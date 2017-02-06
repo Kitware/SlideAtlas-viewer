@@ -265,12 +265,8 @@ window.SA = window.SA || {};
         this.Image.onerror = GetErrorImageFunction(callback);
         // This starts the loading.
 
-        if (SA.TileLoader == "websocket") {
-            this.LoadWebSocket(cache);
-        } else {
-            // "http"
-            this.LoadHttp(cache);
-        }
+        // SA.TileLoader == "http"
+        this.LoadHttp(cache);
     }
 
     Tile.prototype.LoadHttp = function (cache) {
@@ -304,23 +300,6 @@ window.SA = window.SA || {};
 
         this.Image.src = imageSrc;
     }
-
-
-    Tile.prototype.LoadWebSocket = function (cache) {
-        // Right now doing exact same thing
-        var name = '';
-        if (cache.Image.type && cache.Image.type == "stack") {
-            name = this.Name + ".png";
-        } else {
-            name = this.Name + ".jpg";
-        }
-
-        var image = cache.Image._id;
-
-        ws.FetchTile(name, image, cache, this.Image);
-    }
-
-
 
     // TODO: Put program as iVar of view.
     Tile.prototype.Draw = function (program, view) {
