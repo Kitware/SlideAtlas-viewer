@@ -1,219 +1,218 @@
 (function () {
-    "use strict";
+  'use strict';
 
-    var NEW = 0;
-    var WAITING = 3; // The normal (resting) state.
-    var ACTIVE = 4; // Mouse is over the widget and it is receiving events.
-    var PROPERTIES_DIALOG = 5; // Properties dialog is up
+  var NEW = 0;
+  var WAITING = 3; // The normal (resting) state.
+  var ACTIVE = 4; // Mouse is over the widget and it is receiving events.
+  var PROPERTIES_DIALOG = 5; // Properties dialog is up
 
-    var DRAG = 6;
-    var DRAG_LEFT = 7;
-    var DRAG_RIGHT = 8;
+  var DRAG = 6;
+  var DRAG_LEFT = 7;
+  var DRAG_RIGHT = 8;
 
     // view argument is the main view (needed to get the spacing...)
     // Viewer coordinates.
     // Horizontal or verticle
-    function Scale() {
-        SAM.Shape.call(this);
+  function Scale () {
+    SAM.Shape.call(this);
         // Dimension of scale element
-        this.BinLength = 100.0; // unit length in screen pixels
-        this.TickSize = 6; // Screen pixels
-        this.NumberOfBins = 1;
-        this.Orientation = 0; // 0 or 90
-        this.Origin = [10000,10000]; // middle.
-        this.OutlineColor = [0,0,0];
-        this.PointBuffer = [];
-        this.PositionCoordinateSystem = SAM.Shape.VIEWER;
-    };
+    this.BinLength = 100.0; // unit length in screen pixels
+    this.TickSize = 6; // Screen pixels
+    this.NumberOfBins = 1;
+    this.Orientation = 0; // 0 or 90
+    this.Origin = [10000, 10000]; // middle.
+    this.OutlineColor = [0, 0, 0];
+    this.PointBuffer = [];
+    this.PositionCoordinateSystem = SAM.Shape.VIEWER;
+  }
 
-    Scale.prototype = new SAM.Shape();
+  Scale.prototype = new SAM.Shape();
 
-    Scale.prototype.destructor=function() {
+  Scale.prototype.destructor = function () {
         // Get rid of the buffers?
-    };
+  };
 
-    Scale.prototype.UpdateBuffers = function(view) {
+  Scale.prototype.UpdateBuffers = function (view) {
         // TODO: Having a single poly line for a shape is to simple.
         // Add cell arrays.
-        this.PointBuffer = [];
+    this.PointBuffer = [];
 
         // Matrix is computed by the draw method in Shape superclass.
         // TODO: Used to detect first initialization.
         // Get this out of this method.
-        this.Matrix = mat4.create();
-        mat4.identity(this.Matrix);
+    this.Matrix = mat4.create();
+    mat4.identity(this.Matrix);
 
         // Draw all of the x lines.
-        var x = 0;
-        var y = this.TickSize;
-        this.PointBuffer.push(x);
-        this.PointBuffer.push(y);
-        this.PointBuffer.push(0.0);
-        y = 0;
-        this.PointBuffer.push(x);
-        this.PointBuffer.push(y);
-        this.PointBuffer.push(0.0);
+    var x = 0;
+    var y = this.TickSize;
+    this.PointBuffer.push(x);
+    this.PointBuffer.push(y);
+    this.PointBuffer.push(0.0);
+    y = 0;
+    this.PointBuffer.push(x);
+    this.PointBuffer.push(y);
+    this.PointBuffer.push(0.0);
 
-        for (var i = 0; i < this.NumberOfBins; ++i) {
-            x += this.BinLength;
-            this.PointBuffer.push(x);
-            this.PointBuffer.push(y);
-            this.PointBuffer.push(0.0);
-            y = this.TickSize;
-            this.PointBuffer.push(x);
-            this.PointBuffer.push(y);
-            this.PointBuffer.push(0.0);
-            y = 0;
-            this.PointBuffer.push(x);
-            this.PointBuffer.push(y);
-            this.PointBuffer.push(0.0);
-        }
-    };
+    for (var i = 0; i < this.NumberOfBins; ++i) {
+      x += this.BinLength;
+      this.PointBuffer.push(x);
+      this.PointBuffer.push(y);
+      this.PointBuffer.push(0.0);
+      y = this.TickSize;
+      this.PointBuffer.push(x);
+      this.PointBuffer.push(y);
+      this.PointBuffer.push(0.0);
+      y = 0;
+      this.PointBuffer.push(x);
+      this.PointBuffer.push(y);
+      this.PointBuffer.push(0.0);
+    }
+  };
 
-    function ScaleWidget (layer) {
-        var self = this;
+  function ScaleWidget (layer) {
+    var self = this;
 
-        if (layer === null) {
-            return;
-        }
-
-        this.Layer = layer;
-        this.PixelsPerMeter = 0;
-        this.Shape = new Scale();
-        this.Shape.OutlineColor = [0.0, 0.0, 0.0];
-        this.Shape.Origin = [30,20];
-        this.Shape.BinLength = 200;
-        this.Shape.FixedSize = true;
-
-        this.Text = new SAM.Text();
-        this.Text.PositionCoordinateSystem = SAM.Shape.VIEWER;
-        this.Text.Position = [30,5];
-        this.Text.String = "";
-        this.Text.Color = [0.0, 0.0, 0.0];
-        // I want the anchor to be the center of the text.
-        // This is a hackl estimate.
-        this.Text.Anchor = [20,0];
-
-        this.Update(layer.GetPixelsPerUnit());
-
-        this.State = WAITING;
+    if (layer === null) {
+      return;
     }
 
+    this.Layer = layer;
+    this.PixelsPerMeter = 0;
+    this.Shape = new Scale();
+    this.Shape.OutlineColor = [0.0, 0.0, 0.0];
+    this.Shape.Origin = [30, 20];
+    this.Shape.BinLength = 200;
+    this.Shape.FixedSize = true;
+
+    this.Text = new SAM.Text();
+    this.Text.PositionCoordinateSystem = SAM.Shape.VIEWER;
+    this.Text.Position = [30, 5];
+    this.Text.String = '';
+    this.Text.Color = [0.0, 0.0, 0.0];
+        // I want the anchor to be the center of the text.
+        // This is a hackl estimate.
+    this.Text.Anchor = [20, 0];
+
+    this.Update(layer.GetPixelsPerUnit());
+
+    this.State = WAITING;
+  }
 
     // Change the length of the scale based on the camera.
-    ScaleWidget.prototype.Update = function() {
-        if ( ! this.View) { return;}
+  ScaleWidget.prototype.Update = function () {
+    if (!this.View) { return; }
         // Compute the number of screen pixels in a meter.
-        var scale = Math.round(
+    var scale = Math.round(
             this.View.GetPixelsPerUnit() / this.View.GetMetersPerUnit());
-        if (this.PixelsPerMeter == scale) {
-            return;
-        }
+    if (this.PixelsPerMeter == scale) {
+      return;
+    }
         // Save the scale so we know when to regenerate.
-        this.PixelsPerMeter = scale;
-        var target = 200; // pixels
-        var e = 0;
+    this.PixelsPerMeter = scale;
+    var target = 200; // pixels
+    var e = 0;
         // Note: this assumes max bin length is 1 meter.
-        var binLengthViewer = this.PixelsPerMeter;
+    var binLengthViewer = this.PixelsPerMeter;
         // keep reducing the length until it is reasonable.
-        while (binLengthViewer > target) {
-            binLengthViewer = binLengthViewer / 10;
-            --e;
-        }
+    while (binLengthViewer > target) {
+      binLengthViewer = binLengthViewer / 10;
+      --e;
+    }
         // Now compute the units from e.
-        this.Units = "nm";
-        var factor = 1e-9;
-        if (e >= -6) {
-            this.Units = "\xB5m"
-            factor = 1e-6;
-        }
-        if (e >= -3) {
-            this.Units = "mm";
-            factor = 1e-3;
-        }
-        if (e >= -2) {
-            this.Units = "cm";
-            factor = 1e-2;
-        }
-        if (e >= 0) {
-            this.Units = "m";
-            factor = 1;
-        }
-        if (e >= 3) {
-            this.Units = "km";
-            factor = 1000;
-        }
+    this.Units = 'nm';
+    var factor = 1e-9;
+    if (e >= -6) {
+      this.Units = '\xB5m';
+      factor = 1e-6;
+    }
+    if (e >= -3) {
+      this.Units = 'mm';
+      factor = 1e-3;
+    }
+    if (e >= -2) {
+      this.Units = 'cm';
+      factor = 1e-2;
+    }
+    if (e >= 0) {
+      this.Units = 'm';
+      factor = 1;
+    }
+    if (e >= 3) {
+      this.Units = 'km';
+      factor = 1000;
+    }
         // Length is set to the viewer pixel length of a tick / unit.
-        this.Shape.BinLength = binLengthViewer;
+    this.Shape.BinLength = binLengthViewer;
         // Now add bins to get close to the target length.
-        this.Shape.NumberOfBins = Math.floor(target / binLengthViewer);
+    this.Shape.NumberOfBins = Math.floor(target / binLengthViewer);
         // compute the length of entire scale bar (units: viewer pixels).
-        var scaleLengthViewer = binLengthViewer * this.Shape.NumberOfBins;
-        var scaleLengthMeters = scaleLengthViewer / this.PixelsPerMeter;
+    var scaleLengthViewer = binLengthViewer * this.Shape.NumberOfBins;
+    var scaleLengthMeters = scaleLengthViewer / this.PixelsPerMeter;
         // Compute the label.
         // The round should not change the value, only get rid of numerical error.
-        var labelNumber = Math.round(scaleLengthMeters / factor);
-        this.Label = labelNumber.toString() + this.Units;
+    var labelNumber = Math.round(scaleLengthMeters / factor);
+    this.Label = labelNumber.toString() + this.Units;
 
         // Save the length of the scale bar in world units.
         // World (highest res image) pixels default to 0.25e-6 meters.
-        this.LengthWorld = scaleLengthMeters * 4e6;
+    this.LengthWorld = scaleLengthMeters * 4e6;
 
         // Update the label text and position
-        this.Text.String = this.Label;
-        this.Text.UpdateBuffers(this.Layer.AnnotationView);
-        this.Text.Position = [this.Shape.Origin[0]+(scaleLengthViewer/2),
-                              this.Shape.Origin[1]-15];
+    this.Text.String = this.Label;
+    this.Text.UpdateBuffers(this.Layer.AnnotationView);
+    this.Text.Position = [this.Shape.Origin[0] + (scaleLengthViewer / 2),
+      this.Shape.Origin[1] - 15];
 
-        this.Shape.UpdateBuffers(this.Layer.AnnotationView);
+    this.Shape.UpdateBuffers(this.Layer.AnnotationView);
+  };
+
+  ScaleWidget.prototype.Draw = function (view) {
+    if (!this.View || !this.View.HasUnits()) {
+      return;
     }
-
-    ScaleWidget.prototype.Draw = function(view) {
-        if (! this.View || ! this.View.HasUnits()) {
-            return;
-        }
         // Update the scale if zoom changed.
-        this.Update();
-        this.Shape.Draw(view);
-        this.Text.Draw(view);
-    };
+    this.Update();
+    this.Shape.Draw(view);
+    this.Text.Draw(view);
+  };
 
     // This needs to be put in the Viewer.
-    //ScaleWidget.prototype.RemoveFromViewer = function() {
+    // ScaleWidget.prototype.RemoveFromViewer = function() {
     //    if (this.Layer) {
     //        this.RemoveWidget(this);
     //    }
-    //};
+    // };
 
-    ScaleWidget.prototype.HandleKeyPress = function(keyCode, shift) {
-        return true;
-    };
+  ScaleWidget.prototype.HandleKeyPress = function (keyCode, shift) {
+    return true;
+  };
 
-    ScaleWidget.prototype.HandleDoubleClick = function(event) {
-        return true;
-    };
+  ScaleWidget.prototype.HandleDoubleClick = function (event) {
+    return true;
+  };
 
-    ScaleWidget.prototype.HandleMouseDown = function(event) {
+  ScaleWidget.prototype.HandleMouseDown = function (event) {
         /*
         if (event.which != 1) {
             return true;
         }
         this.DragLast = this.Layer.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
         */
-        return false;
-    };
+    return false;
+  };
 
     // returns false when it is finished doing its work.
-    ScaleWidget.prototype.HandleMouseUp = function(event) {
+  ScaleWidget.prototype.HandleMouseUp = function (event) {
         /*
         this.SetActive(false);
         if (window.SA) {SA.RecordState();}
         */
-        return true;
-    };
+    return true;
+  };
 
     // Orientation is a pain,  we need a world to shape transformation.
-    ScaleWidget.prototype.HandleMouseMove = function(event) {
+  ScaleWidget.prototype.HandleMouseMove = function (event) {
         /*
         if (event.which == 1) {
             var world =
@@ -289,11 +288,10 @@
 
         this.CheckActive(event);
 */
-        return true;
-    };
+    return true;
+  };
 
-
-    ScaleWidget.prototype.HandleMouseWheel = function(event) {
+  ScaleWidget.prototype.HandleMouseWheel = function (event) {
         /*
         var x = event.offsetX;
         var y = event.offsetY;
@@ -322,10 +320,9 @@
             }
         }
         */
-    };
+  };
 
-
-    ScaleWidget.prototype.HandleTouchPan = function(event) {
+  ScaleWidget.prototype.HandleTouchPan = function (event) {
         /*
           w0 = this.Layer.ConvertPointViewerToWorld(EVENT_MANAGER.LastMouseX,
           EVENT_MANAGER.LastMouseY);
@@ -339,22 +336,20 @@
           this.Shape.Origin[1] += dy;
           eventuallyRender();
         */
-        return true;
-    };
+    return true;
+  };
 
+  ScaleWidget.prototype.HandleTouchPinch = function (event) {
+        // this.Shape.UpdateBuffers(this.Layer.AnnotationView);
+        // eventuallyRender();
+    return true;
+  };
 
-    ScaleWidget.prototype.HandleTouchPinch = function(event) {
-        //this.Shape.UpdateBuffers(this.Layer.AnnotationView);
-        //eventuallyRender();
-        return true;
-    };
+  ScaleWidget.prototype.HandleTouchEnd = function (event) {
+    this.SetActive(false);
+  };
 
-    ScaleWidget.prototype.HandleTouchEnd = function(event) {
-        this.SetActive(false);
-    };
-
-
-    ScaleWidget.prototype.CheckActive = function(event) {
+  ScaleWidget.prototype.CheckActive = function (event) {
         /*
         var x,y;
         if (this.Shape.FixedSize) {
@@ -412,52 +407,49 @@
             return true;
         }
         */
-        this.SetActive(false);
-        return false;
-    };
+    this.SetActive(false);
+    return false;
+  };
 
     // Multiple active states. Active state is a bit confusing.
-    ScaleWidget.prototype.GetActive = function() {
-        if (this.State == WAITING) {
-            return false;
-        }
-        return true;
-    };
+  ScaleWidget.prototype.GetActive = function () {
+    if (this.State == WAITING) {
+      return false;
+    }
+    return true;
+  };
 
-
-    ScaleWidget.prototype.Deactivate = function() {
-        this.Layer.AnnotationView.CanvasDiv.css({'cursor':'default'});
-        this.Popup.StartHideTimer();
-        this.State = WAITING;
-        this.Shape.Active = false;
-        this.Layer.DeactivateWidget(this);
-        if (this.DeactivateCallback) {
-            this.DeactivateCallback();
-        }
-        eventuallyRender();
-    };
+  ScaleWidget.prototype.Deactivate = function () {
+    this.Layer.AnnotationView.CanvasDiv.css({'cursor': 'default'});
+    this.Popup.StartHideTimer();
+    this.State = WAITING;
+    this.Shape.Active = false;
+    this.Layer.DeactivateWidget(this);
+    if (this.DeactivateCallback) {
+      this.DeactivateCallback();
+    }
+    eventuallyRender();
+  };
 
     // Setting to active always puts state into "active".
     // It can move to other states and stay active.
-    ScaleWidget.prototype.SetActive = function(flag) {
-        if (flag == this.GetActive()) {
-            return;
-        }
+  ScaleWidget.prototype.SetActive = function (flag) {
+    if (flag == this.GetActive()) {
+      return;
+    }
 
-        if (flag) {
-            this.State = ACTIVE;
-            this.Shape.Active = true;
-            this.Layer.ActivateWidget(this);
-            eventuallyRender();
+    if (flag) {
+      this.State = ACTIVE;
+      this.Shape.Active = true;
+      this.Layer.ActivateWidget(this);
+      eventuallyRender();
             // Compute the location for the pop up and show it.
-            this.PlacePopup();
-        } else {
-            this.Deactivate();
-        }
-        eventuallyRender();
-    };
+      this.PlacePopup();
+    } else {
+      this.Deactivate();
+    }
+    eventuallyRender();
+  };
 
-
-    SAM.ScaleWidget = ScaleWidget;
-
+  SAM.ScaleWidget = ScaleWidget;
 })();

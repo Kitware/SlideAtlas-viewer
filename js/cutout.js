@@ -18,31 +18,28 @@
 //     function. The data returned is same as "ctx.getImageData(0,0,w,h);",
 //     but we add data.Camera for conversion to the slide coordinate system.
 
-
 (function () {
-    "use strict";
-
+  'use strict';
 
     // for debugging
-    var CUTOUT_VIEW;
+  var CUTOUT_VIEW;
 
-
-    SA.DownloadImageData = function (data, filename) {
+  SA.DownloadImageData = function (data, filename) {
         // The only way I know if is to put in into a canvas.
 
         // Construct a view to render the image on the client.
-        var width =  data.width;
-        var height =  data.height;
-        var viewport = [0,0, width, height];
+    var width = data.width;
+    var height = data.height;
+    var viewport = [0, 0, width, height];
 
-        var view = new SA.TileView();
-        view.InitializeViewport(viewport, 1, true);
-        view.Canvas.attr("width", width);
-        view.Canvas.attr("height", height);
-        view.Context2d.putImageData(data, 0, 0);
+    var view = new SA.TileView();
+    view.InitializeViewport(viewport, 1, true);
+    view.Canvas.attr('width', width);
+    view.Canvas.attr('height', height);
+    view.Context2d.putImageData(data, 0, 0);
 
-        view.Canvas[0].toBlob(function(blob) {saveAs(blob, filename);}, "image/png");
-    }
+    view.Canvas[0].toBlob(function (blob) { saveAs(blob, filename); }, 'image/png');
+  };
 
     // If file name is not null or "", this image is save to the client.
     // cache: The image/tile source.
@@ -52,57 +49,55 @@
     // roll: in radians?
     // fileName: name of file to download. (null, or "" means do not download).
     // returnCallback:  function to call (with data as argument) when done.
-    SA.GetCutoutImage = function (cache, dimensions, focalPoint, scale, roll, fileName,
+  SA.GetCutoutImage = function (cache, dimensions, focalPoint, scale, roll, fileName,
                                   returnCallback) {
         // Construct a view to render the image on the client.
-        var width =  dimensions[0];
-        var height =  dimensions[1];
-        var viewport = [0,0, width, height];
+    var width = dimensions[0];
+    var height = dimensions[1];
+    var viewport = [0, 0, width, height];
 
-        var view = new SA.TileView();
-        CUTOUT_VIEW = view;
-        view.SetCache(cache);
-        view.SetViewport(viewport);
-        var newCam = view.Camera;
-        newCam.SetFocalPoint( focalPoint);
-        newCam.SetRoll(roll);
-        newCam.SetHeight(height*scale);
+    var view = new SA.TileView();
+    CUTOUT_VIEW = view;
+    view.SetCache(cache);
+    view.SetViewport(viewport);
+    var newCam = view.Camera;
+    newCam.SetFocalPoint(focalPoint);
+    newCam.SetRoll(roll);
+    newCam.SetHeight(height * scale);
         // TODO:  Hide matrix computation.  Make it automatic.
-        newCam.ComputeMatrix();
+    newCam.ComputeMatrix();
 
         // Load only the tiles we need.
-        var tiles = cache.ChooseTiles(newCam, 0, []);
-        for (var i = 0; i < tiles.length; ++i) {
-            SA.LoadQueueAddTile(tiles[i]);
-        }
+    var tiles = cache.ChooseTiles(newCam, 0, []);
+    for (var i = 0; i < tiles.length; ++i) {
+      SA.LoadQueueAddTile(tiles[i]);
+    }
 
-        SA.AddFinishedLoadingCallback(
-            function () {SA.GetCutoutImage2(view, fileName, returnCallback);}
+    SA.AddFinishedLoadingCallback(
+            function () { SA.GetCutoutImage2(view, fileName, returnCallback); }
         );
 
-        SA.LoadQueueUpdate();
+    SA.LoadQueueUpdate();
 
-        console.log("trigger " + SA.LoadQueue.length + " " + SA.LoadingCount);
-    }
+    console.log('trigger ' + SA.LoadQueue.length + ' ' + SA.LoadingCount);
+  };
 
     // This probably does not need to be exposed.
-    SA.GetCutoutImage2 = function(view, fileName, returnCallback) {
+  SA.GetCutoutImage2 = function (view, fileName, returnCallback) {
         // All the tiles are loaded and waiting in the cache.
-        view.DrawTiles();
-        var viewport = view.GetViewport();
+    view.DrawTiles();
+    var viewport = view.GetViewport();
 
-        if (fileName && fileName != "") {
-            view.Canvas[0].toBlob(function(blob) {saveAs(blob, fileName);}, "image/png");
-        }
-
-        if (returnCallback) {
-            var ctx  = view.Context2d;
-            var data = view.GetImageData();
-            returnCallback(data);
-        }
+    if (fileName && fileName != '') {
+      view.Canvas[0].toBlob(function (blob) { saveAs(blob, fileName); }, 'image/png');
     }
 
-
+    if (returnCallback) {
+      var ctx = view.Context2d;
+      var data = view.GetImageData();
+      returnCallback(data);
+    }
+  };
 
     // This works great!
     // Light weight viewer.
@@ -114,125 +109,125 @@
     // Events are funny,  The mouse position is realtive to
     // the tiles.  click and bounds are callback functions to make
     // interaction simpler.
-    var CutoutThumb = function(image, height, request) {
-        if ( ! request) {
-            request = image.bounds;
-        }
+  var CutoutThumb = function (image, height, request) {
+    if (!request) {
+      request = image.bounds;
+    }
 
-        this.ImageData = image;
-        this.Height = height;
-        this.Width = Math.ceil(height * (request[1]-request[0]) / (request[3]-request[2]));
-        this.Div = $('<div>')
-            .css({'width' : this.Width + 'px',
-                  'height': this.Height + 'px'  })
-            .addClass("sa-view-cutout-thumb-div");
+    this.ImageData = image;
+    this.Height = height;
+    this.Width = Math.ceil(height * (request[1] - request[0]) / (request[3] - request[2]));
+    this.Div = $('<div>')
+            .css({'width': this.Width + 'px',
+              'height': this.Height + 'px' })
+            .addClass('sa-view-cutout-thumb-div');
         // Crop the request so we do not ask for tiles that do not exist.
-        var levelReq;
-        if (image.bounds) {
-            var levelReq = [Math.max(request[0],image.bounds[0]),
-                            Math.min(request[1],image.bounds[1]),
-                            Math.max(request[2],image.bounds[2]),
-                            Math.min(request[3],image.bounds[3])];
-        } else {
-            levelReq = [Math.max(request[0],0), request[1],
-                        Math.max(request[2],0), request[3]];
-        }
+    var levelReq;
+    if (image.bounds) {
+      var levelReq = [Math.max(request[0], image.bounds[0]),
+        Math.min(request[1], image.bounds[1]),
+        Math.max(request[2], image.bounds[2]),
+        Math.min(request[3], image.bounds[3])];
+    } else {
+      levelReq = [Math.max(request[0], 0), request[1],
+        Math.max(request[2], 0), request[3]];
+    }
 
         // Size of each tile.
-        var tileDim = 256;
-        if (image.tile_size) {
-            tileDim = image.tile_size;
-        }
+    var tileDim = 256;
+    if (image.tile_size) {
+      tileDim = image.tile_size;
+    }
 
         // Pick the level to use.
-        this.Level = 0; // 0 = leaves
-        while ((levelReq[3]-levelReq[2]) > this.Height &&
-               this.Level < image.levels-1) {
-            this.Level += 1;
-            levelReq[0] *= 0.5;
-            levelReq[1] *= 0.5;
-            levelReq[2] *= 0.5;
-            levelReq[3] *= 0.5;
-        }
+    this.Level = 0; // 0 = leaves
+    while ((levelReq[3] - levelReq[2]) > this.Height &&
+               this.Level < image.levels - 1) {
+      this.Level += 1;
+      levelReq[0] *= 0.5;
+      levelReq[1] *= 0.5;
+      levelReq[2] *= 0.5;
+      levelReq[3] *= 0.5;
+    }
 
         // Size of each tile.
-        var tileDim = 256;
-        if (image.tile_size) {
-            tileDim = image.tile_size;
-        }
+    var tileDim = 256;
+    if (image.tile_size) {
+      tileDim = image.tile_size;
+    }
 
-        this.ScreenPixelSpacing = (request[3]-request[2]) / this.Height;
-        var imgSize = (tileDim<<this.Level) / this.ScreenPixelSpacing;
+    this.ScreenPixelSpacing = (request[3] - request[2]) / this.Height;
+    var imgSize = (tileDim << this.Level) / this.ScreenPixelSpacing;
 
         // grid of tiles to render.
-        this.GridReq = [Math.floor(levelReq[0]/tileDim),
-                        Math.floor(levelReq[1]/tileDim),
-                        Math.floor(levelReq[2]/tileDim),
-                        Math.floor(levelReq[3]/tileDim)];
+    this.GridReq = [Math.floor(levelReq[0] / tileDim),
+      Math.floor(levelReq[1] / tileDim),
+      Math.floor(levelReq[2] / tileDim),
+      Math.floor(levelReq[3] / tileDim)];
 
         // Compute the origin: the upper left corner of the upper left image.
-        this.ScreenPixelOrigin = [this.GridReq[0]*(tileDim<<this.Level),
-                                  this.GridReq[2]*(tileDim<<this.Level)];
+    this.ScreenPixelOrigin = [this.GridReq[0] * (tileDim << this.Level),
+      this.GridReq[2] * (tileDim << this.Level)];
 
         // loop over the tiles.
-        for (var y = this.GridReq[2]; y <= this.GridReq[3]; ++y) {
-            for (var x = this.GridReq[0]; x <= this.GridReq[1]; ++x) {
+    for (var y = this.GridReq[2]; y <= this.GridReq[3]; ++y) {
+      for (var x = this.GridReq[0]; x <= this.GridReq[1]; ++x) {
                 // Compute the tile name.
-                var tx = x, ty = y, tl = this.Level;
-                var tileName = "";
-                while (tl < image.levels-1) {
-                    if ((tx&1) == 0 && (ty&1) == 0) {tileName = "q" + tileName;}
-                    if ((tx&1) == 1 && (ty&1) == 0) {tileName = "r" + tileName;}
-                    if ((tx&1) == 0 && (ty&1) == 1) {tileName = "t" + tileName;}
-                    if ((tx&1) == 1 && (ty&1) == 1) {tileName = "s" + tileName;}
-                    tx = (tx>>1);
-                    ty = (ty>>1);
-                    ++tl;
-                }
-                var left = (((x<<this.Level)*tileDim)-request[0])/this.ScreenPixelSpacing;
-                var top  = (((y<<this.Level)*tileDim)-request[2])/this.ScreenPixelSpacing;
-                var img  = $('<img>')
-                    .appendTo(this.Div)
-                    .attr("width", imgSize)
-                    .attr("height", imgSize)
-                    .attr("src", "/tile?img="+image.img+"&db="+image.db+"&name=t"+tileName+".jpg")
-                    .attr("alt", image.label)
-                    .css({"left": left.toString()+"px",
-                          "top":  top.toString()+"px"})
-                    .addClass("sa-view-cutout-thumb-tile");
-            }
+        var tx = x, ty = y, tl = this.Level;
+        var tileName = '';
+        while (tl < image.levels - 1) {
+          if ((tx & 1) == 0 && (ty & 1) == 0) { tileName = 'q' + tileName; }
+          if ((tx & 1) == 1 && (ty & 1) == 0) { tileName = 'r' + tileName; }
+          if ((tx & 1) == 0 && (ty & 1) == 1) { tileName = 't' + tileName; }
+          if ((tx & 1) == 1 && (ty & 1) == 1) { tileName = 's' + tileName; }
+          tx = (tx >> 1);
+          ty = (ty >> 1);
+          ++tl;
         }
+        var left = (((x << this.Level) * tileDim) - request[0]) / this.ScreenPixelSpacing;
+        var top = (((y << this.Level) * tileDim) - request[2]) / this.ScreenPixelSpacing;
+        var img = $('<img>')
+                    .appendTo(this.Div)
+                    .attr('width', imgSize)
+                    .attr('height', imgSize)
+                    .attr('src', '/tile?img=' + image.img + '&db=' + image.db + '&name=t' + tileName + '.jpg')
+                    .attr('alt', image.label)
+                    .css({'left': left.toString() + 'px',
+                      'top': top.toString() + 'px'})
+                    .addClass('sa-view-cutout-thumb-tile');
+      }
     }
+  };
 
-    CutoutThumb.prototype.AppendTo = function(parent) {
-        this.Div.appendTo(parent);
-        return this;
-    }
+  CutoutThumb.prototype.AppendTo = function (parent) {
+    this.Div.appendTo(parent);
+    return this;
+  };
 
     // Call back argument is this thumb object.
     // slideX, and slideY are set to mouse in slide coordinates.
-    CutoutThumb.prototype.Click = function(callback) {
-        var self = this;
-        this.ClickCallback = callback;
-        this.Div.click(function (e) {
+  CutoutThumb.prototype.Click = function (callback) {
+    var self = this;
+    this.ClickCallback = callback;
+    this.Div.click(function (e) {
             // It is a real pain to get the mouse position rlative to the div.
-            var x = e.pageX;
-            var y = e.pageY;
+      var x = e.pageX;
+      var y = e.pageY;
             // Now get the location of this thumb on the screen.
-            var offset = self.Div.offset();
-            x -= offset.left;
-            y -= offset.top;
-            console.log("click: " + x + ", " + y);
+      var offset = self.Div.offset();
+      x -= offset.left;
+      y -= offset.top;
+      console.log('click: ' + x + ', ' + y);
 
-            self.SlideX = (x * self.ScreenPixelSpacing)
+      self.SlideX = (x * self.ScreenPixelSpacing)
                 + self.ScreenPixelOrigin[0];
-            self.SlideY = (y * self.ScreenPixelSpacing)
+      self.SlideY = (y * self.ScreenPixelSpacing)
                 + self.ScreenPixelOrigin[1];
-            (self.ClickCallback)(self);
-        });
+      (self.ClickCallback)(self);
+    });
 
-        return this;
-    }
+    return this;
+  };
 
     // todo:
     // - Bind delete key to stack creator.
@@ -249,8 +244,6 @@
     // - Improve the gradient descent to be less sensitive to outliers
     //     (mismatched contours.)
 
-
-    SA.CutoutThumb = CutoutThumb;
-
+  SA.CutoutThumb = CutoutThumb;
 })();
 
