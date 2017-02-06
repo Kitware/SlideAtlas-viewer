@@ -91,11 +91,18 @@ module.exports = function (grunt) {
         ],
         dest: './dist/sam.max.js'
       }
+    },
+    copy: {
+      images: {
+        src: './img/**',
+        dest: './dist/'
+      }
     }
   });
 
   grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-copy');
 
     // Default task(s).
-  grunt.registerTask('default', ['concat']);
+  grunt.registerTask('default', ['concat', 'copy']);
 };
