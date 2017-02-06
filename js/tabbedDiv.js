@@ -38,7 +38,7 @@
     }
     this.TabPanels.push(tabPanel);
     // First panel added should be open by default.
-    if (this.TabPanels.length == 1) {
+    if (this.TabPanels.length === 1) {
       this.OpenTabPanel(tabPanel);
     }
 
@@ -81,7 +81,7 @@
   TabbedDiv.prototype.GetTabPanelFromDiv = function (tabDiv) {
     for (var i = 0; i < this.TabPanels.length; ++i) {
       var tabPanel = this.TabPanels[i];
-      if (tabPanel.Div == tabDiv) {
+      if (tabPanel.Div === tabDiv) {
         return tabPanel;
       }
     }
@@ -116,7 +116,7 @@
     if (!panel) { return; }
 
     panel.Enabled = false;
-    if (panel == this.CurrentTabPanel) {
+    if (panel === this.CurrentTabPanel) {
       this.CurrentTabPanel = null;
         // Find another panel to display.
       for (var i = 0; i < this.TabPanels.length; ++i) {
@@ -152,7 +152,6 @@
           'border-width': '1px',
           'border-style': 'solid',
           'border-radius': '5px 5px 0px 0px',
-          'position': 'relative',
           'z-index': '6',
           'background': 'white'})
         .click(function () {

@@ -36,7 +36,7 @@
 
     // Idx changes the ordedr of the points and sign of delta roll.
   PairCorrelation.prototype.GetRoll = function (idx) {
-    if (idx !== undefined && idx == 0) {
+    if (idx !== undefined && idx === 0) {
       return -this.Roll;
     } else {
       return this.Roll;
@@ -44,9 +44,9 @@
   };
 
   PairCorrelation.prototype.GetPoint = function (idx) {
-    if (idx == 0) {
+    if (idx === 0) {
       return this.GetPoint0();
-    } else if (idx == 1) {
+    } else if (idx === 1) {
       return this.GetPoint1();
     }
     alert('Bad correlation point index: ' + idx);
@@ -125,7 +125,7 @@
     // Compute the weighted average of points as center of rotation and translation.
   PairTransformation.prototype.WeightedTransform = function (idx0, idx1, fpIn, sigma) {
     var fpOut = [fpIn[0], fpIn[1]];
-    if (this.Correlations.length == 0) {
+    if (this.Correlations.length === 0) {
       return fpOut;
     }
 
@@ -133,7 +133,7 @@
       sigma = 20000;
     }
 
-    if (this.Correlations.length == 0) {
+    if (this.Correlations.length === 0) {
       fpOut[0] = fpIn[0];
       fpOut[1] = fpIn[1];
       this.DeltaRoll = 0;
@@ -255,7 +255,7 @@
     // Nearest neighbor.
   PairTransformation.prototype.ForwardTransform = function (pt0, sigma) {
     this.DeltaRoll = 0;
-    if (this.Correlations.length == 0) {
+    if (this.Correlations.length === 0) {
       return pt0;
     }
 
@@ -265,7 +265,7 @@
     // Nearest neighbor.
   PairTransformation.prototype.ReverseTransform = function (pt1, sigma) {
     this.DeltaRoll = 0;
-    if (this.Correlations.length == 0) {
+    if (this.Correlations.length === 0) {
       return pt1;
     }
 

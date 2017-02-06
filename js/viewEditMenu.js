@@ -300,7 +300,7 @@ window.SA = window.SA || {};
       d.AspectRatio = viewport[2] / viewport[3];
 
         // Hide or show the stack option.
-      if (SA.display.GetNote().Type == 'Stack') {
+      if (SA.display.GetNote().Type === 'Stack') {
         DOWNLOAD_WIDGET.DimensionDialog.StackDiv.show();
       } else {
         DOWNLOAD_WIDGET.DimensionDialog.StackDiv.hide();
@@ -728,7 +728,7 @@ window.SA = window.SA || {};
           'white-space': 'nowrap',
           'margin-bottom': '5px'})
         .appendTo(this.Body)
-        .keypress(function (event) { return event.keyCode != 13; });
+        .keypress(function (event) { return event.keyCode !== 13; });
     if (editable) {
       this.TitleInput
             .attr('contenteditable', 'true')
@@ -750,7 +750,7 @@ window.SA = window.SA || {};
         .css({'width': '300px',
           'cursor': 'text'})
         .appendTo(this.CopyrightDiv)
-        .keypress(function (event) { return event.keyCode != 13; });
+        .keypress(function (event) { return event.keyCode !== 13; });
     if (editable) {
       this.CopyrightInput
             .attr('contenteditable', 'true')
@@ -777,13 +777,13 @@ window.SA = window.SA || {};
             .attr('contenteditable', 'true')
             .css({'background': '#f0f0ff',
               'cursor': 'text'})
-            .keypress(function (event) { return event.keyCode != 13; });
+            .keypress(function (event) { return event.keyCode !== 13; });
       this.ResolutionUnitsInput
             .attr('contenteditable', 'true')
             .css({'background': '#f0f0ff',
               'cursor': 'text'})
             .attr('contenteditable', 'true')
-            .keypress(function (event) { return event.keyCode != 13; });
+            .keypress(function (event) { return event.keyCode !== 13; });
     }
 
     // Non editable strings.

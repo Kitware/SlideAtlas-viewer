@@ -124,7 +124,7 @@
             $('<input>')
             .appendTo(this.Dialog.BinWidthDiv)
             .css({'display': 'table-cell'})
-            .keypress(function (event) { return event.keyCode != 13; });
+            .keypress(function (event) { return event.keyCode !== 13; });
         // Y
     this.Dialog.BinHeightDiv =
             $('<div>')
@@ -140,7 +140,7 @@
             $('<input>')
             .appendTo(this.Dialog.BinHeightDiv)
             .css({'display': 'table-cell'})
-            .keypress(function (event) { return event.keyCode != 13; });
+            .keypress(function (event) { return event.keyCode !== 13; });
 
         // Orientation
     this.Dialog.RotationDiv =
@@ -157,7 +157,7 @@
             $('<input>')
             .appendTo(this.Dialog.RotationDiv)
             .css({'display': 'table-cell'})
-            .keypress(function (event) { return event.keyCode != 13; });
+            .keypress(function (event) { return event.keyCode !== 13; });
 
         // Color
     this.Dialog.ColorDiv =
@@ -191,7 +191,7 @@
             $('<input type="number">')
             .appendTo(this.Dialog.LineWidthDiv)
             .css({'display': 'table-cell'})
-            .keypress(function (event) { return event.keyCode != 13; });
+            .keypress(function (event) { return event.keyCode !== 13; });
 
     this.Tolerance = 0.05;
     if (SAM.MOBILE_DEVICE) {
@@ -246,9 +246,9 @@
         this.Dialog.ColorInput.val(SAM.ConvertColorToHex(defaults.Color));
         this.Grid.SetOutlineColor(this.Dialog.ColorInput.val());
       }
-      if (defaults.LineWidth != undefined) {
+      if (defaults.LineWidth !== undefined) {
         this.Dialog.LineWidthInput.val(defaults.LineWidth);
-        this.Grid.LineWidth == defaults.LineWidth;
+        this.Grid.LineWidth === defaults.LineWidth;
       }
     }
 
@@ -276,16 +276,16 @@
     var c = Math.cos(3.14156 * this.Grid.Orientation / 180.0);
     var s = Math.sin(3.14156 * this.Grid.Orientation / 180.0);
     var dx, dy;
-    if (roll == 0) {
+    if (roll === 0) {
       dx = xSign * xRadius;
       dy = ySign * yRadius;
-    } else if (roll == 3) {
+    } else if (roll === 3) {
       dx = xSign * xRadius;
       dy = -ySign * yRadius;
-    } else if (roll == 2) {
+    } else if (roll === 2) {
       dx = -xSign * xRadius;
       dy = -ySign * yRadius;
-    } else if (roll == 1) {
+    } else if (roll === 1) {
       dx = -xSign * xRadius;
       dy = ySign * yRadius;
     }
@@ -395,12 +395,12 @@
 
   GridWidget.prototype.HandleKeyPress = function (keyCode, shift) {
         // The dialog consumes all key events.
-    if (this.State == PROPERTIES_DIALOG) {
+    if (this.State === PROPERTIES_DIALOG) {
       return false;
     }
 
         // Copy
-    if (event.keyCode == 67 && event.ctrlKey) {
+    if (event.keyCode === 67 && event.ctrlKey) {
             // control-c for copy
             // The extra identifier is not needed for widgets, but will be
             // needed if we have some other object on the clipboard.
@@ -421,7 +421,7 @@
   };
 
   GridWidget.prototype.HandleMouseDown = function (event) {
-    if (event.which != 1) {
+    if (event.which !== 1) {
       return true;
     }
     var cam = this.Layer.GetCamera();
@@ -441,12 +441,12 @@
 
     // Orientation is a pain,  we need a world to shape transformation.
   GridWidget.prototype.HandleMouseMove = function (event) {
-    if (event.which == 1) {
+    if (event.which === 1) {
       var cam = this.Layer.GetCamera();
       var world =
                 cam.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
       var dx, dy;
-      if (this.State == DRAG) {
+      if (this.State === DRAG) {
         dx = world[0] - this.DragLast[0];
         dy = world[1] - this.DragLast[1];
         this.DragLast = world;
@@ -468,7 +468,7 @@
                 // Change grid dimemsions
         dx = dy = 0;
         var changed = false;
-        if (this.State == DRAG_RIGHT) {
+        if (this.State === DRAG_RIGHT) {
           dx = ix - this.Grid.Dimensions[0];
           if (dx) {
             this.Grid.Dimensions[0] = ix;
@@ -476,14 +476,14 @@
             dx = 0.5 * dx * this.Grid.BinWidth;
             changed = true;
           }
-        } else if (this.State == DRAG_LEFT) {
+        } else if (this.State === DRAG_LEFT) {
           if (ix) {
             this.Grid.Dimensions[0] -= ix;
                         // Compute the change in the center point origin.
             dx = 0.5 * ix * this.Grid.BinWidth;
             changed = true;
           }
-        } else if (this.State == DRAG_BOTTOM) {
+        } else if (this.State === DRAG_BOTTOM) {
           dy = iy - this.Grid.Dimensions[1];
           if (dy) {
             this.Grid.Dimensions[1] = iy;
@@ -491,7 +491,7 @@
             dy = 0.5 * dy * this.Grid.BinHeight;
             changed = true;
           }
-        } else if (this.State == DRAG_TOP) {
+        } else if (this.State === DRAG_TOP) {
           if (iy) {
             this.Grid.Dimensions[1] -= iy;
                         // Compute the change in the center point origin.
@@ -512,7 +512,7 @@
       return;
     }
 
-    if (event.which == 0) {
+    if (event.which === 0) {
             // Update the active state if theuser is not interacting.
       this.SetActive(this.CheckActive(event));
     }
@@ -525,7 +525,7 @@
         var x = event.offsetX;
         var y = event.offsetY;
 
-        if (this.State == ACTIVE) {
+        if (this.State === ACTIVE) {
             if(this.NormalizedActiveDistance < 0.5) {
                 var ratio = 1.05;
                 var direction = 1;
@@ -626,7 +626,7 @@
 
     // Multiple active states. Active state is a bit confusing.
   GridWidget.prototype.GetActive = function () {
-    if (this.State == WAITING) {
+    if (this.State === WAITING) {
       return false;
     }
     return true;
@@ -655,16 +655,16 @@
         console.log('No active index');
         return;
       }
-      if (this.ActiveIndex[0] == 0) {
+      if (this.ActiveIndex[0] === 0) {
         this.State = DRAG_LEFT;
         this.Layer.AnnotationView.CanvasDiv.css({'cursor': 'col-resize'});
-      } else if (this.ActiveIndex[0] == this.Grid.Dimensions[0]) {
+      } else if (this.ActiveIndex[0] === this.Grid.Dimensions[0]) {
         this.State = DRAG_RIGHT;
         this.Layer.AnnotationView.CanvasDiv.css({'cursor': 'col-resize'});
-      } else if (this.ActiveIndex[1] == 0) {
+      } else if (this.ActiveIndex[1] === 0) {
         this.State = DRAG_TOP;
         this.Layer.AnnotationView.CanvasDiv.css({'cursor': 'row-resize'});
-      } else if (this.ActiveIndex[1] == this.Grid.Dimensions[1]) {
+      } else if (this.ActiveIndex[1] === this.Grid.Dimensions[1]) {
         this.State = DRAG_BOTTOM;
         this.Layer.AnnotationView.CanvasDiv.css({'cursor': 'row-resize'});
       } else {

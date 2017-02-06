@@ -32,7 +32,7 @@
         // for picking a corner.
     var bds = [firstCenter[0], firstCenter[0], firstCenter[1], firstCenter[1]];
     for (var i = 0; i < contours.length; ++i) {
-      if (contours[i] != firstContour) {
+      if (contours[i] !== firstContour) {
         match = contours[i].GetArea() / firstContour.GetArea();
         if (match < 1.2 && match > 0.8) {
           var c = contours[i].GetCenter();
@@ -59,8 +59,7 @@
     var direction0 = Math.sign(v[axis0]);
         // Pick the secondary axis and direction.
     var axis1 = axis0 ? 0 : 1;
-    var direction1 = Math.sign(bds[2 * axis1] + bds[2 * axis1 + 1]
-                                   - 2 * firstCenter[axis1]);
+    var direction1 = Math.sign(bds[2 * axis1] + bds[2 * axis1 + 1] - 2 * firstCenter[axis1]);
 
         // Sort the contours.
         // Remove the two contours we have found already
@@ -103,7 +102,7 @@
           }
         }
       }
-      if (bestIdx == -1) {
+      if (bestIdx === -1) {
         return sortedContours;
       }
       console.log(bestIdx);
@@ -118,10 +117,10 @@
     // axis0 is less siginficat axis, axis1 is the more significant axis.
   function SortContours (contours, axis0, axis1) {
         // Decode the axes strings.
-    var direction0 = axis0[0] == '-' ? -1 : 1;
-    var direction1 = axis1[0] == '-' ? -1 : 1;
-    var axis0 = axis0[1] == 'x' ? 0 : 1;
-    var axis1 = axis1[1] == 'x' ? 0 : 1;
+    var direction0 = axis0[0] === '-' ? -1 : 1;
+    var direction1 = axis1[0] === '-' ? -1 : 1;
+    var axis0 = axis0[1] === 'x' ? 0 : 1;
+    var axis1 = axis1[1] === 'x' ? 0 : 1;
 
         // Copy the array so we can modify the original.
     var copy = contours.slice(0);
@@ -204,11 +203,12 @@
         */
 
         // distance to closest point.
-    if (this.Points.length == 0) {
+    if (this.Points.length === 0) {
       return 0.0;
     }
     var bestPt = this.Points[0];
-    var dx = bestPt[0] - x, dy = bestPt[1] - y;
+    var dx = bestPt[0] - x;
+    var dy = bestPt[1] - y;
     var bestDist = dx * dx + dy * dy;
     for (var i = 1; i < this.Points.length; ++i) {
       var pt = this.Points[i];
@@ -234,7 +234,7 @@
   };
 
   Contour.prototype.GetBounds = function () {
-    if (this.Length() == 0) {
+    if (this.Length() === 0) {
       return this.Bounds;
     }
     if (!this.Bounds) {
@@ -325,7 +325,7 @@
 
     // I could also impliment a resample to get uniform spacing.
   Contour.prototype.RemoveDuplicatePoints = function (epsilon) {
-    if (epsilon == undefined) {
+    if (epsilon === undefined) {
       epsilon = 0;
     }
     var p0 = this.Points[this.Points.length - 1];
@@ -535,7 +535,8 @@
         // Smooth for the larger surround.
     SmoothDataAlphaRGB(tmp, 4);
     var idx = 0;
-    var min = 128, max = 128;
+    var min = 128;
+    var max = 128;
     while (idx < tmp.data.length) {
       var intensity = (tmp.data[idx++] + tmp.data[idx++] + tmp.data[idx++]) / 3;
       intensity = 2 * (this.Data.data[idx] - intensity) + 128;
@@ -620,7 +621,8 @@
             // Shrink the radius if it contains a negative.
       for (var i = 0; i < this.NegativePoints; ++i) {
         var negPixel = this.NegativePoints[i];
-        var d2 = 0, d;
+        var d2 = 0;
+        var d;
         for (var j = 0; j < posPixel.length; ++j) {
           d = negPixel[j] - posPixel[j];
           d2 += d * d;
@@ -652,7 +654,8 @@
       this.NegativePoints.push(negPixel);
       for (var i = 0; i < this.PositiveSpheres.length; ++i) {
         var posSphere = this.PositiveSpheres[i];
-        var d2 = 0, d;
+        var d2 = 0;
+        var d;
         for (var j = 0; j < negPixel.length; ++j) {
           d = negPixel[j] - posSphere.center[j];
           d2 += d * d;
@@ -714,14 +717,14 @@
 
   var SEGMENT;
   function HandleMouseUp (event) {
-    if (event.which == 1) {
+    if (event.which === 1) {
       var ptWorld = SEGMENT.Viewer.ConvertPointViewerToWorld(event.clientX, event.clientY);
       SEGMENT.AddPositive(ptWorld);
       SEGMENT.Update();
       SEGMENT.Draw();
       console.log('Positive');
     }
-    if (event.which == 3) {
+    if (event.which === 3) {
       var ptWorld = SEGMENT.Viewer.ConvertPointViewerToWorld(event.clientX, event.clientY);
       SEGMENT.AddNegative(ptWorld);
       SEGMENT.Update();
@@ -963,19 +966,19 @@
     // private
     // Returns the point id shared by two edges.
   TriangleMesh.prototype.PointIdSharedByEdges = function (edge0, edge1) {
-    if (edge0.vert0 == edge1.vert0) { return edge0.vert0; }
-    if (edge0.vert0 == edge1.vert1) { return edge0.vert0; }
-    if (edge0.vert1 == edge1.vert0) { return edge0.vert1; }
-    if (edge0.vert1 == edge1.vert1) { return edge0.vert1; }
+    if (edge0.vert0 === edge1.vert0) { return edge0.vert0; }
+    if (edge0.vert0 === edge1.vert1) { return edge0.vert0; }
+    if (edge0.vert1 === edge1.vert0) { return edge0.vert1; }
+    if (edge0.vert1 === edge1.vert1) { return edge0.vert1; }
     SA.Debug('Edges do not share a point');
   };
 
     // private
   TriangleMesh.prototype.SwapEdgeTriangle = function (edge, oldId, newId) {
-    if (edge.tri0 == oldId) {
+    if (edge.tri0 === oldId) {
       edge.tri0 = newId;
     }
-    if (edge.tri1 != undefined && edge.tri1 == oldId) {
+    if (edge.tri1 !== undefined && edge.tri1 === oldId) {
       edge.tri1 = newId;
     }
   };
@@ -987,7 +990,7 @@
     for (var edgeId = 0; edgeId < this.Edges.length; ++edgeId) {
             // find four edges/points of the quadrilateral containing the edge.
       var edge = this.Edges[edgeId];
-      if (edge === undefined || edge.tri1 == undefined) {
+      if (edge === undefined || edge.tri1 === undefined) {
                 // boundary edge
         continue;
       }
@@ -1070,12 +1073,12 @@
         // Look for the edge in the hash table (created by another triangle).
     for (var i = 0; i < this.EdgeHash[ptId0].length && !edge; ++i) {
       var e2 = this.EdgeHash[ptId0][i];
-      if (e2.vert1 == ptId1) {
+      if (e2.vert1 === ptId1) {
         edge = e2;
         edge.tri1 = triIdx;
       }
     }
-    if (edge == undefined) {
+    if (edge === undefined) {
             // Make a new edge.
       edge = {vert0: ptId0, vert1: ptId1, tri0: triIdx};
             // Add it into the hash.
@@ -1160,13 +1163,16 @@
     var s, c, a;
     var num = contour.Length();
     this.PointCoordinates = new Array(num * 2);
-    this.TrianglePointIds = new Array();
+    this.TrianglePointIds = [];
         // Make an array that marks unused points (and keeps their angles).
     var vAngles = new Array(num);
 
-    var x0 = contour.GetPoint(num - 1)[0], y0 = contour.GetPoint(num - 1)[1];
-    var x1 = contour.GetPoint(0)[0], y1 = contour.GetPoint(0)[1];
-    var dx0 = x1 - x0, dy0 = y1 - y0;
+    var x0 = contour.GetPoint(num - 1)[0];
+    var y0 = contour.GetPoint(num - 1)[1];
+    var x1 = contour.GetPoint(0)[0];
+    var y1 = contour.GetPoint(0)[1];
+    var dx0 = x1 - x0;
+    var dy0 = y1 - y0;
     var dist0 = Math.sqrt(dx0 * dx0 + dy0 * dy0);
     var x2, y2, dx1, dy1, dist1;
     for (var i = 0; i < num; ++i) {
@@ -1246,9 +1252,12 @@
       var p1 = contour.GetPoint(v1);
       var p2 = contour.GetPoint(v2);
       var p3 = contour.GetPoint(v3);
-      var dx0 = p1[0] - p0[0], dy0 = p1[1] - p0[1];
-      var dx1 = p2[0] - p1[0], dy1 = p2[1] - p1[1];
-      var dx2 = p3[0] - p2[0], dy2 = p3[1] - p2[1];
+      var dx0 = p1[0] - p0[0];
+      var dy0 = p1[1] - p0[1];
+      var dx1 = p2[0] - p1[0];
+      var dy1 = p2[1] - p1[1];
+      var dx2 = p3[0] - p2[0];
+      var dy2 = p3[1] - p2[1];
 
       var dist0 = Math.sqrt(dx0 * dx0 + dy0 * dy0);
       var dist1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
@@ -1282,9 +1291,9 @@
     var nextEndIdx = this.EndIdx + 1;
         // If the circular buffer is full, reallocate.
     if (nextEndIdx >= this.Array.length) {
-      nextEndIdx == 0;
+      nextEndIdx === 0;
     }
-    if (this.Array[nextEndIdx] != null) {
+    if (this.Array[nextEndIdx] !== null) {
       this.Allocate(this.Array.length * 2);
       nextEndIdx = this.EndIdx + 1;
     }
@@ -1295,13 +1304,13 @@
 
   MapQueue.prototype.Shift = function () {
     var item = this.Array[this.StartIdx];
-    if (item == null) {
+    if (item === null) {
       return item;
     }
     this.Array[this.StartIdx] = null;
     this.StartIdx += 1;
     if (this.StartIdx >= this.Array.length) {
-      this.StartIdx == 0;
+      this.StartIdx === 0;
     }
     return item;
   };
@@ -1312,7 +1321,7 @@
     var newArray = new Array(length);
     var i = 0;
     if (this.Array) {
-      for (var j = this.StartIdx; j != this.EndIdx; ++j) {
+      for (var j = this.StartIdx; j !== this.EndIdx; ++j) {
         if (j >= this.Array.length) { j = 0; }
         newArray[i++] = this.Array[j];
       }
@@ -1384,7 +1393,7 @@
   DistanceMap.prototype.AddPolyline = function (pline) {
     var m0, m1, m2;
     var points = pline.Points;
-    if (points.length == 0) { return; }
+    if (points.length === 0) { return; }
     m0 = [(points[0][0] - this.Bounds[0]) / this.Spacing,
       (points[0][1] - this.Bounds[2]) / this.Spacing];
     m1 = m0;
@@ -1432,10 +1441,10 @@
                     // Failed to find seed.
           return;
         }
-      } while (this.Map[ix + (iy * this.Dimensions[0])] == 0);
+      } while (this.Map[ix + (iy * this.Dimensions[0])] === 0);
       this.Queue.Push([ix, iy]);
       var seed, idx;
-      while ((seed = this.Queue.Shift()) != null) {
+      while ((seed = this.Queue.Shift()) !== null) {
         this.AddSeedToQueue(seed[0] - 1, seed[1]);
         this.AddSeedToQueue(seed[0] + 1, seed[1]);
         this.AddSeedToQueue(seed[0], seed[1] - 1);
@@ -1453,7 +1462,7 @@
     var xMax = this.Dimensions[0] - 1;
     var yMax = this.Dimensions[1] - 1;
     var seed, idx;
-    while ((seed = this.Queue.Shift()) != null) {
+    while ((seed = this.Queue.Shift()) !== null) {
       if (seed[0] > 0) { this.AddSeedToQueue(seed[0] - 1, seed[1]); }
       if (seed[0] < xMax) { this.AddSeedToQueue(seed[0] + 1, seed[1]); }
       if (seed[1] > 0) { this.AddSeedToQueue(seed[0], seed[1] - 1); }
@@ -1465,7 +1474,7 @@
     var idx = ix + (iy * this.Dimensions[0]);
     if (ix >= 0 && ix < this.Dimensions[0] &&
             iy >= 0 && iy < this.Dimensions[1] &&
-            this.Map[idx] != 0) {
+            this.Map[idx] !== 0) {
       this.Map[idx] = 0;
       this.Queue.Push([ix, iy]);
     }
@@ -1489,7 +1498,7 @@
       for (var x = 0; x < data.width; ++x) {
         if (x >= 0 && x < this.Dimensions[0] &&
                     y >= 0 && y < this.Dimensions[1] &&
-                    data.data[i + 3] == 255) {
+                    data.data[i + 3] === 255) {
           this.Map[x + (y * this.Dimensions[0])] = 0;
         }
         i += 4;
@@ -1598,7 +1607,8 @@
   DistanceMap.prototype.GetGradient = function (x, y) {
     var ix = Math.round((x - this.Bounds[0]) / this.Spacing);
     var iy = Math.round((y - this.Bounds[2]) / this.Spacing);
-    var dx = 0, dy = 0;
+    var dx = 0;
+    var dy = 0;
     if (ix < 0 || ix >= this.Dimensions[0] ||
             iy < 0 || iy >= this.Dimensions[1]) {
             // Slow gradient toward middle.
@@ -1609,18 +1619,18 @@
     }
     var idx = ix + (iy * this.Dimensions[0]);
         // x
-    if (ix == 0) {
+    if (ix === 0) {
       dx = this.Map[idx + 1] - this.Map[idx];
-    } else if (ix == this.Dimensions[0] - 1) {
+    } else if (ix === this.Dimensions[0] - 1) {
       dx = this.Map[idx] - this.Map[idx - 1];
     } else {
       dx = this.Map[idx + 1] - this.Map[idx - 1];
     }
         // y
     var incy = this.Dimensions[0];
-    if (iy == 0) {
+    if (iy === 0) {
       dy = this.Map[idx + incy] - this.Map[idx];
-    } else if (iy == this.Dimensions[1] - 1) {
+    } else if (iy === this.Dimensions[1] - 1) {
       dy = this.Map[idx] - this.Map[idx - incy];
     } else {
       dy = this.Map[idx + incy] - this.Map[idx - incy];
@@ -1824,7 +1834,7 @@
     var ksum = new Array(kernelDim + 1);
     ksum[0] = 0;
     for (var i = -radius, j = 0; i <= radius; ++i, ++j) {
-      if (radius == 0) { // for testing
+      if (radius === 0) { // for testing
         kernel[j] = 1.0;
       } else {
         kernel[j] = Math.exp(-i * i / (radius * radius));
@@ -1930,8 +1940,12 @@
     aveb /= suma;
 
         // Now compute the covarient matrix.
-    var rr = 0, bb = 0, gg = 0;
-    var rb = 0, rg = 0, gb = 0;
+    var rr = 0;
+    var bb = 0;
+    var gg = 0;
+    var rb = 0;
+    var rg = 0;
+    var gb = 0;
     for (var i = 0; i < data.data.length;) {
       var r = data.data[i++] - aver;
       var g = data.data[i++] - aveg;
@@ -2148,9 +2162,12 @@
     distMap.Update();
 
         // No rotation yet.
-    var dx = 0, dy = 0;
+    var dx = 0;
+    var dy = 0;
     for (var i = 0; i < 100; ++i) {
-      var sumx = 0, sumy = 0, sumd = 0;
+      var sumx = 0;
+      var sumy = 0;
+      var sumd = 0;
       for (var j = 0; j < contour2.length; ++j) {
         var x = contour2[j][0] - dx;
         var y = contour2[j][1] - dy;
@@ -2220,15 +2237,19 @@
   function RigidAlignContourWithMap (contour, distMap) {
         // Compute center of rotation
     var c2 = contour.GetCenter();
-    var xCenter = c2[0], yCenter = c2[1];
+    var xCenter = c2[0];
+    var yCenter = c2[1];
 
     var xSave = xCenter;
     var ySave = yCenter;
     var roll = 0;
 
     for (var i = 0; i < 200; ++i) {
-      var sumx = 0, sumy = 0, totald = 0;
-      var sumr = 0, totalr = 0;
+      var sumx = 0;
+      var sumy = 0;
+      var totald = 0;
+      var sumr = 0;
+      var totalr = 0;
       for (var j = 0; j < contour.Length(); ++j) {
         var x = contour.GetPoint(j)[0];
         var y = contour.GetPoint(j)[1];
@@ -2311,7 +2332,8 @@
         }
         var p0 = mesh.GetPointCoordinates(edge.vert0);
         var p1 = mesh.GetPointCoordinates(edge.vert1);
-        var dx = p1[0] - p0[0], dy = p1[1] - p0[1];
+        var dx = p1[0] - p0[0];
+        var dy = p1[1] - p0[1];
         var length = Math.sqrt(dx * dx + dy * dy);
         var k = EDGE_FACTOR * (length - edge.length) / (2 * length);
         idx = edge.vert0 << 1;
@@ -2600,7 +2622,7 @@
         }
       }
     }
-    if (count1 != 1) { return; }
+    if (count1 !== 1) { return; }
 
         // Get the polyline from viewer2
     var viewer2 = SA.VIEWERS[1];
@@ -2625,7 +2647,7 @@
         }
       }
     }
-    if (count2 != 1) { return; }
+    if (count2 !== 1) { return; }
 
     AlignPolylines2(pLine1, pLine2, replace);
   }
@@ -2684,7 +2706,7 @@
     contour2.Resample(1);
         // contour2.Resample(5);
 
-    if (contour1.Points.length == 0 || contour2.Points.length == 0) {
+    if (contour1.Points.length === 0 || contour2.Points.length === 0) {
       return;
     }
 
@@ -2752,7 +2774,7 @@
     var length = hist1.length;
     var best = 0;
     var bestOffset = 0;
-    for (i = 0; i < length; ++i) {
+    for (var i = 0; i < length; ++i) {
       var sum = 0;
       for (j1 = 0; j1 < length; ++j1) {
         var j2 = i + j1;
@@ -2852,7 +2874,7 @@
     // Create a threshold mask image annotation to see the results.
     // Compute the first moment at the same time.
   function ThresholdData (data, threshold, high) {
-    if (high == undefined) { high = true; }
+    if (high === undefined) { high = true; }
     var xSum = 0;
     var ySum = 0;
     var count = 0;
@@ -2860,7 +2882,7 @@
     for (var y = 0; y < data.height; ++y) {
       for (var x = 0; x < data.width; ++x) {
         var intensity = Math.floor((data.data[i] + data.data[i + 1] + data.data[i + 2]) / 3);
-        if ((intensity > threshold) == high) { // Make it semi opaque black
+        if ((intensity > threshold) === high) { // Make it semi opaque black
           data.data[i] = data.data[i + 1] = data.data[i + 2] = 0;
           data.data[i + 3] = 255;
         } else {
@@ -3153,7 +3175,7 @@
     // Rigid alignment should work the same (hold off on using distance map from threshold).
     // The to implement deformable registration.
   function testContourMesh (deci) {
-    if (deci == undefined) {
+    if (deci === undefined) {
       deci = 3;
     }
     var viewer = SA.VIEWERS[1];
@@ -3186,7 +3208,7 @@
     // Get two contours and deform second to match the first.
     // Next step, get alignment points from contour.
   function testDeformableAlign (spacing) {
-    if (spacing == undefined) {
+    if (spacing === undefined) {
       spacing = 3;
     }
     var viewer = SA.VIEWERS[0];
@@ -3463,7 +3485,7 @@
     // Change the low res contours into a high res contour.
   var NEW_HAGFISH_CONTOURS = [];
   function getHighResHagFishContours () {
-    if (HAGFISH_CONTOURS.length == 0) {
+    if (HAGFISH_CONTOURS.length === 0) {
       HAGFISH_CONTOURS = NEW_HAGFISH_CONTOURS;
       NEW_HAGFISH_CONTOURS = [];
       return;

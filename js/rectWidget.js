@@ -103,7 +103,7 @@
             $('<input type="number">')
             .appendTo(this.Dialog.LineWidthDiv)
             .css({'display': 'table-cell'})
-            .keypress(function (event) { return event.keyCode != 13; });
+            .keypress(function (event) { return event.keyCode !== 13; });
 
         // Area
     this.Dialog.AreaDiv =
@@ -190,7 +190,7 @@
   };
 
   RectWidget.prototype.Draw = function (view) {
-    if (this.State != NEW && this.Visibility) {
+    if (this.State !== NEW && this.Visibility) {
       this.Shape.Draw(view);
     }
   };
@@ -262,13 +262,13 @@
     }
 
         // The dialog consumes all key events.
-    if (this.State == PROPERTIES_DIALOG) {
+    if (this.State === PROPERTIES_DIALOG) {
       return false;
     }
 
-    if (this.State == DRAWING) {
+    if (this.State === DRAWING) {
             // escape key (or space or enter) to turn off drawing
-      if (event.keyCode == 27 || event.keyCode == 32 || event.keyCode == 13) {
+      if (event.keyCode === 27 || event.keyCode === 32 || event.keyCode === 13) {
         this.Deactivate();
                 // this widget was temporary, All rects created have been copied.
         this.RemoveFromLayer();
@@ -277,7 +277,7 @@
     }
 
         // Copy
-    if (event.keyCode == 67 && event.ctrlKey) {
+    if (event.keyCode === 67 && event.ctrlKey) {
             // control-c for copy
             // The extra identifier is not needed for widgets, but will be
             // needed if we have some other object on the clipboard.
@@ -301,22 +301,22 @@
       return true;
     }
 
-    if (event.which != 1) {
+    if (event.which !== 1) {
       return false;
     }
-    if (this.State == DRAWING) {
+    if (this.State === DRAWING) {
             // Switch from draging an "icon" around to resizing the rect.
       this.State = DRAG_CORNER;
       return false;
     }
-    if (this.State == DRAG_CENTER) {
+    if (this.State === DRAG_CENTER) {
             // We need the viewer position of the circle center to drag radius.
       this.OriginViewer =
                 this.Layer.GetCamera().ConvertPointWorldToViewer(this.Shape.Origin[0],
                                                                  this.Shape.Origin[1]);
       this.State = DRAG_CORNER;
     }
-    if (this.State == ACTIVE) {
+    if (this.State === ACTIVE) {
             // Determine behavior from active radius.
       if (this.NormalizedActiveDistance < 0.5) {
         this.State = DRAG;
@@ -336,7 +336,7 @@
       return true;
     }
 
-    if (this.State == DRAG_CORNER) {
+    if (this.State === DRAG_CORNER) {
       if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
       if (SAM.NotesWidget && !this.UserNoteFlag) { SAM.NotesWidget.MarkAsModified(); } // Hack
             // Duplicate this widget and keep on drawing.
@@ -361,10 +361,10 @@
     if (event.which === 0) {
             // This keeps the rectangle from being drawn in the wrong place
             // before we get our first event.
-      if (this.State == NEW) {
+      if (this.State === NEW) {
         this.State = DRAWING;
       }
-      if (this.State == DRAWING) {
+      if (this.State === DRAWING) {
                 // Center follows mouse.
         this.Shape.Origin = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
         this.Layer.EventuallyDraw();
@@ -373,9 +373,9 @@
       return true;
     }
 
-    if (event.which != 1) { return; }
+    if (event.which !== 1) { return; }
 
-    if (this.State == DRAG_CORNER) {
+    if (this.State === DRAG_CORNER) {
             // Center remains fixed, and a corner follows the mouse.
             // This is an non standard interaction.  Usually one corner
             // remains fixed and the second corner follows the mouse.
@@ -406,7 +406,7 @@
       return false;
     }
 
-    if (this.State == DRAG) {
+    if (this.State === DRAG) {
       var viewport = this.Layer.GetViewport();
       var cam = this.Layer.GetCamera;
       var dx = x - this.OriginViewer[0];
@@ -417,7 +417,7 @@
       this.Layer.EventuallyDraw();
     }
 
-    if (this.State == WAITING) {
+    if (this.State === WAITING) {
       this.CheckActive(event);
     }
   };
@@ -430,7 +430,7 @@
     var x = event.offsetX;
     var y = event.offsetY;
 
-    if (this.State == ACTIVE) {
+    if (this.State === ACTIVE) {
       if (this.NormalizedActiveDistance < 0.5) {
         var ratio = 1.05;
         var direction = 1;
@@ -532,7 +532,7 @@
 
     // Multiple active states. Active state is a bit confusing.
   RectWidget.prototype.GetActive = function () {
-    if (this.State == WAITING) {
+    if (this.State === WAITING) {
       return false;
     }
     return true;
@@ -564,7 +564,7 @@
       this.Visibility = true;
     }
 
-    if (flag == this.GetActive()) {
+    if (flag === this.GetActive()) {
       return;
     }
 

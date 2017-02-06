@@ -4,7 +4,7 @@
 // to include multiple contours fo sections that have multiple pieces,
 // and internal contours / features.  Internal edges may not be closed
 // loops.
-// Initialy, these widgets will have no interaction, so they might
+// Initially, these widgets will have no interaction, so they might
 // be better as shapes, but we will see.
 
 // Eventually I will put a transformation in here.
@@ -33,7 +33,7 @@
   }
 
   StackSectionWidget.prototype.IsEmpty = function () {
-    return this.Shapes.length == 0;
+    return this.Shapes.length === 0;
   };
 
     // Add all the lines in the in section to this section.
@@ -66,13 +66,13 @@
     var pointsOut = false;
     for (var i = 0; i < this.Shapes.length; ++i) {
       var contained = this.Shapes[i].ContainedInBounds(bds);
-      if (contained == 1) {
+      if (contained === 1) {
         return 1;
       }
-      if (contained == 0) {
+      if (contained === 0) {
         pointsOut = true;
       }
-      if (contained == 2) {
+      if (contained === 2) {
         pointsIn = true;
       }
       if (pointsIn && pointsOut) {
@@ -96,7 +96,7 @@
     // We need bounds in view coordiantes for sorting.
     // Do not bother caching the value.
   StackSectionWidget.prototype.GetViewBounds = function (view) {
-    if (this.Shapes.length == 0) {
+    if (this.Shapes.length === 0) {
       return [0, 0, 0, 0];
     }
     var c = this.GetViewCenter(view);
@@ -160,7 +160,7 @@
     if (this.Thumb) {
       return null;
     }
-    var obj = new Object();
+    var obj = {};
     obj.type = 'stack_section';
     obj.color = this.Color;
     obj.shapes = [];
@@ -228,7 +228,7 @@
       return [cx - rad, cx + rad, cy - rad, cy + rad];
     }
 
-    if (this.Shapes.length == 0) {
+    if (this.Shapes.length === 0) {
       return this.Bounds;
     }
     if (!this.Bounds) {
@@ -416,7 +416,9 @@
     var vx, vy, rx, ry;
     var s = Math.sin(trans[2]);
     var c = Math.cos(trans[2]);
-    var sumx = 0, sumy = 0, totalDist = 0;
+    var sumx = 0;
+    var sumy = 0;
+    var totalDist = 0;
     var sumr = 0;
     var numContributingPoints = 0;
     for (var j = 0; j < this.Shapes.length; ++j) {
@@ -528,7 +530,7 @@
 
     // I could also implement a resample to get uniform spacing.
   StackSectionWidget.prototype.RemoveDuplicatePoints = function (epsilon) {
-    if (epsilon == undefined) {
+    if (epsilon === undefined) {
       epsilon = 0;
     }
     for (var i = 0; i < this.Shapes.length; ++i) {

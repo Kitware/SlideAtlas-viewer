@@ -91,7 +91,7 @@
     // We could chop off the lowest priority tiles if the queue gets too long.
     // Simply add the tile to the queue.
   SA.LoadQueueAddTile = function (tile) {
-    if (tile.LoadState == 0 || tile.LoadState == 4) {
+    if (tile.LoadState === 0 || tile.LoadState === 4) {
             // New tile or error
       tile.LoadState = 1;
             // Add the tile at the front of the queue.
@@ -106,12 +106,12 @@
     for (var i = 1; i < SA.LoadQueue.length; ++i) {
       var t1 = SA.LoadQueue[i];
       var swap = false;
-      if (t1 != null) {
-        if (t0 == null) {
+      if (t1 !== null) {
+        if (t0 === null) {
           swap = true;
         } else if (t0.TimeStamp > t1.TimeStamp) {
           swap = true;
-        } else if (t0.TimeStamp == t1.TimeStamp && t0.Level < t1.Level) {
+        } else if (t0.TimeStamp === t1.TimeStamp && t0.Level < t1.Level) {
           swap = true;
         }
       }
@@ -130,7 +130,7 @@
   SA.LoadQueueRemove = function (tile) {
     var length = SA.LoadQueue.length;
     for (var i = 0; i < length; ++i) {
-      if (SA.LoadQueue[i] == tile) {
+      if (SA.LoadQueue[i] === tile) {
         tile.LoadState = 0;
         SA.LoadQueue[i] = null;
         return;
@@ -161,7 +161,7 @@
       var tile = SA.LoadQueue.pop();
             // For debugging
             // this.PendingTiles.push(tile);
-      if (tile != null && tile.LoadState == 1) {
+      if (tile !== null && tile.LoadState === 1) {
         tile.StartLoad(tile.Cache);
         tile.LoadState = 2; // Loading.
         ++SA.LoadingCount;
@@ -186,13 +186,13 @@
       width = width + '%';
       SA.ProgressBar.css({'width': width});
             // Reset maximum
-      if (SA.LoadQueue.length == 0) {
+      if (SA.LoadQueue.length === 0) {
         SA.LoadProgressMax = 0;
       }
     }
 
     if (SA.FinishedLoadingCallbacks.length > 0 &&
-            SA.LoadQueue.length == 0 && SA.LoadingCount == 0) {
+            SA.LoadQueue.length === 0 && SA.LoadingCount === 0) {
       var tmp = SA.FinishedLoadingCallbacks.slice(0); // copy
       SA.FinishedLoadingCallbacks = [];
       for (var i = 0; i < tmp.length; ++i) {

@@ -65,7 +65,7 @@
       type: 'get',
       url: '/webgl-viewer/getfavoriteviews',
       success: function (data, status) {
-        if (status == 'success') {
+        if (status === 'success') {
           self.LoadFavoritesCallback(data);
         } else { SA.Debug('ajax failed - get favorite views'); }
       },

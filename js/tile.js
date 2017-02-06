@@ -16,7 +16,10 @@ window.SA = window.SA || {};
     // Cache is now saved in tile ivar.
   LoadTileCallback.prototype.HandleLoadedImage = function () {
     var curtime = new Date().getTime();
-    TILESTATS.add({'name': this.Tile.Name, 'loadtime': curtime - this.Tile.starttime });
+    TILESTATS.add({
+      'name': this.Tile.Name,
+      'loadtime': curtime - this.Tile.starttime
+    });
     SA.LoadQueueLoaded(this.Tile);
   };
 
@@ -156,7 +159,7 @@ window.SA = window.SA || {};
       this.Image = 0;
     }
     for (var i = 0; i < 4; ++i) {
-      if (this.Children[i] != null) {
+      if (this.Children[i] !== null) {
         this.Children[i].delete(gl);
         this.Children[i] = null;
       }
@@ -169,12 +172,12 @@ window.SA = window.SA || {};
         // Record that the tile is used (for prioritizing loading and pruning).
         // Mark all lower res tiles so they will be loaded inthe correct order.
     var tmp = this;
-    while (tmp && tmp.TimeStamp != SA.TimeStamp) {
+    while (tmp && tmp.TimeStamp !== SA.TimeStamp) {
       tmp.TimeStamp = SA.TimeStamp;
       tmp = tmp.Parent;
     }
 
-    if (this.LoadState != 0) { // == 2
+    if (this.LoadState !== 0) { // === 2
             // This tiles is already in the load queue or loaded.
       return;
     }
@@ -184,10 +187,10 @@ window.SA = window.SA || {};
         // (levels are skipped in progresive updata).  So, lets try this.
         // Now that I am prioritizing the queue on the tiles time stamp and level,  the previous issues should be resolved.
     if (this.Parent) {
-      if (this.Parent.LoadState == 0) {
+      if (this.Parent.LoadState === 0) {
                 // Not loaded and not in the queue.
         return this.Parent.LoadQueueAdd();
-      } else if (this.Parent.LoadState == 1) {
+      } else if (this.Parent.LoadState === 1) {
                 // Not loaded but in the queue
         return;
       }
@@ -244,7 +247,7 @@ window.SA = window.SA || {};
     }
 
         // Reusing the image caused problems.
-        // if (this.Image == null) {
+        // if (this.Image === null) {
     this.Image = new Image();
 
     this.starttime = new Date().getTime();
@@ -254,7 +257,7 @@ window.SA = window.SA || {};
     this.Image.onerror = GetErrorImageFunction(callback);
         // This starts the loading.
 
-        // SA.TileLoader == "http"
+        // SA.TileLoader === "http"
     this.LoadHttp(cache);
   };
 
@@ -274,7 +277,7 @@ window.SA = window.SA || {};
 
         // Legacy
     var imageSrc;
-    if (cache.Image.type && cache.Image.type == 'stack') {
+    if (cache.Image.type && cache.Image.type === 'stack') {
       imageSrc = cache.GetSource() + this.Name + '.png';
     } else {
       imageSrc = cache.GetSource() + this.Name + '.jpg';
@@ -294,7 +297,7 @@ window.SA = window.SA || {};
   Tile.prototype.Draw = function (program, view) {
         // Load state 0 is: Not loaded and not scheduled to be loaded yet.
         // Load state 1 is: not loaded but in the load queue.
-    if (this.LoadState != 3) {
+    if (this.LoadState !== 3) {
             // This should never happen.
       return;
     }
@@ -315,7 +318,7 @@ window.SA = window.SA || {};
         */
 
     if (view.gl) {
-      if (this.Texture == null) {
+      if (this.Texture === null) {
         this.CreateTexture(view.gl);
       }
             // These are the same for every tile.
@@ -360,7 +363,7 @@ window.SA = window.SA || {};
             // map pixels to Tile
       var tileSize = this.Cache.Image.TileSize;
             // This should not be necessary, quick hack around a bug in __init__.py
-      if (tileSize == undefined) {
+      if (tileSize === undefined) {
         tileSize = 256;
       }
       view.Context2d.transform(1.0 / tileSize, 0.0, 0.0, 1.0 / tileSize, 0.0, 0.0);
@@ -392,7 +395,7 @@ window.SA = window.SA || {};
       alert('Textures need a gl instance');
       return;
     }
-    if (this.Texture != null) { return; }
+    if (this.Texture !== null) { return; }
 
     ++SA.NumberOfTextures; // To determine when to prune textures.
     this.Texture = gl.createTexture();

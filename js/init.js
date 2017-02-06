@@ -119,9 +119,9 @@ window.SA = window.SA || {};
     // Firefox does not set which for mouse move events.
   SA.FirefoxWhich = function (event) {
     event.which = event.buttons;
-    if (event.which == 2) {
+    if (event.which === 2) {
       event.which = 3;
-    } else if (event.which == 3) {
+    } else if (event.which === 3) {
       event.which = 2;
     }
   };
@@ -174,8 +174,8 @@ window.SA = window.SA || {};
     // Main function called by the default view.html template
     // SA global will be set to this object.
   SA.Run = function () {
-    SA.Running == true;
-    self = SA;
+    SA.Running === true;
+    var self = SA;
     if (SA.SessionId) {
       $.ajax({
         type: 'get',
@@ -198,12 +198,12 @@ window.SA = window.SA || {};
 
     // Now we have the session (if the id was passed in).
   SA.Run2 = function () {
-    self = SA;
+    var self = SA;
         // Get the root note.
-    if (SA.ViewId == '' || SA.ViewId == 'None') {
+    if (SA.ViewId === '' || SA.ViewId === 'None') {
       delete SA.ViewId;
     }
-    if (SA.SessionId == '' || SA.SessionId == 'None') {
+    if (SA.SessionId === '' || SA.SessionId === 'None') {
       delete SA.SessionId;
     }
 
@@ -211,10 +211,10 @@ window.SA = window.SA || {};
     var rootNote = new SA.Note();
 
         // Hack to create a new presenation.
-    if (SA.ViewId == 'presentation') {
+    if (SA.ViewId === 'presentation') {
       var title = window.prompt('Please enter the presentation title.',
                                       'SlideShow');
-      if (title == null) {
+      if (title === null) {
                 // Go back in browser?
         return;
       }
@@ -225,7 +225,7 @@ window.SA = window.SA || {};
 
       Main(rootNote);
     } else {
-      if (SA.ViewId == '') {
+      if (SA.ViewId === '') {
         SA.Debug('Missing view id');
         return;
       }
@@ -243,24 +243,24 @@ window.SA = window.SA || {};
   SA.HandleKeyDownStack = function (event) {
     if (SA.ContentEditableHasFocus) { return true; }
 
-    if (event.keyCode == 16) {
+    if (event.keyCode === 16) {
             // Shift key modifier.
       SA.ShiftKeyPressed = true;
             // Do not forward modifier keys events to objects that consume keypresses.
       return true;
     }
-    if (event.keyCode == 17) {
+    if (event.keyCode === 17) {
             // Control key modifier.
       SA.ControlKeyPressed = true;
       return true;
     }
 
         // Handle undo and redo (cntrl-z, cntrl-y)
-    if (SA.ControlKeyPressed && event.keyCode == 90) {
+    if (SA.ControlKeyPressed && event.keyCode === 90) {
             // Function in recordWidget.
       SA.recorderWidget.UndoState();
       return false;
-    } else if (SA.ControlKeyPressed && event.keyCode == 89) {
+    } else if (SA.ControlKeyPressed && event.keyCode === 89) {
             // Function in recordWidget.
       SA.recorderWidget.RedoState();
       return false;
@@ -278,13 +278,13 @@ window.SA = window.SA || {};
     if (SA.ContentEditableHasFocus) { return true; }
 
         // For debugging deformable alignment in stacks.
-    if (event.keyCode == 90) { // z = 90
+    if (event.keyCode === 90) { // z = 90
       if (event.shiftKey) {
         SA.DeformableAlignViewers(false);
         return true;
       }
     }
-    if (event.keyCode == 89) { // y = 89
+    if (event.keyCode === 89) { // y = 89
       if (event.shiftKey) {
         SA.DeformableAlignViewers(true);
         return true;
@@ -293,7 +293,7 @@ window.SA = window.SA || {};
 
         // It is sort of a hack to check for the cursor mode here, but it
         // affects both viewers.
-    if (event.keyCode == 88) { // x = 88
+    if (event.keyCode === 88) { // x = 88
             // I am using the 'x' key to display to focal point cursor
             // SA.StackCursorFlag = false;
             // what a pain.  Holding x down sometimes blocks mouse events.
@@ -309,11 +309,11 @@ window.SA = window.SA || {};
       return false;
     }
 
-    if (event.keyCode == 16) {
+    if (event.keyCode === 16) {
             // Shift key modifier.
       SA.ShiftKeyPressed = false;
             // SA.StackCursorFlag = false;
-    } else if (event.keyCode == 17) {
+    } else if (event.keyCode === 17) {
             // Control key modifier.
       SA.ControlKeyPressed = false;
     }
@@ -336,7 +336,7 @@ window.SA = window.SA || {};
   SA.TriggerStartInteraction = function () {
     if (!SA.StartInteractionListeners) { return; }
     for (var i = 0; i < SA.StartInteractionListeners.length; ++i) {
-      callback = SA.StartInteractionListeners[i];
+      var callback = SA.StartInteractionListeners[i];
       callback();
     }
   };
@@ -344,11 +344,11 @@ window.SA = window.SA || {};
     // TODO: These should be moved to viewer-utils so they can be used
     // separately from SlideAtlas.
     // Helper function: Looks for a key phase in the text.
-    // first == true: Look only at the start. Returns true if found.
-    // first == false: return index of tag or -1;
+    // first === true: Look only at the start. Returns true if found.
+    // first === false: return index of tag or -1;
   SA.TagCompare = function (tag, text, first) {
     if (first) {
-      return (tag.toUpperCase() ==
+      return (tag.toUpperCase() ===
                     text.substring(0, tag.length).toUpperCase());
     }
     return text.toUpperCase().search(tag.toUpperCase());
@@ -431,7 +431,7 @@ window.SA = window.SA || {};
                 // There was a bug with diagnosis in the history container.
                 // This will ungroup multiple tags. However recursion may be
                 // needed.
-        if (child[0].tagName == 'DIV') {
+        if (child[0].tagName === 'DIV') {
           var grandChildren = child.children();
 
                     // child.empty() // looses text that is not a child.
@@ -487,7 +487,7 @@ window.SA = window.SA || {};
             // Make sure the selection / cursor is in this editor.
       parent = range.commonAncestorContainer;
             // I could use jquery .parents(), but I bet this is more efficient.
-      while (parent && parent != div[0]) {
+      while (parent && parent !== div[0]) {
                 // if ( ! parent) {
                 // I believe this happens when outside text is selected.
                 // We should we treat this case like nothing is selected.
@@ -536,7 +536,7 @@ window.SA = window.SA || {};
   };
 
     // function GetViewId () {
-    //    if (typeof(SA.ViewId) != "undefined") {
+    //    if (typeof(SA.ViewId) !== "undefined") {
     //        return SA.ViewId;
     //    }
     //    if ( ! SA.notesWidget && ! SA.notesWidget.RootNote) {
@@ -715,8 +715,8 @@ window.SA = window.SA || {};
         // SA.imageProgram = SA.createWebGlProgram(fragmentShaderString, vertexShaderString, gl);
     view.imageProgram = SA.createWebGlProgram(heatMapFragmentShaderString, vertexShaderString, gl);
         // Texture coordinate attribute and texture image uniform
-    view.imageProgram.textureCoordAttribute
-            = gl.getAttribLocation(view.imageProgram, 'aTextureCoord');
+    view.imageProgram.textureCoordAttribute =
+            gl.getAttribLocation(view.imageProgram, 'aTextureCoord');
     gl.enableVertexAttribArray(view.imageProgram.textureCoordAttribute);
     view.imageProgram.samplerUniform = gl.getUniformLocation(view.imageProgram, 'uSampler');
     view.imageProgram.colorUniform = gl.getUniformLocation(view.imageProgram, 'uColor');
@@ -995,8 +995,8 @@ window.SA = window.SA || {};
   function Main (rootNote) {
     SA.RootNote = rootNote;
 
-    if (rootNote.Type == 'Presentation' ||
-            rootNote.Type == 'HTML') {
+    if (rootNote.Type === 'Presentation' ||
+            rootNote.Type === 'HTML') {
       SA.presentation = new SA.Presentation(rootNote, SA.Edit);
       return;
     }
@@ -1011,7 +1011,7 @@ window.SA = window.SA || {};
         // Just use the canvas for now.
         // I have been getting crashes I attribute to not freeing texture
         // memory properly.
-        // NOTE: I am getting similar crashe with the canvas too.
+        // NOTE: I am getting similar crashes with the canvas too.
         // Stack is running out of some resource.
     if (!SAM.detectMobile() && false) { // && doesBrowserSupportWebGL(testCanvas)) {
       initGL(); // Sets CANVAS and GL global variables
@@ -1039,7 +1039,7 @@ window.SA = window.SA || {};
     SA.notesWidget = new SA.NotesWidget(SA.resizePanel.PanelDiv,
                                             SA.display);
 
-    if (rootNote.Type == 'Stack') {
+    if (rootNote.Type === 'Stack') {
       SA.display.SetNumberOfViewers(2);
     }
 
@@ -1056,7 +1056,7 @@ window.SA = window.SA || {};
 
         // Do not let guests create favorites.
         // TODO: Rework how favorites behave on mobile devices.
-    if (SA.User != '' && !SAM.detectMobile()) {
+    if (SA.User !== '' && !SAM.detectMobile()) {
       if (SA.Edit) {
                 // Put a save button here when editing.
         SA.SaveButton = $('<img>')
@@ -1195,7 +1195,7 @@ window.SA = window.SA || {};
     var c = SA.VIEWER1.GetCamera();
     var b = c.GetBounds();
     for (var i = 0; i < r.Annotations.length; ++i) {
-      if (r.Annotations[i].type != 'lasso') {
+      if (r.Annotations[i].type !== 'lasso') {
         r.Annotations.splice(i, 1);
         --i;
       } else {

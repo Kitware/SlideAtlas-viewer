@@ -67,8 +67,7 @@
 
     var shaderProgram = SA.createWebGlProgram(heatMapFragmentShaderString, vertexShaderString, gl);
         // Setup the shader program to render heatmaps.
-    shaderProgram.textureCoordAttribute
-            = gl.getAttribLocation(shaderProgram, 'aTextureCoord');
+    shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, 'aTextureCoord');
     gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
     shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, 'uSampler');
     shaderProgram.colorUniform = gl.getUniformLocation(shaderProgram, 'uColor');
@@ -79,8 +78,8 @@
     var self = this;
         // this.View.Canvas
     this.OverlayViewDiv.on(
-            'mousemove.overlay',
-			      function (event) {
+      'mousemove.overlay',
+      function (event) {
         self.Center[0] = event.offsetX;
         self.Center[1] = self.OverlayViewDiv.height() - event.offsetY;
         self.EventuallyDraw();
@@ -148,10 +147,8 @@
         var outCam = this.View.Camera;
         var imageObj = this.View.GetCache().Image;
         outCam.DeepCopy(inCam);
-        outCam.FocalPoint[0]
-                    = (outCam.FocalPoint[0] - imageObj.origin[0]) / imageObj.spacing[0];
-        outCam.FocalPoint[1]
-                    = (outCam.FocalPoint[1] - imageObj.origin[1]) / imageObj.spacing[1];
+        outCam.FocalPoint[0] = (outCam.FocalPoint[0] - imageObj.origin[0]) / imageObj.spacing[0];
+        outCam.FocalPoint[1] = (outCam.FocalPoint[1] - imageObj.origin[1]) / imageObj.spacing[1];
         outCam.Width /= imageObj.spacing[0];
         outCam.Height /= imageObj.spacing[1];
         outCam.ComputeMatrix();

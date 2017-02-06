@@ -1,6 +1,5 @@
-// TODO:
 // BUG: Notes now have a sessionId so the navigation widget will work when
-// a note is loaded in issolation.  We are not updating this reference when
+// a note is loaded in isolation.  We are not updating this reference when
 // the view is moved.
 
 // Scroll when dragged to the bottom or top of the screen.
@@ -18,7 +17,7 @@
 
 // I am not so sure I like this closure pattern.
 // I am trying to hide helper object, but
-// I could just declare them inside the contructor.
+// I could just declare them inside the constructor.
 // This pattern does not make any of the methods
 // private.  I do not think it makes any instance
 // variables private either.
@@ -85,7 +84,7 @@ CollectionBrowser = (function () {
   }
 
   function HistoryUndo () {
-    if (HISTORY.length == 0) {
+    if (HISTORY.length === 0) {
       return;
     }
     ClearSelected();
@@ -133,7 +132,7 @@ CollectionBrowser = (function () {
   document.body.addEventListener(
         'keydown',
         function (e) {
-          if (e.keyCode == 90 && e.ctrlKey) {
+          if (e.keyCode === 90 && e.ctrlKey) {
                 // control-z
             HistoryUndo();
           }
@@ -144,7 +143,7 @@ CollectionBrowser = (function () {
   document.body.addEventListener(
         'keydown',
         function (e) {
-          if (e.keyCode == 46) {
+          if (e.keyCode === 46) {
                 // Delete just moves the selected to the trash session.
             TRASH_SESSION.DropSelected(0, false, false);
           }
@@ -162,7 +161,7 @@ CollectionBrowser = (function () {
     PushProgress();
     $.get('/sessions?json=true',
               function (data, status) {
-                if (status == 'success') {
+                if (status === 'success') {
                   PopProgress();
                   self.Load(data);
                 } else {
@@ -220,7 +219,7 @@ CollectionBrowser = (function () {
     this.State = INITIALIZED;
     this.ModifiedTime = this.SavedTime = TIME_COUNT;
 
-    if (this.Label == 'Trash') {
+    if (this.Label === 'Trash') {
       TRASH_SESSION = this;
       this.RequestViewData();
     }
@@ -228,14 +227,14 @@ CollectionBrowser = (function () {
 
   SessionObject.prototype.RequestViewData = function (sucessCallback,
                                                        errorCallback) {
-    if (this.State == LOADED) {
+    if (this.State === LOADED) {
       sucessCallback(this);
     }
     this.LoadCallbacks.push(sucessCallback);
-    if (this.State == WAITING) {
+    if (this.State === WAITING) {
       return;
     }
-    this.State == WAITING;
+    this.State === WAITING;
         // Make the request to populate the view list.
     var self = this;
     this.State = WAITING;
@@ -259,7 +258,7 @@ CollectionBrowser = (function () {
         /*
         $.get("/sessions?json=1&sessid="+this.Id,
               function(data,status){
-                  if (status == "success") {
+                  if (status === "success") {
                       self.LoadViewData(data);
                   } else {
                       if (errorCallback) {
@@ -296,10 +295,10 @@ CollectionBrowser = (function () {
     // It inserts the views at the index.
     // Keep selected flag indicates that the moved views remain selected.
   SessionObject.prototype.DropSelected = function (index, copy, keepSelected) {
-    if (SELECTED.length == 0) {
+    if (SELECTED.length === 0) {
       return;
     }
-    if (this.State != LOADED) {
+    if (this.State !== LOADED) {
       ClearSelected();
       alert('Destintation is not finished loading.');
       return;
@@ -381,7 +380,7 @@ CollectionBrowser = (function () {
             // Make sure the views are in the new session.
       var found = false;
       for (j = 0; j < this.ViewObjects.length; ++j) {
-        if (this.ViewObjects[j].Id == viewObj.Id) {
+        if (this.ViewObjects[j].Id === viewObj.Id) {
           found = true;
           break;
         }
@@ -394,9 +393,9 @@ CollectionBrowser = (function () {
             // Make sure the views are removed from the previous session.
       if (!copy) {
         var sessionObj = viewObj.SessionObject;
-        if (this.Id != sessionObj.Id) {
+        if (this.Id !== sessionObj.Id) {
           for (var j = 0; j < sessionObj.ViewObjects.length; ++j) {
-            if (sessionObj.ViewObjects[j].Id == viewObj.Id) {
+            if (sessionObj.ViewObjects[j].Id === viewObj.Id) {
               HistoryUndo();
               alert('Move did not remove: ' + viewObj.Label);
               return;
@@ -420,7 +419,7 @@ CollectionBrowser = (function () {
     }
     this.SavedTime = this.ModifiedTime;
 
-    if (this.State != LOADED) {
+    if (this.State !== LOADED) {
       console.log('Error Save: Session not loaded.');
       return;
     }
@@ -556,7 +555,7 @@ CollectionBrowser = (function () {
 
   function AddSelected (view) {
     for (var i = 0; i < SELECTED.length; ++i) {
-      if (view.ViewData == SELECTED[i].ViewData) {
+      if (view.ViewData === SELECTED[i].ViewData) {
         return;
       }
     }
@@ -636,7 +635,7 @@ CollectionBrowser = (function () {
 
   CollectionBrowser.prototype.HandleResize = function () {
     return;
-        // We need a dynamic resize
+    // We need a dynamic resize
     var height = window.innerHeight - 2;
     var width = window.innerWidth - 2;
     var pos = this.Div.position();
@@ -656,7 +655,7 @@ CollectionBrowser = (function () {
             // Note: data.sessions is actually a list of collections.
       var collection = new Collection(collectionObject, this);
             // Which collection should be open.
-      if (collectionObject.Label == this.DefaultCollectionLabel) {
+      if (collectionObject.Label === this.DefaultCollectionLabel) {
         defaultCollection = collection;
       }
       this.Collections.push(collection);
@@ -731,7 +730,7 @@ CollectionBrowser = (function () {
                 // Important for dropping / saving.
         session.RequestMetaData();
 
-        if (this.LoadState == LOAD_INITIAL) {
+        if (this.LoadState === LOAD_INITIAL) {
           session.RequestMetaData();
         }
       }
@@ -815,7 +814,7 @@ CollectionBrowser = (function () {
                         // If the anchor is not in the same session,
                         // just start from the begining.
                     if (LAST_SELECTED === undefined ||
-                            LAST_SELECTED.ViewData.SessionObject !=
+                            LAST_SELECTED.ViewData.SessionObject !==
                             view.ViewData.SessionObject) {
                       LAST_SELECTED = view.Session.Views[0];
                     }
@@ -943,7 +942,7 @@ CollectionBrowser = (function () {
 
         // This is only called when the mouse is pressed.
         // Sanity check.
-    if (event.which == 1 || event.which == 3) {
+    if (event.which === 1 || event.which === 3) {
             // Startdragging.
       HideImagePopup();
       StartViewDrag(event);
@@ -1004,7 +1003,7 @@ CollectionBrowser = (function () {
   };
 
   Session.prototype.RequestImages = function () {
-    if (this.LoadState != LOAD_METADATA_LOADED) { return; }
+    if (this.LoadState !== LOAD_METADATA_LOADED) { return; }
     this.LoadState = LOAD_IMAGES;
 
     for (var i = 0; i < this.Views.length; ++i) {
@@ -1016,7 +1015,7 @@ CollectionBrowser = (function () {
                 .attr('alt', view.ViewData.Label)
                 .mouseenter(
                     function (event) {
-                      if (event.which == 0) {
+                      if (event.which === 0) {
                             // Show larger image after about 1 second.
                         ScheduleImagePopup($(this));
                       }
@@ -1041,7 +1040,7 @@ CollectionBrowser = (function () {
             // collection already requests session metadata.  However,
             // This method does nothing if the request has already been made,
             // And someone might call this directly.
-      if (this.LoadState == LOAD_INITIAL) {
+      if (this.LoadState === LOAD_INITIAL) {
                 // This should not be necessary
         this.RequestMetaData();
       }
@@ -1056,7 +1055,7 @@ CollectionBrowser = (function () {
     // Value: boolean on, or false=>off
   Session.prototype.HighlightDropTargetItem = function (on) {
     if (!this.DropTargetItem) { return; }
-    if (this.DropTargetItem == this.SessionLabel[0]) {
+    if (this.DropTargetItem === this.SessionLabel[0]) {
       if (on) {
         $(this.DropTargetItem).css({'background-color': '#BBF'});
       } else {
@@ -1083,8 +1082,8 @@ CollectionBrowser = (function () {
     if (item) { item = item[0]; }
 
     if (this.DropTargetItem === item &&
-            this.DropTargetBefore == before &&
-            this.DropTargetIndex == index) {
+            this.DropTargetBefore === before &&
+            this.DropTargetIndex === index) {
       return;
     }
 
@@ -1102,7 +1101,7 @@ CollectionBrowser = (function () {
         // Check to see if the mouse is in the body
     var pos = this.Body.offset();
     var width = this.Body.innerWidth();
-    if (width == 0) {
+    if (width === 0) {
             // I cannot figure out why it is happening.
       return;
     }
@@ -1193,8 +1192,8 @@ CollectionBrowser = (function () {
     }
     this.modified = false;
 
-    if (this.LoadState != LOAD_METADATA_LOADED &&
-            this.LoadState != LOAD_IMAGES) {
+    if (this.LoadState !== LOAD_METADATA_LOADED &&
+            this.LoadState !== LOAD_IMAGES) {
       alert('Error Save: Session not loaded.');
       return;
     }
@@ -1213,7 +1212,7 @@ CollectionBrowser = (function () {
       }
 
       var viewId = $(this).attr('view');
-      if (viewId && viewId != '') {
+      if (viewId && viewId !== '') {
         view.view = viewId;
       }
       views.push(view);
@@ -1250,11 +1249,11 @@ CollectionBrowser = (function () {
     var browserIdx = (this.Collection.Browser.BrowserIndex + 1) % 2;
     var otherSession =
             BROWSERS[browserIdx].Collections[collectionIdx].Sessions[this.SessionIndex];
-    if (otherSession.LoadState == LOAD_METADATA_WAITING ||
-            otherSession.LoadState == LOAD_METADATA_LOADED) {
+    if (otherSession.LoadState === LOAD_METADATA_WAITING ||
+            otherSession.LoadState === LOAD_METADATA_LOADED) {
             // What to do?
       otherSession.RequestMetaData();
-    } if (otherSession.LoadState == LOAD_IMAGES) {
+    } if (otherSession.LoadState === LOAD_IMAGES) {
       otherSession.RequestMetaData();
             /* this messed up the layout for some reason  needs a clear.
             // Lets just copy / clone this session
@@ -1272,9 +1271,9 @@ CollectionBrowser = (function () {
 // ==============================================================================
   var DROP_TARGETS = [];
   function StartViewDrag (event) {
-    var copy = (event.which == 3) || event.ctrlKey;
+    var copy = (event.which === 3) || event.ctrlKey;
 
-    if (SELECTED.length == 0) {
+    if (SELECTED.length === 0) {
       return;
     }
     var x = event.clientX;
@@ -1341,7 +1340,7 @@ CollectionBrowser = (function () {
   }
 
   function ViewDrag (event) {
-    var copy = (event.which == 3) || event.ctrlKey;
+    var copy = (event.which === 3) || event.ctrlKey;
     if (copy) {
       MESSAGE.text('Copy');
     } else {
@@ -1374,7 +1373,8 @@ CollectionBrowser = (function () {
   var SCROLLING_HEIGHT = 80;
   function ManageDragScroll (x, y) {
         // Which browser is the mouse over?
-    var pos, found = null;
+    var pos;
+    var found = null;
     for (var i = 0; i < BROWSERS.length && !found; ++i) {
       var body = BROWSERS[0].CollectionItemList;
       pos = body.offset();
@@ -1400,7 +1400,7 @@ CollectionBrowser = (function () {
       }
     }
 
-    if (SCROLLING_BODY == found) {
+    if (SCROLLING_BODY === found) {
             // Nothing has changed.
       return;
     }
@@ -1422,7 +1422,7 @@ CollectionBrowser = (function () {
   }
 
   function ViewDrop (event) {
-    var copy = (event.which == 3) || event.ctrlKey;
+    var copy = (event.which === 3) || event.ctrlKey;
     var x = event.clientX;
     var y = event.clientY;
         // Look through all open sessions to see if we dropped in one.

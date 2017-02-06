@@ -88,7 +88,7 @@
     view.DrawTiles();
     var viewport = view.GetViewport();
 
-    if (fileName && fileName != '') {
+    if (fileName && fileName !== '') {
       view.Canvas[0].toBlob(function (blob) { saveAs(blob, fileName); }, 'image/png');
     }
 
@@ -173,13 +173,15 @@
     for (var y = this.GridReq[2]; y <= this.GridReq[3]; ++y) {
       for (var x = this.GridReq[0]; x <= this.GridReq[1]; ++x) {
                 // Compute the tile name.
-        var tx = x, ty = y, tl = this.Level;
+        var tx = x;
+        var ty = y;
+        var tl = this.Level;
         var tileName = '';
         while (tl < image.levels - 1) {
-          if ((tx & 1) == 0 && (ty & 1) == 0) { tileName = 'q' + tileName; }
-          if ((tx & 1) == 1 && (ty & 1) == 0) { tileName = 'r' + tileName; }
-          if ((tx & 1) == 0 && (ty & 1) == 1) { tileName = 't' + tileName; }
-          if ((tx & 1) == 1 && (ty & 1) == 1) { tileName = 's' + tileName; }
+          if ((tx & 1) === 0 && (ty & 1) === 0) { tileName = 'q' + tileName; }
+          if ((tx & 1) === 1 && (ty & 1) === 0) { tileName = 'r' + tileName; }
+          if ((tx & 1) === 0 && (ty & 1) === 1) { tileName = 't' + tileName; }
+          if ((tx & 1) === 1 && (ty & 1) === 1) { tileName = 's' + tileName; }
           tx = (tx >> 1);
           ty = (ty >> 1);
           ++tl;
@@ -219,10 +221,8 @@
       y -= offset.top;
       console.log('click: ' + x + ', ' + y);
 
-      self.SlideX = (x * self.ScreenPixelSpacing)
-                + self.ScreenPixelOrigin[0];
-      self.SlideY = (y * self.ScreenPixelSpacing)
-                + self.ScreenPixelOrigin[1];
+      self.SlideX = (x * self.ScreenPixelSpacing) + self.ScreenPixelOrigin[0];
+      self.SlideY = (y * self.ScreenPixelSpacing) + self.ScreenPixelOrigin[1];
       (self.ClickCallback)(self);
     });
 

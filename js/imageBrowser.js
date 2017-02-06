@@ -16,7 +16,7 @@
 
     $.get('/sessions?json=true',
               function (data, status) {
-                if (status == 'success') {
+                if (status === 'success') {
                   VIEW_BROWSER_INFO = data;
                       // I might want to open a session to avoid an extra click.
                       // I might want to sort the sessions to put the recent at the top.
@@ -54,7 +54,7 @@
     var sess = $(obj).attr('sessid');
     $.get('/sessions?json=true' + '&sessdb=' + $(obj).attr('db') + '&sessid=' + $(obj).attr('sessid'),
               function (data, status) {
-                if (status == 'success') {
+                if (status === 'success') {
                   ImageBrowserAddSessionViews(data);
                 } else { saDelete('ajax failed.'); }
               });
@@ -80,7 +80,7 @@
     $('#ImageBrowser').hide();
 
         // null implies the user wants an empty view.
-    if (obj == null) {
+    if (obj === null) {
       ACTIVE_VIEWER.SetCache(null);
       eventuallyRender();
       return;
@@ -91,7 +91,7 @@
 
     $.get('/webgl-viewer?json=true' + '&db=' + $(obj).attr('db') + '&view=' + $(obj).attr('viewid'),
               function (data, status) {
-                if (status == 'success') {
+                if (status === 'success') {
                   ImageBrowserLoadImage(data);
                 } else { saDelete('ajax failed.'); }
               });

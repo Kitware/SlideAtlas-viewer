@@ -21,10 +21,10 @@
         var cx = (x >> level) & 1;
         var cy = (y >> level) & 1;
         var childIdx = cx + (2 * cy);
-        if (childIdx == 0) { name += 'q'; }
-        if (childIdx == 1) { name += 'r'; }
-        if (childIdx == 2) { name += 't'; }
-        if (childIdx == 3) { name += 's'; }
+        if (childIdx === 0) { name += 'q'; }
+        if (childIdx === 1) { name += 'r'; }
+        if (childIdx === 2) { name += 't'; }
+        if (childIdx === 3) { name += 's'; }
       }
       name = name + '.jpg';
       return name;
@@ -43,7 +43,9 @@
         var gridLevelDim = [Math.ceil(xDim / 256), Math.ceil(yDim / 256)];
         this.GridSize.splice(0, 0, gridLevelDim);
         this.Levels += 1;
-        if (gridLevelDim[0] == 1 && gridLevelDim[1] == 1) return;
+        if (gridLevelDim[0] === 1 && gridLevelDim[1] === 1) {
+          return;
+        }
         xDim = xDim / 2;
         yDim = yDim / 2;
       }
@@ -74,8 +76,7 @@
     this.minLevel = 0;
     this.maxLevel = 7;
     this.getTileUrl = function (level, x, y) {
-      return 'http://lemon:8081/api/v1/item/564e42fe3f24e538e9a20eb9/tiles/zxy/'
-                + level + '/' + x + '/' + y;
+      return 'http://lemon:8081/api/v1/item/564e42fe3f24e538e9a20eb9/tiles/zxy/' + level + '/' + x + '/' + y;
     };
   };
 
@@ -91,7 +92,7 @@
       while (true) {
         var gridLevelDim = [Math.ceil(xDim / 256), Math.ceil(yDim / 256)];
         this.Levels += 1;
-        if (gridLevelDim[0] == 1 && gridLevelDim[1] == 1) return;
+        if (gridLevelDim[0] === 1 && gridLevelDim[1] === 1) return;
         xDim = xDim / 2;
         yDim = yDim / 2;
       }
@@ -159,7 +160,7 @@
   SA.FindCache = function (image) {
     // Look through existing caches and reuse one if possible
     for (var i = 0; i < SA.Caches.length; ++i) {
-      if (SA.Caches[i].Image._id == image._id) {
+      if (SA.Caches[i].Image._id === image._id) {
         return SA.Caches[i];
       }
     }
@@ -168,7 +169,7 @@
     // Special case to link to IIIF? Harvard art..
     // http://ids.lib.harvard.edu/ids/view/Converter?id=834753&c=jpgnocap&s=1&r=0&x=0&y=0&w=600&h=600
 
-    if (image._id == '556e0ad63ed65909dbc2e383') {
+    if (image._id === '556e0ad63ed65909dbc2e383') {
       var tileSource = new SA.IIIFSource();
       tileSource.Prefix = 'http://ids.lib.harvard.edu/ids/view/Converter?id=47174896';
         // "width":2087,"height":2550,"scale_factors":[1,2,4,8,16,32],
@@ -181,7 +182,7 @@
       return cache;
     }
 
-    if (image._id == '556c89a83ed65909dbc2e317') {
+    if (image._id === '556c89a83ed65909dbc2e317') {
       var tileSource = new SA.IIIFSource();
       tileSource.Prefix = 'http://ids.lib.harvard.edu/ids/view/Converter?id=834753&c=jpgnocap';
       tileSource.setDimensions(3890, 5787);
@@ -194,7 +195,7 @@
     }
 
     // Special case to link to gigamacro.
-    if (image._id == '555a1af93ed65909dbc2e19a') {
+    if (image._id === '555a1af93ed65909dbc2e19a') {
       var tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/AMNH/unit_box_test2_05-01-2015/zoomify/';
       tileSource.setDimensions(14316, 8459);
@@ -205,7 +206,7 @@
       cache.TileSource = tileSource;
       return cache;
     }
-    if (image._id == '555a5e163ed65909dbc2e19d') {
+    if (image._id === '555a5e163ed65909dbc2e19d') {
       var tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/cmnh/redbug_bottom/zoomify/';
       tileSource.setDimensions(64893, 40749);
@@ -216,7 +217,7 @@
       cache.TileSource = tileSource;
       return cache;
     }
-    if (image._id == '555b66483ed65909dbc2e1a0') {
+    if (image._id === '555b66483ed65909dbc2e1a0') {
       var tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/cmnh/redbug_top/zoomify/';
       tileSource.setDimensions(64893, 40749);
@@ -227,7 +228,7 @@
       cache.TileSource = tileSource;
       return cache;
     }
-    if (image._id == '555b664d3ed65909dbc2e1a3') {
+    if (image._id === '555b664d3ed65909dbc2e1a3') {
       var tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/AMNH/drawer_unit_box_test_05-01-2015_08-52-29_0000/zoomify/';
       tileSource.setDimensions(11893, 7322);
@@ -238,7 +239,7 @@
       cache.TileSource = tileSource;
       return cache;
     }
-    if (image._id == '555b66523ed65909dbc2e1a6') {
+    if (image._id === '555b66523ed65909dbc2e1a6') {
       var tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/AMNH/full_drawer_test_05-01-2015_09-04-17_0000/zoomify/';
       tileSource.setDimensions(44245, 34013);
@@ -249,7 +250,7 @@
       cache.TileSource = tileSource;
       return cache;
     }
-    if (image._id == '555c93973ed65909dbc2e1b5') {
+    if (image._id === '555c93973ed65909dbc2e1b5') {
       var tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/gigamacro/impasto_polarized/zoomify/';
       tileSource.setDimensions(76551, 57364);
@@ -260,7 +261,7 @@
       cache.TileSource = tileSource;
       return cache;
     }
-    if (image._id == '555c93913ed65909dbc2e1b2') {
+    if (image._id === '555c93913ed65909dbc2e1b2') {
       var tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/gigamacro/restoration_polaraized/zoomify/';
       tileSource.setDimensions(55884, 55750);
@@ -272,7 +273,7 @@
       return cache;
     }
 
-    if (image._id == '555f46503ed65909dbc2e1b8') {
+    if (image._id === '555f46503ed65909dbc2e1b8') {
       var tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/gigamacro/eucalyptus_10-31-2010/zoomify/';
       tileSource.setDimensions(38392, 45242);
@@ -283,7 +284,7 @@
       cache.TileSource = tileSource;
       return cache;
     }
-    if (image._id == '555f46553ed65909dbc2e1bb') {
+    if (image._id === '555f46553ed65909dbc2e1bb') {
       var tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/Bunton/leaf_fossil_04-30-2015/zoomify/';
       tileSource.setDimensions(22590, 10793);
@@ -294,7 +295,7 @@
       cache.TileSource = tileSource;
       return cache;
     }
-    if (image._id == '555f465a3ed65909dbc2e1be') {
+    if (image._id === '555f465a3ed65909dbc2e1be') {
       var tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/formsandsurfaces/maiden_hair_fern_v1_7-6-2012/zoomify/';
       tileSource.setDimensions(22092, 22025);
@@ -305,7 +306,7 @@
       cache.TileSource = tileSource;
       return cache;
     }
-    if (image._id == '555f46623ed65909dbc2e1c1') {
+    if (image._id === '555f46623ed65909dbc2e1c1') {
       var tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/gigamacro/nancy_plants_7-28-2014/zoomify/';
       tileSource.setDimensions(40687, 69306);
@@ -330,7 +331,8 @@
   };
 // No bounds checking.
   CacheLevel.prototype.SetTile = function (tile) {
-    return this.Tiles[tile.X + (tile.Y * this.GridDims[0])] = tile;
+    this.Tiles[tile.X + (tile.Y * this.GridDims[0])] = tile;
+    return tile;
   };
   CacheLevel.prototype.GetTile = function (x, y) {
     return this.Tiles[x + (y * this.GridDims[0])];
@@ -379,7 +381,7 @@
     this.Warp = null;
     this.RootSpacing = [1 << (image.levels - 1), 1 << (image.levels - 1), 10.0];
 
-    if (image.type && image.type == 'stack') {
+    if (image.type && image.type === 'stack') {
       this.NumberOfSections = image.dimensions[2];
       this.TileDimensions = [image.dimensions[0], image.dimensions[1]];
       var qTile;
@@ -445,7 +447,7 @@
 
   Cache.prototype.LoadRoots = function () {
     var qTile;
-    if (this.Image.dimensions == undefined) {
+    if (this.Image.dimensions === undefined) {
       return;
     }
     for (var slice = 1; slice <= this.Image.dimensions[2]; ++slice) {
@@ -680,32 +682,32 @@
 // Set parent to be minimum of children.
   Cache.prototype.UpdateBranchTimeStamp = function (tile) {
     var min = GetCurrentTime();
-    if (tile.Children[0] != null) {
+    if (tile.Children[0] !== null) {
       if (tile.Children[0].BranchTimeStamp < min) {
         min = tile.Children[0].BranchTimeStamp;
       }
     }
-    if (tile.Children[1] != null) {
+    if (tile.Children[1] !== null) {
       if (tile.Children[1].BranchTimeStamp < min) {
         min = tile.Children[1].BranchTimeStamp;
       }
     }
-    if (tile.Children[2] != null) {
+    if (tile.Children[2] !== null) {
       if (tile.Children[2].BranchTimeStamp < min) {
         min = tile.Children[2].BranchTimeStamp;
       }
     }
-    if (tile.Children[3] != null) {
+    if (tile.Children[3] !== null) {
       if (tile.Children[3].BranchTimeStamp < min) {
         min = tile.Children[3].BranchTimeStamp;
       }
     }
-    if (min == GetCurrentTime()) { // no children
+    if (min === GetCurrentTime()) { // no children
       min = tile.TimeStamp;
     }
-    if (min != tile.BranchTimeStamp) {
+    if (min !== tile.BranchTimeStamp) {
       tile.BranchTimeStamp = min;
-      if (tile.Parent != null) {
+      if (tile.Parent !== null) {
         this.UpdateBranchTimeStamp(tile.Parent);
       }
     }
@@ -736,8 +738,8 @@
         // This is to fix a bug. Root.BranchTime larger
         // than all children BranchTimeStamps.  When
         // long branch is added, node never gets updated.
-      if (parent.Children[0] == null && parent.Children[1] == null &&
-            parent.Children[2] == null && parent.Children[3] == null) {
+      if (parent.Children[0] === null && parent.Children[1] === null &&
+            parent.Children[2] === null && parent.Children[3] === null) {
         parent.BranchTimeStamp = SA.GetCurrentTime();
       }
       var cx = x & 1;
@@ -755,7 +757,7 @@
   Cache.prototype.PruneTiles = function () {
     for (var i = 0; i < this.Levels[0].Tiles.length; ++i) {
       var node = this.Levels[0].Tiles[i];
-      if (node != null) {
+      if (node !== null) {
         if (node.BranchTimeStamp < SA.PruneTimeTiles || node.BranchTimeStamp < SA.PruneTimeTextures) {
           this.RecursivePruneTiles(node);
         }
@@ -768,7 +770,7 @@
 
     for (var i = 0; i < 4; ++i) {
       var child = node.Children[i];
-      if (child != null) {
+      if (child !== null) {
         leaf = false;
         if (child.BranchTimeStamp < SA.PruneTimeTiles ||
           child.BranchTimeStamp < SA.PruneTimeTextures) {
@@ -776,23 +778,23 @@
         }
       }
     }
-    if (leaf && node.Parent != null) { // Roots have null parents.  Do not prune roots.
+    if (leaf && node.Parent !== null) { // Roots have null parents.  Do not prune roots.
       if (node.BranchTimeStamp < SA.PruneTimeTextures) {
         node.DeleteTexture();
       }
       if (node.BranchTimeStamp < SA.PruneTimeTiles) {
-        if (node.LoadState == 1) {
+        if (node.LoadState === 1) {
           SA.LoadQueueRemove(node);
         }
         var parent = node.Parent;
       // nodes will always have parents because we do not steal roots.
-        if (parent.Children[0] == node) {
+        if (parent.Children[0] === node) {
           parent.Children[0] = null;
-        } else if (parent.Children[1] == node) {
+        } else if (parent.Children[1] === node) {
           parent.Children[1] = null;
-        } else if (parent.Children[2] == node) {
+        } else if (parent.Children[2] === node) {
           parent.Children[2] = null;
-        } else if (parent.Children[3] == node) {
+        } else if (parent.Children[3] === node) {
           parent.Children[3] = null;
         }
         node.Parent = null;

@@ -55,26 +55,26 @@
   SAM.areaSequence = function (r, g, b) {
     var pl = new SAM.Polyline();
     var vr = SA.RootNote.ViewerRecords;
-    var area_sequence = [];
+    var areaSequence = [];
     for (var i = 0; i < vr.length; ++i) {
       var area = 0;
       var as = vr[i].Annotations;
       for (var j = 0; j < as.length; ++j) {
         var an = as[j];
-        if (an.type == 'polyline' &&
-                    Math.round(an.outlinecolor[0] * 255) == r &&
-                    Math.round(an.outlinecolor[1] * 255) == g &&
-                    Math.round(an.outlinecolor[2] * 255) == b) {
-          if (area != 0) { console.log('Found more than one in a section'); }
+        if (an.type === 'polyline' &&
+                    Math.round(an.outlinecolor[0] * 255) === r &&
+                    Math.round(an.outlinecolor[1] * 255) === g &&
+                    Math.round(an.outlinecolor[2] * 255) === b) {
+          if (area !== 0) { console.log('Found more than one in a section'); }
           pl.Points = an.points;
           area += pl.ComputeArea() * 0.25 * 0.25;
           area = Math.round(area * 100) / 100.0;
         }
       }
-      area_sequence.push(area);
+      areaSequence.push(area);
     }
-        // console.log(JSON.stringify(area_sequence));
-    return area_sequence;
+        // console.log(JSON.stringify(areaSequence));
+    return areaSequence;
   };
 
     // Debugging ... not called in normal operation.
@@ -109,8 +109,8 @@
 
     // Convert any color to an array [r,g,b] values 0->1
   SAM.ConvertColor = function (color) {
-    if (typeof (color) === 'string' && color[0] != '#') {
-      if (color.slice(0, 5) == 'rgba(') {
+    if (typeof (color) === 'string' && color[0] !== '#') {
+      if (color.slice(0, 5) === 'rgba(') {
         color = color.slice(5, -1).split(',');
         color[0] = color[0] / 255;
         color[1] = color[1] / 255;
@@ -119,30 +119,148 @@
       }
 
             // Deal with color names.
-      var colors = {'aliceblue': '#f0f8ff', 'antiquewhite': '#faebd7', 'aqua': '#00ffff', 'aquamarine': '#7fffd4', 'azure': '#f0ffff',
-        'beige': '#f5f5dc', 'bisque': '#ffe4c4', 'black': '#000000', 'blanchedalmond': '#ffebcd', 'blue': '#0000ff', 'blueviolet': '#8a2be2', 'brown': '#a52a2a', 'burlywood': '#deb887',
-        'cadetblue': '#5f9ea0', 'chartreuse': '#7fff00', 'chocolate': '#d2691e', 'coral': '#ff7f50', 'cornflowerblue': '#6495ed', 'cornsilk': '#fff8dc', 'crimson': '#dc143c', 'cyan': '#00ffff',
-        'darkblue': '#00008b', 'darkcyan': '#008b8b', 'darkgoldenrod': '#b8860b', 'darkgray': '#a9a9a9', 'darkgreen': '#006400', 'darkkhaki': '#bdb76b', 'darkmagenta': '#8b008b', 'darkolivegreen': '#556b2f',
-        'darkorange': '#ff8c00', 'darkorchid': '#9932cc', 'darkred': '#8b0000', 'darksalmon': '#e9967a', 'darkseagreen': '#8fbc8f', 'darkslateblue': '#483d8b', 'darkslategray': '#2f4f4f', 'darkturquoise': '#00ced1',
-        'darkviolet': '#9400d3', 'deeppink': '#ff1493', 'deepskyblue': '#00bfff', 'dimgray': '#696969', 'dodgerblue': '#1e90ff',
-        'firebrick': '#b22222', 'floralwhite': '#fffaf0', 'forestgreen': '#228b22', 'fuchsia': '#ff00ff',
-        'gainsboro': '#dcdcdc', 'ghostwhite': '#f8f8ff', 'gold': '#ffd700', 'goldenrod': '#daa520', 'gray': '#808080', 'green': '#008000', 'greenyellow': '#adff2f',
-        'honeydew': '#f0fff0', 'hotpink': '#ff69b4',
-        'indianred ': '#cd5c5c', 'indigo ': '#4b0082', 'ivory': '#fffff0', 'khaki': '#f0e68c',
-        'lavender': '#e6e6fa', 'lavenderblush': '#fff0f5', 'lawngreen': '#7cfc00', 'lemonchiffon': '#fffacd', 'lightblue': '#add8e6', 'lightcoral': '#f08080', 'lightcyan': '#e0ffff', 'lightgoldenrodyellow': '#fafad2',
-        'lightgrey': '#d3d3d3', 'lightgreen': '#90ee90', 'lightpink': '#ffb6c1', 'lightsalmon': '#ffa07a', 'lightseagreen': '#20b2aa', 'lightskyblue': '#87cefa', 'lightslategray': '#778899', 'lightsteelblue': '#b0c4de',
-        'lightyellow': '#ffffe0', 'lime': '#00ff00', 'limegreen': '#32cd32', 'linen': '#faf0e6',
-        'magenta': '#ff00ff', 'maroon': '#800000', 'mediumaquamarine': '#66cdaa', 'mediumblue': '#0000cd', 'mediumorchid': '#ba55d3', 'mediumpurple': '#9370d8', 'mediumseagreen': '#3cb371', 'mediumslateblue': '#7b68ee',
-        'mediumspringgreen': '#00fa9a', 'mediumturquoise': '#48d1cc', 'mediumvioletred': '#c71585', 'midnightblue': '#191970', 'mintcream': '#f5fffa', 'mistyrose': '#ffe4e1', 'moccasin': '#ffe4b5',
-        'navajowhite': '#ffdead', 'navy': '#000080',
-        'oldlace': '#fdf5e6', 'olive': '#808000', 'olivedrab': '#6b8e23', 'orange': '#ffa500', 'orangered': '#ff4500', 'orchid': '#da70d6',
-        'palegoldenrod': '#eee8aa', 'palegreen': '#98fb98', 'paleturquoise': '#afeeee', 'palevioletred': '#d87093', 'papayawhip': '#ffefd5', 'peachpuff': '#ffdab9', 'peru': '#cd853f', 'pink': '#ffc0cb', 'plum': '#dda0dd', 'powderblue': '#b0e0e6', 'purple': '#800080',
-        'red': '#ff0000', 'rosybrown': '#bc8f8f', 'royalblue': '#4169e1',
-        'saddlebrown': '#8b4513', 'salmon': '#fa8072', 'sandybrown': '#f4a460', 'seagreen': '#2e8b57', 'seashell': '#fff5ee', 'sienna': '#a0522d', 'silver': '#c0c0c0', 'skyblue': '#87ceeb', 'slateblue': '#6a5acd', 'slategray': '#708090', 'snow': '#fffafa', 'springgreen': '#00ff7f', 'steelblue': '#4682b4',
-        'tan': '#d2b48c', 'teal': '#008080', 'thistle': '#d8bfd8', 'tomato': '#ff6347', 'turquoise': '#40e0d0',
+      var colors = {
+        'aliceblue': '#f0f8ff',
+        'antiquewhite': '#faebd7',
+        'aqua': '#00ffff',
+        'aquamarine': '#7fffd4',
+        'azure': '#f0ffff',
+        'beige': '#f5f5dc',
+        'bisque': '#ffe4c4',
+        'black': '#000000',
+        'blanchedalmond': '#ffebcd',
+        'blue': '#0000ff',
+        'blueviolet': '#8a2be2',
+        'brown': '#a52a2a',
+        'burlywood': '#deb887',
+        'cadetblue': '#5f9ea0',
+        'chartreuse': '#7fff00',
+        'chocolate': '#d2691e',
+        'coral': '#ff7f50',
+        'cornflowerblue': '#6495ed',
+        'cornsilk': '#fff8dc',
+        'crimson': '#dc143c',
+        'cyan': '#00ffff',
+        'darkblue': '#00008b',
+        'darkcyan': '#008b8b',
+        'darkgoldenrod': '#b8860b',
+        'darkgray': '#a9a9a9',
+        'darkgreen': '#006400',
+        'darkkhaki': '#bdb76b',
+        'darkmagenta': '#8b008b',
+        'darkolivegreen': '#556b2f',
+        'darkorange': '#ff8c00',
+        'darkorchid': '#9932cc',
+        'darkred': '#8b0000',
+        'darksalmon': '#e9967a',
+        'darkseagreen': '#8fbc8f',
+        'darkslateblue': '#483d8b',
+        'darkslategray': '#2f4f4f',
+        'darkturquoise': '#00ced1',
+        'darkviolet': '#9400d3',
+        'deeppink': '#ff1493',
+        'deepskyblue': '#00bfff',
+        'dimgray': '#696969',
+        'dodgerblue': '#1e90ff',
+        'firebrick': '#b22222',
+        'floralwhite': '#fffaf0',
+        'forestgreen': '#228b22',
+        'fuchsia': '#ff00ff',
+        'gainsboro': '#dcdcdc',
+        'ghostwhite': '#f8f8ff',
+        'gold': '#ffd700',
+        'goldenrod': '#daa520',
+        'gray': '#808080',
+        'green': '#008000',
+        'greenyellow': '#adff2f',
+        'honeydew': '#f0fff0',
+        'hotpink': '#ff69b4',
+        'indianred ': '#cd5c5c',
+        'indigo ': '#4b0082',
+        'ivory': '#fffff0',
+        'khaki': '#f0e68c',
+        'lavender': '#e6e6fa',
+        'lavenderblush': '#fff0f5',
+        'lawngreen': '#7cfc00',
+        'lemonchiffon': '#fffacd',
+        'lightblue': '#add8e6',
+        'lightcoral': '#f08080',
+        'lightcyan': '#e0ffff',
+        'lightgoldenrodyellow': '#fafad2',
+        'lightgrey': '#d3d3d3',
+        'lightgreen': '#90ee90',
+        'lightpink': '#ffb6c1',
+        'lightsalmon': '#ffa07a',
+        'lightseagreen': '#20b2aa',
+        'lightskyblue': '#87cefa',
+        'lightslategray': '#778899',
+        'lightsteelblue': '#b0c4de',
+        'lightyellow': '#ffffe0',
+        'lime': '#00ff00',
+        'limegreen': '#32cd32',
+        'linen': '#faf0e6',
+        'magenta': '#ff00ff',
+        'maroon': '#800000',
+        'mediumaquamarine': '#66cdaa',
+        'mediumblue': '#0000cd',
+        'mediumorchid': '#ba55d3',
+        'mediumpurple': '#9370d8',
+        'mediumseagreen': '#3cb371',
+        'mediumslateblue': '#7b68ee',
+        'mediumspringgreen': '#00fa9a',
+        'mediumturquoise': '#48d1cc',
+        'mediumvioletred': '#c71585',
+        'midnightblue': '#191970',
+        'mintcream': '#f5fffa',
+        'mistyrose': '#ffe4e1',
+        'moccasin': '#ffe4b5',
+        'navajowhite': '#ffdead',
+        'navy': '#000080',
+        'oldlace': '#fdf5e6',
+        'olive': '#808000',
+        'olivedrab': '#6b8e23',
+        'orange': '#ffa500',
+        'orangered': '#ff4500',
+        'orchid': '#da70d6',
+        'palegoldenrod': '#eee8aa',
+        'palegreen': '#98fb98',
+        'paleturquoise': '#afeeee',
+        'palevioletred': '#d87093',
+        'papayawhip': '#ffefd5',
+        'peachpuff': '#ffdab9',
+        'peru': '#cd853f',
+        'pink': '#ffc0cb',
+        'plum': '#dda0dd',
+        'powderblue': '#b0e0e6',
+        'purple': '#800080',
+        'red': '#ff0000',
+        'rosybrown': '#bc8f8f',
+        'royalblue': '#4169e1',
+        'saddlebrown': '#8b4513',
+        'salmon': '#fa8072',
+        'sandybrown': '#f4a460',
+        'seagreen': '#2e8b57',
+        'seashell': '#fff5ee',
+        'sienna': '#a0522d',
+        'silver': '#c0c0c0',
+        'skyblue': '#87ceeb',
+        'slateblue': '#6a5acd',
+        'slategray': '#708090',
+        'snow': '#fffafa',
+        'springgreen': '#00ff7f',
+        'steelblue': '#4682b4',
+        'tan': '#d2b48c',
+        'teal': '#008080',
+        'thistle': '#d8bfd8',
+        'tomato': '#ff6347',
+        'turquoise': '#40e0d0',
         'violet': '#ee82ee',
-        'wheat': '#f5deb3', 'white': '#ffffff', 'whitesmoke': '#f5f5f5',
-        'yellow': '#ffff00', 'yellowgreen': '#9acd32'};
+        'wheat': '#f5deb3',
+        'white': '#ffffff',
+        'whitesmoke': '#f5f5f5',
+        'yellow': '#ffff00',
+        'yellowgreen': '#9acd32'
+      };
       if (typeof colors[color.toLowerCase()] !== 'undefined') {
         color = colors[color.toLowerCase()];
       } else {
@@ -151,7 +269,7 @@
     }
 
         // Deal with color in hex format i.e. #0000ff
-    if (typeof (color) === 'string' && color.length == 7 && color[0] == '#') {
+    if (typeof (color) === 'string' && color.length === 7 && color[0] === '#') {
       var floatColor = [];
       var idx = 1;
       for (var i = 0; i < 3; ++i) {
@@ -167,13 +285,13 @@
     // RGB [Float, Float, Float] to #RRGGBB string
   SAM.ConvertColorToHex = function (color) {
     if (typeof (color) === 'string') {
-      if (color.slice(0, 5) == 'rgba(') {
+      if (color.slice(0, 5) === 'rgba(') {
         return color;
       }
       color = SAM.ConvertColorNameToHex(color);
-      if (color.substring(0, 1) == '#') {
+      if (color.substring(0, 1) === '#') {
         return color;
-      } else if (color.substring(0, 3) == 'rgb') {
+      } else if (color.substring(0, 3) === 'rgb') {
         tmp = color.substring(4, color.length - 1).split(',');
         color = [parseInt(tmp[0]) / 255,
           parseInt(tmp[1]) / 255,
@@ -183,110 +301,200 @@
     var hexDigits = '0123456789abcdef';
     var str = '#';
     for (var i = 0; i < 3; ++i) {
-	          var tmp = color[i];
-	          for (var j = 0; j < 2; ++j) {
-	              tmp *= 16.0;
-	              var digit = Math.floor(tmp);
-	              if (digit < 0) { digit = 0; }
-	              if (digit > 15) { digit = 15; }
-	              tmp = tmp - digit;
-	              str += hexDigits.charAt(digit);
-          }
+      var tmp = color[i];
+      for (var j = 0; j < 2; ++j) {
+        tmp *= 16.0;
+        var digit = Math.floor(tmp);
+        if (digit < 0) { digit = 0; }
+        if (digit > 15) { digit = 15; }
+        tmp = tmp - digit;
+        str += hexDigits.charAt(digit);
+      }
     }
     return str;
   };
 
     // 0-f hex digit to int
   SAM.HexDigitToInt = function (hex) {
-    if (hex == '1') {
+    if (hex === '1') {
       return 1.0;
-    } else if (hex == '2') {
+    } else if (hex === '2') {
       return 2.0;
-    } else if (hex == '3') {
+    } else if (hex === '3') {
       return 3.0;
-    } else if (hex == '4') {
+    } else if (hex === '4') {
       return 4.0;
-    } else if (hex == '5') {
+    } else if (hex === '5') {
       return 5.0;
-    } else if (hex == '6') {
+    } else if (hex === '6') {
       return 6.0;
-    } else if (hex == '7') {
+    } else if (hex === '7') {
       return 7.0;
-    } else if (hex == '8') {
+    } else if (hex === '8') {
       return 8.0;
-    } else if (hex == '9') {
-        return 9.0;
-      } else if (hex == 'a' || hex == 'A') {
-          return 10.0;
-        } else if (hex == 'b' || hex == 'B') {
-          return 11.0;
-        } else if (hex == 'c' || hex == 'C') {
-          return 12.0;
-        } else if (hex == 'd' || hex == 'D') {
-          return 13.0;
-        } else if (hex == 'e' || hex == 'E') {
-          return 14.0;
-        } else if (hex == 'f' || hex == 'F') {
-          return 15.0;
-        }
+    } else if (hex === '9') {
+      return 9.0;
+    } else if (hex === 'a' || hex === 'A') {
+      return 10.0;
+    } else if (hex === 'b' || hex === 'B') {
+      return 11.0;
+    } else if (hex === 'c' || hex === 'C') {
+      return 12.0;
+    } else if (hex === 'd' || hex === 'D') {
+      return 13.0;
+    } else if (hex === 'e' || hex === 'E') {
+      return 14.0;
+    } else if (hex === 'f' || hex === 'F') {
+      return 15.0;
+    }
     return 0.0;
   };
 
   SAM.ConvertColorNameToHex = function (color) {
         // Deal with color names.
-    if (typeof (color) === 'string' && color[0] != '#') {
+    if (typeof (color) === 'string' && color[0] !== '#') {
       var colors = {
-        'aliceblue': '#f0f8ff', 'antiquewhite': '#faebd7', 'aqua': '#00ffff',
-        'aquamarine': '#7fffd4', 'azure': '#f0ffff', 'beige': '#f5f5dc',
-        'bisque': '#ffe4c4', 'black': '#000000', 'blanchedalmond': '#ffebcd',
-        'blue': '#0000ff', 'blueviolet': '#8a2be2', 'brown': '#a52a2a',
-        'burlywood': '#deb887', 'cadetblue': '#5f9ea0', 'chartreuse': '#7fff00',
-        'chocolate': '#d2691e', 'coral': '#ff7f50', 'cornflowerblue': '#6495ed',
-        'cornsilk': '#fff8dc', 'crimson': '#dc143c', 'cyan': '#00ffff',
-        'darkblue': '#00008b', 'darkcyan': '#008b8b', 'darkgoldenrod': '#b8860b',
-        'darkgray': '#a9a9a9', 'darkgreen': '#006400', 'darkkhaki': '#bdb76b',
-        'darkmagenta': '#8b008b', 'darkolivegreen': '#556b2f',
-        'darkorange': '#ff8c00', 'darkorchid': '#9932cc', 'darkred': '#8b0000',
-        'darksalmon': '#e9967a', 'darkseagreen': '#8fbc8f',
-        'darkslateblue': '#483d8b', 'darkslategray': '#2f4f4f',
-        'darkturquoise': '#00ced1', 'darkviolet': '#9400d3',
-        'deeppink': '#ff1493', 'deepskyblue': '#00bfff', 'dimgray': '#696969',
-        'dodgerblue': '#1e90ff', 'firebrick': '#b22222', 'floralwhite': '#fffaf0',
-        'forestgreen': '#228b22', 'fuchsia': '#ff00ff', 'gainsboro': '#dcdcdc',
-        'ghostwhite': '#f8f8ff', 'gold': '#ffd700', 'goldenrod': '#daa520',
-        'gray': '#808080', 'green': '#008000', 'greenyellow': '#adff2f',
-        'honeydew': '#f0fff0', 'hotpink': '#ff69b4', 'indianred': '#cd5c5c',
-        'indigo ': '#4b0082', 'ivory': '#fffff0', 'khaki': '#f0e68c',
-        'lavender': '#e6e6fa', 'lavenderblush': '#fff0f5', 'lawngreen': '#7cfc00',
-        'lemonchiffon': '#fffacd', 'lightblue': '#add8e6', 'lightcoral': '#f08080',
-        'lightcyan': '#e0ffff', 'lightgoldenrodyellow': '#fafad2',
-        'lightgrey': '#d3d3d3', 'lightgreen': '#90ee90', 'lightpink': '#ffb6c1',
-        'lightsalmon': '#ffa07a', 'lightseagreen': '#20b2aa',
-        'lightskyblue': '#87cefa', 'lightslategray': '#778899',
-        'lightsteelblue': '#b0c4de', 'lightyellow': '#ffffe0', 'lime': '#00ff00',
-        'limegreen': '#32cd32', 'linen': '#faf0e6', 'magenta': '#ff00ff',
-        'maroon': '#800000', 'mediumaquamarine': '#66cdaa', 'mediumblue': '#0000cd',
-        'mediumorchid': '#ba55d3', 'mediumpurple': '#9370d8',
-        'mediumseagreen': '#3cb371', 'mediumslateblue': '#7b68ee',
-        'mediumspringgreen': '#00fa9a', 'mediumturquoise': '#48d1cc',
-        'mediumvioletred': '#c71585', 'midnightblue': '#191970',
-        'mintcream': '#f5fffa', 'mistyrose': '#ffe4e1', 'moccasin': '#ffe4b5',
-        'navajowhite': '#ffdead', 'navy': '#000080', 'oldlace': '#fdf5e6',
-        'olive': '#808000', 'olivedrab': '#6b8e23', 'orange': '#ffa500',
-        'orangered': '#ff4500', 'orchid': '#da70d6', 'palegoldenrod': '#eee8aa',
-        'palegreen': '#98fb98', 'paleturquoise': '#afeeee',
-        'palevioletred': '#d87093', 'papayawhip': '#ffefd5', 'peachpuff': '#ffdab9',
-        'peru': '#cd853f', 'pink': '#ffc0cb', 'plum': '#dda0dd',
-        'powderblue': '#b0e0e6', 'purple': '#800080', 'red': '#ff0000',
-        'rosybrown': '#bc8f8f', 'royalblue': '#4169e1', 'saddlebrown': '#8b4513',
-        'salmon': '#fa8072', 'sandybrown': '#f4a460', 'seagreen': '#2e8b57',
-        'seashell': '#fff5ee', 'sienna': '#a0522d', 'silver': '#c0c0c0',
-        'skyblue': '#87ceeb', 'slateblue': '#6a5acd', 'slategray': '#708090',
-        'snow': '#fffafa', 'springgreen': '#00ff7f', 'steelblue': '#4682b4',
-        'tan': '#d2b48c', 'teal': '#008080', 'thistle': '#d8bfd8', 'tomato': '#ff6347',
-        'turquoise': '#40e0d0', 'violet': '#ee82ee', 'wheat': '#f5deb3',
-        'white': '#ffffff', 'whitesmoke': '#f5f5f5',
-        'yellow': '#ffff00', 'yellowgreen': '#9acd32'};
+        'aliceblue': '#f0f8ff',
+        'antiquewhite': '#faebd7',
+        'aqua': '#00ffff',
+        'aquamarine': '#7fffd4',
+        'azure': '#f0ffff',
+        'beige': '#f5f5dc',
+        'bisque': '#ffe4c4',
+        'black': '#000000',
+        'blanchedalmond': '#ffebcd',
+        'blue': '#0000ff',
+        'blueviolet': '#8a2be2',
+        'brown': '#a52a2a',
+        'burlywood': '#deb887',
+        'cadetblue': '#5f9ea0',
+        'chartreuse': '#7fff00',
+        'chocolate': '#d2691e',
+        'coral': '#ff7f50',
+        'cornflowerblue': '#6495ed',
+        'cornsilk': '#fff8dc',
+        'crimson': '#dc143c',
+        'cyan': '#00ffff',
+        'darkblue': '#00008b',
+        'darkcyan': '#008b8b',
+        'darkgoldenrod': '#b8860b',
+        'darkgray': '#a9a9a9',
+        'darkgreen': '#006400',
+        'darkkhaki': '#bdb76b',
+        'darkmagenta': '#8b008b',
+        'darkolivegreen': '#556b2f',
+        'darkorange': '#ff8c00',
+        'darkorchid': '#9932cc',
+        'darkred': '#8b0000',
+        'darksalmon': '#e9967a',
+        'darkseagreen': '#8fbc8f',
+        'darkslateblue': '#483d8b',
+        'darkslategray': '#2f4f4f',
+        'darkturquoise': '#00ced1',
+        'darkviolet': '#9400d3',
+        'deeppink': '#ff1493',
+        'deepskyblue': '#00bfff',
+        'dimgray': '#696969',
+        'dodgerblue': '#1e90ff',
+        'firebrick': '#b22222',
+        'floralwhite': '#fffaf0',
+        'forestgreen': '#228b22',
+        'fuchsia': '#ff00ff',
+        'gainsboro': '#dcdcdc',
+        'ghostwhite': '#f8f8ff',
+        'gold': '#ffd700',
+        'goldenrod': '#daa520',
+        'gray': '#808080',
+        'green': '#008000',
+        'greenyellow': '#adff2f',
+        'honeydew': '#f0fff0',
+        'hotpink': '#ff69b4',
+        'indianred': '#cd5c5c',
+        'indigo ': '#4b0082',
+        'ivory': '#fffff0',
+        'khaki': '#f0e68c',
+        'lavender': '#e6e6fa',
+        'lavenderblush': '#fff0f5',
+        'lawngreen': '#7cfc00',
+        'lemonchiffon': '#fffacd',
+        'lightblue': '#add8e6',
+        'lightcoral': '#f08080',
+        'lightcyan': '#e0ffff',
+        'lightgoldenrodyellow': '#fafad2',
+        'lightgrey': '#d3d3d3',
+        'lightgreen': '#90ee90',
+        'lightpink': '#ffb6c1',
+        'lightsalmon': '#ffa07a',
+        'lightseagreen': '#20b2aa',
+        'lightskyblue': '#87cefa',
+        'lightslategray': '#778899',
+        'lightsteelblue': '#b0c4de',
+        'lightyellow': '#ffffe0',
+        'lime': '#00ff00',
+        'limegreen': '#32cd32',
+        'linen': '#faf0e6',
+        'magenta': '#ff00ff',
+        'maroon': '#800000',
+        'mediumaquamarine': '#66cdaa',
+        'mediumblue': '#0000cd',
+        'mediumorchid': '#ba55d3',
+        'mediumpurple': '#9370d8',
+        'mediumseagreen': '#3cb371',
+        'mediumslateblue': '#7b68ee',
+        'mediumspringgreen': '#00fa9a',
+        'mediumturquoise': '#48d1cc',
+        'mediumvioletred': '#c71585',
+        'midnightblue': '#191970',
+        'mintcream': '#f5fffa',
+        'mistyrose': '#ffe4e1',
+        'moccasin': '#ffe4b5',
+        'navajowhite': '#ffdead',
+        'navy': '#000080',
+        'oldlace': '#fdf5e6',
+        'olive': '#808000',
+        'olivedrab': '#6b8e23',
+        'orange': '#ffa500',
+        'orangered': '#ff4500',
+        'orchid': '#da70d6',
+        'palegoldenrod': '#eee8aa',
+        'palegreen': '#98fb98',
+        'paleturquoise': '#afeeee',
+        'palevioletred': '#d87093',
+        'papayawhip': '#ffefd5',
+        'peachpuff': '#ffdab9',
+        'peru': '#cd853f',
+        'pink': '#ffc0cb',
+        'plum': '#dda0dd',
+        'powderblue': '#b0e0e6',
+        'purple': '#800080',
+        'red': '#ff0000',
+        'rosybrown': '#bc8f8f',
+        'royalblue': '#4169e1',
+        'saddlebrown': '#8b4513',
+        'salmon': '#fa8072',
+        'sandybrown': '#f4a460',
+        'seagreen': '#2e8b57',
+        'seashell': '#fff5ee',
+        'sienna': '#a0522d',
+        'silver': '#c0c0c0',
+        'skyblue': '#87ceeb',
+        'slateblue': '#6a5acd',
+        'slategray': '#708090',
+        'snow': '#fffafa',
+        'springgreen': '#00ff7f',
+        'steelblue': '#4682b4',
+        'tan': '#d2b48c',
+        'teal': '#008080',
+        'thistle': '#d8bfd8',
+        'tomato': '#ff6347',
+        'turquoise': '#40e0d0',
+        'violet': '#ee82ee',
+        'wheat': '#f5deb3',
+        'white': '#ffffff',
+        'whitesmoke': '#f5f5f5',
+        'yellow': '#ffff00',
+        'yellowgreen': '#9acd32'
+      };
       color = color.toLowerCase();
       if (typeof colors[color] !== 'undefined') {
         color = colors[color];
@@ -318,15 +526,15 @@
     lengthStr = lengthStr.trim(); // remove leading and trailing spaces.
     var len = lengthStr.length;
         // Convert to microns
-    if (lengthStr.substring(len - 2, len) == '\xB5m') {
+    if (lengthStr.substring(len - 2, len) === '\xB5m') {
       length = parseFloat(lengthStr.substring(0, len - 2)) / 1e6;
-    } else if (lengthStr.substring(len - 2, len) == 'mm') {
+    } else if (lengthStr.substring(len - 2, len) === 'mm') {
       length = parseFloat(lengthStr.substring(0, len - 2)) / 1e3;
-    } else if (lengthStr.substring(len - 2, len) == 'cm') {
+    } else if (lengthStr.substring(len - 2, len) === 'cm') {
       length = parseFloat(lengthStr.substring(0, len - 2)) / 1e2;
-    } else if (lengthStr.substring(len - 2, len) == ' m') {
+    } else if (lengthStr.substring(len - 2, len) === ' m') {
       length = parseFloat(lengthStr.substring(0, len - 2));
-    } else if (lengthStr.substring(len - 2, len) == 'km') {
+    } else if (lengthStr.substring(len - 2, len) === 'km') {
       length = parseFloat(lengthStr.substring(0, len - 2)) * 1e3;
     }
 
@@ -335,37 +543,43 @@
 
     // ConvertToMeters.
   window.SAM.ConvertToMeters = function (distObj) {
-    if (!distObj.units || distObj.units == 'Units') {
+    if (!distObj.units || distObj.units === 'Units') {
       return distObj.value;
     }
 
-    if (distObj.units.toLowerCase() == 'nm') {
+    if (distObj.units.toLowerCase() === 'nm') {
       distObj.units = 'm';
-      return distObj.value *= 1e-9;
+      distObj.value *= 1e-9;
+      return distObj.value;
     }
-    if (distObj.units.toLowerCase() == '\xB5m') {
+    if (distObj.units.toLowerCase() === '\xB5m') {
       distObj.units = 'm';
-      return distObj.value *= 1e-6;
+      distObj.value *= 1e-6;
+      return distObj.value;
     }
-    if (distObj.units.toLowerCase() == 'mm') {
+    if (distObj.units.toLowerCase() === 'mm') {
       distObj.units = 'm';
-      return distObj.value *= 1e-3;
+      distObj.value *= 1e-3;
+      return distObj.value;
     }
-    if (distObj.units.toLowerCase() == 'cm') {
+    if (distObj.units.toLowerCase() === 'cm') {
       distObj.units = 'm';
-      return distObj.value *= 1e-2;
+      distObj.value *= 1e-2;
+      return distObj.value;
     }
-    if (distObj.units.toLowerCase() == 'dm') {
+    if (distObj.units.toLowerCase() === 'dm') {
       distObj.units = 'm';
-      return distObj.value *= 1e-1;
+      distObj.value *= 1e-1;
+      return distObj.value;
     }
-    if (distObj.units.toLowerCase() == 'm') {
+    if (distObj.units.toLowerCase() === 'm') {
       distObj.units = 'm';
       return distObj.value;
     }
-    if (distObj.units.toLowerCase() == 'km') {
+    if (distObj.units.toLowerCase() === 'km') {
       distObj.units = 'm';
-      return distObj.value *= 1e3;
+      distObj.value *= 1e3;
+      return distObj.value;
     }
     console.log('Unknown units: ' + units);
     return distObj.value;
@@ -451,25 +665,25 @@
     var can = this.LayerDiv;
     can.on(
             'mousedown.viewer',
-			      function (event) {
-        return self.HandleMouseDown(event);
-      });
+            function (event) {
+              return self.HandleMouseDown(event);
+            });
     can.on(
             'mousemove.viewer',
-			      function (event) {
+            function (event) {
                 // So key events go the the right viewer.
-        this.focus();
+              this.focus();
                 // Firefox does not set which for mouse move events.
-        SA.FirefoxWhich(event);
-        return self.HandleMouseMove(event);
-      });
+              SA.FirefoxWhich(event);
+              return self.HandleMouseMove(event);
+            });
         // We need to detect the mouse up even if it happens outside the canvas,
     $(document.body).on(
             'mouseup.viewer',
-			      function (event) {
-        self.HandleMouseUp(event);
-        return true;
-      });
+            function (event) {
+              self.HandleMouseUp(event);
+              return true;
+            });
     can.on(
             'wheel.viewer',
             function (event) {
@@ -499,9 +713,9 @@
     this.LayerDiv.attr('tabindex', '1');
     can.on(
             'keydown.viewer',
-			      function (event) {
-        return self.HandleKeyDown(event);
-      });
+            function (event) {
+              return self.HandleKeyDown(event);
+            });
   }
 
     // Try to remove all global references to this viewer.
@@ -652,7 +866,7 @@
         // TODO: Get rid of this hack.
         // This is the messy way of detecting widgets that did not load
         // properly.
-    if (widget.Type == 'sections' && widget.IsEmpty()) {
+    if (widget.Type === 'sections' && widget.IsEmpty()) {
       return undefined;
     }
 
@@ -668,7 +882,7 @@
   AnnotationLayer.prototype.ActivateWidget = function (widget) {
         // not getting key events for copy.
     this.LayerDiv.focus();
-    if (this.ActiveWidget == widget) {
+    if (this.ActiveWidget === widget) {
       return;
     }
         // Make sure only one popup is visible at a time.
@@ -682,7 +896,7 @@
     widget.SetActive(true);
   };
   AnnotationLayer.prototype.DeactivateWidget = function (widget) {
-    if (this.ActiveWidget != widget || widget == null) {
+    if (this.ActiveWidget !== widget || widget === null) {
             // Do nothing if the widget is not active.
       return;
     }
@@ -792,13 +1006,13 @@
         // Put a throttle on events
     if (!this.HandleTouch(e, false)) { return; }
 
-    if (this.Touches.length == 1) {
+    if (this.Touches.length === 1) {
       return this.HandleTouchPan(this);
     }
-    if (this.Touches.length == 2) {
+    if (this.Touches.length === 2) {
       return this.HandleTouchPinch(this);
     }
-        // if (this.Touches.length == 3) {
+        // if (this.Touches.length === 3) {
         //    this.HandleTouchRotate(this);
         //    return
         // }
@@ -917,7 +1131,7 @@
     }
 
     this.SetMousePositionFromEvent(event);
-    if (event.which != 0 && this.MouseClick) {
+    if (event.which !== 0 && this.MouseClick) {
       if (Math.abs(this.MouseDownX - this.MouseX) > 5) {
         this.MouseClick = false;
       }
@@ -934,7 +1148,7 @@
 
         // The event position is relative to the target which can be a tab on
         // top of the canvas.  Just skip these events.
-    if ($(event.target).width() != $(event.currentTarget).width()) {
+    if ($(event.target).width() !== $(event.currentTarget).width()) {
       return true;
     }
 
@@ -942,9 +1156,9 @@
 
         // Firefox does not set "which" for move events.
     event.which = event.buttons;
-    if (event.which == 2) {
+    if (event.which === 2) {
       event.which = 3;
-    } else if (event.which == 3) {
+    } else if (event.which === 3) {
       event.which = 2;
     }
 
@@ -1037,12 +1251,12 @@
   };
 
   AnnotationLayer.prototype.RemoveWidget = function (widget) {
-    if (widget.Layer == null) {
+    if (widget.Layer === null) {
       return;
     }
     widget.Layer = null;
     var idx = this.WidgetList.indexOf(widget);
-    if (idx != -1) {
+    if (idx !== -1) {
       this.WidgetList.splice(idx, 1);
     }
     if (SAM.NotesWidget) {

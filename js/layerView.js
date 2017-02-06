@@ -31,62 +31,75 @@
     var self = this;
 
         // The wrapper div that controls a single layer.
-    var layer_control = $('<div>')
+    var layerControl = $('<div>')
             .appendTo(parent)
-            .css({ 'border': '1px solid #CCC', 'width': '100%',
-              'height': '65px' });
+            .css({
+              'border': '1px solid #CCC',
+              'width': '100%',
+              'height': '65px'
+            });
 
         // the sub-div that holds the direct toggle and the label.
-    var toggle_wrapper = $('<div>')
-            .appendTo(layer_control)
-            .css({ 'border': '1px solid #CCC', 'width': '20%',
-              'height': '100%', 'float': 'left' });
+    var toggleWrapper = $('<div>')
+            .appendTo(layerControl)
+            .css({
+              'border': '1px solid #CCC',
+              'width': '20%',
+              'height': '100%',
+              'float': 'left'
+            });
 
     this.CheckBox = $('<input type="checkbox">')
-            .appendTo(toggle_wrapper)
+            .appendTo(toggleWrapper)
             .on('change',
                 function () {
                   self.CheckCallback();
                 })
             .prop('checked', true);
 
-    var layer_label = $('<div>')
-            .appendTo(toggle_wrapper)
+    var layerLabel = $('<div>')
+            .appendTo(toggleWrapper)
             .html(label);
 
         // Wrapper for the confidence slider.
-    var conf_wrapper = $('<div>')
-            .appendTo(layer_control)
-            .css({ 'border': '1px solid #CCC', 'width': '60%',
-              'height': '100%', 'float': 'left' });
+    var confWrapper = $('<div>')
+            .appendTo(layerControl)
+            .css({
+              'border': '1px solid #CCC',
+              'width': '60%',
+              'height': '100%',
+              'float': 'left'
+            });
 
     this.Slider = $('<input type="range" min="0" max="100">')
-            .appendTo(conf_wrapper)
+            .appendTo(confWrapper)
             .on('input',
                 function () {
                   self.SliderCallback();
                 });
         // this.Slider[0].min = 75;
 
-    var min_label = $('<div>')
-            .appendTo(conf_wrapper)
+    var minLabel = $('<div>')
+            .appendTo(confWrapper)
             .html('0%')
             .css({ 'float': 'left' });
 
-    var max_label = $('<div>')
-            .appendTo(conf_wrapper)
+    var maxLabel = $('<div>')
+            .appendTo(confWrapper)
             .html('100%')
             .css({ 'float': 'right' });
 
-    var color_wrapper = $('<div>')
-            .appendTo(layer_control)
-            .css({ 'border': '1px solid #CCC',
+    var colorWrapper = $('<div>')
+            .appendTo(layerControl)
+            .css({
+              'border': '1px solid #CCC',
               'width': '20%',
               'padding': '5px',
               'height': '100%',
-              'float': 'left' });
+              'float': 'left'
+            });
     this.ColorInput = $('<input type="color">')
-            .appendTo(color_wrapper)
+            .appendTo(colorWrapper)
             .val(SAM.ConvertColorToHex(this.Color))
             .change(function () {
               self.ColorCallback();
@@ -118,10 +131,10 @@
     var checked = this.CheckBox.prop('checked');
     layer.SetVisibility(checked);
     if (checked) {
-      var vis_value = parseInt(this.Slider.val()) / 100.0;
-      for (var w_index = 0; w_index < layer.WidgetList.length; w_index++) {
-        var widget = layer.WidgetList[w_index];
-        widget.SetThreshold(vis_value);
+      var visValue = parseInt(this.Slider.val()) / 100.0;
+      for (var wIndex = 0; wIndex < layer.WidgetList.length; wIndex++) {
+        var widget = layer.WidgetList[wIndex];
+        widget.SetThreshold(visValue);
         widget.Shape.SetOutlineColor(this.Color);
       }
     }

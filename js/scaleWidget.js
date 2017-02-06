@@ -105,7 +105,7 @@
         // Compute the number of screen pixels in a meter.
     var scale = Math.round(
             this.View.GetPixelsPerUnit() / this.View.GetMetersPerUnit());
-    if (this.PixelsPerMeter == scale) {
+    if (this.PixelsPerMeter === scale) {
       return;
     }
         // Save the scale so we know when to regenerate.
@@ -194,7 +194,7 @@
 
   ScaleWidget.prototype.HandleMouseDown = function (event) {
         /*
-        if (event.which != 1) {
+        if (event.which !== 1) {
             return true;
         }
         this.DragLast = this.Layer.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
@@ -214,11 +214,11 @@
     // Orientation is a pain,  we need a world to shape transformation.
   ScaleWidget.prototype.HandleMouseMove = function (event) {
         /*
-        if (event.which == 1) {
+        if (event.which === 1) {
             var world =
                 this.Layer.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
             var dx, dy;
-            if (this.State == DRAG) {
+            if (this.State === DRAG) {
                 dx = world[0] - this.DragLast[0];
                 dy = world[1] - this.DragLast[1];
                 this.DragLast = world;
@@ -242,7 +242,7 @@
                 // Change scale dimemsions
                 dx = dy = 0;
                 var changed = false;
-                if (this.State == DRAG_RIGHT) {
+                if (this.State === DRAG_RIGHT) {
                     dx = ix - this.Shape.Dimensions[0];
                     if (dx) {
                         this.Shape.Dimensions[0] = ix;
@@ -250,14 +250,14 @@
                         dx = 0.5 * dx * this.Shape.Width;
                         changed = true;
                     }
-                } else if (this.State == DRAG_LEFT) {
+                } else if (this.State === DRAG_LEFT) {
                     if (ix) {
                         this.Shape.Dimensions[0] -= ix;
                         // Compute the change in the center point origin.
                         dx = 0.5 * ix * this.Shape.Width;
                         changed = true;
                     }
-                } else if (this.State == DRAG_BOTTOM) {
+                } else if (this.State === DRAG_BOTTOM) {
                     dy = iy - this.Shape.Dimensions[1];
                     if (dy) {
                         this.Shape.Dimensions[1] = iy;
@@ -265,7 +265,7 @@
                         dy = 0.5 * dy * this.Shape.Height;
                         changed = true;
                     }
-                } else if (this.State == DRAG_TOP) {
+                } else if (this.State === DRAG_TOP) {
                     if (iy) {
                         this.Shape.Dimensions[1] -= iy;
                         // Compute the change in the center point origin.
@@ -296,7 +296,7 @@
         var x = event.offsetX;
         var y = event.offsetY;
 
-        if (this.State == ACTIVE) {
+        if (this.State === ACTIVE) {
             if(this.NormalizedActiveDistance < 0.5) {
                 var ratio = 1.05;
                 var direction = 1;
@@ -388,16 +388,16 @@
 
         if (Math.abs(x) < tolerance || Math.abs(y) < tolerance) {
             this.SetActive(true);
-            if (ix == 0) {
+            if (ix === 0) {
                 this.State = DRAG_LEFT;
                 thisLayer.AnnotationView.CanvasDiv.css({'cursor':'col-resize'});
-            } else if (ix == this.Shape.Dimensions[0]) {
+            } else if (ix === this.Shape.Dimensions[0]) {
                 this.State = DRAG_RIGHT;
                 this.Layer.AnnotationView.CanvasDiv.css({'cursor':'col-resize'});
-            } else if (iy == 0) {
+            } else if (iy === 0) {
                 this.State = DRAG_TOP;
                 this.Viewer.AnnotationView.CanvasDiv.css({'cursor':'row-resize'});
-            } else if (iy == this.Shape.Dimensions[1]) {
+            } else if (iy === this.Shape.Dimensions[1]) {
                 this.State = DRAG_BOTTOM;
                 this.Layer.MainView.CanvasDiv.css({'cursor':'row-resize'});
             } else {
@@ -413,7 +413,7 @@
 
     // Multiple active states. Active state is a bit confusing.
   ScaleWidget.prototype.GetActive = function () {
-    if (this.State == WAITING) {
+    if (this.State === WAITING) {
       return false;
     }
     return true;
@@ -434,7 +434,7 @@
     // Setting to active always puts state into "active".
     // It can move to other states and stay active.
   ScaleWidget.prototype.SetActive = function (flag) {
-    if (flag == this.GetActive()) {
+    if (flag === this.GetActive()) {
       return;
     }
 

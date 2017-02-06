@@ -83,7 +83,7 @@
     this.Heights.splice(index, 1);
     this.Labels.splice(index, 1);
     this.Confidences.splice(index, 1);
-    if (this.ActiveIndex == index) {
+    if (this.ActiveIndex === index) {
       this.ActiveIndex = -1;
     }
   };
@@ -100,7 +100,7 @@
         // Identity.
     view.Context2d.setTransform(1, 0, 0, 1, 0, 0);
 
-        // only supported case: this.PositionCoordinateSystem == Shape.SLIDE
+        // only supported case: this.PositionCoordinateSystem === Shape.SLIDE
     var theta = view.Camera.Roll;
     var matrix0 = Math.cos(theta);
     var matrix1 = Math.sin(theta);
@@ -151,7 +151,7 @@
         view.Context2d.lineTo((x - hw) * scale, (y - hh) * scale);
         view.Context2d.stroke();
 
-        if (i == this.ActiveIndex) {
+        if (i === this.ActiveIndex) {
                     // mark the rectangle
           view.Context2d.beginPath();
           view.Context2d.strokeStyle = '#00ffff';
@@ -308,7 +308,7 @@
         if (index < 0 || index >= this.Shape.Widths.length) {
             return true;
         }
-        if (event.which != 1) {
+        if (event.which !== 1) {
             return true;
         }
         // find the world location of the event.

@@ -17,18 +17,18 @@
     // Returns 1 if part of the section is in the bounds.
     // Returns 2 if all of the section is in the bounds.
   ShapeGroup.prototype.ContainedInBounds = function (bds) {
-    if (this.Shapes.length == 0) { return 0; }
+    if (this.Shapes.length === 0) { return 0; }
     var retVal = this.Shapes[0].ContainedInBounds(bds);
     for (var i = 1; i < this.Shapes.length; ++i) {
-      if (retVal == 1) {
+      if (retVal === 1) {
                 // Both inside and outside. Nothing more to check.
         return retVal;
       }
       var shapeVal = this.Shapes[i].ContainedInBounds(bds);
-      if (retVal == 0 && shapeVal != 0) {
+      if (retVal === 0 && shapeVal !== 0) {
         retVal = 1;
       }
-      if (retVal == 2 && shapeVal != 2) {
+      if (retVal === 2 && shapeVal !== 2) {
         retVal = 1;
       }
     }
@@ -52,7 +52,7 @@
 
     // Find a world location of a popup point given a camera.
   ShapeGroup.prototype.FindPopupPoint = function (cam) {
-    if (this.Shapes.length == 0) { return; }
+    if (this.Shapes.length === 0) { return; }
     var roll = cam.Roll;
     var s = Math.sin(roll + (Math.PI * 0.25));
     var c = Math.cos(roll + (Math.PI * 0.25));
@@ -101,7 +101,7 @@
 
     // Just returns the first.
   ShapeGroup.prototype.GetLineWidth = function () {
-    if (this.Shapes.length != 0) {
+    if (this.Shapes.length !== 0) {
       return this.Shapes[0].GetLineWidth();
     }
     return 0;
@@ -115,7 +115,7 @@
 
     // Just returns the first.
   ShapeGroup.prototype.GetOutlineColor = function () {
-    if (this.Shapes.length != 0) {
+    if (this.Shapes.length !== 0) {
       return this.Shapes[0].OutlineColor;
     }
     return [0, 0, 0];
@@ -137,7 +137,7 @@
 
     // Just returns the first.
   ShapeGroup.prototype.GetOrigin = function () {
-    if (this.Shapes.length != 0) {
+    if (this.Shapes.length !== 0) {
       return this.Shapes[0].Origin;
     }
     return [0, 0, 0];

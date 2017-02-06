@@ -48,7 +48,7 @@
     // Setup the scalar function so inside is positive,
     var insideOut = false;
     s1 = GetDataValue(d, x1, y1, threshold, insideOut);
-    if (s1 == 0) {
+    if (s1 === 0) {
       alert('Seed point on threshold.');
       return;
     }
@@ -105,7 +105,7 @@
       }
         // Check for termination.
         // x0 annd basis has returned to its original position.
-      if (x0 == xSeed && y0 == ySeed && xr == 1) {
+      if (x0 === xSeed && y0 === ySeed && xr === 1) {
         return loop;
       }
     }
@@ -124,7 +124,7 @@
     var insideOut = false;
     var s1 = GetDataValue(d, xSeed, ySeed, threshold, insideOut);
     console.log('seed value : ' + (s1 + threshold));
-    if (s1 == 0) {
+    if (s1 === 0) {
       alert('Seed point on threshold.');
       return;
     }

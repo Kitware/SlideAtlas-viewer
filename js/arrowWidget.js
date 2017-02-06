@@ -20,7 +20,7 @@
 
     // We might get rid of the new flag by passing in a null layer.
   function ArrowWidget (layer, newFlag) {
-    if (layer == null) {
+    if (layer === null) {
       return null;
     }
     this.Layer = layer;
@@ -64,7 +64,7 @@
       return null;
     }
 
-    var obj = new Object();
+    var obj = {};
     obj.type = 'arrow';
     obj.origin = this.Shape.Origin;
     obj.fillcolor = this.Shape.FillColor;
@@ -90,13 +90,13 @@
     if (obj.fixedsize === undefined) {
       this.Shape.FixedSize = true;
     } else {
-      this.Shape.FixedSize = (obj.fixedsize == 'true');
+      this.Shape.FixedSize = (obj.fixedsize === 'true');
     }
 
     if (obj.fixedorientation === undefined) {
       this.Shape.FixedOrientation = true;
     } else {
-      this.Shape.FixedOrientation = (obj.fixedorientation == 'true');
+      this.Shape.FixedOrientation = (obj.fixedorientation === 'true');
     }
 
     this.Shape.UpdateBuffers(this.Layer.AnnotationView);
@@ -105,7 +105,7 @@
     // When we toggle fixed size, we have to convert the length of the arrow
     // between viewer and world.
   ArrowWidget.prototype.SetFixedSize = function (fixedSizeFlag) {
-    if (this.Shape.FixedSize == fixedSizeFlag) {
+    if (this.Shape.FixedSize === fixedSizeFlag) {
       return;
     }
     var pixelsPerUnit = this.Layer.GetPixelsPerUnit();
@@ -127,14 +127,14 @@
   };
 
   ArrowWidget.prototype.HandleMouseDown = function (event) {
-    if (event.which != 1) {
+    if (event.which !== 1) {
       return;
     }
-    if (this.State == ARROW_WIDGET_NEW) {
+    if (this.State === ARROW_WIDGET_NEW) {
       this.TipPosition = [this.Layer.MouseX, this.Layer.MouseY];
       this.State = ARROW_WIDGET_DRAG_TAIL;
     }
-    if (this.State == ARROW_WIDGET_ACTIVE) {
+    if (this.State === ARROW_WIDGET_ACTIVE) {
       if (this.ActiveTail) {
         this.TipPosition = this.Layer.ConvertPointWorldToViewer(this.Shape.Origin[0], this.Shape.Origin[1]);
         this.State = ARROW_WIDGET_DRAG_TAIL;
@@ -149,14 +149,14 @@
 
     // returns false when it is finished doing its work.
   ArrowWidget.prototype.HandleMouseUp = function (event) {
-    if (this.State == ARROW_WIDGET_ACTIVE && event.which == 3) {
+    if (this.State === ARROW_WIDGET_ACTIVE && event.which === 3) {
             // Right mouse was pressed.
             // Pop up the properties dialog.
             // Which one should we popup?
             // Add a ShowProperties method to the widget. (With the magic of javascript).
       this.State = ARROW_WIDGET_PROPERTIES_DIALOG;
       this.ShowPropertiesDialog();
-    } else if (this.State != ARROW_WIDGET_PROPERTIES_DIALOG) {
+    } else if (this.State !== ARROW_WIDGET_PROPERTIES_DIALOG) {
       this.SetActive(false);
     }
   };
@@ -165,18 +165,18 @@
     var x = this.Layer.MouseX;
     var y = this.Layer.MouseY;
 
-    if (this.Layer.MouseDown == false && this.State == ARROW_WIDGET_ACTIVE) {
+    if (this.Layer.MouseDown === false && this.State === ARROW_WIDGET_ACTIVE) {
       this.CheckActive(event);
       return;
     }
 
-    if (this.State == ARROW_WIDGET_NEW || this.State == ARROW_WIDGET_DRAG) {
+    if (this.State === ARROW_WIDGET_NEW || this.State === ARROW_WIDGET_DRAG) {
       var viewport = this.Layer.GetViewport();
       this.Shape.Origin = this.Layer.ConvertPointViewerToWorld(x + this.TipOffset[0], y + this.TipOffset[1]);
       eventuallyRender();
     }
 
-    if (this.State == ARROW_WIDGET_DRAG_TAIL) {
+    if (this.State === ARROW_WIDGET_DRAG_TAIL) {
       var dx = x - this.TipPosition[0];
       var dy = y - this.TipPosition[1];
       if (!this.Shape.FixedSize) {
@@ -190,7 +190,7 @@
       eventuallyRender();
     }
 
-    if (this.State == ARROW_WIDGET_WAITING) {
+    if (this.State === ARROW_WIDGET_WAITING) {
       this.CheckActive(event);
     }
   };
@@ -243,18 +243,18 @@
   };
 
     // We have three states this widget is active.
-    // First created and folloing the mouse (actually two, head or tail following). Color nbot active.
+    // First created and following the mouse (actually two, head or tail following). Color nbot active.
     // Active because mouse is over the arrow.  Color of arrow set to active.
     // Active because the properties dialog is up. (This is how dialog know which widget is being edited).
   ArrowWidget.prototype.GetActive = function () {
-    if (this.State == ARROW_WIDGET_WAITING) {
+    if (this.State === ARROW_WIDGET_WAITING) {
       return false;
     }
     return true;
   };
 
   ArrowWidget.prototype.SetActive = function (flag) {
-    if (flag == this.GetActive()) {
+    if (flag === this.GetActive()) {
       return;
     }
 
@@ -306,7 +306,7 @@
     var hexcolor = document.getElementById('arrowcolor').value;
         // var fixedSizeFlag = document.getElementById("ArrowFixedSize").checked;
     widget.Shape.SetFillColor(hexcolor);
-    if (widget != null) {
+    if (widget !== null) {
       widget.SetActive(false);
             // widget.SetFixedSize(fixedSizeFlag);
     }
@@ -315,14 +315,14 @@
 
   function ArrowPropertyDialogCancel () {
     var widget = ARROW_WIDGET_DIALOG_SELF;
-    if (widget != null) {
+    if (widget !== null) {
       widget.SetActive(false);
     }
   }
 
   function ArrowPropertyDialogDelete () {
     var widget = ARROW_WIDGET_DIALOG_SELF;
-    if (widget != null) {
+    if (widget !== null) {
       this.Layer.ActiveWidget = null;
             // We need to remove an item from a list.
             // shape list and widget list.

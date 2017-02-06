@@ -32,7 +32,7 @@
     mat4.identity(this.Matrix);
 
     if (view.gl) {
-      if (this.LineWidth == 0) {
+      if (this.LineWidth === 0) {
         for (var i = 0; i <= numEdges; ++i) {
           var theta = i * 2 * 3.14159265359 / numEdges;
           this.PointBuffer.push(this.Radius * Math.cos(theta));

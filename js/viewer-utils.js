@@ -256,7 +256,7 @@
         .prop('disabled', true)
         .val(1)
         // Consume all events except return
-        .keypress(function (event) { return event.keyCode != 13; });
+        .keypress(function (event) { return event.keyCode !== 13; });
     this.Dialog.BorderColorDiv = $('<div>')
         .appendTo(this.Dialog.BorderLine1)
         .css({'float': 'right',
@@ -294,7 +294,7 @@
           'width': '3em'})
         .val(5)
         // Consume all events except return
-        .keypress(function (event) { return event.keyCode != 13; });
+        .keypress(function (event) { return event.keyCode !== 13; });
 
     // Shadow
     this.Dialog.BorderLine3 = $('<div>')
@@ -329,7 +329,7 @@
           'width': '3em'})
         .val(10)
         // Consume all events except return
-        .keypress(function (event) { return event.keyCode != 13; });
+        .keypress(function (event) { return event.keyCode !== 13; });
     this.Dialog.ShadowBlurLabel = $('<div>')
         .appendTo(this.Dialog.BorderLine3)
         .css({'display': 'inline-block',
@@ -346,7 +346,7 @@
           'width': '3em'})
         .val(5)
         // Consume all events except return
-        .keypress(function (event) { return event.keyCode != 13; });
+        .keypress(function (event) { return event.keyCode !== 13; });
     this.Dialog.ShadowColorDiv = $('<div>')
         .appendTo(this.Dialog.BorderLine3)
         .css({'float': 'right',
@@ -388,7 +388,7 @@
       if (self.OpenAccordionPanel) {
         self.OpenAccordionPanel.hide(200);
       }
-      if (self.OpenAccordionPanel == panel) {
+      if (self.OpenAccordionPanel === panel) {
             // Just closing the open panel.
         self.OpenAccordionPanel = null;
         return;
@@ -429,7 +429,7 @@
   saElement.prototype.DialogInitialize = function () {
     // TODO: Does this work when 'border' is used?
     var str = this.Div[0].style.borderWidth;
-    if (str != '') {
+    if (str !== '') {
       this.Dialog.BorderCheck.prop('checked', true);
       this.Dialog.BorderWidth.prop('disabled', false);
       this.Dialog.BorderColor.spectrum('enable');
@@ -437,11 +437,11 @@
         // Current border is highlighted.  Use the saved color.
         // str = this.Div[0].style.borderColor;
       str = this.SavedBorder;
-      if (!str || str == '') {
+      if (!str || str === '') {
             // Called programatically
         str = this.Div[0].style.border;
       }
-      if (str != '') {
+      if (str !== '') {
         str = str.substr(str.indexOf('rgb'));
         this.Dialog.BorderColor.spectrum('set', str);
       }
@@ -449,7 +449,7 @@
 
     // Border Radius
     str = this.Div[0].style.borderRadius;
-    if (str != '') {
+    if (str !== '') {
       this.Dialog.BorderRadiusCheck.prop('checked', true);
       this.Dialog.BorderRadius.prop('disabled', false);
       this.Dialog.BorderRadius.val(parseInt(str));
@@ -457,7 +457,7 @@
 
     // Shadow
     str = this.Div[0].style.boxShadow;
-    if (str != '') {
+    if (str !== '') {
       this.Dialog.ShadowCheck.prop('checked', true);
       var idx = str.indexOf(')') + 1;
       var color = str.substr(str.indexOf('rgb'), idx);
@@ -544,7 +544,7 @@
     // It is important to set aspect ratio before EditOn is called.
     // AspectRatio is a boolean.
     if (args.aspectRatio !== undefined) {
-      if (args.apsectRatio == '') {
+      if (args.apsectRatio === '') {
             // Actively remove the aspect ratio.
         delete this.AspectRatio;
         this.Div.removeAttr('sa-aspect-ratio');
@@ -614,7 +614,7 @@
     // Just had to restart chrome. Delete key is oldschool anyway.
 
     // Manage the cursor for drag versus resize.
-    if (this.Position == 'absolute') {
+    if (this.Position === 'absolute') {
       this.Div.on(
             'mousemove.elementCursor',
             function (event) {
@@ -636,7 +636,7 @@
 
   saElement.prototype.HandleMouseDown = function (event) {
     if (!this.Interactive) { return true; }
-    if (event.which == 1) {
+    if (event.which === 1) {
         // Hack tp allow content editable to work with text editor.
         // This event does not let content editable receive events
         // if we return false.
@@ -653,7 +653,7 @@
               return self.HandleMouseUp(e);
             });
 
-      if (this.Editable && this.Position == 'absolute') {
+      if (this.Editable && this.Position === 'absolute') {
             // Setup dragging.
         this.DragLastX = event.screenX;
         this.DragLastY = event.screenY;
@@ -687,9 +687,9 @@
   saElement.prototype.HandleMouseMoveCursor = function (event) {
     if (!this.Interactive) { return true; }
     SA.FirefoxWhich(event);
-    if (event.which == 0) {
+    if (event.which === 0) {
         // Is it dangerous to modify the event object?
-      while (event.srcElement && event.srcElement != this.Div[0]) {
+      while (event.srcElement && event.srcElement !== this.Div[0]) {
         event.offsetX += event.srcElement.offsetLeft;
         event.offsetY += event.srcElement.offsetTop;
         event.srcElement = event.srcElement.parentElement;
@@ -726,19 +726,19 @@
         this.Div.css({'cursor': 'ns-resize'});
         this.MoveState = 3;
       } else if (y > yMax) {
-      this.Div.css({'cursor': 'ns-resize'});
-      this.MoveState = 4;
-    } else {
-      this.Div.css({'cursor': 'move'});
-      this.MoveState = 0;
-    }
+        this.Div.css({'cursor': 'ns-resize'});
+        this.MoveState = 4;
+      } else {
+        this.Div.css({'cursor': 'move'});
+        this.MoveState = 0;
+      }
     }
     return true;
   };
 
   saElement.prototype.HandleMouseMove = function (event) {
     SA.FirefoxWhich(event);
-    if (event.which == 1) {
+    if (event.which === 1) {
         // Wait for the click duration to start dragging.
       if (Date.now() - this.ClickStart < 200) {
         return true;
@@ -765,17 +765,17 @@
       if (this.AspectRatio && typeof (this.AspectRatio) !== 'number') {
         this.AspectRatio = width / height;
       }
-      if (this.MoveState == 0) {
+      if (this.MoveState === 0) {
         var left = pos.left + dx;
         var top = pos.top + dy;
         this.Div[0].style.top = top.toString() + 'px';
         this.Div[0].style.left = left.toString() + 'px';
         return false;
-      } else if (this.MoveState == 1) {
+      } else if (this.MoveState === 1) {
         var left = pos.left + dx;
         width = width - dx;
         this.Div[0].style.left = left.toString() + 'px';
-        if (sizing == 'border-box') {
+        if (sizing === 'border-box') {
           this.Div.width(width);
         } else {
           this.Div.outerWidth(width);
@@ -785,9 +785,9 @@
         }
         this.Div.trigger('resize');
         return false;
-      } else if (this.MoveState == 2) {
+      } else if (this.MoveState === 2) {
         width = width + dx;
-        if (sizing == 'border-box') {
+        if (sizing === 'border-box') {
           this.Div.width(width);
         } else {
           this.Div.outerWidth(width);
@@ -797,11 +797,11 @@
         }
         this.Div.trigger('resize');
         return false;
-      } else if (this.MoveState == 3) {
+      } else if (this.MoveState === 3) {
         var top = pos.top + dy;
         height = height - dy;
         this.Div[0].style.top = top.toString() + 'px';
-        if (sizing == 'border-box') {
+        if (sizing === 'border-box') {
           this.Div.height(height);
         } else {
           this.Div.outerHeight(height);
@@ -811,9 +811,9 @@
         }
         this.Div.trigger('resize');
         return false;
-      } else if (this.MoveState == 4) {
+      } else if (this.MoveState === 4) {
         height = height + dy;
-        if (sizing == 'border-box') {
+        if (sizing === 'border-box') {
           this.Div.height(height);
         } else {
           this.Div.outerHeight(height);
@@ -823,7 +823,7 @@
         }
         this.Div.trigger('resize');
         return false;
-      } else if (this.MoveState == 5) {
+      } else if (this.MoveState === 5) {
             // upper left corner resize
         var left = pos.left + dx;
         var top = pos.top + dy;
@@ -831,7 +831,7 @@
         height = height - dy;
         this.Div[0].style.top = top.toString() + 'px';
         this.Div[0].style.left = left.toString() + 'px';
-        if (sizing == 'border-box') {
+        if (sizing === 'border-box') {
           this.Div.width(width);
           this.Div.height(height);
         } else {
@@ -843,56 +843,56 @@
         }
         this.Div.trigger('resize');
         return false;
-      } else if (this.MoveState == 6) {
+      } else if (this.MoveState === 6) {
             // lower right corner resize
         width = width + dx;
         height = height + dy;
-        if (sizing == 'border-box') {
-        this.Div.width(width);
-        this.Div.height(height);
-      } else {
-        this.Div.outerWidth(width);
-        this.Div.outerHeight(height);
-      }
-        if (this.AspectRatio) {
-        this.Div.innerWidth(this.Div.innerHeight() * this.AspectRatio);
-      }
-        this.Div.trigger('resize');
-        return false;
-      } else if (this.MoveState == 7) {
-            // lower left corner resize
-      var left = pos.left + dx;
-      width = width - dx;
-      height = height + dy;
-      this.Div[0].style.left = left.toString() + 'px';
-      if (sizing == 'border-box') {
+        if (sizing === 'border-box') {
           this.Div.width(width);
           this.Div.height(height);
         } else {
           this.Div.outerWidth(width);
           this.Div.outerHeight(height);
         }
-      if (this.AspectRatio) {
+        if (this.AspectRatio) {
           this.Div.innerWidth(this.Div.innerHeight() * this.AspectRatio);
         }
-      this.Div.trigger('resize');
-      return false;
-    } else if (this.MoveState == 8) {
+        this.Div.trigger('resize');
+        return false;
+      } else if (this.MoveState === 7) {
+            // lower left corner resize
+        var left = pos.left + dx;
+        width = width - dx;
+        height = height + dy;
+        this.Div[0].style.left = left.toString() + 'px';
+        if (sizing === 'border-box') {
+          this.Div.width(width);
+          this.Div.height(height);
+        } else {
+          this.Div.outerWidth(width);
+          this.Div.outerHeight(height);
+        }
+        if (this.AspectRatio) {
+          this.Div.innerWidth(this.Div.innerHeight() * this.AspectRatio);
+        }
+        this.Div.trigger('resize');
+        return false;
+      } else if (this.MoveState === 8) {
             // upper right corner resize
         var top = pos.top + dy;
         width = width + dx;
         height = height - dy;
         this.Div[0].style.top = top.toString() + 'px';
-        if (sizing == 'border-box') {
-            this.Div.width(width);
-            this.Div.height(height);
-          } else {
-            this.Div.outerWidth(width);
-            this.Div.outerHeight(height);
-          }
+        if (sizing === 'border-box') {
+          this.Div.width(width);
+          this.Div.height(height);
+        } else {
+          this.Div.outerWidth(width);
+          this.Div.outerHeight(height);
+        }
         if (this.AspectRatio) {
-            this.Div.innerWidth(this.Div.innerHeight() * this.AspectRatio);
-          }
+          this.Div.innerWidth(this.Div.innerHeight() * this.AspectRatio);
+        }
         this.Div.trigger('resize');
         return false;
       }
@@ -977,13 +977,13 @@
     // NOTE: this.Div.width() also misbehaves when the div is not visible.
     // It does not convert percent to pixels (returns percent).
     var width = this.Div[0].style.width;
-    if (width.indexOf('%') == -1) {
+    if (width.indexOf('%') === -1) {
       width = parseFloat(width);
       width = 100 * width / this.Div.parent().width();
       this.Div[0].style.width = width.toString() + '%';
     }
     var height = this.Div[0].style.height;
-    if (height.indexOf('%') == -1) {
+    if (height.indexOf('%') === -1) {
       height = parseFloat(height);
       height = 100 * height / this.Div.parent().height();
       this.Div[0].style.height = height.toString() + '%';
@@ -991,13 +991,13 @@
 
     // Note: We cannot use this.Div.position() when the div is hidden.
     var top = this.Div.css('top');
-    if (top.indexOf('%') == -1) {
+    if (top.indexOf('%') === -1) {
       top = parseFloat(top);
       top = 100 * top / this.Div.parent().height();
       this.Div[0].style.top = top.toString() + '%';
     }
     var left = this.Div.css('left');
-    if (left.indexOf('%') == -1) {
+    if (left.indexOf('%') === -1) {
       left = parseFloat(left);
       left = 100 * left / this.Div.parent().width();
       this.Div[0].style.left = left.toString() + '%';
@@ -1099,7 +1099,7 @@
   }
 
   saRectangle.prototype.ProcessArguments = function (args) {
-    if (args.length == 0) { return; }
+    if (args.length === 0) { return; }
 
     // Superclass
     this.Div[0].saElement.ProcessArguments(args);
@@ -1114,10 +1114,10 @@
 
   saRectangle.prototype.DialogInitialize = function () {
     var color = this.Div[0].style.background;
-    if (color == '') {
+    if (color === '') {
       color = this.Div[0].style.backgroundColor;
     }
-    if (color == '') {
+    if (color === '') {
       this.BackgroundCheck.prop('checked', false);
       this.BackgroundColor.spectrum('disable');
       this.GradientCheck.prop('checked', false);
@@ -1125,7 +1125,7 @@
       this.GradientColor.spectrum('hide');
       return;
     }
-    if (color.substring(0, 3) == 'rgb') {
+    if (color.substring(0, 3) === 'rgb') {
         // Single color in background (no 'linear-gradient')
       this.BackgroundCheck.prop('checked', true);
       this.BackgroundColor.spectrum('set', color);
@@ -1136,7 +1136,7 @@
       return;
     }
     // parsing the gradient is a bit harder.
-    if (color.substring(0, 15) == 'linear-gradient') {
+    if (color.substring(0, 15) === 'linear-gradient') {
       var idx0 = color.indexOf('rgb');
       var idx1 = color.indexOf(')') + 1;
       this.BackgroundCheck.prop('checked', true);
@@ -1209,7 +1209,7 @@
     this.PaddingLeft =
             $('<input type="number">')
             .appendTo(this.PaddingLeftLine)
-            .keypress(function (event) { return event.keyCode != 13; });
+            .keypress(function (event) { return event.keyCode !== 13; });
     // Top
     this.PaddingTopLine = $('<div>')
         .appendTo(this.PaddingPanel)
@@ -1225,7 +1225,7 @@
     this.PaddingTop =
             $('<input type="number">')
             .appendTo(this.PaddingTopLine)
-            .keypress(function (event) { return event.keyCode != 13; });
+            .keypress(function (event) { return event.keyCode !== 13; });
     // Right
     this.PaddingRightLine = $('<div>')
         .appendTo(this.PaddingPanel)
@@ -1241,7 +1241,7 @@
     this.PaddingRight =
             $('<input type="number">')
             .appendTo(this.PaddingRightLine)
-            .keypress(function (event) { return event.keyCode != 13; });
+            .keypress(function (event) { return event.keyCode !== 13; });
     // Bottom
     this.PaddingBottomLine = $('<div>')
         .appendTo(this.PaddingPanel)
@@ -1257,11 +1257,11 @@
     this.PaddingBottom =
             $('<input type="number">')
             .appendTo(this.PaddingBottomLine)
-            .keypress(function (event) { return event.keyCode != 13; });
+            .keypress(function (event) { return event.keyCode !== 13; });
   }
 
   saText.prototype.ProcessArguments = function (args) {
-    if (args.length == 0) { return; }
+    if (args.length === 0) { return; }
 
     // Superclass
     this.Div[0].saRectangle.ProcessArguments(args);
@@ -1339,7 +1339,7 @@
 // Assumes multiple choice for now.
   saQuestion.prototype.SetQuestionText = function (text) {
     var question = this.Div.find('.sa-q');
-    if (question.length == 0) {
+    if (question.length === 0) {
       question = $('<div>').addClass('sa-q').appendTo(this.Div);
     }
     question.text(text);
@@ -1348,16 +1348,16 @@
   saQuestion.prototype.AddAnswerText = function (text, correct) {
     var answerText = text;
     // get rid of bullets
-    if (text[0] == '-') {
+    if (text[0] === '-') {
       answerText = text.substring(1);
-    } else if (text[1] == '.' || text[1] == ':') {
+    } else if (text[1] === '.' || text[1] === ':') {
       answerText = text.substring(2);
     }
     // Get rid of whitespace
     answerText = answerText.trim();
 
     var answers = this.Div.find('ol');
-    if (answers.length == 0) {
+    if (answers.length === 0) {
       answers = $('<ol>').appendTo(this.Div);
     }
     var answer = $('<li>').appendTo(answers).addClass('sa-answer');
@@ -1368,7 +1368,7 @@
   };
 
   saQuestion.prototype.ProcessArguments = function (args) {
-    if (args.length == 0) { return; }
+    if (args.length === 0) { return; }
 
     // Superclass
     this.Div[0].saText.ProcessArguments(args);
@@ -1384,7 +1384,7 @@
   saQuestion.prototype.SetMode = function (mode) {
     // Clear wrong answers selected by user.
     this.Div.find('.sa-answer').css({'color': '#000'});
-    if (mode == 'answer-show') {
+    if (mode === 'answer-show') {
       this.Div.find('.sa-quiz-hide').show();
       this.Div.find('.sa-true').css({'font-weight': 'bold'});
       this.Div.find('.sa-short-answer')
@@ -1397,7 +1397,7 @@
             .hide();
     }
 
-    if (mode == 'answer-interactive') {
+    if (mode === 'answer-interactive') {
         // Bind response to the user selecting an answer.
       this.Div.find('.sa-answer')
             .css({'cursor': 'pointer',
@@ -1485,17 +1485,17 @@
     //    .text("True or False");
     this.QuestionTypeSelect.change(
         function () {
-          if ($(this).val() == 'Multiple Choice') {
+          if ($(this).val() === 'Multiple Choice') {
             self.MultipleChoiceDiv.show();
             self.TrueFalseDiv.hide();
             self.ShortAnswerDiv.hide();
           }
-          if ($(this).val() == 'True or False') {
+          if ($(this).val() === 'True or False') {
             self.MultipleChoiceDiv.hide();
             self.TrueFalseDiv.show();
             self.ShortAnswerDiv.hide();
           }
-          if ($(this).val() == 'Short Answer') {
+          if ($(this).val() === 'Short Answer') {
             self.MultipleChoiceDiv.hide();
             self.TrueFalseDiv.hide();
             self.ShortAnswerDiv.show();
@@ -1543,7 +1543,7 @@
     if (questionDiv.length > 0) {
       this.Question.text(questionDiv.text());
       var type = this.Div.attr('type');
-      if (type == 'multiple-choice') {
+      if (type === 'multiple-choice') {
         this.QuestionTypeSelect.val('Multiple Choice');
         var options = this.Div.find('.sa-answer');
         for (var i = 0; i < options.length; ++i) {
@@ -1553,7 +1553,7 @@
                                  this.MultipleChoiceAnswers,
                                  item.text(), checked);
         }
-      } else if (type == 'short-answer') {
+      } else if (type === 'short-answer') {
         this.ShortAnswerDiv.text($('.sa-short-answer').text());
         this.QuestionTypeSelect.val('Short Answer');
         this.ShortAnswerDiv.show();
@@ -1585,7 +1585,7 @@
         .addClass('sa-q')
         .text(this.Question.text());
 
-    if (this.QuestionTypeSelect.val() == 'Multiple Choice') {
+    if (this.QuestionTypeSelect.val() === 'Multiple Choice') {
       this.Div.attr('type', 'multiple-choice');
       tmp = $('<ol>')
             .appendTo(this.Div)
@@ -1603,7 +1603,7 @@
         // Convert to html
       for (var i = 0; i < this.MultipleChoiceAnswers.length; ++i) {
         var answer = this.MultipleChoiceAnswers[i];
-        if (answer.Input.text() != '') {
+        if (answer.Input.text() !== '') {
           var a = $('<li>')
                     .appendTo(tmp)
                     .addClass('sa-answer')
@@ -1615,7 +1615,7 @@
         }
       }
     }
-    if (this.QuestionTypeSelect.val() == 'True or False') {
+    if (this.QuestionTypeSelect.val() === 'True or False') {
       this.Div.attr('type', 'true-false');
         // TODO: Share code with multiple choice
         // TODO: Make true false be mutually exclusive (radio button).
@@ -1624,7 +1624,7 @@
             .css({'margin': '0px 0px 0px 0.5em'});
       for (var i = 0; i < this.TrueFalseAnswers.length; ++i) {
         var answer = this.TrueFalseAnswers[i];
-        if (answer.Input.text() != '') {
+        if (answer.Input.text() !== '') {
           var a = $('<li>')
                     .appendTo(tmp)
                     .addClass('sa-true-false-answer')
@@ -1636,7 +1636,7 @@
         }
       }
     }
-    if (this.QuestionTypeSelect.val() == 'Short Answer') {
+    if (this.QuestionTypeSelect.val() === 'Short Answer') {
       this.Div.attr('type', 'short-answer');
       var tmp = $('<div>')
             .appendTo(this.Div)
@@ -1702,7 +1702,7 @@
     this.FontSize = $('<input type="number">')
         .appendTo(this.FontSizeDiv)
         .addClass('sa-view-annotation-modal-input')
-        .keypress(function (event) { return event.keyCode != 13; });
+        .keypress(function (event) { return event.keyCode !== 13; });
 
     // Font Color
     this.FontColorDiv = $('<div>')
@@ -1732,7 +1732,7 @@
         .appendTo(this.LineHeightDiv)
         .addClass('sa-view-annotation-modal-input')
         .val(1)
-        .keypress(function (event) { return event.keyCode != 13; });
+        .keypress(function (event) { return event.keyCode !== 13; });
 
     // Create a div for the editor options.
     // These will only become visible when you click / select
@@ -1808,8 +1808,8 @@
         function (e) {
             // We do not want click in the text box (or buttons) to turn
             // off editing.
-          if (self.Div[0] != e.srcElement &&
-                 self.EditButtonDiv[0] != e.srcElement &&
+          if (self.Div[0] !== e.srcElement &&
+                 self.EditButtonDiv[0] !== e.srcElement &&
                  !$.contains(self.Div[0], e.srcElement) &&
                  !$.contains(self.EditButtonDiv[0], e.srcElement)) {
             self.EditingOff();
@@ -1853,7 +1853,7 @@
     // Grow the parent div to contain the text.
     var textHeight = this.Div[0].scrollHeight;
     if (textHeight > this.Div.outerHeight()) {
-      if (this.Div.css('box-sizing') == 'border-box') {
+      if (this.Div.css('box-sizing') === 'border-box') {
         this.Div.height(textHeight + 4);
       } else {
         this.Div.outerHeight(textHeight + 4);
@@ -1928,15 +1928,15 @@
 
     var color = '#000000';
     str = this.Div[0].style.color;
-    if (str != '') {
+    if (str !== '') {
       color = SAM.ConvertColorToHex(str);
     }
     this.FontColor.spectrum('set', color);
 
     var lineHeight = 120; // default value?
     var str = this.Div[0].style.lineHeight;
-    if (str != '') {
-      if (str.substring(str.length - 1) == '%') {
+    if (str !== '') {
+      if (str.substring(str.length - 1) === '%') {
         lineHeight = parseFloat(str.substr(0, str.length - 1));
       }
     }
@@ -1967,7 +1967,7 @@
 
     var color = '#000000';
     str = this.Div[0].style.color;
-    if (str != '') {
+    if (str !== '') {
       color = str;
     }
     this.FontColor.spectrum('set', color);
@@ -2030,13 +2030,13 @@
               'width': '25em'})
             .on('input', function () {
               var url = self.UrlDialog.UrlInput.val();
-              if (self.UrlDialog.LastUrl == self.UrlDialog.TextInput.val()) {
+              if (self.UrlDialog.LastUrl === self.UrlDialog.TextInput.val()) {
                     // The text is same as the URL. Keep them synchronized.
                 self.UrlDialog.TextInput.val(url);
               }
               self.UrlDialog.LastUrl = url;
                 // Deactivate the apply button if the url is blank.
-              if (url == '') {
+              if (url === '') {
                 self.UrlDialog.ApplyButton.attr('disabled', true);
               } else {
                 self.UrlDialog.ApplyButton.attr('disabled', false);
@@ -2077,7 +2077,7 @@
       range.collapse(true);
     }
     var linkText = this.UrlDialog.TextInput.val();
-    if (linkText == '') {
+    if (linkText === '') {
       linkText = this.UrlDialog.UrlInput.val();
     }
     link.appendChild(document.createTextNode(linkText));
@@ -2108,7 +2108,7 @@
         // Make sure the selection / cursor is in this editor.
       parent = range.commonAncestorContainer;
         // I could use jquery .parents(), but I bet this is more efficient.
-      while (parent && parent != this.Div[0]) {
+      while (parent && parent !== this.Div[0]) {
             // if ( ! parent) {
                 // I believe this happens when outside text is selected.
                 // We should we treat this case like nothing is selected.
@@ -2190,7 +2190,7 @@
     // All lightbox items in this parent will share a mask.
     var parent = div.parent();
     this.Mask = parent.find('.sa-light-box-mask');
-    if (this.Mask.length == 0) {
+    if (this.Mask.length === 0) {
       this.Mask = $('<div>')
             .appendTo(parent)
             .addClass('sa-light-box-mask') // So it can be retrieved.
@@ -2208,7 +2208,7 @@
   }
 
   saLightBox.prototype.ProcessArguments = function (args) {
-    if (args.length == 0) { return; }
+    if (args.length === 0) { return; }
 
     // Superclass
     this.Div[0].saElement.ProcessArguments(args);
@@ -2306,7 +2306,7 @@
 
   saLightBox.prototype.Expand = function (flag, animate) {
     if (!this.Interactive) { return; }
-    if (flag == this.Expanded) { return; }
+    if (flag === this.Expanded) { return; }
     var self = this;
     if (flag) {
       this.Div.saElement({editable: false});
@@ -2491,12 +2491,12 @@
   var SA_BUTTONS_VISIBLE = null;
 
   jQuery.prototype.saButtons = function (cmd) {
-    if (cmd == 'enable') {
+    if (cmd === 'enable') {
       for (var i = 0; i < this.length; ++i) {
         saButtonsEnable(this[i]);
       }
     }
-    if (cmd == 'disable') {
+    if (cmd === 'disable') {
       for (var i = 0; i < this.length; ++i) {
         saButtonsDisable(this[i]);
       }
@@ -2552,12 +2552,12 @@
       this.TimerId = -1;
     }
     if (this.Enabled) {
-      if (SA_BUTTONS_VISIBLE && SA_BUTTONS_VISIBLE != this.ButtonsDiv) {
+      if (SA_BUTTONS_VISIBLE && SA_BUTTONS_VISIBLE !== this.ButtonsDiv) {
         SA_BUTTONS_VISIBLE.fadeOut(200);
         SA_BUTTONS_VISIBLE = this.ButtonsDiv;
       }
       this.PlaceButtons();
-      if (level == 1) {
+      if (level === 1) {
         this.ButtonsDiv
                 .fadeIn(400);
         this.ButtonsDiv.children()
@@ -2576,7 +2576,7 @@
       var self = this;
       this.TimerId =
             setTimeout(function () {
-              if (SA_BUTTONS_VISIBLE == self.ButtonsDiv) {
+              if (SA_BUTTONS_VISIBLE === self.ButtonsDiv) {
                 SA_BUTTONS_VISIBLE = null;
               }
               self.ButtonsDiv.fadeOut(200);
@@ -2779,7 +2779,7 @@
     // get the note object if an id is specified.
     if (args.viewId) {
       args.note = SA.GetNoteFromId(args.viewId);
-      if (args.note == null) {
+      if (args.note === null) {
             // It has not been loaded yet.  Get if from the server.
         args.note = new SA.Note();
         var self = this;
@@ -2794,7 +2794,7 @@
 
     // User can call a viewer method through thie jquery api.
     // Pass on the return value if it has one.
-    if (arguments.length == 0) {
+    if (arguments.length === 0) {
       return saViewerSetup(this, [args]) || this;
     }
     return saViewerSetup(this, arguments) || this;
@@ -2829,7 +2829,7 @@
         .on('resize.sa', saResizeCallback);
 
     for (var i = 0; i < self.length; ++i) {
-      if (args[0] == 'destroy') {
+      if (args[0] === 'destroy') {
         $(self[i]).removeClass('sa-resize');
             // This should not cause a problem.
             // Only one resize element should be using this element.
@@ -3055,7 +3055,7 @@
     // For tap/click rather than drag.
     this.ClickStart = Date.now();
 
-    if (event.which == 1 || event.which == 3) {
+    if (event.which === 1 || event.which === 3) {
       $('body').on(
             'mouseup.presentation',
             function (e) {
@@ -3063,7 +3063,7 @@
             });
     }
 
-    if (event.which == 1) {
+    if (event.which === 1) {
       $('body').on(
             'mousemove.presentation',
             function (e) {
@@ -3090,7 +3090,7 @@
     } else if (event.wheelDelta) {
       tmp = event.wheelDelta;
     }
-    if (tmp == 0) { return; }
+    if (tmp === 0) { return; }
     // Wheel event seems to be in increments of 3.
     // depreciated mousewheel had increments of 120....
     // Initial delta cause another bug.
@@ -3111,7 +3111,7 @@
       return true;
     }
 
-    if (event.which == 1) {
+    if (event.which === 1) {
       var dx = event.screenX - this.DragLastX;
       var dy = event.screenY - this.DragLastY;
       this.DragLastX = event.screenX;
@@ -3127,7 +3127,7 @@
 
   saPresentation.prototype.HandleMouseUp = function (event) {
     $('body').off('mouseup.presentation');
-    if (event.which == 1) {
+    if (event.which === 1) {
       $('body').off('mousemove.presentation');
       $('body').off('mouseleave.presentation');
     }
@@ -3176,7 +3176,7 @@
             // convert to a decimal.
         scale = args.scale;
         if (typeof (scale) === 'string') {
-          if (scale.substring(-1) == '%') {
+          if (scale.substring(-1) === '%') {
             scale = parseFloat(scale.substr(0, str.length - 1)) / 100;
           } else {
             scale = parseFloat(scale);
@@ -3427,7 +3427,7 @@
             // Add the helper as an instance variable to the dom object.
         this[i].saFullWindowOption = helper;
       }
-      if (args == 'off') {
+      if (args === 'off') {
         this[i].saFullWindowOption.SetFullWindow($(this[i]), false);
       }
     }
@@ -3543,7 +3543,7 @@
     // Shift all the larger indexes down one.
     for (var i = 0; i < items.length; ++i) {
       if (items[i].saViewer &&
-            items[i].saViewer.saNote == note &&
+            items[i].saViewer.saNote === note &&
             items[i].saViewer.saViewerIndex > viewerIdx) {
         --items[i].saViewer.saViewerIndex;
       }
@@ -3727,7 +3727,7 @@
 // Open and close the panel
   ResizePanel.prototype.SetVisibility = function (visibility, duration) {
     if (duration === undefined) { duration = 1000.0; }
-    if (this.Visibility == visibility) { return; }
+    if (this.Visibility === visibility) { return; }
     this.Visibility = visibility;
 
     this.AnimationCurrent = this.Width;
@@ -3777,7 +3777,7 @@
 
 // args: { label: function, ...}
   jQuery.prototype.saMenuButton = function (args) {
-    if (this.length == 0) { return this; }
+    if (this.length === 0) { return this; }
     var item = this[0];
 
     if (!item.saMenuButton) {
@@ -3883,9 +3883,9 @@
       }
         // This hides and shows the button/tools but does not change the
         // visibility of the annotations in the viewer.
-      if (args == 'hide') {
+      if (args === 'hide') {
         item.saAnnotationWidget.hide();
-      } else if (args == 'show') {
+      } else if (args === 'show') {
         item.saAnnotationWidget.show();
       }
     }

@@ -10,7 +10,7 @@
     // var left = '620px';
     var right = '0px';
     var bottom = '170px';
-    if (SAM.detectMobile() == 'iPhone') {
+    if (SAM.detectMobile() === 'iPhone') {
       size = '100px';
       bottom = '80px';
       left = '80px';
@@ -67,7 +67,7 @@
     // Hard code only a single view for now.
     this.Layer = SA.VIEWERS[0].GetAnnotationLayer();
 
-    if (this.Layer.ActiveWidget != undefined && widget) {
+    if (this.Layer.ActiveWidget !== undefined && widget) {
       this.Layer.ActiveWidget.Deactivate();
     }
     var widget = new SAM.CircleWidget(this.Layer, false);

@@ -1,5 +1,4 @@
 // CME
-// TODO:
 
 // Bugs:
 // Get short answer questions working.
@@ -45,8 +44,6 @@
 
 (function () {
   'use strict';
-
-// TODO:
 
 // ==============================================================================
 // TODO:
@@ -385,11 +382,11 @@
             .css({'float': 'right',
               'margin': '3px'})
             .change(function () {
-              if (this.value == 'review') {
+              if (this.value === 'review') {
                 self.RootNote.Mode = 'answer-show';
-              } else if (this.value == 'hidden') {
+              } else if (this.value === 'hidden') {
                 self.RootNote.Mode = 'answer-hide';
-              } else if (this.value == 'interactive') {
+              } else if (this.value === 'interactive') {
                 self.RootNote.Mode = 'answer-interactive';
               }
               self.UpdateQuestionMode();
@@ -410,9 +407,9 @@
               'margin-top': '4px'})
             .text('quiz');
         // Set the question mode
-      if (this.RootNote.Mode == 'answer-hide') {
+      if (this.RootNote.Mode === 'answer-hide') {
         this.QuizMenu.val('hidden');
-      } else if (this.RootNote.Mode == 'answer-interactive') {
+      } else if (this.RootNote.Mode === 'answer-interactive') {
         this.QuizMenu.val('interactive');
       } else {
         this.RootNote.Mode = 'answer-show';
@@ -513,7 +510,7 @@
 // TODO: Get rid of the local iVar UserNote.
 // TODO: Make sure this works with temp note ids.
   UserNoteEditor.prototype.SetNote = function (parentNote) {
-    if (this.ParentNote == parentNote) { return; }
+    if (this.ParentNote === parentNote) { return; }
 
     // Save the previous note incase the user is in mid edit
     // TODO: Do not save it has not been modified.
@@ -567,7 +564,7 @@
   };
 
   UserNoteEditor.prototype.LoadUserNote = function (data, parentNoteId) {
-    if (!this.ParentNote || this.ParentNote.Id != parentNoteId) {
+    if (!this.ParentNote || this.ParentNote.Id !== parentNoteId) {
         // Many things could happen while waiting for the note to load.
       return;
     }
@@ -596,7 +593,7 @@
     $('.sa-question').saQuestion('SetMode', this.RootNote.Mode);
 
     // Do not hide the Title page title
-    if (this.RootNote.Mode == 'answer-hide' && this.Index != 0) {
+    if (this.RootNote.Mode === 'answer-hide' && this.Index !== 0) {
         // Experiment with hiding titles too.
       var title = $('.sa-presentation-title');
       var standin = title.clone();
@@ -616,7 +613,7 @@
   };
 
   Presentation.prototype.TimerCallback = function (duration) {
-    if (this.Index == this.GetNumberOfSlides() - 1) {
+    if (this.Index === this.GetNumberOfSlides() - 1) {
         // Stop but stay in full screen mode.
       this.GotoSlide(0);
       SA.ContentEditableHasFocus = false;
@@ -659,7 +656,7 @@
 
 // Adds a view to the current slide.
   Presentation.prototype.AddViewCallback = function (viewObj) {
-    if (viewObj.Type == 'HTML') {
+    if (viewObj.Type === 'HTML') {
         // What will happen if you insert a whole presentation (root)?
         // Insert a new slide
       var idx = this.Index + 1;
@@ -674,7 +671,7 @@
       return;
     }
 
-    if (this.Note.Type == 'HTML') {
+    if (this.Note.Type === 'HTML') {
         // TODO: Change this to pass a viewer record of the view.
         //       Maybe show all the records as options.
       this.HtmlPage.InsertView(viewObj);
@@ -699,12 +696,12 @@
       Height: (image.bounds[3] - image.bounds[2]),
       Width: (image.bounds[1] - image.bounds[0])};
 
-    if (this.Note.Type == 'HTML') {
+    if (this.Note.Type === 'HTML') {
         // This will be the primar path in the future.
       this.HtmlPage.InsertViewerRecord(record);
       return;
     }
-    if (this.Note != this.RootNote) {
+    if (this.Note !== this.RootNote) {
       var note = new SA.Note();
       note.ViewerRecords[0] = record;
       this.SlidePage.InsertViewNote(note);
@@ -715,7 +712,7 @@
     // never executed because I add a presentation icon
     // NOTE: This might be a problem with the new html title page.
     //       Viewers inthe title pages are stored as records.
-    if (this.RootNote.ViewerRecords.length == 0) {
+    if (this.RootNote.ViewerRecords.length === 0) {
       this.RootNote.ViewerRecords.push(record);
     }
   };
@@ -729,33 +726,33 @@
     // I cannot get the browser to paste into a new div
     // First, paste is executed before this callback.
     // Second, the execCommand paste does not appear to work.
-    // if (event.keyCode == "86" && ! event.ctrlKey) { // check for control v paste
-    //    if (this.Note.Type == "HTML") {
+    // if (event.keyCode === "86" && ! event.ctrlKey) { // check for control v paste
+    //    if (this.Note.Type === "HTML") {
     //        this.HtmlPage.Paste();
     //   }
     // }
 
-    if (event.keyCode == '32' || // space
-        event.keyCode == '34' || // page down
-        event.keyCode == '78' || // n
-        event.keyCode == '39' || // right arrow
-        event.keyCode == '40' || // down arrow
-        event.keyCode == '13') { // enter
+    if (event.keyCode === '32' || // space
+        event.keyCode === '34' || // page down
+        event.keyCode === '78' || // n
+        event.keyCode === '39' || // right arrow
+        event.keyCode === '40' || // down arrow
+        event.keyCode === '13') { // enter
       this.GotoSlide(this.Index + 1);
       return false;
     }
-    if (event.keyCode == '80' || // p
-        event.keyCode == '37' || // back arrow
-        event.keyCode == '38' || // up arrow
-        event.keyCode == '33') { // page up
+    if (event.keyCode === '80' || // p
+        event.keyCode === '37' || // back arrow
+        event.keyCode === '38' || // up arrow
+        event.keyCode === '33') { // page up
       this.GotoSlide(this.Index - 1);
       return false;
     }
-    if (event.keyCode == '36') { // home
+    if (event.keyCode === '36') { // home
       this.GotoSetSlide(0);
       return false;
     }
-    if (event.keyCode == '35') { // end
+    if (event.keyCode === '35') { // end
       this.GotoSlide(this.GetNumberOfSlides() - 1);
       return false;
     }
@@ -777,8 +774,8 @@
     // the children are.
     for (var i = 0; i < SA.Notes.length; ++i) {
       var note = SA.Notes[i];
-      if (note.Type == 'UserNote') {
-        if (note.LoadState || note.Text != '') {
+      if (note.Type === 'UserNote') {
+        if (note.LoadState || note.Text !== '') {
           note.Save();
         }
       }
@@ -823,7 +820,7 @@
     var noteInSession = false;
     var session = SA.Session.session.views;
     for (var i = 0; i < session.length && !noteInSession; ++i) {
-      if (session[i].id == this.RootNote.Id) {
+      if (session[i].id === this.RootNote.Id) {
         noteInSession = true;
       }
     }
@@ -839,7 +836,7 @@
           'view': this.RootNote.Id},
         url: 'webgl-viewer/move-view',
         success: function (data, status) {
-          if (status != 'Success') {
+          if (status !== 'Success') {
             SA.Debug(data);
           }
         },
@@ -861,11 +858,11 @@
     if (this.Index > index) { this.Index -= 1; }
 
     // Case where we are deleting the current slide.
-    if (index == this.Index) {
+    if (index === this.Index) {
         // index becomes the sldie we are going to.
         // Handles the case where we are on the last slide.
         // Move to the previous rather then the next.
-      if (index == maxIdx) { --index; }
+      if (index === maxIdx) { --index; }
         // force GotoSlide to
       this.Index = -1;
       this.GotoSlide(index);
@@ -886,7 +883,7 @@
     note.Parent = this.RootNote;
     this.GotoSlide(idx);
     this.UpdateSlidesTab();
-    if (type == 'HTML') {
+    if (type === 'HTML') {
       this.HtmlPage.InitializeSlidePage();
     }
     this.UpdateQuestionMode();
@@ -924,7 +921,7 @@
 // 0->Root/titlePage
 // Childre/slides start at index 1
   Presentation.prototype.GotoSlide = function (index) {
-    if (index < 0 || index >= this.GetNumberOfSlides() || index == this.Index) {
+    if (index < 0 || index >= this.GetNumberOfSlides() || index === this.Index) {
       return;
     }
 
@@ -935,26 +932,26 @@
 
     this.AspectDiv.show();
     this.Index = index;
-    if (index == 0) { // Title page
+    if (index === 0) { // Title page
       this.Note = this.RootNote;
-      if (this.Note.Type == 'Presentation') {
+      if (this.Note.Type === 'Presentation') {
             // legacy
         this.SlidePage.Div.hide();
         this.HtmlPage.Div.hide();
         this.TitlePage.DisplayNote(this.Note);
-      } else if (this.Note.Type == 'HTML') {
+      } else if (this.Note.Type === 'HTML') {
         this.TitlePage.Div.hide();
         this.SlidePage.Div.hide();
         this.HtmlPage.Div.show();
         this.HtmlPage.DisplayNote(this.Note);
-        if (this.Note.Text == '') {
+        if (this.Note.Text === '') {
           this.HtmlPage.InitializeTitlePage();
         }
       }
       this.UserNoteEditor.SetNote(this.Note);
     } else { // Slide page
       this.Note = this.GetSlide(index);
-      if (this.Note.Type == 'HTML') {
+      if (this.Note.Type === 'HTML') {
         this.TitlePage.Div.hide();
         this.SlidePage.Div.hide();
         this.HtmlPage.Div.show();
@@ -996,7 +993,7 @@
     if (idx < 0 || idx > this.RootNote.Children.length) {
       return null;
     }
-    if (idx == 0) {
+    if (idx === 0) {
       return this.RootNote;
     }
     return this.RootNote.Children[idx - 1];
@@ -1009,11 +1006,11 @@
     var newIndex = 0;
     for (var i = 0; i < items.length; ++i) {
       var idx = parseInt($(items[i]).data('index'));
-      if (idx != 0) { // we have to skip the title page because it is
+      if (idx !== 0) { // we have to skip the title page because it is
             // root.
         newChildren.push(this.GetSlide(idx));
       }
-      if (this.Index == idx) {
+      if (this.Index === idx) {
             // If the current slide moved, update the index.
             // Note the offset by one to account for the root / title.
             // length is one more than the notes index.
@@ -1045,9 +1042,9 @@
       var title;
       var title = note.Text;
       var idx = title.indexOf('sa-presentation-text');
-      if (idx == -1) {
+      if (idx === -1) {
         title = note.Title;
-        if (title == '') {
+        if (title === '') {
                 // Nothing i the text / html to use as a title.
           title = 'Slide ' + i;
         }
@@ -1058,18 +1055,18 @@
         idx = title.indexOf('<');
             // We may have other formating blocks.
             // An xml parser would be nice.
-        while (idx == 0) {
+        while (idx === 0) {
           idx = title.indexOf('>');
           title = title.substring(idx + 1);
           idx = title.indexOf('<');
         }
         title = title.substring(0, idx);
-        if (note.Title == '') {
+        if (note.Title === '') {
           note.Title = title;
         }
       }
         // Hide titles
-      if (this.RootNote.Mode == 'answer-hide') {
+      if (this.RootNote.Mode === 'answer-hide') {
         title = '#' + i;
       }
 
@@ -1099,7 +1096,7 @@
         sortHandle.addClass('sa-sort-handle');
       }
 
-      if (this.Note == note) {
+      if (this.Note === note) {
         slideDiv.css({'background': '#EEE'});
       }
     }
@@ -1430,7 +1427,7 @@
     }
   };
 
-// Records == views.
+// Records === views.
   SlidePage.prototype.ResizeViews = function () {
     var width = this.ViewPanel.width();
     var height = this.ViewPanel.height();
@@ -1445,13 +1442,13 @@
     var numRecords = this.Records.length;
     var record;
 
-    if (numRecords == 0) {
+    if (numRecords === 0) {
         // Poor way to hide a viewer.
       this.ViewerDiv1[0].saViewer.SetViewport([0, 0, 0, height]);
         // Poor way to hide a viewer.
       this.ViewerDiv2[0].saViewer.SetViewport([0, 0, 0, height]);
     }
-    if (numRecords == 1) {
+    if (numRecords === 1) {
       record = this.Records[0];
       this.PlaceViewer(this.ViewerDiv1, record, [0, 0, width, height]);
         // Poor way to hide a viewer.
@@ -1465,16 +1462,16 @@
       this.PlaceViewer(this.ViewerDiv2, record, [halfWidth, 0, halfWidth, height]);
     }
     if (this.Edit) {
-      if (numRecords == 0) {
+      if (numRecords === 0) {
             // TODO: View should have hide/show methods and manage this.
         this.AnnotationWidget1.hide();
         this.AnnotationWidget2.hide();
       }
-      if (numRecords == 1) {
+      if (numRecords === 1) {
         this.AnnotationWidget1.show();
         this.AnnotationWidget2.hide();
       }
-      if (numRecords == 2) {
+      if (numRecords === 2) {
         this.AnnotationWidget1.show();
         this.AnnotationWidget2.show();
       }
@@ -1536,10 +1533,10 @@
 
     // Hack: Since GotoSlide copies the viewer to the record,
     // We first have to push the new record to the view.
-    if (this.Note.ViewerRecords.length == 1) {
+    if (this.Note.ViewerRecords.length === 1) {
         // TODO: jquery arg
       this.ViewerDiv1[0].saViewer.SetViewerRecord(this.Note.viewerRecords[0]);
-    } else if (this.Note.ViewerRecords.length == 2) {
+    } else if (this.Note.ViewerRecords.length === 2) {
       this.ViewerDiv2[0].saViewer.SetViewerRecord(this.Note.viewerRecords[1]);
     }
 
@@ -1882,7 +1879,7 @@
     var top = 20 + Math.floor(Math.random() * 10);
 
     /* // link option
-    if (ref != "") {
+    if (ref !== "") {
         imgDiv = $('<a>')
             .appendTo(this.Div)
             .attr('href', ref)
@@ -2000,7 +1997,7 @@
     // Youtube size has to be set in the original html string.
     var width, height;
     var start = html.indexOf('width');
-    if (start != -1) {
+    if (start !== -1) {
       var str = html.substring(start + 7);
       var end = str.indexOf('"');
       var tmp = str.substr(0, end);
@@ -2010,7 +2007,7 @@
       html = html.replace(tmp, width);
     }
     start = html.indexOf('height');
-    if (start != -1) {
+    if (start !== -1) {
       var str = html.substring(start + 8);
       var end = str.indexOf('"');
       var tmp = str.substr(0, end);
@@ -2158,7 +2155,7 @@
     newNote.Load(viewObj);
     delete newNote.Id;
     newNote.Id = tmpId;
-    if (newNote.ViewerRecords.length == 0) {
+    if (newNote.ViewerRecords.length === 0) {
       SA.Debug('Insert failed: Note has no viewer records.');
     } else if (this.Note.Parent) {
       this.Note.Children.push(newNote);
@@ -2286,7 +2283,7 @@
 
     // Extra viewer records get pruned when the page is converted to html
     // Get rid of dual viewer notes.
-    if (dom.saViewer.saNote != this.Note) {
+    if (dom.saViewer.saNote !== this.Note) {
       var childIdx = this.Note.Children.indexOf(dom.saViewer.saNote);
       if (childIdx >= 0) {
         this.Note.Children.splice(childIdx, 1);
@@ -2309,7 +2306,7 @@
               var w = $(this).parent().width();
               var h = $(this).parent().height();
               var scale = Math.min(h, w / 1.62) / 700;
-              scaleStr = scale.toString();
+              var scaleStr = scale.toString();
               w = (Math.floor(w / scale)).toString();
               h = (Math.floor(h / scale)).toString();
 
@@ -2494,7 +2491,7 @@
       type: 'get',
       url: 'webgl-viewer/getfavoriteviews',
       success: function (data, status) {
-        if (status == 'success') {
+        if (status === 'success') {
           self.LoadClipboardCallback(data);
         } else { SA.Debug('ajax failed - get favorite views 2'); }
       },
@@ -2511,7 +2508,7 @@
 
     for (var i = 0; i < this.ClipboardViews.length; ++i) {
       var view = this.ClipboardViews[i];
-      if (view.Thumb.substring(0, 6) == 'http:/') {
+      if (view.Thumb.substring(0, 6) === 'http:/') {
         view.Thumb = view.Thumb.substring(6);
       }
       var thumb = $('<img>')

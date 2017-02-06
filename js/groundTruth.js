@@ -36,20 +36,20 @@
     this.Classes = [].concat([detectionClass], classes);
         // assign colors to the labels
         // detections will be yellow
-    var num_classes = this.Classes.length;
+    var numClasses = this.Classes.length;
         // Detection class is yellow.
-    if (num_classes > 0) {
+    if (numClasses > 0) {
       this.Classes[0].color = '#FFFF00';
     }
-    if (num_classes > 1) { // Second (false positive) is red
+    if (numClasses > 1) { // Second (false positive) is red
       this.Classes[1].color = '#FF0000';
     }
-    if (num_classes > 2) { // last (true positive) is green
-      this.Classes[num_classes - 1].color = '#00FF00';
+    if (numClasses > 2) { // last (true positive) is green
+      this.Classes[numClasses - 1].color = '#00FF00';
     }
         // the rest will range from purple to cyan
-    for (var i = 2; i < num_classes - 1; ++i) {
-      var k = (i - 2) / (num_classes - 4);
+    for (var i = 2; i < numClasses - 1; ++i) {
+      var k = (i - 2) / (numClasses - 4);
       this.Classes[i].color = SAM.ConvertColorToHex([k, 1 - k, 1]);
     }
 
@@ -65,7 +65,7 @@
         // active class is highlighted in the gui.
         // It is the class used for clicks
     this.ActiveClassIndex = 0;
-    this.SetActiveClassIndex(num_classes - 1);
+    this.SetActiveClassIndex(numClasses - 1);
   }
 
     // Returns true if it was a valid class index.
@@ -97,7 +97,7 @@
 
     // Highlight on hover.
   GroundTruth.prototype.HandleMouseMove = function (event) {
-    if (event.which != 0) { return; }
+    if (event.which !== 0) { return; }
     var cam = this.Layer.GetCamera();
     var pt = cam.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
     var rectRadius = this.RectSize / 2;
@@ -134,7 +134,7 @@
   GroundTruth.prototype.SetHighlightedRect = function (classObj, idx) {
     var widget = classObj.widget;
         // No change,  just return.
-    if (this.HighlightedRect && this.HighlightedRect.idx == idx && this.HighlightedRect.widget == widget) {
+    if (this.HighlightedRect && this.HighlightedRect.idx === idx && this.HighlightedRect.widget === widget) {
       return;
     }
 
@@ -144,7 +144,7 @@
       this.HighlightedRect.idx = -1;
     }
 
-    if (this.InteractionState == ITERATING && idx == -1) {
+    if (this.InteractionState === ITERATING && idx === -1) {
             // Unset => go back to the default current rect.
       widget = this.Classes[0].widget;
       idx = this.IteratorIndex;
@@ -166,8 +166,8 @@
     // keydown determines the label.
   GroundTruth.prototype.HandleKeyDown = function (event) {
         // Always active now.
-    if (this.InteractionState == ITERATING) {
-      if (this.ActionState != KEY_UP) {
+    if (this.InteractionState === ITERATING) {
+      if (this.ActionState !== KEY_UP) {
         return false;
       }
       if (event.keyCode > 48 && event.keyCode < 48 + this.Classes.length) {
@@ -176,7 +176,7 @@
     }
     var valid = this.SetActiveClassIndex(event.keyCode - 48);
         // Keep the viewer from panning on the arrows when iterating.
-    if (valid || this.InteractionState == ITERATING) {
+    if (valid || this.InteractionState === ITERATING) {
       return false;
     }
 
@@ -189,16 +189,16 @@
 
         // Handle the complex decision to adavance or not.
         // If the key only modified a click, do not advance.
-    if (this.InteractionState == ITERATING) {
+    if (this.InteractionState === ITERATING) {
             // Mouse click (with key modifier) was used to add an annotation
             // outside the sequence and no advancement is necessary.
-      if (this.ActionState == KEY_USED_NO_ADVANCE) {
+      if (this.ActionState === KEY_USED_NO_ADVANCE) {
         this.ActionState = KEY_UP;
         return false;
       }
             // Mouse click (with key modifier) was used to recenter an
             // annotation inside the sequences. We need to advance.
-      if (this.ActionState == KEY_USED_ADVANCE) {
+      if (this.ActionState === KEY_USED_ADVANCE) {
                 // Just advance to the next
         setTimeout(function () { self.ChangeCurrent(1); }, 300);
         this.ActionState = KEY_UP;
@@ -206,7 +206,7 @@
       }
       this.ActionState = KEY_UP;
             // Escape key stops iteration.
-      if (event.keyCode == 27) { // escape
+      if (event.keyCode === 27) { // escape
         this.Stop();
         return false;
       }
@@ -226,15 +226,15 @@
         rectSet.Labels[rectIdx] = classLabel;
         this.Layer.EventuallyDraw();
                 // Automatically move to the next, to save clicks.
-        if (this.InteractionState == ITERATING &&
-                    rectWidget == this.Classes[0].widget && rectIdx == this.IteratorIndex) {
+        if (this.InteractionState === ITERATING &&
+                    rectWidget === this.Classes[0].widget && rectIdx === this.IteratorIndex) {
           setTimeout(function () { self.ChangeCurrent(1); }, 300);
         }
         return false;
       }
 
             // Delete applies to the selected / highlighted rect.
-      if (event.keyCode == 46) { // Delete key
+      if (event.keyCode === 46) { // Delete key
                 // remove the rectangle
         rectSet.DeleteRectangle(rectIdx);
                 // Rebuild the hash.
@@ -242,12 +242,12 @@
         var bds = this.Layer.GetViewer().GetOverViewBounds();
         rectWidget.Hash.Build(rectWidget.Shape.Centers, bds);
                 // Deleted rect was in the detection set while iterating
-        if (this.InteractionState == ITERATING &&
-                    rectWidget == this.Classes[0].widget) {
+        if (this.InteractionState === ITERATING &&
+                    rectWidget === this.Classes[0].widget) {
                     // If we deleted a rect before the current, ...
           if (rectIdx < this.IteratorIndex) {
             this.SetIteratorIndex(this.IteratorIndex - 1);
-          } else if (rectIdx == this.IteratorIndex) {
+          } else if (rectIdx === this.IteratorIndex) {
                         // Animate to the next (rectIdx does not actually
                         // change). Hack to find next under threshold
             this.IteratorIndex -= 1;
@@ -262,14 +262,14 @@
     }
 
         // Forward and backward.
-    if (this.InteractionState == ITERATING) {
+    if (this.InteractionState === ITERATING) {
       var rectSet = this.Classes[0].widget.Shape;
       var index = this.IteratorIndex;
-      if (event.keyCode == 40) {
+      if (event.keyCode === 40) {
                 // down cursor key
                 // Move to the previous without a label
         while (index < rectSet.Widths.length) {
-          if (rectSet.Labels[index] == 'detection') {
+          if (rectSet.Labels[index] === 'detection') {
             this.SetIteratorIndex(index);
             return false;
           }
@@ -278,11 +278,11 @@
                 // Got to end without finding one.
         this.Layer.DeactivateWidget(this);
         return false;
-      } else if (event.keyCode == 37) {
+      } else if (event.keyCode === 37) {
                 // Left cursor key
         this.ChangeCurrent(-1);
         return false;
-      } else if (event.keyCode == 39) {
+      } else if (event.keyCode === 39) {
                 // Right cursor key
         this.ChangeCurrent(1);
         return false;
@@ -345,7 +345,7 @@
   };
 
   GroundTruth.prototype.HandleClick = function (event) {
-    if (event.which != 1) {
+    if (event.which !== 1) {
       return true;
     }
         // Compute the new center
@@ -370,14 +370,14 @@
         rectSet.SetCenter(rectIdx, pt);
         this.Layer.EventuallyDraw();
                 // Advance if user clicked on the one iterating rectangle
-        if (this.InteractionState == ITERATING &&
-                    rectWidget == this.Classes[0].widget && rectIdx == this.IteratorIndex) {
+        if (this.InteractionState === ITERATING &&
+                    rectWidget === this.Classes[0].widget && rectIdx === this.IteratorIndex) {
           var self = this;
                     // If a key is being used as amodified, stop advaning twice.
                     // SHould we advance on the mouse up or key up?
                     // Lets try mouse up.
                     // work right
-          if (this.ActionState == KEY_DOWN) {
+          if (this.ActionState === KEY_DOWN) {
             this.ActionState = KEY_USED_NO_ADVANCE;
           }
           setTimeout(function () { self.ChangeCurrent(1); }, 300);
@@ -397,7 +397,7 @@
       rectWidget.Hash.Add(pt, rectWidget.GetLength() - 1);
       this.Layer.EventuallyDraw();
             // Keep the key up (if a key is pressed) from advancing
-      if (this.ActionState == KEY_DOWN) {
+      if (this.ActionState === KEY_DOWN) {
         this.ActionState = KEY_USED_NO_ADVANCE;
         return false;
       }
@@ -418,18 +418,21 @@
     var self = this;
 
         // The wrapper div that controls a single layer.
-    var layer_control = $('<div>')
+    var layerControl = $('<div>')
             .appendTo(parent)
-            .css({ 'border': '1px solid #CCC', 'width': '100%'});
+            .css({
+              'border': '1px solid #CCC',
+              'width': '100%'
+            });
 
     this.ActiveLabel =
-            $('<div>').appendTo(layer_control)
+            $('<div>').appendTo(layerControl)
             .prop('title', 'Start sorting detections')
             .attr('contenteditable', 'false')
             .text('');
 
     var sizeContainer =
-            $('<p>').appendTo(layer_control);
+            $('<p>').appendTo(layerControl);
     this.SizeLabel =
             $('<label>').appendTo(sizeContainer)
             .text('Size:  ');
@@ -439,7 +442,7 @@
             .on('change', function () { self.ChangeSize(); });
 
     var buttonContainer =
-            $('<p>').appendTo(layer_control);
+            $('<p>').appendTo(layerControl);
     this.StartStopButton =
             $('<button>').appendTo(buttonContainer)
             .text('Start')
@@ -455,30 +458,34 @@
             .click(function () { self.Save(); });
 
         // Wrapper for the confidence slider.
-    var conf_wrapper = $('<div>')
-            .appendTo(layer_control)
-            .css({ 'border': '1px solid #CCC', 'width': '100%', 'height': '50px'});
+    var confWrapper = $('<div>')
+            .appendTo(layerControl)
+            .css({
+              'border': '1px solid #CCC',
+              'width': '100%',
+              'height': '50px'
+            });
 
     this.Slider = $('<input type="range" min="0" max="100">')
-            .appendTo(conf_wrapper)
+            .appendTo(confWrapper)
             .on('input',
                 function () {
                   self.SliderCallback();
                 });
         // this.Slider[0].min = 75;
 
-    var min_label = $('<div>')
-            .appendTo(conf_wrapper)
+    var minLabel = $('<div>')
+            .appendTo(confWrapper)
             .html('0%')
             .css({ 'float': 'left' });
 
-    var max_label = $('<div>')
-            .appendTo(conf_wrapper)
+    var maxLabel = $('<div>')
+            .appendTo(confWrapper)
             .html('100%')
             .css({ 'float': 'right' });
 
     var classContainer =
-            $('<p>').appendTo(layer_control);
+            $('<p>').appendTo(layerControl);
     for (var i = 0; i < this.Classes.length; ++i) {
       this.MakeClassButton(classContainer, i);
     }
@@ -533,16 +540,16 @@
     }
     */
 
-  GroundTruth.prototype.RequestAnnotationItem = function (class_obj) {
+  GroundTruth.prototype.RequestAnnotationItem = function (classObj) {
         // var annotId = "572be29d3f24e53573aa8e91";
     var self = this;
     if (window.girder) {
       girder.restRequest({
-        path: 'annotation/' + class_obj.annotation_id,
+        path: 'annotation/' + classObj.annotation_id,
         method: 'GET',
         contentType: 'application/json'
       }).done(function (data) {
-        self.LoadAnnotation(data, class_obj);
+        self.LoadAnnotation(data, classObj);
       });
     } else {
       alert('No girder');
@@ -550,40 +557,40 @@
   };
 
     // TODO: Share this code (to parse girder data) with girderWidget.
-  GroundTruth.prototype.LoadAnnotation = function (data, class_obj) {
+  GroundTruth.prototype.LoadAnnotation = function (data, classObj) {
         // Used for saving the annotation back to girder.
-    class_obj.annotation = data.annotation;
+    classObj.annotation = data.annotation;
 
         // Put all the rectangles into one set.
-    var set_obj = {};
-    set_obj.type = 'rect_set';
-    set_obj.centers = [];
-    set_obj.widths = [];
-    set_obj.heights = [];
-    set_obj.confidences = [];
-    set_obj.labels = [];
+    var setObj = {};
+    setObj.type = 'rect_set';
+    setObj.centers = [];
+    setObj.widths = [];
+    setObj.heights = [];
+    setObj.confidences = [];
+    setObj.labels = [];
 
     var annot = data.annotation;
     for (var i = 0; i < annot.elements.length; ++i) {
       var element = annot.elements[i];
       var obj = {};
 
-      if (element.type == 'rectangle') {
-        set_obj.widths.push(element.width);
-        set_obj.heights.push(element.height);
-        set_obj.centers.push(element.center[0]);
-        set_obj.centers.push(element.center[1]);
+      if (element.type === 'rectangle') {
+        setObj.widths.push(element.width);
+        setObj.heights.push(element.height);
+        setObj.centers.push(element.center[0]);
+        setObj.centers.push(element.center[1]);
         if (element.scalar === undefined) {
           element.scalar = 1.0;
         }
-        set_obj.confidences.push(element.scalar);
+        setObj.confidences.push(element.scalar);
                 // ignore the database label because we use our own
-        set_obj.labels.push(class_obj.label);
+        setObj.labels.push(classObj.label);
       }
     }
 
     var widget = new SAM.RectSetWidget();
-    widget.Load(set_obj);
+    widget.Load(setObj);
     widget.Hash = new SpatialHash();
     var bds = this.Layer.GetViewer().GetOverViewBounds();
     widget.Hash.Build(widget.Shape.Centers, bds);
@@ -598,8 +605,8 @@
       }
     }
 
-    class_obj.widget = widget;
-    widget.Shape.SetOutlineColor(class_obj.color);
+    classObj.widget = widget;
+    widget.Shape.SetOutlineColor(classObj.color);
     this.Layer.EventuallyDraw();
   };
 
@@ -763,10 +770,10 @@
     return returnElements;
   };
 
-    // Now we are always active.  We have interaction state == ITERATING to
+    // Now we are always active.  We have interaction state === ITERATING to
     // indicate cycling through annotations one by one.
   GroundTruth.prototype.SetActive = function (active) {
-    if (active == this.Active) {
+    if (active === this.Active) {
       return;
     }
     this.Active = active;

@@ -105,7 +105,7 @@
   View.prototype.HasUnits = function () {
     var cache = this.GetCache();
     if (!cache || !cache.Image || !cache.Image.units) { return false; }
-    return cache.Image.units != 'Units';
+    return cache.Image.units !== 'Units';
   };
 
   View.prototype.GetMetersPerUnit = function () {
@@ -351,10 +351,8 @@
         var wPt = correlations[i].GetPoint(pointIdx);
         var m = this.Camera.Matrix;
                 // Change coordinate system from world to -1->1
-        var x = (wPt[0] * m[0] + wPt[1] * m[4]
-                         + m[12]) / m[15];
-        var y = (wPt[0] * m[1] + wPt[1] * m[5]
-                         + m[13]) / m[15];
+        var x = (wPt[0] * m[0] + wPt[1] * m[4] + m[12]) / m[15];
+        var y = (wPt[0] * m[1] + wPt[1] * m[5] + m[13]) / m[15];
                 // Transform coordinate system from -1->1 to canvas
         x = (1.0 + x) * this.Viewport[2] * 0.5;
         y = (1.0 - y) * this.Viewport[3] * 0.5;
@@ -373,7 +371,7 @@
 
     // NOTE: Not used anymore. Viewer uses a DOM.
   View.prototype.DrawCopyright = function (copyright) {
-    if (copyright == undefined || MASK_HACK) {
+    if (copyright === undefined || MASK_HACK) {
       return;
     }
     if (this.gl) {
@@ -477,9 +475,9 @@
     }
 
     var edge = 0;
-    if (x0 != x1) {
+    if (x0 !== x1) {
       edge = (x0 < x1) ? 1 : 4;
-    } else if (y0 != y1) {
+    } else if (y0 !== y1) {
       edge = (y0 < y1) ? 2 : 8;
     }
 

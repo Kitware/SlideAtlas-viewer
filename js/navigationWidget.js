@@ -86,7 +86,7 @@
     // TODO: Fix the main css file for mobile.  Hack this until fixed.
     if (SAM.MOBILE_DEVICE) {
       size = '80px';
-      if (SAM.MOBILE_DEVICE == 'iPhone') {
+      if (SAM.MOBILE_DEVICE === 'iPhone') {
         size = '100px';
       }
       this.PreviousSlideButton
@@ -139,20 +139,20 @@
   NavigationWidget.prototype.HandleKeyDown = function (event) {
     var keyCode = event.keyCode;
     // 34=page down, 78=n, 32=space
-    if (keyCode == 34) {
+    if (keyCode === 34) {
       this.NextSlide();
       return false;
     }
-    if (keyCode == 78 || keyCode == 32) {
+    if (keyCode === 78 || keyCode === 32) {
       this.NextNote();
       return false;
     }
     // 33=page up, 80=p
-    if (keyCode == 33) {
+    if (keyCode === 33) {
       this.PreviousSlide();
       return false;
     }
-    if (keyCode == 80) {
+    if (keyCode === 80) {
       this.PreviousNote();
       return false;
     }
@@ -161,7 +161,7 @@
   };
 
   NavigationWidget.prototype.SetNote = function (note) {
-    if (this.GetNote() == note) {
+    if (this.GetNote() === note) {
       return;
     }
 
@@ -172,13 +172,13 @@
         this.Session = SA.Session.session.views;
         this.SessionId = SA.Session.sessid;
         this.Update();
-      } else if (note.SessionId && SA.RootNote.Type != 'HTML') {
+      } else if (note.SessionId && SA.RootNote.Type !== 'HTML') {
         this.SessionId = note.SessionId;
         $.ajax({
           type: 'get',
           url: SA.SessionUrl + '?json=true&sessid=' + this.SessionId,
           success: function (data, status) {
-            if (self.SessionId != data.sessid) {
+            if (self.SessionId !== data.sessid) {
                         // This will never happen.
               console.log('expecting a second session to load.');
               return;
@@ -223,12 +223,12 @@
     var note = this.GetNote();
     if (note) {
       for (var i = 0; i < this.Session.length; ++i) {
-        if (this.Session[i].id == note.Id) {
+        if (this.Session[i].id === note.Id) {
           this.SlideIndex = i;
         }
       }
 
-      if (note.Type == 'Stack') {
+      if (note.Type === 'Stack') {
             // Next note refers to ViewerRecords.
         if (note.StartIndex > 0) {
           note.ViewerRecords[note.StartIndex - 1].LoadTiles([0, 0, 200, 150]);
@@ -265,7 +265,7 @@
     }
 
     // Hack because next slide does not with presentations.
-    if (SA.RootNote && SA.RootNote.Type == 'HTML') {
+    if (SA.RootNote && SA.RootNote.Type === 'HTML') {
       this.PreviousSlideButton.removeClass('sa-active');
       this.NextSlideButton.removeClass('sa-active');
     }
@@ -278,7 +278,7 @@
     if (SA.notesWidget) { SA.notesWidget.Flush(); }
 
     var current = this.GetNote();
-    if (current.Type == 'Stack') {
+    if (current.Type === 'Stack') {
       if (current.StartIndex <= 0) { return; }
 
         // Move camera
@@ -338,7 +338,7 @@
     if (SA.notesWidget) { SA.notesWidget.Flush(); }
 
     var current = this.GetNote();
-    if (current.Type == 'Stack') {
+    if (current.Type === 'Stack') {
       if (current.StartIndex >= current.ViewerRecords.length - 1) {
         return;
       }
@@ -397,7 +397,7 @@
     // Find the previous slide ( skip presentations)
     var prevSlideIdx = this.SlideIndex - 1;
     while (prevSlideIdx >= 0 &&
-           this.Session[prevSlideIdx].Type == 'Presentation') {
+           this.Session[prevSlideIdx].Type === 'Presentation') {
       --prevSlideIdx;
     }
     if (prevSlideIdx < 0) { return; }
@@ -426,7 +426,7 @@
     // Find the next slide ( skip presentations)
     var nextSlideIdx = this.SlideIndex + 1;
     while (nextSlideIdx < this.Session.length &&
-           this.Session[nextSlideIdx].Type == 'Presentation') {
+           this.Session[nextSlideIdx].Type === 'Presentation') {
       ++nextSlideIdx;
     }
     if (nextSlideIdx >= this.Session.length) { return; }
@@ -470,7 +470,7 @@
 // Because of sorting, I have to make the index dynamic
 // and it cannot be stored as an ivar.
   NoteIterator.prototype.GetChildIndex = function () {
-    if (this.ChildIterator == null) {
+    if (this.ChildIterator === null) {
       return -1;
     }
     return this.GetChildArray().indexOf(this.ChildIterator.Note);
@@ -480,13 +480,13 @@
 // Notes do not keep a pointer to parents.
 // The iterator has this information for active notes.
   NoteIterator.prototype.GetParentNote = function () {
-    if (this.ChildIterator == null) {
+    if (this.ChildIterator === null) {
         // We are at the current note.  Let the caller supply the parent.
       return null;
     }
 
     var parent = this.ChildIterator.GetParentNote();
-    if (parent == null) {
+    if (parent === null) {
         // This level contains the parent.
       parent = this.Note;
     }
@@ -496,7 +496,7 @@
 
 // We use this to see (peek) if next or previous should be disabled.
   NoteIterator.prototype.IsStart = function () {
-    if (this.ChildIterator == null) {
+    if (this.ChildIterator === null) {
       return true;
     }
     return false;
@@ -506,7 +506,7 @@
     if (!this.Note) { return true; }
 
     // Case note is active.
-    if (this.ChildIterator == null) {
+    if (this.ChildIterator === null) {
       if (this.Note.Children.length > 0 && this.Note.ChildrenVisibility) {
         return false;
       }
@@ -517,7 +517,7 @@
     var childIndex = this.GetChildIndex();
 
     // sub child is active
-    if (childIndex == this.GetChildArray().length - 1) {
+    if (childIndex === this.GetChildArray().length - 1) {
       return this.ChildIterator.IsEnd();
     }
     return false;
@@ -530,7 +530,7 @@
     if (!this.Note) { return; }
 
     // Case 1:  Iterator is on its own node.
-    if (this.ChildIterator == null) {
+    if (this.ChildIterator === null) {
         // Next check for children notes
       if (this.Note.Children.length > 0 && this.Note.ChildrenVisibility) {
             // Move to the first child.
@@ -562,7 +562,7 @@
   NoteIterator.prototype.Previous = function () {
     if (!this.Note) { return; }
 
-    if (this.ChildIterator == null) {
+    if (this.ChildIterator === null) {
         // At start.
       return this.Note;
     }
@@ -609,11 +609,11 @@
 // If the note is not in the tree, Set the note as root.
 // Otherwise, point the iterator to the note in the tree.
   NoteIterator.prototype.SetNote = function (note) {
-    if (this.GetNote() == note) { return; }
+    if (this.GetNote() === note) { return; }
     // See if the note is in the tree.
     this.ToStart();
     while (true) {
-      if (this.GetNote() == note) {
+      if (this.GetNote() === note) {
             // Found the note in the tree.
         return;
       }
@@ -633,7 +633,7 @@
   };
 
   NoteIterator.prototype.GetNote = function () {
-    if (this.ChildIterator != null) {
+    if (this.ChildIterator !== null) {
       return this.ChildIterator.GetNote();
     }
     return this.Note;

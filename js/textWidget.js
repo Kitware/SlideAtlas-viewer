@@ -34,13 +34,13 @@
     this.Type = 'text';
 
     DEBUG = this;
-    if (layer == null) {
+    if (layer === null) {
       return null;
     }
 
     if (typeof string !== 'string') { string = ''; }
 
-        // create and cuystomize the dialog properties popup.
+        // create and customize the dialog properties popup.
     var self = this;
     this.Dialog = new SAM.Dialog(function () { self.DialogApplyCallback(); });
     this.Dialog.Title.text('Text Annotation Editor');
@@ -212,10 +212,10 @@
     // Global text visibility is passed in as argument.
     // Local visiblity mode is the hover state of this text. (0 text only, 1: hover, 2: both on).
   TextWidget.prototype.Draw = function (view) {
-    if (this.VisibilityMode != 0) {
+    if (this.VisibilityMode !== 0) {
       this.Arrow.Draw(view);
     }
-    if (this.VisibilityMode != 1 || this.State != WAITING) {
+    if (this.VisibilityMode !== 1 || this.State !== WAITING) {
       this.Text.Draw(view);
       this.Text.Visibility = true;
     } else {
@@ -236,7 +236,7 @@
 
   TextWidget.prototype.Serialize = function () {
     if (this.Text === undefined) { return null; }
-    var obj = new Object();
+    var obj = {};
     obj.type = 'text';
     obj.user_note_flag = this.UserNoteFlag;
     obj.color = this.Text.Color;
@@ -256,7 +256,7 @@
     this.UserNoteFlag = obj.user_note_flag;
     var string = obj.string;
         // Some empty strings got in my database.  I connot delete them from the gui.
-    if (obj.string && obj.string == '') {
+    if (obj.string && obj.string === '') {
       this.Layer.RemoveWidget(this);
       return;
     }
@@ -267,7 +267,7 @@
       parseFloat(obj.color[2])];
     this.Text.Color = rgb;
     this.Text.Size = parseFloat(obj.size);
-    if (obj.backgroundFlag != undefined) {
+    if (obj.backgroundFlag !== undefined) {
       this.Text.BackgroundFlag = obj.backgroundFlag;
     }
     this.Text.Position = [parseFloat(obj.position[0]),
@@ -319,18 +319,18 @@
 
     // Anchor is in the middle of the bounds when the shape is not visible.
   TextWidget.prototype.SetVisibilityMode = function (mode) {
-    if (this.VisibilityMode == mode) { return; }
+    if (this.VisibilityMode === mode) { return; }
     this.VisibilityMode = mode;
 
-    if (mode == 2 || mode == 1) { // turn glyph on
-      if (this.SavedTextAnchor == undefined) {
+    if (mode === 2 || mode === 1) { // turn glyph on
+      if (this.SavedTextAnchor === undefined) {
         this.SavedTextAnchor = [-30, 0];
       }
       this.Text.Anchor = this.SavedTextAnchor.slice(0);
       this.Arrow.Visibility = true;
       this.Arrow.Origin = this.Text.Position;
       this.UpdateArrow();
-    } else if (mode == 0) { // turn glyph off
+    } else if (mode === 0) { // turn glyph off
             // save the old anchor incase glyph is turned back on.
       this.SavedTextAnchor = this.Text.Anchor.slice(0);
             // Put the new (invisible rotation point (anchor) in the middle bottom of the bounds.
@@ -357,11 +357,11 @@
     var length = Math.sqrt(dx * dx + dy * dy);
         // Find the intersection of the vector and the bounding box.
     var min = length;
-    if (dy != 0) {
+    if (dy !== 0) {
       var d = Math.abs(length * yRad / dy);
       if (min > d) { min = d; }
     }
-    if (dx != 0) {
+    if (dx !== 0) {
       var d = Math.abs(length * xRad / dx);
       if (min > d) { min = d; }
     }
@@ -378,12 +378,12 @@
 
   TextWidget.prototype.HandleKeyDown = function (event) {
         // The dialog consumes all key events.
-    if (this.State == PROPERTIES_DIALOG) {
+    if (this.State === PROPERTIES_DIALOG) {
       return false;
     }
 
         // Copy
-    if (event.keyCode == 67 && event.ctrlKey) {
+    if (event.keyCode === 67 && event.ctrlKey) {
             // control-c for copy
             // The extra identifier is not needed for widgets, but will be
             // needed if we have some other object on the clipboard.
@@ -401,15 +401,15 @@
   };
 
   TextWidget.prototype.HandleMouseDown = function (event) {
-    if (event.which == 1) {
+    if (event.which === 1) {
             // LastMouse necessary for dragging.
       var x = event.offsetX;
       var y = event.offsetY;
       var cam = this.Layer.GetCamera();
       this.LastMouse = [x, y];
-      if (this.State == ACTIVE) {
+      if (this.State === ACTIVE) {
         this.State = DRAG;
-      } else if (this.State == ACTIVE_TEXT) {
+      } else if (this.State === ACTIVE_TEXT) {
         this.State = DRAG_TEXT;
       }
       return false;
@@ -419,12 +419,12 @@
 
     // returns false when it is finished doing its work.
   TextWidget.prototype.HandleMouseUp = function (event) {
-    if (event.which == 1) {
-      if (this.State == DRAG) {
+    if (event.which === 1) {
+      if (this.State === DRAG) {
         this.State = ACTIVE;
         if (window.SA) { SA.RecordState(); }
         if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
-      } else if (this.State == DRAG_TEXT) {
+      } else if (this.State === DRAG_TEXT) {
         this.State = ACTIVE_TEXT;
         if (window.SA) { SA.RecordState(); }
         if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
@@ -432,9 +432,9 @@
       return false;
     }
 
-    if (event.which == 3) {
-      if (this.State == ACTIVE ||
-                this.State == ACTIVE_TEXT) {
+    if (event.which === 3) {
+      if (this.State === ACTIVE ||
+                this.State === ACTIVE_TEXT) {
                 // Right mouse was pressed.
                 // Pop up the properties dialog.
                 // Which one should we popup?
@@ -463,7 +463,7 @@
   };
 
   TextWidget.prototype.HandleMouseMove = function (event) {
-    if (this.State == DRAG) {
+    if (this.State === DRAG) {
       var cam = this.Layer.GetCamera();
       var w0 = cam.ConvertPointViewerToWorld(this.LastMouse[0], this.LastMouse[1]);
       var w1 = cam.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
@@ -479,7 +479,7 @@
       this.Layer.EventuallyDraw();
       return false;
     }
-    if (this.State == DRAG_TEXT) { // Just the text not the anchor glyph
+    if (this.State === DRAG_TEXT) { // Just the text not the anchor glyph
       var dx = event.offsetX - this.LastMouse[0];
       var dy = event.offsetY - this.LastMouse[1];
       this.LastMouse = [event.offsetX, event.offsetY];
@@ -495,7 +495,7 @@
       return false;
     }
         // We do not want to deactivate the widget while the properties dialog is showing.
-    if (this.State != PROPERTIES_DIALOG) {
+    if (this.State !== PROPERTIES_DIALOG) {
       return this.CheckActive(event);
     }
     return true;
@@ -504,9 +504,9 @@
   TextWidget.prototype.HandleTouchPan = function (event, viewer) {
         // We should probably have a handle touch start too.
         // Touch start calls CheckActive() ...
-    if (this.State == ACTIVE) {
+    if (this.State === ACTIVE) {
       this.State = DRAG;
-    } else if (this.State == ACTIVE_TEXT) {
+    } else if (this.State === ACTIVE_TEXT) {
       this.State = DRAG_TEXT;
     }
 
@@ -551,7 +551,7 @@
   };
 
   TextWidget.prototype.GetActive = function () {
-    if (this.State == ACTIVE || this.State == PROPERTIES_DIALOG) {
+    if (this.State === ACTIVE || this.State === PROPERTIES_DIALOG) {
       return true;
     }
     return false;
@@ -575,25 +575,25 @@
       reason = WAITING;
     }
 
-    if (reason == this.State) {
+    if (reason === this.State) {
       return;
     }
 
     this.State = reason;
 
-    if (reason == ACTIVE) {
+    if (reason === ACTIVE) {
       this.Text.Active = false;
       this.Arrow.Active = true;
       this.Layer.ActivateWidget(this);
       this.PlacePopup();
       this.Layer.EventuallyDraw();
-    } else if (reason == ACTIVE_TEXT) {
+    } else if (reason === ACTIVE_TEXT) {
       this.Text.Active = true;
       this.Arrow.Active = false;
       this.Layer.ActivateWidget(this);
       this.PlacePopup();
       this.Layer.EventuallyDraw();
-    } else if (reason == WAITING) {
+    } else if (reason === WAITING) {
       this.Deactivate();
     }
   };
@@ -633,7 +633,7 @@
     var string = this.Dialog.TextInput.val();
         // remove any trailing white space.
     string = string.trim();
-    if (string == '') {
+    if (string === '') {
       alert('Empty String');
       return;
     }
@@ -695,7 +695,7 @@
     var nLastWrappingIndex = -1;
     for (var i = 0; i < strRawValue.length; i++) {
       var curChar = strRawValue.charAt(i);
-      if (curChar == ' ' || curChar == '-' || curChar == '+') {
+      if (curChar === ' ' || curChar === '-' || curChar === '+') {
         nLastWrappingIndex = i;
       }
       oTextarea.value += curChar;

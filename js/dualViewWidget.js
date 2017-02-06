@@ -82,7 +82,7 @@ window.SA = window.SA || {};
         // of the dual viewer.
     this.NavigationWidget = new SA.NavigationWidget(this.TopDiv, this);
 
-    if (!SAM.MOBILE_DEVICE) { // || SAM.MOBILE_DEVICE == 'iPad') {
+    if (!SAM.MOBILE_DEVICE) { // || SAM.MOBILE_DEVICE === 'iPad') {
             // Todo: Make the button become more opaque when pressed.
       $('<img>')
                 .appendTo(this.ViewerDivs[0])
@@ -133,7 +133,7 @@ window.SA = window.SA || {};
         // TODO: Deal with multiple  windows consistently.
         // Now num viewRecords indicates the number of views in the display,
         // but not for stacks.  We have this start index which implies stack behavior.
-    if (note.Type != 'Stack') {
+    if (note.Type !== 'Stack') {
       if (!this.DualView && note.ViewerRecords.length > 1) {
         note.ViewerRecords = [note.ViewerRecords[0]];
       }
@@ -186,7 +186,7 @@ window.SA = window.SA || {};
     for (var i = 0; i < this.Viewers.length; ++i) {
       var viewer = this.Viewers[i];
 
-      if (args.hideCopyright != undefined) {
+      if (args.hideCopyright !== undefined) {
         viewer.SetCopyrightVisibility(!args.hideCopyright);
       }
       if (args.overview !== undefined) {
@@ -233,13 +233,13 @@ window.SA = window.SA || {};
   };
 
   DualViewWidget.prototype.SetNote = function (note) {
-        // NOTE: Even when this.saNote == note, we still need to set the
+        // NOTE: Even when this.saNote === note, we still need to set the
         // camera and annotations because the user might have changed these.
 
         // If the note is not loaded, request the note, and call this method
         // when the note is finally loaded.
     var self = this;
-    if (note && note.LoadState != 2) {
+    if (note && note.LoadState !== 2) {
       note.LoadViewId(
                 note.Id,
                 function () {
@@ -262,7 +262,7 @@ window.SA = window.SA || {};
             // this.NavigationWidget.Update(); // not sure if this is necessary
     }
     this.DisplayNote(note);
-    if (note.Type == 'Stack') {
+    if (note.Type === 'Stack') {
             // TODO: Can I move this logic into the display? SetNote maybe?
             // Possibly nagivationWidget (we need to know which viewer is referecne.
             // Select only gets called when the stack is first loaded.
@@ -376,14 +376,14 @@ window.SA = window.SA || {};
     // update the annotations.
   DualViewWidget.prototype.DisplayNote = function (note, lockCamera) {
     var numViewers = this.GetNumberOfViewers();
-    if (numViewers == 0) { return; }
-    if (note.Type == 'Stack') {
+    if (numViewers === 0) { return; }
+    if (note.Type === 'Stack') {
             // Stack display needs to keep both viewers up to date.
       numViewers = 2;
     }
 
         // We could have more than two in the future.
-    if (note.Type != 'Stack') {
+    if (note.Type !== 'Stack') {
             // I want the single view (when set by the user) to persist for rthe stack.
       numViewers = note.ViewerRecords.length;
       this.SetNumberOfViewers(numViewers);
@@ -427,7 +427,7 @@ window.SA = window.SA || {};
     if (!note) {
       note = new SA.Note();
     }
-    if (note.LoadState != 2) {
+    if (note.LoadState !== 2) {
       var self = this;
       note.LoadViewId(
                 noteId,
@@ -743,7 +743,7 @@ window.SA = window.SA || {};
     }
 
         // OverView cameras need to be updated.
-    if (refViewerIdx == 0) {
+    if (refViewerIdx === 0) {
       this.GetViewer(1).UpdateCamera();
       this.GetViewer(1).EventuallyRender(false);
     } else {
@@ -754,7 +754,7 @@ window.SA = window.SA || {};
         // Synchronize annotation visibility.
     var refViewer = this.GetViewer(refViewerIdx);
     for (var i = 0; i < 2; ++i) {
-      if (i != refViewerIdx) {
+      if (i !== refViewerIdx) {
         var viewer = this.GetViewer(i);
         if (viewer.AnnotationWidget && refViewer.AnnotationWidget) {
           viewer.AnnotationWidget.SetVisibility(
@@ -783,7 +783,7 @@ window.SA = window.SA || {};
         var r = Math.floor(polyline0.OutlineColor[0] * 255);
         var g = Math.floor(polyline0.OutlineColor[1] * 255);
         var b = Math.floor(polyline0.OutlineColor[2] * 255);
-        if (r != color[0] || g != color[1] || b != color[2]) {
+        if (r !== color[0] || g !== color[1] || b !== color[2]) {
           continue;
         }
         console.log('Matched color ' + i);
@@ -791,8 +791,8 @@ window.SA = window.SA || {};
                 // get the center and area.
         var center0 = [(polyline0.Bounds[0] + polyline0.Bounds[1]) * 0.5,
           (polyline0.Bounds[2] + polyline0.Bounds[3]) * 0.5];
-        var size = Math.abs(polyline0.Bounds[1] - polyline0.Bounds[0])
-                    + Math.abs(polyline0.Bounds[3] - polyline0.Bounds[2]);
+        var size = Math.abs(polyline0.Bounds[1] - polyline0.Bounds[0]) +
+                   Math.abs(polyline0.Bounds[3] - polyline0.Bounds[2]);
 
         var area0 = polyline0.ComputeArea();
         var bestMatch;
@@ -810,9 +810,8 @@ window.SA = window.SA || {};
             var area1 = polyline1.ComputeArea();
             var dx = center1[0] - center0b[0];
             var dy = center1[1] - center0b[1];
-            var match = (dx * dx + dy * dy + Math.abs(area1 - area0))
-                                       / area0;
-            if (bestIdx == -1 || match < bestMatch) {
+            var match = (dx * dx + dy * dy + Math.abs(area1 - area0)) / area0;
+            if (bestIdx === -1 || match < bestMatch) {
               bestMatch = match;
               bestPolyline = w1;
               bestIdx = j;
@@ -820,7 +819,7 @@ window.SA = window.SA || {};
           }
         }
 
-        if (bestIdx == -1) {
+        if (bestIdx === -1) {
                     // Should not happen
           console.log('+++ No candidates: Widget' + i);
         } else if (bestMatch < tolerance) {

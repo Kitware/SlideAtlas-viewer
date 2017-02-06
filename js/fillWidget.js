@@ -9,7 +9,7 @@
   var FILL_WIDGET_WAITING = 2;
 
   function FillWidget (viewer, newFlag) {
-    if (viewer == null) {
+    if (viewer === null) {
       return;
     }
 
@@ -50,7 +50,7 @@
             $('<input type="number">')
             .appendTo(this.Dialog.LineWidthDiv)
             .addClass('sa-view-fill-input')
-            .keypress(function (event) { return event.keyCode != 13; });
+            .keypress(function (event) { return event.keyCode !== 13; });
 
     this.Popup = new SAM.WidgetPopup(this);
     this.Viewer = viewer;
@@ -153,13 +153,13 @@
     var x = this.Viewer.MouseX;
     var y = this.Viewer.MouseY;
 
-    if (event.which == 1) {
+    if (event.which === 1) {
       var ptWorld = this.Viewer.ConvertPointViewerToWorld(x, y);
       this.Cursor.attr('src', SAM.ImagePathUrl + 'brush1.jpg');
       this.Cursor.show();
       this.Segmentation.AddPositive(ptWorld);
     }
-    if (event.which == 3) {
+    if (event.which === 3) {
       var ptWorld = this.Viewer.ConvertPointViewerToWorld(x, y);
       this.Cursor.attr('src', SAM.ImagePathUrl + 'eraser1.jpg');
       this.Cursor.show();
@@ -169,13 +169,13 @@
 
   FillWidget.prototype.HandleMouseUp = function (event) {
         // Middle mouse deactivates the widget.
-    if (event.which == 2) {
+    if (event.which === 2) {
             // Middle mouse was pressed.
       this.Deactivate();
     }
 
         // A stroke has just been finished.
-    if (event.which == 1 || event.which == 3) {
+    if (event.which === 1 || event.which === 3) {
       this.Cursor.hide();
       this.Segmentation.Update();
       this.Segmentation.Draw();
@@ -193,12 +193,12 @@
         // Move the paint bucket icon to follow the mouse.
     this.Cursor.css({'left': (x + 4), 'top': (y - 32)});
 
-    if (this.Viewer.MouseDown == true && this.State == FILL_WIDGET_DRAWING) {
-      if (event.which == 1) {
+    if (this.Viewer.MouseDown === true && this.State === FILL_WIDGET_DRAWING) {
+      if (event.which === 1) {
         var ptWorld = this.Viewer.ConvertPointViewerToWorld(x, y);
         this.Segmentation.AddPositive(ptWorld);
       }
-      if (event.which == 3) {
+      if (event.which === 3) {
         var ptWorld = this.Viewer.ConvertPointViewerToWorld(x, y);
         this.Segmentation.AddNegative(ptWorld);
       }
@@ -240,7 +240,7 @@
 
   FillWidget.prototype.CheckActive = function (event) {
         /*
-          if (this.State == FILL_WIDGET_DRAWING) { return; }
+          if (this.State === FILL_WIDGET_DRAWING) { return; }
 
           var pt = this.Viewer.ConvertPointWorldToViewer(this.ActiveCenter[0],
           this.ActiveCenter[1]);

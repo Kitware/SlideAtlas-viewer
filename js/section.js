@@ -26,7 +26,7 @@
     for (var cIdx = 0; cIdx < this.Caches.length; ++cIdx) {
       var cache = this.Caches[cIdx];
       var bds = cache.GetBounds();
-      if (cIdx == 0) {
+      if (cIdx === 0) {
         bounds = [bds[0], bds[1], bds[2], bds[3]];
       } else {
         if (bds[0] < bounds[0]) {
@@ -73,7 +73,7 @@
   Section.prototype.FindImage = function (imageCollectionName) {
     for (var i = 0; i < this.Caches.length; ++i) {
       var cache = this.Caches[i];
-      if (cache.Image._id == imageCollectionName) {
+      if (cache.Image._id === imageCollectionName) {
         return cache;
       }
     }
@@ -116,7 +116,7 @@
       var j = 0;
       while (j < tiles.length) { // We add tiles in the loop so we need a while.
         var tile = tiles[j];
-        if (tile.LoadState == 3) {
+        if (tile.LoadState === 3) {
           loadedTiles.push(tile);
         } else {
           if (tiles[j].LoadState < 3) {

@@ -23,7 +23,7 @@
   var WAITING = 3;
 
   function PencilWidget (layer, newFlag) {
-    if (layer == null) {
+    if (layer === null) {
       return;
     }
 
@@ -69,7 +69,7 @@
             $('<input type="number">')
             .appendTo(this.Dialog.LineWidthDiv)
             .css({'display': 'table-cell'})
-            .keypress(function (event) { return event.keyCode != 13; });
+            .keypress(function (event) { return event.keyCode !== 13; });
 
     this.LineWidth = 0;
     if (localStorage.PencilWidgetDefaults) {
@@ -118,7 +118,7 @@
   };
 
   PencilWidget.prototype.Serialize = function () {
-    var obj = new Object();
+    var obj = {};
     obj.type = 'pencil';
     obj.user_note_flag = this.UserNoteFlag;
     obj.shapes = [];
@@ -183,9 +183,9 @@
   };
 
   PencilWidget.prototype.HandleKeyDown = function (event) {
-    if (this.State == DRAWING) {
+    if (this.State === DRAWING) {
             // escape key (or space or enter) to turn off drawing
-      if (event.keyCode == 27 || event.keyCode == 32 || event.keyCode == 13) {
+      if (event.keyCode === 27 || event.keyCode === 32 || event.keyCode === 13) {
         this.Deactivate();
         return false;
       }
@@ -194,8 +194,8 @@
 
     // Change the line width with the wheel.
   PencilWidget.prototype.HandleMouseWheel = function (event) {
-    if (this.State == DRAWING ||
-             this.State == ACTIVE) {
+    if (this.State === DRAWING ||
+             this.State === ACTIVE) {
       if (this.Shapes.GetNumberOfShapes() < 0) { return; }
       var tmp = 0;
 
@@ -233,8 +233,8 @@
     var x = event.offsetX;
     var y = event.offsetY;
 
-    if (event.which == 1) {
-      if (this.State == DRAWING) {
+    if (event.which === 1) {
+      if (this.State === DRAWING) {
                 // Start drawing.
         var shape = new SAM.Polyline();
                 // shape.OutlineColor = [0.9, 1.0, 0.0];
@@ -248,7 +248,7 @@
         var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
         shape.Points.push([pt[0], pt[1]]); // avoid same reference.
       }
-      if (this.State == ACTIVE) {
+      if (this.State === ACTIVE) {
                 // Anticipate dragging (might be double click)
         var cam = this.Layer.GetCamera();
         this.LastMouse = cam.ConvertPointViewerToWorld(x, y);
@@ -257,20 +257,20 @@
   };
 
   PencilWidget.prototype.HandleMouseUp = function (event) {
-    if (event.which == 3) {
+    if (event.which === 3) {
             // Right mouse was pressed.
             // Pop up the properties dialog.
       this.ShowPropertiesDialog();
       return false;
     }
         // Middle mouse deactivates the widget.
-    if (event.which == 2) {
+    if (event.which === 2) {
             // Middle mouse was pressed.
       this.Deactivate();
       return false;
     }
 
-    if (this.State == DRAG) {
+    if (this.State === DRAG) {
             // Set the origin back to zero (put it explicitely in points).
       this.Shapes.ResetOrigin();
       this.State = ACTIVE;
@@ -278,8 +278,8 @@
 
         // A stroke has just been finished.
     var last = this.Shapes.GetNumberOfShapes() - 1;
-    if (this.State == DRAWING &&
-            event.which == 1 && last >= 0) {
+    if (this.State === DRAWING &&
+            event.which === 1 && last >= 0) {
       var spacing = this.Layer.GetCamera().GetSpacing();
             // NOTE: This assume that the shapes are polylines.
             // this.Decimate(this.Shapes.GetShape(last), spacing);
@@ -291,11 +291,11 @@
   };
 
   PencilWidget.prototype.HandleDoubleClick = function (event) {
-    if (this.State == DRAWING) {
+    if (this.State === DRAWING) {
       this.Deactivate();
       return false;
     }
-    if (this.State == ACTIVE) {
+    if (this.State === ACTIVE) {
       this.SetStateToDrawing();
       return false;
     }
@@ -306,7 +306,7 @@
     var x = event.offsetX;
     var y = event.offsetY;
 
-    if (event.which == 1 && this.State == DRAWING) {
+    if (event.which === 1 && this.State === DRAWING) {
       var last = this.Shapes.GetNumberOfShapes() - 1;
       var shape = this.Shapes.GetShape(last);
       var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
@@ -318,18 +318,18 @@
       return false;
     }
 
-    if (this.State == ACTIVE &&
-            event.which == 0) {
+    if (this.State === ACTIVE &&
+            event.which === 0) {
             // Deactivate
       this.SetActive(this.CheckActive(event));
       return false;
     }
 
-    if (this.State == ACTIVE && event.which == 1) {
+    if (this.State === ACTIVE && event.which === 1) {
       this.State = DRAG;
     }
 
-    if (this.State == DRAG) {
+    if (this.State === DRAG) {
             // Drag
       this.State = DRAG;
       this.Popup.Hide();
@@ -358,8 +358,8 @@
   };
 
   PencilWidget.prototype.CheckActive = function (event) {
-    if (this.State == DRAWING) { return true; }
-    if (this.Shapes.GetNumberOfShapes() == 0) { return false; }
+    if (this.State === DRAWING) { return true; }
+    if (this.Shapes.GetNumberOfShapes() === 0) { return false; }
 
     var x = event.offsetX;
     var y = event.offsetY;
@@ -371,9 +371,9 @@
     if (width < minWidth) { width = minWidth; }
 
     var flag = this.Shapes.PointOnShape(pt, width);
-    if (this.State == ACTIVE && !flag) {
+    if (this.State === ACTIVE && !flag) {
       this.SetActive(flag);
-    } else if (this.State == WAITING && flag) {
+    } else if (this.State === WAITING && flag) {
       this.PlacePopup();
       this.SetActive(flag);
     }
@@ -383,7 +383,7 @@
     // Setting to active always puts state into "active".
     // It can move to other states and stay active.
   PencilWidget.prototype.SetActive = function (flag) {
-    if (flag == this.GetActive()) { return; }
+    if (flag === this.GetActive()) { return; }
     if (flag) {
       this.Layer.ActivateWidget(this);
       this.State = ACTIVE;
@@ -391,7 +391,7 @@
       this.PlacePopup();
       this.Layer.EventuallyDraw();
     } else {
-      if (this.State != ACTIVE) {
+      if (this.State !== ACTIVE) {
                 // Not active.  Do nothing.
         return;
       }
@@ -401,7 +401,7 @@
   };
 
   PencilWidget.prototype.GetActive = function () {
-    return this.State != WAITING;
+    return this.State !== WAITING;
   };
 
   PencilWidget.prototype.RemoveFromLayer = function () {

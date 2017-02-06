@@ -76,7 +76,7 @@
 
   function Text (gl) {
         // All text objects sare the same texture map.
-        // if (TEXT_TEXTURE == undefined ) {
+        // if (TEXT_TEXTURE === undefined ) {
         // }
     if (gl) {
       this.gl = gl;
@@ -138,7 +138,7 @@
         // First transform the world anchor to view.
     var x = this.Position[0];
     var y = this.Position[1];
-    if (this.PositionCoordinateSystem != SAM.Shape.VIEWER) {
+    if (this.PositionCoordinateSystem !== SAM.Shape.VIEWER) {
       var m = view.Camera.Matrix;
       x = (this.Position[0] * m[0] + this.Position[1] * m[4] + m[12]) / m[15];
       y = (this.Position[0] * m[1] + this.Position[1] * m[5] + m[13]) / m[15];
@@ -153,10 +153,10 @@
     }
 
     if (view.gl) {
-      if (this.TextureLoaded == false) {
+      if (this.TextureLoaded === false) {
         return;
       }
-      if (this.Matrix == undefined) {
+      if (this.Matrix === undefined) {
         this.UpdateBuffers(view);
         this.Matrix = mat4.create();
         mat4.identity(this.Matrix);
@@ -267,7 +267,7 @@
   };
 
   function roundRect (ctx, x, y, width, height, radius) {
-        /* if (typeof stroke == "undefined" ) {
+        /* if (typeof stroke === "undefined" ) {
           stroke = true;
           } */
     if (typeof radius === 'undefined') {
@@ -325,7 +325,7 @@
 
     for (var i = 0; i < this.String.length; ++i) {
       var idx = this.String.charCodeAt(i);
-      if (idx == 10 || idx == 13) { // newline
+      if (idx === 10 || idx === 13) { // newline
         charLeft = 0;
         charTop += this.Size;
       } else {

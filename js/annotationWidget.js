@@ -139,7 +139,7 @@
   };
 
   AnnotationWidget.prototype.SetVisibility = function (visibility) {
-    if (this.Layer.GetVisibility() == visibility) {
+    if (this.Layer.GetVisibility() === visibility) {
       return;
     }
 
@@ -147,7 +147,7 @@
     // flag.
     if (SA.notesWidget) {
       var note = SA.notesWidget.GetCurrentNote();
-      if (note && note.Type == 'Stack') {
+      if (note && note.Type === 'Stack') {
         for (var i = 0; i < note.ViewerRecords.length; ++i) {
           note.ViewerRecords[i].AnnotationVisibility = visibility;
         }
@@ -155,7 +155,7 @@
     }
 
     if (this.VisibilityImage) {
-      if (visibility == ANNOTATION_OFF) {
+      if (visibility === ANNOTATION_OFF) {
         this.VisibilityImage.css({'top': '-30px'});
       } else {
         this.VisibilityImage.css({'top': '1px'});
@@ -172,7 +172,7 @@
 
   AnnotationWidget.prototype.ToggleVisibility = function () {
     var vis = this.GetVisibility();
-    if (vis == ANNOTATION_OFF) {
+    if (vis === ANNOTATION_OFF) {
       vis = ANNOTATION_ON;
     } else {
       vis = ANNOTATION_OFF;
@@ -306,14 +306,14 @@
     // See if a SectionsWidget already exists.
     var widget = null;
     var widgets = this.Layer.GetWidgets();
-    for (var i = 0; i < widgets.length && widget == null; ++i) {
+    for (var i = 0; i < widgets.length && widget === null; ++i) {
       var w = widgets[i];
         // if (w instanceOf SectionsWidget) {
-      if (w.Type == 'sections') {
+      if (w.Type === 'sections') {
         widget = w;
       }
     }
-    if (widget == null) {
+    if (widget === null) {
         // Find sections to initialize sections widget.
       widget = new SA.SectionsWidget(this.Layer, this.Viewer, false);
       widget.ComputeSections(this.Viewer);

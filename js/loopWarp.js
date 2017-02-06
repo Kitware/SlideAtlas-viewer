@@ -13,7 +13,7 @@
 
 // This method converts a point in image coordinates to a point in world coordinates.
   LoopWarp.prototype.ImageToWorld = function (imagePt) {
-    if (this.Loop.length == 0) {
+    if (this.Loop.length === 0) {
     // Just shift by the origin.
     // Assume spacing is 1.
       return [imagePt[0] + this.Origin[0], imagePt[1] + this.Origin[1]];
@@ -23,13 +23,13 @@
     var px = imagePt[0] - this.LoopCenter.ImagePt[0];
     var py = imagePt[1] - this.LoopCenter.ImagePt[1];
 
-  // Iterate ovver the wedges of the loop.
+  // Iterate over the wedges of the loop.
     var i0 = this.Loop.length - 1;
     var v0 = [this.Loop[i0].ImagePt[0] - this.LoopCenter.ImagePt[0], this.Loop[i0].ImagePt[1] - this.LoopCenter.ImagePt[1]];
     for (var i1 = 0; i1 < this.Loop.length; ++i1) {
     // Find the two bounding vectors of the wedge.
       var v1 = [this.Loop[i1].ImagePt[0] - this.LoopCenter.ImagePt[0], this.Loop[i1].ImagePt[1] - this.LoopCenter.ImagePt[1]];
-    // Find the linear combination of the vectors that equals the point. (inver the matrix [v0 v1])
+    // Find the linear combination of the vectors that equals the point. (invert the matrix [v0 v1])
       var d = (v0[0] * v1[1] - v1[0] * v0[1]);
       var k0 = (v1[1] * px - v1[0] * py) / d;
       var k1 = (v0[0] * py - v0[1] * px) / d;
@@ -49,7 +49,7 @@
 
 // This method converts a point in world coordinates to a point in cache-image coordinates.
   LoopWarp.prototype.WorldToImage = function (worldPt) {
-    if (this.Loop.length == 0) {
+    if (this.Loop.length === 0) {
     // Just shift by the origin.
     // Assume spacing is 1.
       return [worldPt[0] - this.Origin[0], worldPt[1] - this.Origin[1]];
@@ -59,13 +59,13 @@
     var px = worldPt[0] - this.LoopCenter.WorldPt[0];
     var py = worldPt[1] - this.LoopCenter.WorldPt[1];
 
-  // Iterate ovver the wedges of the loop.
+  // Iterate over the wedges of the loop.
     var i0 = this.Loop.length - 1;
     var v0 = [this.Loop[i0].WorldPt[0] - this.LoopCenter.WorldPt[0], this.Loop[i0].WorldPt[1] - this.LoopCenter.WorldPt[1]];
     for (var i1 = 0; i1 < this.Loop.length; ++i1) {
     // Find the two bounding vectors of the wedge.
       var v1 = [this.Loop[i1].WorldPt[0] - this.LoopCenter.WorldPt[0], this.Loop[i1].WorldPt[1] - this.LoopCenter.WorldPt[1]];
-    // Find the linear combination of the vectors that equals the point. (inver the matrix [v0 v1])
+    // Find the linear combination of the vectors that equals the point. (invert the matrix [v0 v1])
       var d = (v0[0] * v1[1] - v1[0] * v0[1]);
       var k0 = (v1[1] * px - v1[0] * py) / d;
       var k1 = (v0[0] * py - v0[1] * px) / d;
@@ -127,7 +127,7 @@
       loop.push(this.Loop[i0].ImagePt);
       loop.push(this.Loop[i1].ImagePt);
       i0 = i1;
-      loop = this.ClipLoop(bds[0], [ 1, 0], loop);
+      loop = this.ClipLoop(bds[0], [1, 0], loop);
       loop = this.ClipLoop(-bds[1], [-1, 0], loop);
       loop = this.ClipLoop(bds[2], [0, 1], loop);
       loop = this.ClipLoop(-bds[3], [0, -1], loop);

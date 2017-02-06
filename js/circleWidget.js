@@ -58,7 +58,7 @@
             $('<input type="number">')
             .appendTo(this.Dialog.LineWidthDiv)
             .addClass('sa-view-annotation-modal-input')
-            .keypress(function (event) { return event.keyCode != 13; });
+            .keypress(function (event) { return event.keyCode !== 13; });
 
         // Area
     this.Dialog.AreaDiv =
@@ -91,7 +91,7 @@
       this.Tolerance = 0.1;
     }
 
-    if (layer == null) {
+    if (layer === null) {
       return;
     }
 
@@ -127,7 +127,7 @@
   }
 
   CircleWidget.prototype.Draw = function (view) {
-    if (this.State != NEW_HIDDEN) {
+    if (this.State !== NEW_HIDDEN) {
       this.Shape.Draw(view);
     }
   };
@@ -142,7 +142,7 @@
 
   CircleWidget.prototype.Serialize = function () {
     if (this.Shape === undefined) { return null; }
-    var obj = new Object();
+    var obj = {};
     obj.type = 'circle';
     obj.user_note_flag = this.UserNoteFlag;
     obj.origin = this.Shape.Origin;
@@ -179,12 +179,12 @@
 
   CircleWidget.prototype.HandleKeyDown = function (keyCode) {
         // The dialog consumes all key events.
-    if (this.State == PROPERTIES_DIALOG) {
+    if (this.State === PROPERTIES_DIALOG) {
       return false;
     }
 
         // Copy
-    if (event.keyCode == 67 && event.ctrlKey) {
+    if (event.keyCode === 67 && event.ctrlKey) {
             // control-c for copy
             // The extra identifier is not needed for widgets, but will be
             // needed if we have some other object on the clipboard.
@@ -202,18 +202,18 @@
   };
 
   CircleWidget.prototype.HandleMouseDown = function (event) {
-    if (event.which != 1) {
+    if (event.which !== 1) {
       return false;
     }
     var cam = this.Layer.GetCamera();
-    if (this.State == NEW_DRAGGING) {
+    if (this.State === NEW_DRAGGING) {
             // We need the viewer position of the circle center to drag radius.
       this.OriginViewer =
                 cam.ConvertPointWorldToViewer(this.Shape.Origin[0],
                                               this.Shape.Origin[1]);
       this.State = DRAG_RADIUS;
     }
-    if (this.State == ACTIVE) {
+    if (this.State === ACTIVE) {
             // Determine behavior from active radius.
       if (this.NormalizedActiveDistance < 0.5) {
         this.State = DRAG;
@@ -229,8 +229,8 @@
 
     // returns false when it is finished doing its work.
   CircleWidget.prototype.HandleMouseUp = function (event) {
-    if (this.State == DRAG ||
-             this.State == DRAG_RADIUS) {
+    if (this.State === DRAG ||
+             this.State === DRAG_RADIUS) {
       this.SetActive(false);
 
       if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
@@ -243,16 +243,16 @@
     var x = event.offsetX;
     var y = event.offsetY;
 
-    if (event.which == 0 && this.State == ACTIVE) {
+    if (event.which === 0 && this.State === ACTIVE) {
       this.SetActive(this.CheckActive(event));
       return false;
     }
 
     var cam = this.Layer.GetCamera();
-    if (this.State == NEW_HIDDEN) {
+    if (this.State === NEW_HIDDEN) {
       this.State = NEW_DRAGGING;
     }
-    if (this.State == NEW_DRAGGING || this.State == DRAG) {
+    if (this.State === NEW_DRAGGING || this.State === DRAG) {
       if (SA && SA.notesWidget && !this.UserNoteFlag) { SA.notesWidget.MarkAsModified(); } // hack
       if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
       this.Shape.Origin = cam.ConvertPointViewerToWorld(x, y);
@@ -260,7 +260,7 @@
       this.Layer.EventuallyDraw();
     }
 
-    if (this.State == DRAG_RADIUS) {
+    if (this.State === DRAG_RADIUS) {
       var viewport = this.Layer.GetViewport();
       var cam = this.Layer.GetCamera();
       var dx = x - this.OriginViewer[0];
@@ -274,7 +274,7 @@
       this.Layer.EventuallyDraw();
     }
 
-    if (this.State == WAITING) {
+    if (this.State === WAITING) {
       this.CheckActive(event);
     }
     return false;
@@ -313,8 +313,8 @@
   };
 
   CircleWidget.prototype.CheckActive = function (event) {
-    if (this.State == NEW_HIDDEN ||
-            this.State == NEW_DRAGGING) {
+    if (this.State === NEW_HIDDEN ||
+            this.State === NEW_DRAGGING) {
       return true;
     }
 
@@ -335,7 +335,7 @@
     var lineWidth = this.Shape.LineWidth / this.Shape.Radius;
     this.NormalizedActiveDistance = d;
 
-    if (this.Shape.FillColor == undefined) { // Circle
+    if (this.Shape.FillColor === undefined) { // Circle
       if ((d < (1.0 + this.Tolerance + lineWidth) && d > (1.0 - this.Tolerance)) ||
                 d < (this.Tolerance + lineWidth)) {
         active = true;
@@ -352,7 +352,7 @@
 
     // Multiple active states. Active state is a bit confusing.
   CircleWidget.prototype.GetActive = function () {
-    if (this.State == WAITING) {
+    if (this.State === WAITING) {
       return false;
     }
     return true;
@@ -362,7 +362,7 @@
         // If the circle button is clicked to deactivate the widget before
         // it is placed, I want to delete it. (like cancel). I think this
         // will do the trick.
-    if (this.State == NEW_HIDDEN) {
+    if (this.State === NEW_HIDDEN) {
       this.Layer.RemoveWidget(this);
       return;
     }
@@ -380,7 +380,7 @@
     // Setting to active always puts state into "active".
     // It can move to other states and stay active.
   CircleWidget.prototype.SetActive = function (flag) {
-    if (flag == this.GetActive()) {
+    if (flag === this.GetActive()) {
       return;
     }
 

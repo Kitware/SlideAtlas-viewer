@@ -27,7 +27,7 @@
 
     // We need the viewer to get the image to process.
   function SectionsWidget (layer, viewer, newFlag) {
-    if (layer == null) {
+    if (layer === null) {
       return;
     }
 
@@ -134,7 +134,7 @@
 
     // Get union of all section bounds.
   SectionsWidget.prototype.GetBounds = function () {
-    if (this.Sections.length == 0) { return [0, 0, 0, 0]; }
+    if (this.Sections.length === 0) { return [0, 0, 0, 0]; }
     var allBds = this.Sections[0].GetBounds();
     for (var i = 0; i < this.Sections.length; ++i) {
       var bds = this.Sections[i].GetBounds();
@@ -164,7 +164,7 @@
         direction1 = -1;
       }
     }
-    if (axis == 1) {
+    if (axis === 1) {
       var tmp = direction0;
       direction0 = direction1;
       direction1 = tmp;
@@ -221,7 +221,7 @@
   };
 
   SectionsWidget.prototype.DeleteActiveSection = function () {
-    if (this.ActiveSection == null) { return; }
+    if (this.ActiveSection === null) { return; }
     var section = this.ActiveSection;
     this.SetActiveSection(null);
     this.RemoveSection(section);
@@ -233,7 +233,7 @@
   };
 
   SectionsWidget.prototype.RemoveSection = function (section) {
-    if (this.ActiveSection == section) this.ActiveSection = null;
+    if (this.ActiveSection === section) this.ActiveSection = null;
     var idx = this.Sections.indexOf(section);
     if (idx > -1) {
       this.Sections.splice(idx, 1);
@@ -241,7 +241,7 @@
   };
 
   SectionsWidget.prototype.SetActiveSection = function (section) {
-    if (section == this.ActiveSection) { return; }
+    if (section === this.ActiveSection) { return; }
 
     if (this.ActiveSection) {
       this.ActiveSection.Active = false;
@@ -322,7 +322,7 @@
   };
 
   SectionsWidget.prototype.Serialize = function () {
-    var obj = new Object();
+    var obj = {};
     obj.type = 'sections';
     obj.sections = [];
     for (var i = 0; i < this.Sections.length; ++i) {
@@ -353,7 +353,7 @@
   };
 
   SectionsWidget.prototype.IsEmpty = function () {
-    return this.Sections.length == 0;
+    return this.Sections.length === 0;
   };
 
   SectionsWidget.prototype.HandleMouseWheel = function (event) {
@@ -361,7 +361,7 @@
   };
 
   SectionsWidget.prototype.HandleKeyPress = function (event, shift) {
-    if (event.keyCode == 46) {
+    if (event.keyCode === 46) {
       this.DeleteActiveSection();
       return false;
     }
@@ -372,7 +372,7 @@
     this.StartX = event.offsetX;
     this.StartY = event.offsetY;
     if (this.ActiveSection) {
-      if (event.which == 3) {
+      if (event.which === 3) {
         this.Menu
                     .show()
                     .css({'left': event.offsetX + 'px',
@@ -386,7 +386,7 @@
   SectionsWidget.prototype.HandleMouseUp = function (event) {
     var x = event.offsetX;
     var y = event.offsetY;
-    if (event.which == 1) {
+    if (event.which === 1) {
       if (Math.abs(x - this.StartX) +
                 Math.abs(y - this.StartY) < 5) {
                 // alert("click");
@@ -407,7 +407,7 @@
   SectionsWidget.prototype.HandleMouseMove = function (event) {
     var x = event.offsetX;
     var y = event.offsetY;
-    if (event.which == 1) {
+    if (event.which === 1) {
             // Drag out a bounding box.
             // Keep the bounding box in slide coordinates for now.
       var pt0 = this.Layer.GetCamera().ConvertPointViewerToWorld(this.StartX, this.StartY);
@@ -417,7 +417,7 @@
       return false;
     }
 
-    if (event.which == 0) {
+    if (event.which === 0) {
       var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
             // Find the smallest section with pt in the bbox.
       var bestSection = null;
@@ -429,7 +429,7 @@
         if (pt[0] > (bds[0] - margin) && pt[0] < (bds[1] + margin) &&
                     pt[1] > (bds[2] - margin) && pt[1] < (bds[3] + margin)) {
           var area = (bds[1] - bds[0]) * (bds[3] - bds[2]);
-          if (bestSection == null || area < bestArea) {
+          if (bestSection === null || area < bestArea) {
             bestSection = this.Sections[i];
             bestArea = area;
           }
@@ -486,8 +486,8 @@
     for (var i = 0; i < this.Sections.length; ++i) {
       var section = this.Sections[i];
       var mode = section.ContainedInBounds(bds);
-      if (mode == 2) { full.push(section); }
-      if (mode == 1) { partial.push(section); }
+      if (mode === 2) { full.push(section); }
+      if (mode === 1) { partial.push(section); }
     }
         // If the rectangle fully contains more than one shape, group them
     if (full.length > 1) {
@@ -497,7 +497,7 @@
       }
     }
         // If bounds do not contain any section, process the image for a new one.
-    if (full.length == 0 && partial.length == 0) {
+    if (full.length === 0 && partial.length === 0) {
             // My decision to keep bounds in slide space is causing problems
             // here. I might want to change all bounds comparison to view.
             // It would require recomputation of bounds when the view changes,
@@ -519,7 +519,7 @@
                              var threshold = SA.PickThreshold(histogram);
                                // TODO: Move the hagfish specific method in to this class.
                              var contours = self.GetBigContours(data, threshold);
-                             if (contours.length == 0) { return; }
+                             if (contours.length === 0) { return; }
                              var w = new SA.StackSectionWidget();
                              for (var i = 0; i < contours.length; ++i) {
                                w.Shapes.push(contours[i].MakePolyline([0, 1, 0]));
@@ -531,23 +531,23 @@
 
         // If the contours partially contains only one section, and clean
         // separates the shapes, then split them.
-    if (full.length == 0 && partial.length == 1) {
+    if (full.length === 0 && partial.length === 1) {
       var section = partial[0];
       full = [];
       partial = [];
       for (var i = 0; i < section.Shapes.length; ++i) {
         var contains = section.Shapes[i].ContainedInBounds(bds);
-        if (contains == 1) { partial.push(section.Shapes[i]); }
-        if (contains == 2) { full.push(section.Shapes[i]); }
+        if (contains === 1) { partial.push(section.Shapes[i]); }
+        if (contains === 2) { full.push(section.Shapes[i]); }
       }
-      if (partial.length == 0) {
+      if (partial.length === 0) {
         var idx;
                 // Split it up.
         var newSection = new SA.StackSectionWidget();
         newSection.Shapes = full;
         for (var i = 0; i < full.length; ++i) {
           idx = section.Shapes.indexOf(full[i]);
-          if (idx != -1) {
+          if (idx !== -1) {
             section.Shapes.splice(idx, 1);
           }
           section.Bounds = null;

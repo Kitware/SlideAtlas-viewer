@@ -24,7 +24,7 @@
     var m11 = trianglePoints[2][1] - trianglePoints[0][1];
   // Compute the inverse transformation.
     var tmp = m00 * m11 - m10 * m01;
-    if (tmp == 0.0) {
+    if (tmp === 0.0) {
       return null;
     }
   // determinant
@@ -92,7 +92,7 @@
       if (params) {
       // Compute a distance of point from the triangle.
         dist = this.ComputeDistance(params);
-        if (dist == 0.0) {
+        if (dist === 0.0) {
         // Point is inside the triangle.
         // Compute the world point from the weights.
           var worldPt = [0.0, 0.0, 0.0];
@@ -103,7 +103,7 @@
           }
           return worldPt;
         } else { // Keep track of the best triangle.
-          if (bestParams == null || dist < bestDist) {
+          if (bestParams === null || dist < bestDist) {
             bestDist = dist;
             bestParams = params;
             bestTriangleIds = triangleIds;
@@ -112,7 +112,7 @@
       }
     }
 
-    if (bestParams == null) {
+    if (bestParams === null) {
       return null;
     }
 
@@ -143,7 +143,7 @@
       var params = this.ComputePointParameters(worldPt, trianglePoints);
       if (params) {
         dist = this.ComputeDistance(params);
-        if (dist == 0.0) {
+        if (dist === 0.0) {
         // Point is inside the triangle.
         // Compute the world point from the weights.
           var imagePt = [0.0, 0.0, 0.0];
@@ -154,7 +154,7 @@
           }
           return imagePt;
         } else { // Keep track of the best triangle.
-          if (bestParams == null || dist < bestDist) {
+          if (bestParams === null || dist < bestDist) {
             bestDist = dist;
             bestParams = params;
             bestTriangleIds = triangleIds;
@@ -163,7 +163,7 @@
       }
     }
 
-    if (bestParams == null) {
+    if (bestParams === null) {
       return null;
     }
 
@@ -226,7 +226,7 @@
       loop.push(this.Points[triIds[1]].ImagePt);
       loop.push(this.Points[triIds[2]].ImagePt);
 
-      loop = this.ClipLoop(bds[0], [ 1, 0], loop);
+      loop = this.ClipLoop(bds[0], [1, 0], loop);
       loop = this.ClipLoop(-bds[1], [-1, 0], loop);
       loop = this.ClipLoop(bds[2], [0, 1], loop);
       loop = this.ClipLoop(-bds[3], [0, -1], loop);

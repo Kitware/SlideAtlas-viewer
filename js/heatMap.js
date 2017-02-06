@@ -41,10 +41,10 @@
             'void main(void) {' +
             '  vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t)).rgba;' +
             '  float alpha = textureColor[0];' +
-            '  if (uWindowLevel[0] != 1.0 || uWindowLevel[1] != 0.5) {' +
+            '  if (uWindowLevel[0] !== 1.0 || uWindowLevel[1] !== 0.5) {' +
             '    alpha = ((alpha-0.5)/uWindowLevel[0]) + uWindowLevel[1];' +
             '  }' +
-            '  if (uGamma != 1.0) {' +
+            '  if (uGamma !== 1.0) {' +
             '    if (uGamma < 0.0) {' +
             '      alpha = pow((1.0-alpha), -uGamma);' +
             '    } else {' +
@@ -68,8 +68,8 @@
 
     var shaderProgram = SA.createWebGlProgram(heatMapFragmentShaderString, vertexShaderString, gl);
         // Setup the shader program to render heatmaps.
-    shaderProgram.textureCoordAttribute
-            = gl.getAttribLocation(shaderProgram, 'aTextureCoord');
+    shaderProgram.textureCoordAttribute =
+            gl.getAttribLocation(shaderProgram, 'aTextureCoord');
     gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
     shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, 'uSampler');
     shaderProgram.colorUniform = gl.getUniformLocation(shaderProgram, 'uColor');
@@ -121,10 +121,10 @@
         var outCam = this.View.Camera;
         var imageObj = this.View.GetCache().Image;
         outCam.DeepCopy(inCam);
-        outCam.FocalPoint[0]
-                    = (outCam.FocalPoint[0] - imageObj.origin[0]) / imageObj.spacing[0];
-        outCam.FocalPoint[1]
-                    = (outCam.FocalPoint[1] - imageObj.origin[1]) / imageObj.spacing[1];
+        outCam.FocalPoint[0] =
+                    (outCam.FocalPoint[0] - imageObj.origin[0]) / imageObj.spacing[0];
+        outCam.FocalPoint[1] =
+                    (outCam.FocalPoint[1] - imageObj.origin[1]) / imageObj.spacing[1];
         outCam.Width /= imageObj.spacing[0];
         outCam.Height /= imageObj.spacing[1];
         outCam.ComputeMatrix();
@@ -140,7 +140,7 @@
       gl.disable(gl.DEPTH_TEST);
       gl.enable(gl.BLEND);
             // The blending in funky because there is no destination.
-            // It is bleniding with data from canvas behind the webGl canvas.
+            // It is blending with data from canvas behind the webGl canvas.
       gl.blendFunc(gl.SRC_ALPHA, gl.ZERO);
       gl.uniform3f(program.colorUniform, this.Color[0], this.Color[1], this.Color[2]);
       gl.uniform1f(program.gamaUniform, this.Gamma);

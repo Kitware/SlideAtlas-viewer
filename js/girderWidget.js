@@ -164,13 +164,13 @@
 
     for (var i = 0; i < this.AnnotationLayer.GetNumberOfWidgets(); ++i) {
       var widget = this.AnnotationLayer.GetWidget(i).Serialize();
-      if (widget.type == 'circle') {
+      if (widget.type === 'circle') {
         widget.origin[2] = 0; // z coordinate
         element = {'type': 'circle',
           'center': widget.origin,
           'radius': widget.radius};
       }
-      if (widget.type == 'text') {
+      if (widget.type === 'text') {
                 // Will not keep scale feature..
         var points = [widget.position, widget.offset];
         points[1][0] += widget.position[0];
@@ -185,7 +185,7 @@
           'fontSize': widget.size,
           'color': SAM.ConvertColorToHex(widget.color)};
       }
-      if (widget.type == 'grid') {
+      if (widget.type === 'grid') {
         element = {'type': 'rectanglegrid',
           'center': widget.origin,
           'width': widget.bin_width * widget.dimensions[0],
@@ -195,7 +195,7 @@
           'widthSubdivisions': widget.dimensions[0],
           'heightSubdivisions': widget.dimensions[1]};
       }
-      if (widget.type == 'rect') {
+      if (widget.type === 'rect') {
         element = {'type': 'rectangle',
           'label': {'value': 'test'},
           'center': widget.origin,
@@ -203,7 +203,7 @@
           'width': widget.width,
           'rotation': widget.orientation};
       }
-      if (widget.type == 'rect_set') {
+      if (widget.type === 'rect_set') {
         var num = widget.widths.length;
         for (var j = 0; j < num; ++j) {
           element = {'type': 'rectangle',
@@ -217,7 +217,7 @@
         }
         element = undefined;
       }
-      if (widget.type == 'polyline') {
+      if (widget.type === 'polyline') {
                 // add the z coordinate
         for (var j = 0; j < widget.points.length; ++j) {
           widget.points[j][2] = 0;
@@ -226,7 +226,7 @@
           'closed': widget.closedloop,
           'points': widget.points};
       }
-      if (widget.type == 'lasso') {
+      if (widget.type === 'lasso') {
                 // add the z coordinate
         for (var j = 0; j < widget.points.length; ++j) {
           widget.points[j][2] = 0;
@@ -236,7 +236,7 @@
           'points': widget.points};
       }
             // Pencil scheme not exact match.  Need to split up polylines.
-      if (widget.type == 'pencil') {
+      if (widget.type === 'pencil') {
         for (var i = 0; i < widget.shapes.length; ++i) {
           var points = widget.shapes[i];
                     // add the z coordinate
@@ -300,7 +300,7 @@
         var y = 70 + ((i - 1) * 6 * this.Radius);
         annotObj.Circle.animate({'top': y + 'px'});
         newObjects.push(annotObj);
-      } else if (deleteAnnotObj == annotObj) {
+      } else if (deleteAnnotObj === annotObj) {
         found = true;
         annotObj.Circle.remove();
         if (window.girder) {
@@ -352,11 +352,11 @@
 
     circle.contextmenu(function () { return false; });
     circle.mousedown(function (e) {
-      if (e.button == 0) {
+      if (e.button === 0) {
         self.DisplayAnnotation(annotObj);
         return false;
       }
-      if (e.button == 2) {
+      if (e.button === 2) {
         self.MenuAnnotationObject = annotObj;
                 // Position and show the properties menu.
         var pos = $(this).position();
@@ -396,20 +396,20 @@
     this.AnnotationLayer.Reset();
 
         // Put all the rectangles into one set.
-    var set_obj = {};
-    set_obj.type = 'rect_set';
-    set_obj.centers = [];
-    set_obj.widths = [];
-    set_obj.heights = [];
-    set_obj.confidences = [];
-    set_obj.labels = [];
+    var setObj = {};
+    setObj.type = 'rect_set';
+    setObj.centers = [];
+    setObj.widths = [];
+    setObj.heights = [];
+    setObj.confidences = [];
+    setObj.labels = [];
 
     var annot = annotObj.Data.annotation;
     for (var i = 0; i < annot.elements.length; ++i) {
       var element = annot.elements[i];
       var obj = {};
 
-      if (element.type == 'view') {
+      if (element.type === 'view') {
                 // Set the camera / view.
         var cam = this.AnnotationLayer.GetCamera();
         cam.SetFocalPoint(element.center);
@@ -430,7 +430,7 @@
           this.AnnotationLayer.Viewer.EventuallyRender();
         }
       }
-      if (element.type == 'circle') {
+      if (element.type === 'circle') {
         obj.type = element.type;
         obj.outlinecolor = SAM.ConvertColor(element.lineColor);
         obj.linewidth = element.lineWidth;
@@ -438,7 +438,7 @@
         obj.radius = element.radius;
         this.AnnotationLayer.LoadWidget(obj);
       }
-      if (element.type == 'arrow') {
+      if (element.type === 'arrow') {
         obj.type = 'text';
         obj.string = element.label.value;
         obj.color = SAM.ConvertColor(element.fillColor);
@@ -449,9 +449,9 @@
         obj.offset[1] -= obj.position[1];
         this.AnnotationLayer.LoadWidget(obj);
       }
-      if (element.type == 'rectanglegrid') {
-        obj.type = 'grid',
-                obj.outlinecolor = SAM.ConvertColor(element.lineColor);
+      if (element.type === 'rectanglegrid') {
+        obj.type = 'grid';
+        obj.outlinecolor = SAM.ConvertColor(element.lineColor);
         obj.linewidth = element.lineWidth;
         obj.origin = element.center;
         obj.bin_width = element.width / element.widthSubdivisions;
@@ -460,24 +460,24 @@
         obj.dimensions = [element.widthSubdivisions, element.heightSubdivisions];
         this.AnnotationLayer.LoadWidget(obj);
       }
-      if (element.type == 'rectangle') {
+      if (element.type === 'rectangle') {
         if (true) {
-          set_obj.widths.push(element.width);
-          set_obj.heights.push(element.height);
-          set_obj.centers.push(element.center[0]);
-          set_obj.centers.push(element.center[1]);
+          setObj.widths.push(element.width);
+          setObj.heights.push(element.height);
+          setObj.centers.push(element.center[0]);
+          setObj.centers.push(element.center[1]);
           if (element.scalar === undefined) {
             element.scalar = 1.0;
           }
-          set_obj.confidences.push(element.scalar);
+          setObj.confidences.push(element.scalar);
           if (element.label) {
-            set_obj.labels.push(element.label.value);
+            setObj.labels.push(element.label.value);
           } else {
-            set_obj.labels.push('');
+            setObj.labels.push('');
           }
         } else {
-          obj.type = 'rect',
-                    obj.outlinecolor = SAM.ConvertColor(element.lineColor);
+          obj.type = 'rect';
+          obj.outlinecolor = SAM.ConvertColor(element.lineColor);
           obj.linewidth = element.lineWidth;
           obj.origin = element.center;
           obj.width = element.width;
@@ -486,7 +486,7 @@
           this.AnnotationLayer.LoadWidget(obj);
         }
       }
-      if (element.type == 'polyline') {
+      if (element.type === 'polyline') {
         obj.type = element.type;
         obj.closedloop = element.closed;
         obj.outlinecolor = SAM.ConvertColor(element.lineColor);
@@ -496,8 +496,8 @@
       }
     }
 
-    if (set_obj.widths.length > 0) {
-      this.AnnotationLayer.LoadWidget(set_obj);
+    if (setObj.widths.length > 0) {
+      this.AnnotationLayer.LoadWidget(setObj);
     }
 
     this.AnnotationLayer.EventuallyDraw();

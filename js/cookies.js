@@ -6,20 +6,21 @@ window.SA = window.SA || {};
 (function () {
   'use strict';
 
-  SA.setCookie = function (c_name, value, exdays) {
+  SA.setCookie = function (cName, value, exdays) {
     var exdate = new Date();
     exdate.setDate(exdate.getDate() + exdays);
-    var c_value = escape(value) + ((exdays == null) ? '' : '; expires=' + exdate.toUTCString());
-    document.cookie = c_name + '=' + c_value;
+    var cValue = escape(value) + ((exdays === null) ? '' : '; expires=' + exdate.toUTCString());
+    document.cookie = cName + '=' + cValue;
   };
 
-  SA.getCookie = function (c_name) {
-    var i, x, y, ARRcookies = document.cookie.split(';');
+  SA.getCookie = function (cName) {
+    var i, x, y;
+    var ARRcookies = document.cookie.split(';');
     for (i = 0; i < ARRcookies.length; i++) {
       x = ARRcookies[i].substr(0, ARRcookies[i].indexOf('='));
       y = ARRcookies[i].substr(ARRcookies[i].indexOf('=') + 1);
       x = x.replace(/^\s+|\s+$/g, '');
-      if (x == c_name) {
+      if (x === cName) {
         return unescape(y);
       }
     }

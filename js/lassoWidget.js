@@ -13,7 +13,7 @@
   var WAITING = 2;
 
   function LassoWidget (layer, newFlag) {
-    if (layer == null) {
+    if (layer === null) {
       return;
     }
 
@@ -57,7 +57,7 @@
             $('<input type="number">')
             .appendTo(this.Dialog.LineWidthDiv)
             .addClass('sa-view-annotation-modal-input')
-            .keypress(function (event) { return event.keyCode != 13; });
+            .keypress(function (event) { return event.keyCode !== 13; });
 
         // Area
     this.Dialog.AreaDiv =
@@ -116,7 +116,7 @@
   };
 
   LassoWidget.prototype.Serialize = function () {
-    var obj = new Object();
+    var obj = {};
     obj.type = 'lasso';
     obj.user_note_flag = this.UserNoteFlag;
     obj.outlinecolor = this.Loop.OutlineColor;
@@ -133,7 +133,7 @@
     // Load a widget from a json object (origin MongoDB).
   LassoWidget.prototype.Load = function (obj) {
     this.UserNoteFlag = obj.user_note_flag;
-    if (obj.outlinecolor != undefined) {
+    if (obj.outlinecolor !== undefined) {
       this.Loop.OutlineColor[0] = parseFloat(obj.outlinecolor[0]);
       this.Loop.OutlineColor[1] = parseFloat(obj.outlinecolor[1]);
       this.Loop.OutlineColor[2] = parseFloat(obj.outlinecolor[2]);
@@ -142,14 +142,14 @@
             //    this.Stroke.OutlineColor = this.Loop.OutlineColor;
             // }
     }
-    if (obj.outlinewidth != undefined) {
+    if (obj.outlinewidth !== undefined) {
       this.Loop.LineWidth = obj.linewidth;
     }
     var points = [];
-    if (obj.points != undefined) {
+    if (obj.points !== undefined) {
       points = obj.points;
     }
-    if (obj.shape != undefined) {
+    if (obj.shape !== undefined) {
       points = obj.shapes[0];
     }
 
@@ -162,8 +162,8 @@
   };
 
   LassoWidget.prototype.HandleMouseWheel = function (event) {
-    if (this.State == DRAWING ||
-             this.State == ACTIVE) {
+    if (this.State === DRAWING ||
+             this.State === ACTIVE) {
       if (!this.Loop) { return true; }
       var tmp = 0;
 
@@ -212,9 +212,9 @@
   };
 
   LassoWidget.prototype.HandleKeyDown = function (event) {
-    if (this.State == DRAWING) {
+    if (this.State === DRAWING) {
             // escape key (or space or enter) to turn off drawing
-      if (event.keyCode == 27 || event.keyCode == 32 || event.keyCode == 13) {
+      if (event.keyCode === 27 || event.keyCode === 32 || event.keyCode === 13) {
         this.Deactivate();
         return false;
       }
@@ -225,7 +225,7 @@
     var x = event.offsetX;
     var y = event.offsetY;
 
-    if (event.which == 1) {
+    if (event.which === 1) {
             // Start drawing.
             // Stroke is a temporary line for interaction.
             // When interaction stops, it is converted/merged with loop.
@@ -246,13 +246,13 @@
 
   LassoWidget.prototype.HandleMouseUp = function (event) {
         // Middle mouse deactivates the widget.
-    if (event.which == 2) {
+    if (event.which === 2) {
             // Middle mouse was pressed.
       this.Deactivate();
     }
 
         // A stroke has just been finished.
-    if (event.which == 1 && this.State == DRAWING) {
+    if (event.which === 1 && this.State === DRAWING) {
       var spacing = this.Layer.GetCamera().GetSpacing();
             // this.Decimate(this.Stroke, spacing);
       this.Stroke.Decimate(spacing);
@@ -274,11 +274,11 @@
   };
 
   LassoWidget.prototype.HandleDoubleClick = function (event) {
-    if (this.State == DRAWING) {
+    if (this.State === DRAWING) {
       this.Deactivate();
       return false;
     }
-    if (this.State == ACTIVE) {
+    if (this.State === ACTIVE) {
       this.SetStateToDrawing();
       return false;
     }
@@ -300,7 +300,7 @@
     var x = event.offsetX;
     var y = event.offsetY;
 
-    if (event.which == 1 && this.State == DRAWING) {
+    if (event.which === 1 && this.State === DRAWING) {
       var shape = this.Stroke;
       var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
       shape.Points.push([pt[0], pt[1]]); // avoid same reference.
@@ -311,8 +311,8 @@
       return false;
     }
 
-    if (this.State == ACTIVE &&
-            event.which == 0) {
+    if (this.State === ACTIVE &&
+            event.which === 0) {
             // Deactivate
       this.SetActive(this.CheckActive(event));
       return false;
@@ -349,7 +349,7 @@
     // Just returns whether the widget thinks it should be active.
     // Layer is responsible for seting it to active.
   LassoWidget.prototype.CheckActive = function (event) {
-    if (this.State == DRAWING) { return; }
+    if (this.State === DRAWING) { return; }
 
     var x = event.offsetX;
     var y = event.offsetY;
@@ -368,21 +368,21 @@
   };
 
   LassoWidget.prototype.GetActive = function () {
-    return this.State != WAITING;
+    return this.State !== WAITING;
   };
 
     // Setting to active always puts state into "active".
     // It can move to other states and stay active.
   LassoWidget.prototype.SetActive = function (flag) {
     if (flag) {
-      if (this.State == WAITING) {
+      if (this.State === WAITING) {
         this.State = ACTIVE;
         this.Loop.SetActive(true);
         this.PlacePopup();
         this.Layer.EventuallyDraw();
       }
     } else {
-      if (this.State != WAITING) {
+      if (this.State !== WAITING) {
         this.Deactivate();
         this.Layer.DeactivateWidget(this);
       }
@@ -508,7 +508,7 @@
                 // I need to insert the intersection in the stroke so
                 // one stroke segment does not intersect loop twice.
         this.Stroke.Points.splice(i, 0, tmp.Point);
-        if (intersection0 == undefined) {
+        if (intersection0 === undefined) {
           intersection0 = tmp;
           intersection0.StrokeIndex = i;
         } else {
@@ -526,7 +526,7 @@
     var sanityCheck = 0;
 
         // If we have two intersections, clip the loop with the stroke.
-    if (intersection1 != undefined) {
+    if (intersection1 !== undefined) {
             // We will have two parts.
             // Build both loops keeing track of their lengths.
             // Keep the longer part.
@@ -543,7 +543,7 @@
             // Now the two new loops take different directions around the original loop.
             // Decreasing
       i = intersection1.LoopIndex;
-      while (i != intersection0.LoopIndex) {
+      while (i !== intersection0.LoopIndex) {
         if (++sanityCheck > 1000000) {
           alert('Combine loop 1 is taking too long.');
           return;
@@ -552,7 +552,7 @@
         var dx = this.Loop.Points[i][0];
         var dy = this.Loop.Points[i][1];
                 // decrement around loop.  First and last loop points are the same.
-        if (--i == 0) { i = this.Loop.Points.length - 1; }
+        if (--i === 0) { i = this.Loop.Points.length - 1; }
                 // Integrate distance.
         dx -= this.Loop.Points[i][0];
         dy -= this.Loop.Points[i][1];
@@ -563,7 +563,7 @@
 
             // Increasing
       i = intersection1.LoopIndex;
-      while (i != intersection0.LoopIndex) {
+      while (i !== intersection0.LoopIndex) {
         if (++sanityCheck > 1000000) {
           alert('Combine loop 2 is taking too long.');
           return;
@@ -572,7 +572,7 @@
         var dx = this.Loop.Points[i][0];
         var dy = this.Loop.Points[i][1];
                 // increment around loop.  First and last loop points are the same.
-        if (++i == this.Loop.Points.length - 1) { i = 0; }
+        if (++i === this.Loop.Points.length - 1) { i = 0; }
                 // Integrate distance.
         dx -= this.Loop.Points[i][0];
         dy -= this.Loop.Points[i][1];
@@ -618,7 +618,7 @@
     for (var i = 1; i < this.Loop.Points.length; ++i) {
       var m1 = this.Loop.Points[i];
             // Avoid an infinite loop inserting points.
-      if (p0 == m0 || p0 == m1) { continue; }
+      if (p0 === m0 || p0 === m1) { continue; }
       var n1 = [(m1[0] - p0[0]) / mag, (m1[1] - p0[1]) / mag];
       var k1 = [(n1[0] * p[0] + n1[1] * p[1]), (n1[1] * p[0] - n1[0] * p[1])];
       if ((k1[1] >= 0.0 && k0[1] <= 0.0) || (k1[1] <= 0.0 && k0[1] >= 0.0)) {

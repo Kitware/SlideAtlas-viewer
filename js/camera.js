@@ -162,7 +162,7 @@ window.SAM = window.SAM || {};
     // Scale does not matter because we only care about rotation.
   Camera.prototype.HandleRoll = function (x, y, dx, dy) {
         // Avoid divide by zero / singularity
-    if (x == 0 && y == 0) {
+    if (x === 0 && y === 0) {
       return;
     }
         // Orthogonal (counter clockwise) dot dVect.
@@ -307,7 +307,7 @@ window.SAM = window.SAM || {};
 
   Camera.prototype.CreateBuffer = function (gl) {
     if (gl) {
-      if (this.Buffer != null) {
+      if (this.Buffer !== null) {
         gl.deleteBuffer(this.Buffer);
       }
       this.Buffer = gl.createBuffer();
@@ -344,10 +344,10 @@ window.SAM = window.SAM || {};
 
         // To handle rotation, I need to pass the center through
         // the overview camera matrix. Coordinate system is -1->1
-    var newCx = (cx * overviewCam.Matrix[0] + cy * overviewCam.Matrix[4]
-                     + overviewCam.Matrix[12]) / overviewCam.Matrix[15];
-    var newCy = (cx * overviewCam.Matrix[1] + cy * overviewCam.Matrix[5]
-                     + overviewCam.Matrix[13]) / overviewCam.Matrix[15];
+    var newCx = (cx * overviewCam.Matrix[0] + cy * overviewCam.Matrix[4] +
+                     overviewCam.Matrix[12]) / overviewCam.Matrix[15];
+    var newCy = (cx * overviewCam.Matrix[1] + cy * overviewCam.Matrix[5] +
+                     overviewCam.Matrix[13]) / overviewCam.Matrix[15];
 
     if (gl) { /*
             // I having trouble using the overview camera, so lets just compute

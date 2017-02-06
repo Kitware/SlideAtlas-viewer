@@ -42,7 +42,7 @@
     if (!this.Visibility) {
       return;
     }
-    if (this.Matrix == undefined) {
+    if (this.Matrix === undefined) {
       this.UpdateBuffers(view);
     }
 
@@ -118,7 +118,7 @@
       }
 
             // Fill color
-      if (this.FillColor != undefined) {
+      if (this.FillColor !== undefined) {
         if (this.Active) {
           view.gl.uniform3f(program.colorUniform, this.ActiveColor[0],
                                  this.ActiveColor[1], this.ActiveColor[2]);
@@ -133,7 +133,7 @@
                                 view.gl.UNSIGNED_SHORT, 0);
       }
 
-      if (this.OutlineColor != undefined) {
+      if (this.OutlineColor !== undefined) {
         if (this.Active) {
           view.gl.uniform3f(program.colorUniform, this.ActiveColor[0],
                                  this.ActiveColor[1], this.ActiveColor[2]);
@@ -142,7 +142,7 @@
                                  this.OutlineColor[1], this.OutlineColor[2]);
         }
 
-        if (this.LineWidth == 0) {
+        if (this.LineWidth === 0) {
           if (this.WireFrame) {
             view.gl.bindBuffer(view.gl.ELEMENT_ARRAY_BUFFER, this.CellBuffer);
             view.gl.drawElements(view.gl.LINE_LOOP, this.CellBuffer.numItems,
@@ -163,7 +163,7 @@
             // Identity.
       view.Context2d.setTransform(1, 0, 0, 1, 0, 0);
 
-      if (this.PositionCoordinateSystem == Shape.SLIDE) {
+      if (this.PositionCoordinateSystem === Shape.SLIDE) {
         var theta = (this.Orientation * 3.1415926536 / 180.0);
         if (!this.FixedSize) {
           theta -= view.Camera.Roll;
@@ -189,7 +189,7 @@
         x = view.Viewport[2] * (0.5 * (1.0 + x));
         y = view.Viewport[3] * (0.5 * (1.0 - y));
         view.Context2d.transform(this.Matrix[0], this.Matrix[1], this.Matrix[4], this.Matrix[5], x, y);
-      } else if (this.PositionCoordinateSystem == Shape.VIEWER) {
+      } else if (this.PositionCoordinateSystem === Shape.VIEWER) {
         var theta = (this.Orientation * 3.1415926536 / 180.0);
         this.Matrix[0] = Math.cos(theta);
         this.Matrix[1] = -Math.sin(theta);
@@ -252,9 +252,9 @@
         i += 3;
       }
 
-      if (this.OutlineColor != undefined) {
+      if (this.OutlineColor !== undefined) {
         var width = this.LineWidth * scale;
-        if (width == 0) {
+        if (width === 0) {
           width = 1;
         }
         view.Context2d.lineWidth = width;
@@ -267,7 +267,7 @@
         view.Context2d.stroke();
       }
 
-      if (this.FillColor != undefined) {
+      if (this.FillColor !== undefined) {
         if (this.Active) {
           view.Context2d.fillStyle = SAM.ConvertColorToHex(this.ActiveColor);
         } else {

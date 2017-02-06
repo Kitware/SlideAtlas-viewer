@@ -67,18 +67,18 @@
 
     this.Layers = [];
 
-    if (!SAM.detectMobile() || SAM.MOBILE_DEVICE == 'iPad') {
+    if (!SAM.detectMobile() || SAM.MOBILE_DEVICE === 'iPad') {
       this.OverViewVisibility = true;
       this.OverViewScale = 0.02; // Experimenting with scroll
-	          this.OverViewport = [80, 20, 180, 180];
+      this.OverViewport = [80, 20, 180, 180];
       this.OverViewDiv = $('<div>')
                 .appendTo(this.Div);
 
       this.OverView = new SA.TileView(this.OverViewDiv);
-	          this.OverView.Camera.ZRange = [-1, 0];
-	          this.OverView.Camera.SetFocalPoint([13000.0, 11000.0]);
-	          this.OverView.Camera.SetHeight(22000.0);
-	          this.OverView.Camera.ComputeMatrix();
+      this.OverView.Camera.ZRange = [-1, 0];
+      this.OverView.Camera.SetFocalPoint([13000.0, 11000.0]);
+      this.OverView.Camera.SetHeight(22000.0);
+      this.OverView.Camera.ComputeMatrix();
 
             // One must be true for the icon to be active (opaque).
       this.RotateIconHover = false;
@@ -119,25 +119,25 @@
     can.attr('tabindex', '1');
     can.on(
             'mousedown.viewer',
-			      function (event) {
-        return self.HandleMouseDown(event);
-      });
+         function (event) {
+           return self.HandleMouseDown(event);
+         });
     can.on(
             'mousemove.viewer',
-			      function (event) {
+         function (event) {
                 // So key events go the the right viewer.
-        this.focus();
+           this.focus();
                 // Firefox does not set which for mouse move events.
-        SA.FirefoxWhich(event);
-        return self.HandleMouseMove(event);
-      });
+           SA.FirefoxWhich(event);
+           return self.HandleMouseMove(event);
+         });
         // We need to detect the mouse up even if it happens outside the canvas,
     $(document.body).on(
             'mouseup.viewer',
-			      function (event) {
-        self.HandleMouseUp(event);
-        return true;
-      });
+         function (event) {
+           self.HandleMouseUp(event);
+           return true;
+         });
     can.on(
             'wheel.viewer',
             function (event) {
@@ -167,21 +167,21 @@
     this.MainView.CanvasDiv.attr('tabindex', '1');
     can.on(
             'keydown.viewer',
-			      function (event) {
+         function (event) {
                 // alert("keydown");
-        return self.HandleKeyDown(event);
-      });
+           return self.HandleKeyDown(event);
+         });
     can.on(
             'keyup.viewer',
-			      function (event) {
-        return self.HandleKeyUp(event);
-      });
+         function (event) {
+           return self.HandleKeyUp(event);
+         });
 
         // This did not work for double left click
         // Go back to my original way of handling this.
         // can.addEventListener("dblclick",
-		    //	                   function (event){self.HandleDoubleClick(event);},
-		    //	                   false);
+      //                    function (event){self.HandleDoubleClick(event);},
+      //                    false);
 
     if (this.OverView) {
       var can = this.OverView.CanvasDiv;
@@ -193,26 +193,26 @@
 
       can.on(
                 'mouseup.viewer',
-			          function (e) {
-            return self.HandleOverViewMouseUp(e);
-          });
+             function (e) {
+               return self.HandleOverViewMouseUp(e);
+             });
       can.on(
                 'mousemove.viewer',
-			          function (e) {
-            return self.HandleOverViewMouseMove(e);
-          });
+             function (e) {
+               return self.HandleOverViewMouseMove(e);
+             });
             // I cannot get this to capture events.  The feature of resizing
             //    the overview with the mouse wheel is not important anyway.
             // can[0].addEventListener(
             //    function (e){return self.HandleOverViewMouseWheel(e);},
             //    "wheel",
-			      //    false);
+         //    false);
     }
 
     this.CopyrightWrapper = $('<div>')
             .appendTo(this.MainView.CanvasDiv)
             .addClass('sa-view-copyright');
-    if (SA.Session && SA.Session.sessid == '560b5127a7a1412195d13685') {
+    if (SA.Session && SA.Session.sessid === '560b5127a7a1412195d13685') {
       this.Icon = $('<img>')
                 .appendTo(this.MainView.CanvasDiv)
                 .attr('src', 'http://static1.squarespace.com/static/5126bbb4e4b08c2e6d1cb6e4/t/54e66f05e4b0440df79a5729/1424387847915/')
@@ -223,7 +223,7 @@
                   'width': '128px',
                   'z-index': '4'});
     }
-    if (SA.Session && SA.Session.sessid == '57504ba7a7a1411310dd2637') {
+    if (SA.Session && SA.Session.sessid === '57504ba7a7a1411310dd2637') {
       this.Icon = $('<img>')
                 .appendTo(this.MainView.CanvasDiv)
                 .attr('src', 'https://slide-atlas.org/api/v2/sessions/53d9230fdd98b54fd71e8ed7/attachments/57518ce4a7a14113156b8166')
@@ -322,7 +322,7 @@
       this.Parent.attr('sa-note-id', args.note.Id || args.note.TempId);
       this.Parent.attr('sa-viewer-index', this.saViewerIndex);
     }
-    if (args.hideCopyright != undefined) {
+    if (args.hideCopyright !== undefined) {
       this.SetCopyrightVisibility(!args.hideCopyright);
     }
     if (args.interaction !== undefined) {
@@ -344,7 +344,7 @@
     if (!lockCamera) {
       this.Reset();
       var cache = this.GetCache();
-      if (!cache || viewerRecord.Image._id != cache.Image._id) {
+      if (!cache || viewerRecord.Image._id !== cache.Image._id) {
         var newCache = SA.FindCache(viewerRecord.Image);
         this.SetCache(newCache);
       }
@@ -367,7 +367,7 @@
     }
 
         // TODO: Get rid of this hack.
-    if (this.AnnotationWidget && viewerRecord.AnnotationVisibility != undefined) {
+    if (this.AnnotationWidget && viewerRecord.AnnotationVisibility !== undefined) {
       this.AnnotationWidget.SetVisibility(viewerRecord.AnnotationVisibility);
     }
 
@@ -489,7 +489,7 @@
   Viewer.prototype.RollMove = function (e) {
     if (!this.OverView) { return; }
     if (!this.RotateIconDrag) { return; }
-    if (e.which != 1) {
+    if (e.which !== 1) {
             // We must have missed the mouse up event.
       this.RotateIconDrag = false;
       return;
@@ -874,7 +874,7 @@
   };
 
   Viewer.prototype.SetSection = function (section) {
-    if (section == null) {
+    if (section === null) {
       return;
     }
     this.MainView.Section = section;
@@ -891,7 +891,7 @@
         this.SetOverViewBounds(cache.Image.bounds);
       }
 
-      if (cache.Image.copyright == undefined) {
+      if (cache.Image.copyright === undefined) {
         cache.Image.copyright = 'Copyright 2017. All Rights Reserved.';
       }
       this.CopyrightWrapper
@@ -1055,10 +1055,10 @@
     factor = this.ZoomTarget / this.MainView.Camera.GetHeight(); // Actual factor after limit.
 
         // Compute translate target to keep position in the same place.
-    this.TranslateTarget[0] = position[0]
-            - factor * (position[0] - this.MainView.Camera.FocalPoint[0]);
-    this.TranslateTarget[1] = position[1]
-            - factor * (position[1] - this.MainView.Camera.FocalPoint[1]);
+    this.TranslateTarget[0] = position[0] -
+            factor * (position[0] - this.MainView.Camera.FocalPoint[0]);
+    this.TranslateTarget[1] = position[1] -
+            factor * (position[1] - this.MainView.Camera.FocalPoint[1]);
 
     this.RollTarget = this.MainView.Camera.Roll;
 
@@ -1176,7 +1176,7 @@
     }
 
     var cache = this.GetCache();
-    if (cache != undefined) {
+    if (cache !== undefined) {
       var copyright = cache.Image.copyright;
             // this.MainView.DrawCopyright(copyright);
     }
@@ -1260,16 +1260,16 @@
       var currentRoll = this.MainView.Camera.Roll;
 
       this.MainView.Camera.SetHeight(
-                currentHeight + (this.ZoomTarget - currentHeight)
-                    * (timeNow - this.AnimateLast) / this.AnimateDuration);
-      this.MainView.Camera.Roll
-                = currentRoll + (this.RollTarget - currentRoll)
-                * (timeNow - this.AnimateLast) / this.AnimateDuration;
+                currentHeight + (this.ZoomTarget - currentHeight) *
+                    (timeNow - this.AnimateLast) / this.AnimateDuration);
+      this.MainView.Camera.Roll =
+                currentRoll + (this.RollTarget - currentRoll) *
+                (timeNow - this.AnimateLast) / this.AnimateDuration;
       this.MainView.Camera.SetFocalPoint(
-        [currentCenter[0] + (this.TranslateTarget[0] - currentCenter[0])
-                 * (timeNow - this.AnimateLast) / this.AnimateDuration,
-          currentCenter[1] + (this.TranslateTarget[1] - currentCenter[1])
-                 * (timeNow - this.AnimateLast) / this.AnimateDuration]);
+        [currentCenter[0] + (this.TranslateTarget[0] - currentCenter[0]) *
+                 (timeNow - this.AnimateLast) / this.AnimateDuration,
+          currentCenter[1] + (this.TranslateTarget[1] - currentCenter[1]) *
+                 (timeNow - this.AnimateLast) / this.AnimateDuration]);
       this.ConstrainCamera();
       if (this.OverView) {
                 // this.OverView.Camera.Roll = this.MainView.Camera.Roll;
@@ -1337,11 +1337,11 @@
         // converted this code yet.
         // Get rid of the favorites and the link divs if they are visible
     if (SA.LinkDiv && SA.LinkDiv.is(':visible')) {
-	          SA.LinkDiv.fadeOut();
+      SA.LinkDiv.fadeOut();
     }
     if (typeof FAVORITES_WIDGET !== 'undefined' &&
-	          FAVORITES_WIDGET.hidden == false) {
-	          FAVORITES_WIDGET.ShowHideFavorites();
+           FAVORITES_WIDGET.hidden === false) {
+      FAVORITES_WIDGET.ShowHideFavorites();
     }
 
     var date = new Date();
@@ -1375,7 +1375,7 @@
     this.MouseDeltaX = this.MouseX - this.LastMouseX;
     this.MouseDeltaY = this.MouseY - this.LastMouseY;
     this.MouseDeltaTime = this.MouseTime - this.LastMouseTime;
-    return this.MouseDeltaX != 0 || this.MouseDeltaY != 0;
+    return this.MouseDeltaX !== 0 || this.MouseDeltaY !== 0;
   };
   Viewer.prototype.RecordMouseUp = function (event) {
     this.SetMousePositionFromEvent(event);
@@ -1476,7 +1476,7 @@
   Viewer.prototype.HandleTouchMove = function (e) {
         // Case where sweep caused nextNote.
         // Short circuit interaction.
-    if (this.StartTouchTime == 0) { return false; }
+    if (this.StartTouchTime === 0) { return false; }
 
         // Put a throttle on events
     if (!this.HandleTouch(e, false)) { return; }
@@ -1511,15 +1511,15 @@
       }
     }
 
-    if (this.Touches.length == 1) {
+    if (this.Touches.length === 1) {
       this.HandleTouchPan(this);
       return;
     }
-    if (this.Touches.length == 2) {
+    if (this.Touches.length === 2) {
       this.HandleTouchPinch(this);
       return;
     }
-    if (this.Touches.length == 3) {
+    if (this.Touches.length === 3) {
       this.HandleTouchRotate(this);
       return;
     }
@@ -1528,7 +1528,7 @@
     // Only one touch
   Viewer.prototype.HandleTouchPan = function (event) {
     if (!this.InteractionEnabled) { return true; }
-    if (this.Touches.length != 1 || this.LastTouches.length != 1) {
+    if (this.Touches.length !== 1 || this.LastTouches.length !== 1) {
             // Sanity check.
       return;
     }
@@ -1571,7 +1571,7 @@
   Viewer.prototype.HandleTouchRotate = function (event) {
     if (!this.InteractionEnabled) { return true; }
     var numTouches = this.Touches.length;
-    if (this.LastTouches.length != numTouches || numTouches != 3) {
+    if (this.LastTouches.length !== numTouches || numTouches !== 3) {
             // Sanity check.
       return;
     }
@@ -1639,7 +1639,7 @@
   Viewer.prototype.HandleTouchPinch = function (event) {
     if (!this.InteractionEnabled) { return true; }
     var numTouches = this.Touches.length;
-    if (this.LastTouches.length != numTouches || numTouches != 2) {
+    if (this.LastTouches.length !== numTouches || numTouches !== 2) {
             // Sanity check.
       return;
     }
@@ -1655,7 +1655,7 @@
     var w1 = this.ConvertPointViewerToWorld(this.MouseX, this.MouseY);
     var dt = event.Time - this.LastTime;
         // iPad / iPhone must have low precision time
-    if (dt == 0) {
+    if (dt === 0) {
       return;
     }
 
@@ -1721,7 +1721,7 @@
     this.MomentumScale = this.MomentumScale * (1 - k);
 
     t = t - this.StartTouchTime;
-    if (event.targetTouches.length == 0 && SAM.MOBILE_DEVICE) {
+    if (event.targetTouches.length === 0 && SAM.MOBILE_DEVICE) {
       this.StartTouchTime = 0;
       if (t < 90) {
                 // We should not have a navigation widget on mobile
@@ -1734,7 +1734,7 @@
         }
         return;
       }
-      if (this.ActiveWidget != null) {
+      if (this.ActiveWidget !== null) {
         this.ActiveWidget.HandleTouchEnd(event);
         return;
       }
@@ -1800,7 +1800,7 @@
             Math.abs(this.MomentumRoll) < 0.0002 && Math.abs(this.MomentumScale) < 0.00005) {
             // Change is small. Stop the motion.
       this.MomentumTimerId = 0;
-      if (this.InteractionState != INTERACTION_NONE) {
+      if (this.InteractionState !== INTERACTION_NONE) {
         this.InteractionState = INTERACTION_NONE;
         if (SA.RECORDER_WIDGET) {
           SA.RECORDER_WIDGET.RecordState();
@@ -1878,7 +1878,7 @@
     }
 
         // Choose what interaction will be performed.
-    if (event.which == 1) {
+    if (event.which === 1) {
       if (event.ctrlKey) {
         this.InteractionState = INTERACTION_ROTATE;
       } else if (event.altKey) {
@@ -1888,7 +1888,7 @@
       }
       return false;
     }
-    if (event.which == 2) {
+    if (event.which === 2) {
       this.InteractionState = INTERACTION_ROTATE;
       return false;
     }
@@ -1899,9 +1899,9 @@
     if (!this.InteractionEnabled) { return true; }
 
     var mWorld = this.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
-    if (event.which == 1) {
+    if (event.which === 1) {
       this.AnimateZoomTo(0.5, mWorld);
-    } else if (event.which == 3) {
+    } else if (event.which === 3) {
       this.AnimateZoomTo(2.0, mWorld);
     }
     return true;
@@ -1919,12 +1919,12 @@
       return false;
     }
 
-    if (this.InteractionState == INTERACTION_OVERVIEW ||
-            this.InteractionState == INTERACTION_OVERVIEW_DRAG) {
+    if (this.InteractionState === INTERACTION_OVERVIEW ||
+            this.InteractionState === INTERACTION_OVERVIEW_DRAG) {
       return this.HandleOverViewMouseUp(event);
     }
 
-    if (this.InteractionState != INTERACTION_NONE) {
+    if (this.InteractionState !== INTERACTION_NONE) {
       this.InteractionState = INTERACTION_NONE;
       if (SA.RECORDER_WIDGET) {
         SA.RECORDER_WIDGET.RecordState();
@@ -1939,7 +1939,7 @@
 
         // The event position is relative to the target which can be a tab on
         // top of the canvas.  Just skip these events.
-    if ($(event.target).width() != $(event.currentTarget).width()) {
+    if ($(event.target).width() !== $(event.currentTarget).width()) {
       return true;
     }
 
@@ -1952,12 +1952,12 @@
       return false;
     }
 
-    if (this.InteractionState == INTERACTION_OVERVIEW ||
-            this.InteractionState == INTERACTION_OVERVIEW_DRAG) {
+    if (this.InteractionState === INTERACTION_OVERVIEW ||
+            this.InteractionState === INTERACTION_OVERVIEW_DRAG) {
       return this.HandleOverViewMouseMove(event);
     }
 
-    if (this.InteractionState == INTERACTION_NONE) {
+    if (this.InteractionState === INTERACTION_NONE) {
             // Allow the ResizePanel drag to process the events.
       return true;
     }
@@ -1969,7 +1969,7 @@
         // Dragging is too slow.  I want to accelerate dragging the further
         // this mouse moves.  This is a moderate change, so I am
         // going to try to accelerate with speed.
-    if (this.InteractionState == INTERACTION_ROTATE) {
+    if (this.InteractionState === INTERACTION_ROTATE) {
             // Rotate
             // Origin in the center.
             // GLOBAL GL will use view's viewport instead.
@@ -1981,13 +1981,13 @@
                                             this.MouseDeltaY);
       this.RollTarget = this.MainView.Camera.Roll;
       this.UpdateCamera();
-    } else if (this.InteractionState == INTERACTION_ZOOM) {
+    } else if (this.InteractionState === INTERACTION_ZOOM) {
       var dy = this.MouseDeltaY / this.MainView.Viewport[2];
-      this.MainView.Camera.SetHeight(this.MainView.Camera.GetHeight()
-                                           / (1.0 + (dy * 5.0)));
+      this.MainView.Camera.SetHeight(this.MainView.Camera.GetHeight() /
+                                           (1.0 + (dy * 5.0)));
       this.ZoomTarget = this.MainView.Camera.GetHeight();
       this.UpdateCamera();
-    } else if (this.InteractionState == INTERACTION_DRAG) {
+    } else if (this.InteractionState === INTERACTION_DRAG) {
             // Translate
             // Convert to view [-0.5,0.5] coordinate system.
             // Note: the origin gets subtracted out in delta above.
@@ -2045,10 +2045,10 @@
         // this.TranslateTarget[1] = this.MainView.Camera.FocalPoint[1];
     var position = this.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
     var factor = this.ZoomTarget / this.MainView.Camera.GetHeight();
-    this.TranslateTarget[0] = position[0]
-            - factor * (position[0] - this.MainView.Camera.FocalPoint[0]);
-    this.TranslateTarget[1] = position[1]
-            - factor * (position[1] - this.MainView.Camera.FocalPoint[1]);
+    this.TranslateTarget[0] = position[0] -
+            factor * (position[0] - this.MainView.Camera.FocalPoint[0]);
+    this.TranslateTarget[1] = position[1] -
+            factor * (position[1] - this.MainView.Camera.FocalPoint[1]);
 
     this.RollTarget = this.MainView.Camera.Roll;
 
@@ -2061,14 +2061,14 @@
     // Special one time function for paper analysis.
   Viewer.prototype.SegmentationsToCsv = function () {
     var note = SA.display.NavigationWidget.GetNote();
-        // first collect a set of segmetnatnion labels.
+        // first collect a set of segmentation labels.
     labels = {};
     labelArray = [];
     for (var i = 0; i < note.ViewerRecords.length; ++i) {
       annotations = note.ViewerRecords[i].Annotations;
       for (var j = 0; j < annotations.length; ++j) {
         annot = annotations[j];
-        if (annot.type == 'polyline' && annot.text) {
+        if (annot.type === 'polyline' && annot.text) {
           if (!labels[annot.text]) {
             labelArray.push(annot.text);
             labels[annot.text] = {area: 0.0, perimeter: 0.0};
@@ -2099,7 +2099,7 @@
       }
       for (var j = 0; j < viewerRecord.Annotations.length; ++j) {
         annot = viewerRecord.Annotations[j];
-        if (annot.type == 'polyline' && annot.text) {
+        if (annot.type === 'polyline' && annot.text) {
           widget.Load(annot);
           widget.Polyline.Closed = true;
           labels[annot.text].area += widget.ComputeArea() * 0.25 * 0.25;
@@ -2108,7 +2108,7 @@
       }
       for (var j = 0; j < labelArray.length; ++j) {
         label = labelArray[j];
-        if (labels[label].area == 0.0) {
+        if (labels[label].area === 0.0) {
           row += ',,';
         } else {
           row += labels[label].area.toString() + ',' + labels[label].perimeter.toString() + ',';
@@ -2131,13 +2131,13 @@
     }
 
         // Linking polyline segmentations in a stack.
-        // if (event.keyCode == 81) {
+        // if (event.keyCode === 81) {
         //    SA.SegmentationSequenceLabel = prompt("Enter a segmentation label");
         // }
-        // if (event.keyCode == 87 && SA.SegmentationSequenceLabel) {
+        // if (event.keyCode === 87 && SA.SegmentationSequenceLabel) {
         //    var layer = this.GetAnnotationLayer();
         //    //var note = SA.display.NavigationWidget.GetNote();
-        //    if (layer.ActiveWidget && layer.ActiveWidget.Type == "polyline") {
+        //    if (layer.ActiveWidget && layer.ActiveWidget.Type === "polyline") {
         //        var widget = layer.ActiveWidget;
         //        widget.InitializeText();
         //        widget.Text.String = SA.SegmentationSequenceLabel;
@@ -2145,7 +2145,7 @@
         //    SA.display.NavigationWidget.NextNote();
         // }
 
-    if (event.keyCode == 83 && event.ctrlKey) { // control -s to save.
+    if (event.keyCode === 83 && event.ctrlKey) { // control -s to save.
       if (!SAVING_IMAGE) {
         SAVING_IMAGE = new SAM.Dialog();
         SAVING_IMAGE.Title.text('Saving');
@@ -2173,14 +2173,14 @@
     }
 
         // Handle paste
-    if (event.keyCode == 79) {
+    if (event.keyCode === 79) {
             // o to print out world mouse location for debugging.
       var wPt = this.ConvertPointViewerToWorld(this.LastMouseX, this.LastMouseY);
       console.log('World: ' + wPt[0] + ', ' + wPt[1]);
     }
 
         // Handle paste
-    if (event.keyCode == 86 && event.ctrlKey) {
+    if (event.keyCode === 86 && event.ctrlKey) {
             // control-v for paste
 
       if (localStorage.ClipBoard === undefined) {
@@ -2193,23 +2193,23 @@
         camera = new SAM.Camera();
         camera.Load(clip.Camera);
       }
-      if (clip.Type == 'CircleWidget') {
+      if (clip.Type === 'CircleWidget') {
         var widget = new SAM.CircleWidget(this.GetAnnotationLayer(), false);
         widget.PasteCallback(clip.Data, this.GetAnnotationLayer().MouseWorld, camera);
       }
-      if (clip.Type == 'PolylineWidget') {
+      if (clip.Type === 'PolylineWidget') {
         var widget = new SAM.PolylineWidget(this.GetAnnotationLayer(), false);
         widget.PasteCallback(clip.Data, this.GetAnnotationLayer().MouseWorld, camera);
       }
-      if (clip.Type == 'TextWidget') {
+      if (clip.Type === 'TextWidget') {
         var widget = new SAM.TextWidget(this.GetAnnotationLayer(), '');
         widget.PasteCallback(clip.Data, this.GetAnnotationLayer().MouseWorld, camera);
       }
-      if (clip.Type == 'RectWidget') {
+      if (clip.Type === 'RectWidget') {
         var widget = new SAM.RectWidget(this.GetAnnotationLayer(), '');
         widget.PasteCallback(clip.Data, this.MouseWorld, camera);
       }
-      if (clip.Type == 'GridWidget') {
+      if (clip.Type === 'GridWidget') {
         var widget = new SAM.GridWidget(this.GetAnnotationLayer(), '');
         widget.PasteCallback(clip.Data, this.MouseWorld, camera);
       }
@@ -2217,7 +2217,7 @@
       return false;
     }
 
-    if (String.fromCharCode(event.keyCode) == 'R') {
+    if (String.fromCharCode(event.keyCode) === 'R') {
             // this.MainView.Camera.Reset();
       this.MainView.Camera.ComputeMatrix();
       this.ZoomTarget = this.MainView.Camera.GetHeight();
@@ -2225,7 +2225,7 @@
       return false;
     }
 
-    if (event.keyCode == 38) {
+    if (event.keyCode === 38) {
             // Up cursor key
       var cam = this.GetCamera();
       var c = Math.cos(cam.Roll);
@@ -2240,7 +2240,7 @@
       this.AnimateDuration = 200.0;
       this.EventuallyRender(true);
       return false;
-    } else if (event.keyCode == 40) {
+    } else if (event.keyCode === 40) {
             // Down cursor key
       var cam = this.GetCamera();
       var c = Math.cos(cam.Roll);
@@ -2255,7 +2255,7 @@
       this.AnimateDuration = 200.0;
       this.EventuallyRender(true);
       return false;
-    } else if (event.keyCode == 37) {
+    } else if (event.keyCode === 37) {
             // Left cursor key
       var cam = this.GetCamera();
       var c = Math.cos(cam.Roll);
@@ -2270,7 +2270,7 @@
       this.AnimateDuration = 200.0;
       this.EventuallyRender(true);
       return false;
-    } else if (event.keyCode == 39) {
+    } else if (event.keyCode === 39) {
             // Right cursor key
       var cam = this.GetCamera();
       var c = Math.cos(cam.Roll);
@@ -2333,30 +2333,148 @@
 
     // Where else should I put this?
   function colorNameToHex (color) {
-    var colors = {'aliceblue': '#f0f8ff', 'antiquewhite': '#faebd7', 'aqua': '#00ffff', 'aquamarine': '#7fffd4', 'azure': '#f0ffff',
-      'beige': '#f5f5dc', 'bisque': '#ffe4c4', 'black': '#000000', 'blanchedalmond': '#ffebcd', 'blue': '#0000ff', 'blueviolet': '#8a2be2', 'brown': '#a52a2a', 'burlywood': '#deb887',
-      'cadetblue': '#5f9ea0', 'chartreuse': '#7fff00', 'chocolate': '#d2691e', 'coral': '#ff7f50', 'cornflowerblue': '#6495ed', 'cornsilk': '#fff8dc', 'crimson': '#dc143c', 'cyan': '#00ffff',
-      'darkblue': '#00008b', 'darkcyan': '#008b8b', 'darkgoldenrod': '#b8860b', 'darkgray': '#a9a9a9', 'darkgreen': '#006400', 'darkkhaki': '#bdb76b', 'darkmagenta': '#8b008b', 'darkolivegreen': '#556b2f',
-      'darkorange': '#ff8c00', 'darkorchid': '#9932cc', 'darkred': '#8b0000', 'darksalmon': '#e9967a', 'darkseagreen': '#8fbc8f', 'darkslateblue': '#483d8b', 'darkslategray': '#2f4f4f', 'darkturquoise': '#00ced1',
-      'darkviolet': '#9400d3', 'deeppink': '#ff1493', 'deepskyblue': '#00bfff', 'dimgray': '#696969', 'dodgerblue': '#1e90ff',
-      'firebrick': '#b22222', 'floralwhite': '#fffaf0', 'forestgreen': '#228b22', 'fuchsia': '#ff00ff',
-      'gainsboro': '#dcdcdc', 'ghostwhite': '#f8f8ff', 'gold': '#ffd700', 'goldenrod': '#daa520', 'gray': '#808080', 'green': '#008000', 'greenyellow': '#adff2f',
-      'honeydew': '#f0fff0', 'hotpink': '#ff69b4',
-      'indianred ': '#cd5c5c', 'indigo ': '#4b0082', 'ivory': '#fffff0', 'khaki': '#f0e68c',
-      'lavender': '#e6e6fa', 'lavenderblush': '#fff0f5', 'lawngreen': '#7cfc00', 'lemonchiffon': '#fffacd', 'lightblue': '#add8e6', 'lightcoral': '#f08080', 'lightcyan': '#e0ffff', 'lightgoldenrodyellow': '#fafad2',
-      'lightgrey': '#d3d3d3', 'lightgreen': '#90ee90', 'lightpink': '#ffb6c1', 'lightsalmon': '#ffa07a', 'lightseagreen': '#20b2aa', 'lightskyblue': '#87cefa', 'lightslategray': '#778899', 'lightsteelblue': '#b0c4de',
-      'lightyellow': '#ffffe0', 'lime': '#00ff00', 'limegreen': '#32cd32', 'linen': '#faf0e6',
-      'magenta': '#ff00ff', 'maroon': '#800000', 'mediumaquamarine': '#66cdaa', 'mediumblue': '#0000cd', 'mediumorchid': '#ba55d3', 'mediumpurple': '#9370d8', 'mediumseagreen': '#3cb371', 'mediumslateblue': '#7b68ee',
-      'mediumspringgreen': '#00fa9a', 'mediumturquoise': '#48d1cc', 'mediumvioletred': '#c71585', 'midnightblue': '#191970', 'mintcream': '#f5fffa', 'mistyrose': '#ffe4e1', 'moccasin': '#ffe4b5',
-      'navajowhite': '#ffdead', 'navy': '#000080',
-      'oldlace': '#fdf5e6', 'olive': '#808000', 'olivedrab': '#6b8e23', 'orange': '#ffa500', 'orangered': '#ff4500', 'orchid': '#da70d6',
-      'palegoldenrod': '#eee8aa', 'palegreen': '#98fb98', 'paleturquoise': '#afeeee', 'palevioletred': '#d87093', 'papayawhip': '#ffefd5', 'peachpuff': '#ffdab9', 'peru': '#cd853f', 'pink': '#ffc0cb', 'plum': '#dda0dd', 'powderblue': '#b0e0e6', 'purple': '#800080',
-      'red': '#ff0000', 'rosybrown': '#bc8f8f', 'royalblue': '#4169e1',
-      'saddlebrown': '#8b4513', 'salmon': '#fa8072', 'sandybrown': '#f4a460', 'seagreen': '#2e8b57', 'seashell': '#fff5ee', 'sienna': '#a0522d', 'silver': '#c0c0c0', 'skyblue': '#87ceeb', 'slateblue': '#6a5acd', 'slategray': '#708090', 'snow': '#fffafa', 'springgreen': '#00ff7f', 'steelblue': '#4682b4',
-      'tan': '#d2b48c', 'teal': '#008080', 'thistle': '#d8bfd8', 'tomato': '#ff6347', 'turquoise': '#40e0d0',
+    var colors = {
+      'aliceblue': '#f0f8ff',
+      'antiquewhite': '#faebd7',
+      'aqua': '#00ffff',
+      'aquamarine': '#7fffd4',
+      'azure': '#f0ffff',
+      'beige': '#f5f5dc',
+      'bisque': '#ffe4c4',
+      'black': '#000000',
+      'blanchedalmond': '#ffebcd',
+      'blue': '#0000ff',
+      'blueviolet': '#8a2be2',
+      'brown': '#a52a2a',
+      'burlywood': '#deb887',
+      'cadetblue': '#5f9ea0',
+      'chartreuse': '#7fff00',
+      'chocolate': '#d2691e',
+      'coral': '#ff7f50',
+      'cornflowerblue': '#6495ed',
+      'cornsilk': '#fff8dc',
+      'crimson': '#dc143c',
+      'cyan': '#00ffff',
+      'darkblue': '#00008b',
+      'darkcyan': '#008b8b',
+      'darkgoldenrod': '#b8860b',
+      'darkgray': '#a9a9a9',
+      'darkgreen': '#006400',
+      'darkkhaki': '#bdb76b',
+      'darkmagenta': '#8b008b',
+      'darkolivegreen': '#556b2f',
+      'darkorange': '#ff8c00',
+      'darkorchid': '#9932cc',
+      'darkred': '#8b0000',
+      'darksalmon': '#e9967a',
+      'darkseagreen': '#8fbc8f',
+      'darkslateblue': '#483d8b',
+      'darkslategray': '#2f4f4f',
+      'darkturquoise': '#00ced1',
+      'darkviolet': '#9400d3',
+      'deeppink': '#ff1493',
+      'deepskyblue': '#00bfff',
+      'dimgray': '#696969',
+      'dodgerblue': '#1e90ff',
+      'firebrick': '#b22222',
+      'floralwhite': '#fffaf0',
+      'forestgreen': '#228b22',
+      'fuchsia': '#ff00ff',
+      'gainsboro': '#dcdcdc',
+      'ghostwhite': '#f8f8ff',
+      'gold': '#ffd700',
+      'goldenrod': '#daa520',
+      'gray': '#808080',
+      'green': '#008000',
+      'greenyellow': '#adff2f',
+      'honeydew': '#f0fff0',
+      'hotpink': '#ff69b4',
+      'indianred ': '#cd5c5c',
+      'indigo ': '#4b0082',
+      'ivory': '#fffff0',
+      'khaki': '#f0e68c',
+      'lavender': '#e6e6fa',
+      'lavenderblush': '#fff0f5',
+      'lawngreen': '#7cfc00',
+      'lemonchiffon': '#fffacd',
+      'lightblue': '#add8e6',
+      'lightcoral': '#f08080',
+      'lightcyan': '#e0ffff',
+      'lightgoldenrodyellow': '#fafad2',
+      'lightgrey': '#d3d3d3',
+      'lightgreen': '#90ee90',
+      'lightpink': '#ffb6c1',
+      'lightsalmon': '#ffa07a',
+      'lightseagreen': '#20b2aa',
+      'lightskyblue': '#87cefa',
+      'lightslategray': '#778899',
+      'lightsteelblue': '#b0c4de',
+      'lightyellow': '#ffffe0',
+      'lime': '#00ff00',
+      'limegreen': '#32cd32',
+      'linen': '#faf0e6',
+      'magenta': '#ff00ff',
+      'maroon': '#800000',
+      'mediumaquamarine': '#66cdaa',
+      'mediumblue': '#0000cd',
+      'mediumorchid': '#ba55d3',
+      'mediumpurple': '#9370d8',
+      'mediumseagreen': '#3cb371',
+      'mediumslateblue': '#7b68ee',
+      'mediumspringgreen': '#00fa9a',
+      'mediumturquoise': '#48d1cc',
+      'mediumvioletred': '#c71585',
+      'midnightblue': '#191970',
+      'mintcream': '#f5fffa',
+      'mistyrose': '#ffe4e1',
+      'moccasin': '#ffe4b5',
+      'navajowhite': '#ffdead',
+      'navy': '#000080',
+      'oldlace': '#fdf5e6',
+      'olive': '#808000',
+      'olivedrab': '#6b8e23',
+      'orange': '#ffa500',
+      'orangered': '#ff4500',
+      'orchid': '#da70d6',
+      'palegoldenrod': '#eee8aa',
+      'palegreen': '#98fb98',
+      'paleturquoise': '#afeeee',
+      'palevioletred': '#d87093',
+      'papayawhip': '#ffefd5',
+      'peachpuff': '#ffdab9',
+      'peru': '#cd853f',
+      'pink': '#ffc0cb',
+      'plum': '#dda0dd',
+      'powderblue': '#b0e0e6',
+      'purple': '#800080',
+      'red': '#ff0000',
+      'rosybrown': '#bc8f8f',
+      'royalblue': '#4169e1',
+      'saddlebrown': '#8b4513',
+      'salmon': '#fa8072',
+      'sandybrown': '#f4a460',
+      'seagreen': '#2e8b57',
+      'seashell': '#fff5ee',
+      'sienna': '#a0522d',
+      'silver': '#c0c0c0',
+      'skyblue': '#87ceeb',
+      'slateblue': '#6a5acd',
+      'slategray': '#708090',
+      'snow': '#fffafa',
+      'springgreen': '#00ff7f',
+      'steelblue': '#4682b4',
+      'tan': '#d2b48c',
+      'teal': '#008080',
+      'thistle': '#d8bfd8',
+      'tomato': '#ff6347',
+      'turquoise': '#40e0d0',
       'violet': '#ee82ee',
-      'wheat': '#f5deb3', 'white': '#ffffff', 'whitesmoke': '#f5f5f5',
-      'yellow': '#ffff00', 'yellowgreen': '#9acd32'};
+      'wheat': '#f5deb3',
+      'white': '#ffffff',
+      'whitesmoke': '#f5f5f5',
+      'yellow': '#ffff00',
+      'yellowgreen': '#9acd32'
+    };
 
     if (typeof colors[color.toLowerCase()] !== 'undefined') {
       return colors[color.toLowerCase()];
@@ -2423,7 +2541,7 @@
   Viewer.prototype.HandleOverViewMouseUp = function (event) {
     if (!this.InteractionEnabled) { return true; }
     if (this.RotateIconDrag) { return; }
-    if (this.InteractionState == INTERACTION_OVERVIEW_DRAG) {
+    if (this.InteractionState === INTERACTION_OVERVIEW_DRAG) {
       this.InteractionState = INTERACTION_NONE;
       return;
     }
@@ -2432,11 +2550,11 @@
         // This fixes a bug: OverView translated rotates camamera back to zero.
     this.RollTarget = this.MainView.Camera.Roll;
 
-    if (event.which == 1) {
+    if (event.which === 1) {
       var x = event.offsetX;
       var y = event.offsetY;
-      if (x == undefined) { x = event.layerX; }
-      if (y == undefined) { y = event.layerY; }
+      if (x === undefined) { x = event.layerX; }
+      if (y === undefined) { y = event.layerY; }
             // Transform to view's coordinate system.
       this.OverViewPlaceCamera(x, y);
     }
@@ -2453,7 +2571,7 @@
       return false;
     }
 
-    if (this.InteractionState == INTERACTION_OVERVIEW) {
+    if (this.InteractionState === INTERACTION_OVERVIEW) {
             // Do not start dragging until the mouse has moved some distance.
       if (Math.abs(event.pageX - this.OverviewEventX) > 5 ||
                 Math.abs(event.pageY - this.OverviewEventY) > 5) {
@@ -2494,16 +2612,16 @@
     if (!this.InteractionEnabled) { return true; }
     var tmp = 0;
     if (event.deltaY) {
-	          tmp = event.deltaY;
+      tmp = event.deltaY;
     } else if (event.wheelDelta) {
-	          tmp = event.wheelDelta;
+      tmp = event.wheelDelta;
     }
 
     if (tmp > 0) {
       this.OverViewScale *= 1.2;
-	      } else if (tmp < 0) {
-        this.OverViewScale /= 1.2;
-      }
+    } else if (tmp < 0) {
+      this.OverViewScale /= 1.2;
+    }
 
     this.UpdateSize();
 
@@ -2513,7 +2631,7 @@
     // TODO: Get rid of this function.
     // AnnotationWidget should not be here either.
   Viewer.prototype.SetAnnotationWidgetVisibility = function (vis) {
-    if (this.Layers.length == 0) { return; }
+    if (this.Layers.length === 0) { return; }
     var layer = this.GetAnnotationLayer();
     if (!layer) { return; }
     if (vis) {

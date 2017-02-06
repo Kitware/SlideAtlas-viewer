@@ -53,7 +53,7 @@
     if (!obj.Image.units && obj.Image.filename) {
       var tmp = obj.Image.filename.split('.');
       var ext = tmp[tmp.length - 1];
-      if (ext == 'ptif') {
+      if (ext === 'ptif') {
         obj.Image.spacing = [0.25, 0.25, 1.0];
         obj.Image.units = '\xB5m'; // um / micro meters
       }
@@ -106,7 +106,7 @@
     }
 
     if (!this.UserFlag) {
-      if (!this.UserNote || this.UserNote.Parent != this.Image._id) {
+      if (!this.UserNote || this.UserNote.Parent !== this.Image._id) {
                 // This returns a note if it has already been loaded.
         this.UserNote = SA.GetUserNoteFromImageId(this.Image._id);
         if (!this.UserNote) {
@@ -134,12 +134,12 @@
     if (!this.UserNote) {
       return;
     }
-    if (this.UserNote.LoadState != 0) {
+    if (this.UserNote.LoadState !== 0) {
       return;
     }
 
         // TODO: Move this to note.js
-    this.UserNote.LoadState == 1; // REQUESTED
+    this.UserNote.LoadState === 1; // REQUESTED
 
     var self = this;
     $.ajax({
@@ -162,7 +162,7 @@
 
     // Move to note.js
   ViewerRecord.prototype.LoadUserNote = function (data) {
-    if (data.Notes.length == 0) {
+    if (data.Notes.length === 0) {
       return;
     }
 
@@ -184,7 +184,7 @@
         // If in the rare case that the user note took a long time to load
         // and user text or annotations were added while waiting, merge
         // them.
-    if (userNote.Text != '') {
+    if (userNote.Text !== '') {
       noteData.Text = userNote.Text + '<br>' + noteData.Text;
     }
     if (userNote.ViewerRecords[0].Annotations.length > 0) {
@@ -233,7 +233,7 @@
   ViewerRecord.prototype.CopyAnnotations = function (viewer, userNoteFlag) {
     this.Annotations = [];
         // TODO: get rid of this hack somehow. Generalize layers?
-    if (viewer.Layers.length == 0) { return; }
+    if (viewer.Layers.length === 0) { return; }
     var annotationLayer = viewer.Layers[0];
     if (!annotationLayer) { return; }
     var widgets = viewer.Layers[0].GetWidgets();
@@ -243,7 +243,7 @@
             // if ((userNoteFlag && widget.UserNoteFlag)) ||
             //    (!userNoteFlag && !widget.UserNoteFlag)){ // ! exclusive or.
       widget.UserNoteFlag = widget.UserNoteFlag || false;
-      if (userNoteFlag == widget.UserNoteFlag) { // ! exclusive or.
+      if (userNoteFlag === widget.UserNoteFlag) { // ! exclusive or.
         var o = widgets[i].Serialize();
         if (o) {
           this.Annotations.push(o);
@@ -292,7 +292,7 @@
         if (! lockCamera) {
             viewer.Reset();
             var cache = viewer.GetCache();
-            if ( ! cache || this.Image._id != cache.Image._id) {
+            if ( ! cache || this.Image._id !== cache.Image._id) {
                 var newCache = SA.FindCache(this.Image);
                 viewer.SetCache(newCache);
             }
@@ -315,7 +315,7 @@
         }
 
         // TODO: Get rid of this hack.
-        if (viewer.AnnotationWidget && this.AnnotationVisibility != undefined) {
+        if (viewer.AnnotationWidget && this.AnnotationVisibility !== undefined) {
             viewer.AnnotationWidget.SetVisibility(this.AnnotationVisibility);
         }
 
@@ -323,7 +323,7 @@
         if (annotationLayer) {
             annotationLayer.Reset();
             // Load the primary annotations
-            if (this.Annotations != undefined) {
+            if (this.Annotations !== undefined) {
                 var annotationLayer = viewer.GetAnnotationLayer();
                 if (annotationLayer) {
                     // TODO: Fix this.  Keep actual widgets in the records / notes.
@@ -382,7 +382,7 @@
       type: 'get',
       url: '/webgl-viewer/gettrackingdata',
       success: function (data, status) {
-        if (status == 'success') {
+        if (status === 'success') {
           LoadTrackingCallback(data);
         } else { SA.Debug('ajax failed - get tracking data'); }
       },
@@ -457,7 +457,7 @@
             .click(function () { alert('REDO'); });
 
     this.RecordingName = SA.getCookie('SlideAtlasRecording');
-    if (this.RecordingName != undefined && this.RecordingName != 'false') {
+    if (this.RecordingName !== undefined && this.RecordingName !== 'false') {
       this.Recording = true;
       this.UpdateGUI();
     }
@@ -499,7 +499,7 @@
   };
 
   RecorderWidget.prototype.RecordStateCallback = function () {
-    if (this.Display.GetNumberOfViewers() == 0) { return; }
+    if (this.Display.GetNumberOfViewers() === 0) { return; }
 
         // Timer called this method.  Timer id is no longer valid.
     this.RecordTimerId = 0;
@@ -552,7 +552,7 @@
     // I still do not compress scroll wheel zoom, so I am putting a timer event
     // to collapse recording to lest than oner per second.
   RecorderWidget.prototype.RecordState = function () {
-    if (this.Display.GetNumberOfViewers() == 0) { return; }
+    if (this.Display.GetNumberOfViewers() === 0) { return; }
         // Delete the previous pending record timer
     if (this.RecordTimerId) {
       clearTimeout(this.RecordTimerId);
@@ -611,7 +611,7 @@
 
     // Move the state forward in time.
   RecorderWidget.prototype.RedoState = function () {
-    if (this.RedoState.length == 0) {
+    if (this.RedoState.length === 0) {
       return;
     }
     var recordNote = this.RedoStack.pop();

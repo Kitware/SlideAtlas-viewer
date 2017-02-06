@@ -192,16 +192,16 @@
     var w = this.AvailableWidth;
     var h = this.AvailableHeight;
 
-    if (xIdx != 1) {
+    if (xIdx !== 1) {
       w = w / 2;
     }
-    if (yIdx != 1) {
+    if (yIdx !== 1) {
       h = h / 2;
     }
-    if (xIdx == 2) {
+    if (xIdx === 2) {
       x = x + w;
     }
-    if (yIdx == 2) {
+    if (yIdx === 2) {
       y = y + h;
     }
         // inner vs outer?
@@ -225,7 +225,7 @@
         // WindowRectangle. Change it to be relative to the
         // ScreenRectangle.
     var src = $(event.originalEvent.srcElement);
-    while (src[0] != this.ScreenRectangle[0]) {
+    while (src[0] !== this.ScreenRectangle[0]) {
       var pos = src.position();
       x += pos.left;
       y += pos.top;
@@ -296,7 +296,7 @@
     this.Header.saOnResize(
             function () {
               var top = self.Header.height();
-              if (top == 0) {
+              if (top === 0) {
                     // Hack because height not set yet.
                 setTimeout(function () { self.Header[0].onresize(); }, 250);
                 return;
@@ -422,11 +422,11 @@
                    function () { $(this).css('color', '#29C'); });
     this.HomeButton.contextmenu(function () { return false; });
     this.HomeButton.mousedown(function (e) {
-      if (e.button == 0) {
+      if (e.button === 0) {
         self.HomeCallback();
         return false;
       }
-      if (e.button == 2) {
+      if (e.button === 2) {
         self.LinkMenuObject = {Link: self.HomeButton,
           Note: self.Note};
                 // Position and show the properties menu.
@@ -525,11 +525,11 @@
 
       $(link).contextmenu(function () { return false; });
       $(link).mousedown(function (e) {
-        if (e.button == 0) {
+        if (e.button === 0) {
           self.StartWindowManagerTimer(linkNote, e.pageX, e.pageY);
           return false;
         }
-        if (e.button == 2) {
+        if (e.button === 2) {
           self.LinkMenuObject = {Link: $(link),
             Note: linkNote};
                     // Position and show the properties menu.
@@ -544,7 +544,7 @@
         return true;
       });
       $(link).mousemove(function (e) {
-        if (e.which == 1) {
+        if (e.which === 1) {
           var dx = e.pageX - self.WindowManagerX;
           var dy = e.pageY - self.WindowManagerY;
           if (Math.abs(dx) + Math.abs(dy) > 5) {
@@ -554,12 +554,12 @@
       });
 
       $(link).mouseup(function (e) {
-        if (e.button == 0) {
+        if (e.button === 0) {
           if (self.WindowManagerTimer) {
             clearTimeout(self.WindowManagerTimer);
             self.WindowManagerTimer = undefined;
           }
-          if (self.LinkWindowLocation == 0) {
+          if (self.LinkWindowLocation === 0) {
             SA.SetNote(linkNote);
             return false;
           }
@@ -722,7 +722,7 @@
         }
         for (var i = first; i < answers.childElementCount; ++i) {
           var answer = answers.children[i];
-          var bold = (answer.style.fontWeight == 'bold') ||
+          var bold = (answer.style.fontWeight === 'bold') ||
                         ($(answer).find('b').length > 0);
           bar.saQuestion('AddAnswerText',
                                    answer.textContent,
@@ -821,13 +821,13 @@
                   'width': '25em'})
                 .bind('input', function () {
                   var url = self.UrlDialog.UrlInput.val();
-                  if (self.UrlDialog.LastUrl == self.UrlDialog.TextInput.val()) {
+                  if (self.UrlDialog.LastUrl === self.UrlDialog.TextInput.val()) {
                         // The text is same as the URL. Keep them synchronized.
                     self.UrlDialog.TextInput.val(url);
                   }
                   self.UrlDialog.LastUrl = url;
                     // Deactivate the apply button if the url is blank.
-                  if (url == '') {
+                  if (url === '') {
                     self.UrlDialog.ApplyButton.attr('disabled', true);
                   } else {
                     self.UrlDialog.ApplyButton.attr('disabled', false);
@@ -863,7 +863,7 @@
       range.collapse(true);
     }
     var linkText = this.UrlDialog.TextInput.val();
-    if (linkText == '') {
+    if (linkText === '') {
       linkText = this.UrlDialog.UrlInput.val();
     }
     link.appendChild(document.createTextNode(linkText));
@@ -1016,14 +1016,14 @@
 
     // This gets called when the note's mode changes.
   TextEditor.prototype.UpdateMode = function (mode) {
-    if (mode == 'answer-show' && this.Note && this.Note.Title) {
+    if (mode === 'answer-show' && this.Note && this.Note.Title) {
       this.HomeButton.text(this.Note.Title);
     } else {
       this.HomeButton.text('Home');
     }
 
         // TODO: change this to apply only to the textEntry window.
-    if (mode == 'answer-show') {
+    if (mode === 'answer-show') {
       $('.sa-note').show();
       $('.sa-notes').show();
       $('.sa-diagnosis').show();
@@ -1031,7 +1031,7 @@
       $('.sa-teaching-points').show();
       $('.sa-compare').show();
       $('.sa-question').saQuestion('SetMode', mode);
-    } else if (mode == 'answer-hide' || mode == 'answer-interactive') {
+    } else if (mode === 'answer-hide' || mode === 'answer-interactive') {
       $('.sa-note').hide();
       $('.sa-notes').hide();
       $('.sa-diagnosis').hide();
@@ -1202,11 +1202,11 @@
                   'margin': '3px'})
                 .change(function () {
                   if (!self.RootNote) { return; }
-                  if (this.value == 'review') {
+                  if (this.value === 'review') {
                     self.RootNote.Mode = 'answer-show';
-                  } else if (this.value == 'hidden') {
+                  } else if (this.value === 'hidden') {
                     self.RootNote.Mode = 'answer-hide';
-                  } else if (this.value == 'interactive') {
+                  } else if (this.value === 'interactive') {
                     self.RootNote.Mode = 'answer-interactive';
                   }
                   self.UpdateQuestionMode();
@@ -1272,7 +1272,7 @@
   NotesWidget.prototype.SaveUserNote = function () {
     this.UserNoteTimerId = false;
     var note = SA.notesWidget.GetCurrentNote();
-    if (!note || note.ViewerRecords.length == 0) {
+    if (!note || note.ViewerRecords.length === 0) {
       return;
     }
     var userNote = note.ViewerRecords[note.StartIndex].UserNote;
@@ -1290,14 +1290,14 @@
     }
 
     if (userNote.ViewerRecords[0].Annotations.length > 0 ||
-            userNote.LoadState == 2) {
+            userNote.LoadState === 2) {
       userNote.Save();
     }
   };
 
     // Needed so administrators can create usernotes.
   NotesWidget.prototype.IsUserTextTabOpen = function () {
-    if (this.TabbedWindow.GetCurrentDiv() == this.UserTextDiv) {
+    if (this.TabbedWindow.GetCurrentDiv() === this.UserTextDiv) {
       return true;
     }
     return false;
@@ -1314,16 +1314,16 @@
     }
 
     if (this.QuizMenu) {
-      if (this.RootNote.Mode == 'answer-hide') {
+      if (this.RootNote.Mode === 'answer-hide') {
         this.QuizMenu.val('hidden');
-      } else if (this.RootNote.Mode == 'answer-interactive') {
+      } else if (this.RootNote.Mode === 'answer-interactive') {
         this.QuizMenu.val('interactive');
       } else {
                 // this.RootNote.Mode = 'answer-show';
         this.QuizMenu.val('review');
       }
     }
-    if (this.RootNote.Mode == 'answer-interactive') {
+    if (this.RootNote.Mode === 'answer-interactive') {
       var self = this;
       this.QuizButton
                 .show()
@@ -1363,22 +1363,22 @@
     // There has to be another from text links.  That does not set the
     // text.
   NotesWidget.prototype.SetNote = function (note) {
-        // NOTE: Even if note == this.SelectedNote we still need to add the
+        // NOTE: Even if note === this.SelectedNote we still need to add the
         // user note annotations because display resets the annotations of
         // the view. this user may have changed annotations without
         // changing the note.
 
     var ancestor = note;
-    while (ancestor != this.RootNote &&
+    while (ancestor !== this.RootNote &&
                ancestor.Parent &&
-               ancestor.Type != 'UserNote') {
+               ancestor.Type !== 'UserNote') {
       ancestor = ancestor.Parent;
     }
 
         // Check to see if we have to set a new root note.
         // If note is not in the root note's family, set a new root.
         // Avoid decendants of user notes.
-    if (ancestor != this.RootNote && ancestor.Type != 'UserNote') {
+    if (ancestor !== this.RootNote && ancestor.Type !== 'UserNote') {
             // This will call SetNote again when root note is set.
       this.SetRootNote(ancestor);
       return;
@@ -1389,9 +1389,9 @@
     if (SA.LinkDiv.is(':visible')) { SA.LinkDiv.fadeOut(); }
 
         // If the note is a view link, use the text of the parent.
-    if (ancestor.Type != 'UserNote') {
+    if (ancestor.Type !== 'UserNote') {
       var textNote = note;
-      while (textNote && textNote.Type == 'View') {
+      while (textNote && textNote.Type === 'View') {
         textNote = textNote.Parent;
       }
       if (textNote) {
@@ -1399,7 +1399,7 @@
       }
     }
 
-    if (note == this.SelectedNote) {
+    if (note === this.SelectedNote) {
       return;
     }
 
@@ -1600,7 +1600,7 @@
                 });
     }
         // Default to old style when no text exists (for backward compatability).
-    if (this.RootNote.Text == '') {
+    if (this.RootNote.Text === '') {
       this.TabbedWindow.ShowTabDiv(this.LinksDiv);
     } else {
       this.TabbedWindow.ShowTabDiv(this.TextDiv);
@@ -1638,7 +1638,7 @@
   NotesWidget.prototype.UpdateUserNotes = function () {
         // Even if the userNote did not change, we still need to render the annotation.
         // User notes are always editable. Unless it this the demo account.
-    if (SA.User != '' && SA.VIEWER1) {
+    if (SA.User !== '' && SA.VIEWER1) {
       this.UserTextEditor.EditOn();
     }
 

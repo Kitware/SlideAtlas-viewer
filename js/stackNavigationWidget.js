@@ -77,7 +77,7 @@
         // TODO: Fix the main css file for mobile.  Hack this until fixed.
     if (SAM.MOBILE_DEVICE) {
       size = '80px';
-      if (SAM.MOBILE_DEVICE == 'iPhone') {
+      if (SAM.MOBILE_DEVICE === 'iPhone') {
         size = '100px';
       }
       this.PreviousNoteButton
@@ -114,11 +114,11 @@
   StackNavigationWidget.prototype.HandleKeyDown = function (event) {
     var keyCode = event.keyCode;
         // 34=page down, 78=n, 32=space
-    if (keyCode == 78 || keyCode == 32) {
+    if (keyCode === 78 || keyCode === 32) {
       this.NextNote();
       return false;
     }
-    if (keyCode == 80) {
+    if (keyCode === 80) {
       this.PreviousNote();
       return false;
     }
@@ -127,7 +127,7 @@
   };
 
   StackNavigationWidget.prototype.SetNote = function (note) {
-    if (this.GetNote() == note) {
+    if (this.GetNote() === note) {
       return;
     }
 
@@ -138,13 +138,13 @@
         this.Session = SA.Session.session.views;
         this.SessionId = SA.Session.sessid;
         this.Update();
-      } else if (note.SessionId && SA.RootNote.Type != 'HTML') {
+      } else if (note.SessionId && SA.RootNote.Type !== 'HTML') {
         this.SessionId = note.SessionId;
         $.ajax({
           type: 'get',
           url: SA.SessionUrl + '?json=true&sessid=' + this.SessionId,
           success: function (data, status) {
-            if (self.SessionId != data.sessid) {
+            if (self.SessionId !== data.sessid) {
                             // This will never happen.
               console.log('expecting a second session to load.');
               return;
@@ -189,12 +189,12 @@
     var note = this.GetNote();
     if (note) {
       for (var i = 0; i < this.Session.length; ++i) {
-        if (this.Session[i].id == note.Id) {
+        if (this.Session[i].id === note.Id) {
           this.SlideIndex = i;
         }
       }
 
-      if (note.Type == 'Stack') {
+      if (note.Type === 'Stack') {
                 // Next note refers to ViewerRecords.
         if (note.StartIndex > 0) {
           this.PreviousNoteButton.addClass('sa-active');
@@ -213,7 +213,7 @@
     if (SA.notesWidget) { SA.notesWidget.Flush(); }
 
     var current = this.GetNote();
-    if (current.Type == 'Stack') {
+    if (current.Type === 'Stack') {
       if (current.StartIndex <= 0) { return; }
 
             // Move camera
@@ -253,7 +253,7 @@
     if (SA.notesWidget) { SA.notesWidget.Flush(); }
 
     var current = this.GetNote();
-    if (current.Type == 'Stack') {
+    if (current.Type === 'Stack') {
       if (current.StartIndex >= current.ViewerRecords.length - 1) {
         return;
       }

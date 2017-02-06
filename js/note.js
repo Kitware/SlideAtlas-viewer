@@ -18,7 +18,7 @@
   SA.GetNoteFromId = function (id) {
     for (var i = 0; i < SA.Notes.length; ++i) {
       var note = SA.Notes[i];
-      if (note.Id && note.Id == id) {
+      if (note.Id && note.Id === id) {
         return note;
       }
     }
@@ -27,7 +27,7 @@
   SA.GetUserNoteFromImageId = function (id) {
     for (var i = 0; i < SA.Notes.length; ++i) {
       var note = SA.Notes[i];
-      if (note.Type == 'UserNote' && note.Parent == id) {
+      if (note.Type === 'UserNote' && note.Parent === id) {
         return note;
       }
     }
@@ -38,7 +38,7 @@
     // them again.
   SA.DeleteNote = function (note) {
     var idx = SA.Notes.indexOf(note);
-    if (idx != -1) {
+    if (idx !== -1) {
       SA.Notes.splice(idx, 1);
     }
   };
@@ -106,7 +106,7 @@
             .appendTo(this.TitleDiv)
             .text(this.Title)
             .addClass('sa-title');
-    if (this.Mode == 'answer-hide' || this.Mode == 'answer-interactive') {
+    if (this.Mode === 'answer-hide' || this.Mode === 'answer-interactive') {
       this.TitleEntry.text('-');
     }
 
@@ -141,14 +141,14 @@
                   'opacity': '0.5'});
     }
 
-    if (SA.HideAnnotations || this.Mode == 'answer-hide' ||
-            this.Mode == 'answer-interactive') {
+    if (SA.HideAnnotations || this.Mode === 'answer-hide' ||
+            this.Mode === 'answer-interactive') {
       this.TitleEntry.text('-');
     }
 
     if (SA.Edit) {
       this.Modified = false;
-      if (this.Mode == 'answer-hide' && this.Mode != 'answer-interactive') {
+      if (this.Mode === 'answer-hide' && this.Mode !== 'answer-interactive') {
         this.TitleEntry
                     .attr('contenteditable', 'true');
       }
@@ -285,7 +285,7 @@
     if (this.Modified) {
             // Move the Title from the GUI to the note.
       this.Modified = false;
-      if (this.Mode != 'answer-hide' && this.Mode != 'answer-interactive') {
+      if (this.Mode !== 'answer-hide' && this.Mode !== 'answer-interactive') {
         this.Title = this.TitleEntry.text();
       }
       if (SA.notesWidget) {
@@ -296,9 +296,9 @@
     SA.ContentEditableHasFocus = false;
     if (!this.Modified) { return; }
     this.Modified = false;
-    if (this.Mode != 'answer-hide' && this.Mode != 'answer-interactive') {
+    if (this.Mode !== 'answer-hide' && this.Mode !== 'answer-interactive') {
       var text = this.TitleEntry.text();
-      if (this.Title != text && !SA.HideAnnotations) {
+      if (this.Title !== text && !SA.HideAnnotations) {
         this.Title = text;
         this.Save();
       }
@@ -322,20 +322,20 @@
   };
 
   Note.prototype.DeleteCallback = function () {
-    if (this.Type == 'UserNote') {
+    if (this.Type === 'UserNote') {
             // User notes have a parent, but are also roots.
       return;
     }
     var parent = this.Parent;
-    if (parent == null) {
+    if (parent === null) {
       return;
     }
 
     this.ClearHyperlink();
 
-    if (this.Type != 'view') {
+    if (this.Type !== 'view') {
       if (SA.display && SA.display.NavigationWidget &&
-                SA.display.NavigationWidget.GetNote() == this) {
+                SA.display.NavigationWidget.GetNote() === this) {
                 // Move the current note off this note.
                 // There is always a previous.
         SA.display.NavigationWidget.PreviousNote();
@@ -370,14 +370,14 @@
 
   Note.prototype.RecordView = function (display) {
         // TODO: Get rid of VIEWER globals.
-    if (display.GetNumberOfViewers() == 0) { return; }
+    if (display.GetNumberOfViewers() === 0) { return; }
 
-    if (this.Type == 'Stack') {
+    if (this.Type === 'Stack') {
             // All we want to do is record the default
             // camera of the first section (if we at
             // the start of the stack).
       var viewer0 = display.GetViewer(0);
-      if (this.StartIndex == 0) {
+      if (this.StartIndex === 0) {
         this.ViewerRecords[0].CopyViewer(viewer0);
       }
       return;
@@ -412,7 +412,7 @@
     this.ChildrenDiv.empty();
 
         // Stacks
-    if (this.Type == 'Stack') {
+    if (this.Type === 'Stack') {
             // I want viewer records to look like children for stacks.
       this.StackDivs = [];
       for (var i = 0; i < this.ViewerRecords.length; ++i) {
@@ -425,7 +425,7 @@
           sectionDiv.text(this.ViewerRecords[i].Image.label);
         }
         this.StackDivs.push(sectionDiv);
-        if (i == this.StartIndex) {
+        if (i === this.StartIndex) {
           sectionDiv.css({'background-color': '#BBB'});
         }
       }
@@ -433,7 +433,7 @@
     }
 
         // Notes
-    if (this.Children.length == 0) {
+    if (this.Children.length === 0) {
       return;
     }
 
@@ -441,19 +441,19 @@
         // gui. They are for text links.  They may mess up drag ordering.
     var newChildren = [];
     for (var i = 0; i < this.Children.length; ++i) {
-      if (this.Children[i].Type == 'Note') {
+      if (this.Children[i].Type === 'Note') {
         newChildren.push(this.Children[i]);
       }
     }
     for (var i = 0; i < this.Children.length; ++i) {
-      if (this.Children[i].Type != 'Note') {
+      if (this.Children[i].Type !== 'Note') {
         newChildren.push(this.Children[i]);
       }
     }
     this.Children = newChildren;
 
     for (var i = 0; i < this.Children.length; ++i) {
-      if (this.Children[i].Type == 'Note') {
+      if (this.Children[i].Type === 'Note') {
         this.Children[i].DisplayGUI(this.ChildrenDiv);
                 // Indexes used for sorting.
         this.Children[i].Div.data('index', i);
@@ -473,7 +473,7 @@
   Note.prototype.Contains = function (decendent) {
     for (var i = 0; i < this.Children.length; ++i) {
       var child = this.Children[i];
-      if (child == decendent) {
+      if (child === decendent) {
         return true;
       }
       if (child.Contains(decendent)) {
@@ -549,7 +549,7 @@
             // If the note has annotations, they might be new.
             // If it was loaded, the annotations might have been deleted.
       if (this.UserNote.HasAnnotations() ||
-                this.UserNote.LoadState != INVALID) {
+                this.UserNote.LoadState !== INVALID) {
         this.UserNote.Save();
       }
     }
@@ -560,7 +560,7 @@
       if (this.ViewerRecords.length > this.StartIndex + i) {
         var viewerRecord = this.ViewerRecords[this.StartIndex + i];
         viewerRecord.CopyAnnotations(
-                    display.GetViewer(i), (this.Type == 'UserNote'));
+                    display.GetViewer(i), (this.Type === 'UserNote'));
       }
     }
   };
@@ -570,7 +570,7 @@
     var self = this;
     this.Div.appendTo(div);
 
-    if (this.Mode != 'answer-hide' && this.Mode != 'answer-interactive') {
+    if (this.Mode !== 'answer-hide' && this.Mode !== 'answer-interactive') {
       this.TitleEntry
                 .click(function () {
                   SA.SetNote(self);
@@ -592,7 +592,7 @@
                 .hover(
                     function () {
                       self.TitleEntry.css({'color': '#33D'});
-                      if (SA.notesWidget && SA.notesWidget.SelectedNote == self) {
+                      if (SA.notesWidget && SA.notesWidget.SelectedNote === self) {
                         self.ButtonsDiv.show();
                       }
                     },
@@ -724,13 +724,13 @@
 
         // It would be better not to set the ParentId of user notes in the
         // first place. userNote.Parent is set to the id of the image.
-    if (this.Type != 'UserNote' && this.ParentId) {
+    if (this.Type !== 'UserNote' && this.ParentId) {
       this.Parent = SA.GetNoteFromId(this.ParentId);
       delete this.ParentId;
     }
 
-    if (SA.HideAnnotations || this.Mode == 'answer-hide' ||
-            this.Model == 'answer-interactive') {
+    if (SA.HideAnnotations || this.Mode === 'answer-hide' ||
+            this.Model === 'answer-interactive') {
       this.TitleEntry.text('-');
     } else {
       this.TitleEntry.text(this.Title);
@@ -779,12 +779,12 @@
     // needed. I will keep it to be safe.
   var HACK_LOAD_CALLBACKS = [];
   Note.prototype.LoadViewId = function (viewId, callback) {
-    if (this.LoadState == SYNCHRONIZED) {
+    if (this.LoadState === SYNCHRONIZED) {
             // no realoading (could be done with an extra arg).
       (callback)();
       return;
     }
-    if (this.LoadState == REQUESTED) {
+    if (this.LoadState === REQUESTED) {
             // Waiting for an ajax call to return.
             // Add the new callback to any already pending.
       HACK + LOAD_CALLBACKS.push({note: this, callback: callback});
@@ -813,7 +813,7 @@
         var tmp = [];
         for (var i = 0; i < HACK_LOAD_CALLBACKS.length; ++i) {
           tmp2 = HACK_LOAD_CALLBACKS[i];
-          if (tmp2.note == self) {
+          if (tmp2.note === self) {
             (tmp2.callback)();
           } else {
             tmp.push(tmp2);
@@ -858,7 +858,7 @@
     }
         // Indicate which section is being displayed in viewer 1
     for (var i = 0; i < this.StackDivs.length; ++i) {
-      if (i == this.StartIndex) {
+      if (i === this.StartIndex) {
         this.StackDivs[i].css({'background-color': '#BBB'});
       } else {
         this.StackDivs[i].css({'background-color': '#FFF'});

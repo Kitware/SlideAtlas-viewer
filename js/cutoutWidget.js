@@ -64,14 +64,14 @@
   CutoutWidget.prototype.Accept = function () {
     this.Deactivate();
     var types = ['tif', 'jpeg', 'png', 'svs'];
-    var image_source = this.Viewer.GetCache().Image;
+    var imageSource = this.Viewer.GetCache().Image;
         // var bounds = [];
         // for (var i=0; i <this.Bounds.length; i++) {
         //  bounds[i] = this.Bounds[i] -1;
         // }
 
-    window.location = '/cutout/' + image_source.database + '/' +
-            image_source._id + '/image.' + types[this.Select.val()] + '?bounds=' + JSON.stringify(this.Bounds);
+    window.location = '/cutout/' + imageSource.database + '/' +
+            imageSource._id + '/image.' + types[this.Select.val()] + '?bounds=' + JSON.stringify(this.Bounds);
   };
 
   CutoutWidget.prototype.Cancel = function () {
@@ -154,11 +154,11 @@
 
   CutoutWidget.prototype.HandleKeyPress = function (keyCode, shift) {
         // Return is the same as except.
-    if (event.keyCode == 67) {
+    if (event.keyCode === 67) {
       alert('Accept');
     }
         // esc or delete: cancel
-    if (event.keyCode == 67) {
+    if (event.keyCode === 67) {
       alert('Cancel');
     }
 
@@ -170,7 +170,7 @@
   };
 
   CutoutWidget.prototype.HandleMouseDown = function (event) {
-    if (event.which != 1) {
+    if (event.which !== 1) {
       return false;
     }
     return true;
@@ -197,7 +197,7 @@
     var x = event.offsetX;
     var y = event.offsetY;
 
-    if (event.which == 0) {
+    if (event.which === 0) {
       this.CheckActive(event);
       return;
     }
@@ -264,11 +264,11 @@
     if (bds[3] > imgBds[3]) bds[3] = imgBds[3];
 
         // Do not the bounds go to zero area.
-    if (bds[0] != bds[1]) {
+    if (bds[0] !== bds[1]) {
       this.Bounds[0] = bds[0];
       this.Bounds[1] = bds[1];
     }
-    if (bds[2] != bds[3]) {
+    if (bds[2] !== bds[3]) {
       this.Bounds[2] = bds[2];
       this.Bounds[3] = bds[3];
     }
@@ -332,7 +332,7 @@
       active = active | 16;
     }
 
-    if (active != this.Active) {
+    if (active !== this.Active) {
       this.SetActive(active);
       eventuallyRender();
     }
@@ -347,7 +347,7 @@
 
   CutoutWidget.prototype.Deactivate = function () {
     this.Div.remove();
-    if (this.Layer == null) {
+    if (this.Layer === null) {
       return;
     }
     this.Layer.DeactivateWidget(this);
@@ -359,12 +359,12 @@
     // Setting to active always puts state into "active".
     // It can move to other states and stay active.
   CutoutWidget.prototype.SetActive = function (active) {
-    if (this.Active == active) {
+    if (this.Active === active) {
       return;
     }
     this.Active = active;
 
-    if (active != 0) {
+    if (active !== 0) {
       this.Layer.ActivateWidget(this);
     } else {
       this.Layer.DeactivateWidget(this);

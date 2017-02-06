@@ -56,7 +56,7 @@ window.SA = window.SA || {};
   }
 
   ViewBrowser.prototype.SelectView = function (viewObj) {
-    if (viewObj == null) {
+    if (viewObj === null) {
       this.Viewer.SetCache(null);
       eventuallyRender();
     }
@@ -221,7 +221,7 @@ window.SA = window.SA || {};
     $.get('/sessions?json=true',
           function (data, status) {
             self.PopProgress();
-            if (status == 'success') {
+            if (status === 'success') {
               self.BrowserInfo = data;
                   // I might want to open a session to avoid an extra click.
                   // I might want to sort the sessions to put the recent at the top.
@@ -239,7 +239,7 @@ window.SA = window.SA || {};
     $.get('/sessions?json=true' + '&sessid=' + sessId,
           function (data, status) {
             self.PopProgress();
-            if (status == 'success') {
+            if (status === 'success') {
               self.AddSessionViews(sessionFolder, data);
             } else { SA.Debug('ajax failed.'); }
           });
@@ -294,7 +294,7 @@ window.SA = window.SA || {};
 
   BrowserPanel.prototype.LoadViewChildren = function (viewFolder, data) {
     // Replace image with thumb?
-    if (data.Type == 'HTML') {
+    if (data.Type === 'HTML') {
         // Add a small slide html page.
       var div1 = $('<div>')
             .appendTo(viewFolder.Title)
@@ -313,7 +313,7 @@ window.SA = window.SA || {};
         // hack,  This should be off by default.
       div.find('.sa-viewer').saElement({hideCopyright: true});
         // Look for an alternative label.
-      if (!data.Title || data.Title == '') {
+      if (!data.Title || data.Title === '') {
         var titleDiv = div.find('.sa-presentation-title');
         if (titleDiv.length > 0) {
           viewFolder.Label.text(titleDiv.text());
@@ -344,7 +344,7 @@ window.SA = window.SA || {};
     var self = this;
 
     // null implies the user wants an empty view. ?????????????????
-    // if (obj == null) {
+    // if (obj === null) {
     //    this.SelectView(null);
     //    return;
     // }

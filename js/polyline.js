@@ -130,7 +130,7 @@
 
     // Find a world location of a popup point given a camera.
   Polyline.prototype.FindPopupPoint = function (cam) {
-    if (this.Points.length == 0) { return; }
+    if (this.Points.length === 0) { return; }
     var roll = cam.Roll;
     var s = Math.sin(roll + (Math.PI * 0.25));
     var c = Math.cos(roll + (Math.PI * 0.25));
@@ -295,18 +295,18 @@
     this.Matrix = mat4.create();
     mat4.identity(this.Matrix);
 
-    if (this.Points.length == 0) { return; }
+    if (this.Points.length === 0) { return; }
         // xMin,xMax, yMin,yMax
     this.Bounds = [points[0][0], points[0][0], points[0][1], points[0][1]];
 
-    if (this.LineWidth == 0 || !view.gl) {
+    if (this.LineWidth === 0 || !view.gl) {
       for (var i = 0; i < points.length; ++i) {
         this.PointBuffer.push(points[i][0]);
         this.PointBuffer.push(points[i][1]);
         this.PointBuffer.push(0.0);
         this.AddPointToBounds(points[i], 0);
       }
-            // Not used for line width == 0.
+            // Not used for line width === 0.
       for (var i = 2; i < points.length; ++i) {
         cellData.push(0);
         cellData.push(i - 1);
@@ -393,7 +393,7 @@
       this.CellBuffer.itemSize = 1;
       this.CellBuffer.numItems = cellData.length;
 
-      if (this.LineWidth != 0) {
+      if (this.LineWidth !== 0) {
         this.LineCellBuffer = view.gl.createBuffer();
         view.gl.bindBuffer(view.gl.ELEMENT_ARRAY_BUFFER, this.LineCellBuffer);
         view.gl.bufferData(view.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(lineCellData), view.gl.STATIC_DRAW);

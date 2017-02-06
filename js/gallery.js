@@ -58,7 +58,7 @@
     var self = this;
     $.get('/sessions?json=true',
               function (data, status) {
-                if (status == 'success') {
+                if (status === 'success') {
                   self.LoadCollectionList(data);
                 } else {
                   SA.Debug('ajax failed.');
@@ -76,7 +76,7 @@
                 .val(i)
                 .text(data.sessions[i].rule);
             // Set the default selected value.
-      if (data.sessions[i].rule == this.DefaultCollectionLabel) {
+      if (data.sessions[i].rule === this.DefaultCollectionLabel) {
         option.attr('selected', true);
         defaultCollectionIndex = i;
       }
@@ -98,7 +98,7 @@
                 .appendTo(this.SessionList)
                 .val(i)
                 .text(sessions[i].label);
-      if (defaultSessionLabel && defaultSessionLabel == sessions[i].label) {
+      if (defaultSessionLabel && defaultSessionLabel === sessions[i].label) {
         defaultSessionIndex = i;
         option.attr('selected', true);
       }
@@ -114,15 +114,15 @@
 
   Gallery.prototype.SelectSession = function (idx) {
     var self = this;
-    if (idx == this.SelectedCollection.sessions.length) {
+    if (idx === this.SelectedCollection.sessions.length) {
             // Load all the images for a database.
       this.SelectedSession = undefined;
             // Retrieve the database id from one of the sessions.
-      image_store_id = this.SelectedCollection.sessions[0].sessdb;
-      $.get('/webgl-viewer/getimagenames?db=' + image_store_id,
+      var imageStoreId = this.SelectedCollection.sessions[0].sessdb;
+      $.get('/webgl-viewer/getimagenames?db=' + imageStoreId,
                   function (data, status) {
-                    if (status == 'success') {
-                      self.LoadImages(data, image_store_id);
+                    if (status === 'success') {
+                      self.LoadImages(data, imageStoreId);
                     } else {
                       SA.Debug('ajax failed.');
                     }
@@ -132,7 +132,7 @@
       this.SelectedSession = this.SelectedCollection.sessions[idx];
       $.get('/sessions?json=1&sessid=' + this.SelectedSession.sessid,
                   function (data, status) {
-                    if (status == 'success') {
+                    if (status === 'success') {
                       self.LoadSession(data);
                     } else {
                       SA.Debug('ajax failed.');
@@ -263,7 +263,7 @@
       var label = item.children('div').text();
       var found = true;
       for (var j = 0; j < keys.length && found; ++j) {
-        if (label.toLowerCase().indexOf(keys[j]) == -1) { found = false; }
+        if (label.toLowerCase().indexOf(keys[j]) === -1) { found = false; }
       }
       if (found) {
         item.show();
