@@ -1617,7 +1617,7 @@ function TitlePage (parent, edit) {
 
     this.Image = $('<img>')
         .appendTo(this.Div)
-        .attr('src', 'static/img/SlideAtlas_home.jpg')
+        .attr('src', 'https://slide-atlas.org/static/img/SlideAtlas_home.jpg')
         .css({'position':'absolute',
               'top': '46%',
               'height':'50%',
