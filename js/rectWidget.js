@@ -1,4 +1,3 @@
-
 // Since there is already a rectangle widget (for axis aligned rectangle)
 // renaming this as Rect, other possible name is OrientedRectangle
 
@@ -646,7 +645,7 @@
         if (this.UserNoteFlag && SA.notesWidget){SA.notesWidget.EventuallySaveUserNote();}
         if (SAM.NotesWidget && ! this.UserNoteFlag) { SAM.NotesWidget.MarkAsModified(); } // Hack
         localStorage.RectWidgetDefaults = JSON.stringify(
-            {Color: hexcolor, 
+            {Color: hexcolor,
              LineWidth: this.Shape.LineWidth});
     };
 

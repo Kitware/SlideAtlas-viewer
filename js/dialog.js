@@ -1,4 +1,3 @@
-
 (function () {
     "use strict";
 
@@ -68,7 +67,7 @@
             self.ApplyButton.click(function (e) {
                 // hack
                 SA.ContentEditableHasFocus = false;
-                self.Hide(); 
+                self.Hide();
                 (callback)(); return true;
             });
         })();

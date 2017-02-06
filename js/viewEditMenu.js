@@ -1,7 +1,7 @@
 // It seems I cannot control the order these files are loaded.
 window.SA = window.SA || {};
 
-// TODO: 
+// TODO:
 //  ShowViewBrowser();});
 // get rid of these.
 
@@ -88,7 +88,7 @@ function ViewEditMenu (viewer, otherViewer) {
                 .addClass("sa-view-edit-button")
                 .click(function(){self.CopyZoom();});
         }
-    
+
         $('<button>').appendTo(this.Tab.Panel)
             .text("Flip Horizontal")
             .addClass("sa-view-edit-button")
@@ -171,7 +171,7 @@ ViewEditMenu.prototype.SaveView = function() {
 
 ViewEditMenu.prototype.GetViewerBounds = function (viewer) {
     var cam = viewer.GetCamera();
-    var fp = cam.GetFocalPoint(); 
+    var fp = cam.GetFocalPoint();
     var halfWidth = cam.GetWidth()/2;
     var halfHeight = cam.GetHeight()/2;
     return [fp[0]-halfWidth, fp[0]+halfWidth, fp[1]-halfHeight, fp[1]+halfHeight];
@@ -258,7 +258,7 @@ ViewEditMenu.prototype.CopyZoom = function() {
     var cam = this.Viewer.GetCamera();
     var copyCam;
     var copyCam = this.OtherViewer.GetCamera();
-    
+
     this.Viewer.AnimateCamera(cam.GetFocalPoint(), cam.Roll, copyCam.Height);
 }
 
@@ -357,7 +357,7 @@ var DownloadImage = (function () {
                                   });
         }
 
-        
+
         var d = new SAM.Dialog(StartDownloadCallback);
         d.Body.css({'margin':'1em 2em',
                     // Hack no time to figure out layout with border box option.
@@ -365,7 +365,7 @@ var DownloadImage = (function () {
                     'padding-right':'3em'});
         DOWNLOAD_WIDGET.DimensionDialog = d;
         d.Title.text('Download Image');
-        
+
         // Pixel Dimensions
         d.PxDiv = $('<div>')
             .appendTo(d.Body)
@@ -380,12 +380,12 @@ var DownloadImage = (function () {
                   'top': '-9px',
                   'display': 'inline-block',
                   'background-color': 'white'});
-        
+
         d.PxWidthDiv =
             $('<div>')
             .appendTo(d.PxDiv)
             .css({'display':'table-row'});
-        
+
         d.PxWidthLabel =
             $('<div>')
             .appendTo(d.PxWidthDiv)
@@ -407,7 +407,7 @@ var DownloadImage = (function () {
             .text("Pixels")
             .css({'display':'table-cell',
                   'text-align': 'left'});
-        
+
         d.PxHeightDiv =
             $('<div>')
             .appendTo(d.PxDiv)
@@ -427,15 +427,15 @@ var DownloadImage = (function () {
                   'width': '100px',
                   'margin': '5px'})
             .change(function () {PxHeightChanged();});
-        
+
         d.PxHeightUnits =
             $('<div>')
             .appendTo(d.PxHeightDiv)
             .text("Pixels")
             .css({'display':'table-cell',
                   'text-align': 'left'});
-        
-        
+
+
         // Document Size
         d.SizeDiv = $('<div>')
             .appendTo(d.Body)
@@ -450,7 +450,7 @@ var DownloadImage = (function () {
                   'top': '-9px',
                   'display': 'inline-block',
                   'background-color': 'white'});
-        
+
         d.SizeWidthDiv =
             $('<div>')
             .appendTo(d.SizeDiv)
@@ -471,14 +471,14 @@ var DownloadImage = (function () {
                   'width': '100px',
                   'margin': '5px'})
             .change(function () {SizeWidthChanged();});
-        
+
         d.SizeWidthUnits =
             $('<div>')
             .appendTo(d.SizeWidthDiv)
             .text("Inches")
             .css({'display':'table-cell',
                   'text-align': 'left'});
-        
+
         d.SizeHeightDiv =
             $('<div>')
             .appendTo(d.SizeDiv)
@@ -498,14 +498,14 @@ var DownloadImage = (function () {
                   'width': '100px',
                   'margin': '5px'})
             .change(function () {SizeHeightChanged();});
-        
+
         d.SizeHeightUnits =
             $('<div>')
             .appendTo(d.SizeHeightDiv)
             .text("Inches")
             .css({'display':'table-cell',
                   'text-align': 'left'});
-        
+
         d.SizeResDiv =
             $('<div>')
             .appendTo(d.SizeDiv)
@@ -525,16 +525,16 @@ var DownloadImage = (function () {
                   'width': '100px',
                   'margin': '5px'})
             .change(function () {ResChanged();});
-        
+
         d.SizeResUnits =
             $('<div>')
             .appendTo(d.SizeResDiv)
             .text("Pixels/Inch")
             .css({'display':'table-cell',
                   'text-align': 'left'});
-        
-        
-        d.ProportionsDiv = 
+
+
+        d.ProportionsDiv =
             $('<div>')
             .appendTo(d.Body)
             .css({'margin': '15px',
@@ -852,7 +852,7 @@ ImageInformationDialog.prototype.Open = function(imageObj, viewer) {
     this.Body.show();
 }
 
-ImageInformationDialog.prototype.Close = function() 
+ImageInformationDialog.prototype.Close = function()
 {
     if (this.Editable) {
         this.ImageObj.label = this.TitleInput.text();

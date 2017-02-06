@@ -352,7 +352,7 @@ window.SA = window.SA || {};
     // TODO: These should be moved to viewer-utils so they can be used
     // separately from SlideAtlas.
     // Helper function: Looks for a key phase in the text.
-    // first == true: Look only at the start. Returns true if found. 
+    // first == true: Look only at the start. Returns true if found.
     // first == false: return index of tag or -1;
     SA.TagCompare = function (tag,text,first) {
         if (first) {
@@ -380,8 +380,8 @@ window.SA = window.SA || {};
         var children = item.children();
         for (var i = 0; i < children.length; ++i) {
             var child = $(children[i]);
-            
-            // Look for an existing class from our set. 
+
+            // Look for an existing class from our set.
             // If we find one, terminate processing for the item and ites children.
             // Terminate the container collecting items.
             var foundTag = undefined;
@@ -478,7 +478,7 @@ window.SA = window.SA || {};
 
     // Useful utility to get selected text / the position of the cursor.
     // Get the selection in div.  Returns a range.
-    // If not, the range is collapsed at the 
+    // If not, the range is collapsed at the
     // end of the text and a new line is added.
     // div is a jquery parent.
     SA.GetSelectionRange = function(div) {
@@ -648,7 +648,7 @@ window.SA = window.SA || {};
     function initShaderPrograms(gl) {
 
         // Test threshold value for alpha.
-        var heatMapTestFragmentShaderString = 
+        var heatMapTestFragmentShaderString =
             "precision highp float;" +
             "uniform sampler2D uSampler;" +
             "varying vec2 vTextureCoord;" +
@@ -661,7 +661,7 @@ window.SA = window.SA || {};
             "   gl_FragColor = textureColor;" +
             " }";
         // Test red->alpha, greed->hue
-        var heatMapHueFragmentShaderString = 
+        var heatMapHueFragmentShaderString =
             "precision highp float;" +
             "uniform sampler2D uSampler;" +
             "varying vec2 vTextureCoord;" +
@@ -749,7 +749,7 @@ window.SA = window.SA || {};
         //textProgram.colorUniform = gl.getUniformLocation(textProgram, "uColor");
     }
 
-    
+
     SA.createWebGlProgram = function(fragmentShaderString, vertexShaderString, gl) {
         var fragmentShader = getShader(gl, gl.FRAGMENT_SHADER, fragmentShaderString);
         var vertexShader = getShader(gl, gl.VERTEX_SHADER, vertexShaderString);
@@ -1114,7 +1114,7 @@ window.SA = window.SA || {};
             }
         }
 
-        if (SAM.MOBILE_DEVICE && SA.DualDisplay && 
+        if (SAM.MOBILE_DEVICE && SA.DualDisplay &&
             SA.DualDisplay.NavigationWidget) {
             SA.DualDisplay.NavigationWidget.SetVisibility(false);
         }

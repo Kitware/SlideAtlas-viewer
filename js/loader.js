@@ -1,4 +1,3 @@
-
 // Make this a singlton (effectively) for now.
 // Two levels of caching and pruning.
 // Image without an associated texture map.

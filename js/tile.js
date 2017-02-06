@@ -130,7 +130,7 @@ window.SA = window.SA || {};
             bds[2] = (bds[2] / tileSpacingY) - tileOriginY;
             bds[3] = (bds[3] / tileSpacingY) - tileOriginY;
             // Do we need to crop?
-            if (bds[0] > 0 || bds[1] < cache.TileDimensions[0] || 
+            if (bds[0] > 0 || bds[1] < cache.TileDimensions[0] ||
                 bds[1] > 0 || bds[3] < cache.TileDimensions[1]) {
                 // Yes we need to crop. Put it in
                 // [minx,miny,sizex,sizey]
@@ -270,7 +270,7 @@ window.SA = window.SA || {};
     }
 
     Tile.prototype.LoadHttp = function (cache) {
-        // For http simply set the data url and wait 
+        // For http simply set the data url and wait
         if (cache.TileSource) {
             // This should eventually displace all other methods
             // of getting the tile source.

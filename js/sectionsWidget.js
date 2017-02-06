@@ -86,7 +86,7 @@
             .css({'margin':'2px 0px',
                   'width' : '100%'})
             .mouseup(function(){
-                self.Menu.hide(); 
+                self.Menu.hide();
                 self.Sort(0);
             });
         $('<button>')
@@ -95,7 +95,7 @@
             .css({'margin':'2px 0px',
                   'width' : '100%'})
             .mouseup(function(){
-                self.Menu.hide(); 
+                self.Menu.hide();
                 self.Sort(1);
             });
         $('<button>')
@@ -177,7 +177,7 @@
         this.ViewSortSections(axis0,direction0, axis1,direction1);
     }
 
-    SectionsWidget.prototype.ViewSortSections = function(axis0,direction0, 
+    SectionsWidget.prototype.ViewSortSections = function(axis0,direction0,
                                                          axis1,direction1) {
         function lessThan(bds1,bds2) {
             if ((bds1[(axis1<<1)+1] > bds2[axis1<<1]) &&
@@ -270,7 +270,7 @@
         }
     }
 
-    // world is a boolean indicating the bounds should be drawn in slide coordinates. 
+    // world is a boolean indicating the bounds should be drawn in slide coordinates.
     SectionsWidget.prototype.DrawBounds = function(view, bds, world, color) {
         var pt0 = [bds[0],bds[2]];
         var pt1 = [bds[1],bds[2]];

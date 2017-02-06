@@ -28,7 +28,7 @@
 // Mobile users: first view in session is off the edge.
 
 
-// Snap 
+// Snap
 //    to objects.
 //    some indication of snap.
 //    look at google.
@@ -112,7 +112,7 @@ function Presentation(rootNote, edit) {
     // Wow, really?  Timing caused the swipe bug?
     this.WindowDiv.on(
         'swipeleft',
-        function (e) { 
+        function (e) {
             if ( self.ResizePanel.Visibility &&
                  e.swipestop.coords[0] < self.ResizePanel.Width) {
                 self.ResizePanel.SetVisibility(false);
@@ -122,7 +122,7 @@ function Presentation(rootNote, edit) {
         });
     this.WindowDiv.on(
         'swiperight',
-        function (e) { 
+        function (e) {
             if ( ! self.ResizePanel.Visibility &&
                  e.swipestart.coords[0] < 10) {
                 self.ResizePanel.Show();
@@ -283,7 +283,7 @@ Presentation.prototype.StartFullScreen = function () {
             var state = document.fullScreen || document.mozFullScreen ||
                 document.webkitIsFullScreen;
             //var event = state ? 'FullScreenOn' : 'FullScreenOff';
-            
+
             self.FullScreen = state;
             if ( ! self.FullScreen) {
                 self.ResizePanel.Show();
@@ -642,7 +642,7 @@ Presentation.prototype.TimerCallback = function(duration) {
         this.GotoSlide(0);
         SA.ContentEditableHasFocus = false;
         return;
-    }   
+    }
 
     this.GotoSlide(this.Index+1);
 
@@ -738,7 +738,7 @@ Presentation.prototype.AddImageCallback = function(image) {
     //       Viewers inthe title pages are stored as records.
     if (this.RootNote.ViewerRecords.length == 0) {
         this.RootNote.ViewerRecords.push(record);
-    } 
+    }
 }
 
 
@@ -1058,7 +1058,7 @@ Presentation.prototype.UpdateSlidesTab = function (){
 
     if ( ! this.SlideList) { return;}
 
-    // Add the title page 
+    // Add the title page
     this.SlideList.empty();
 
     if (SA.Edit) {
@@ -1933,7 +1933,7 @@ HtmlPage.prototype.InitializeSlidePage = function() {
     this.BindElements();
 }
 
-// TODO: make sa jquery handle this. 
+// TODO: make sa jquery handle this.
 HtmlPage.prototype.InsertImage = function(src) {
 
     var imgDiv;
@@ -2128,7 +2128,7 @@ HtmlPage.prototype.InsertTextBox = function(size) {
 
     // Arbitrary height so I do not need to specify
     // text in percentages.
-    var scale = size / 800; 
+    var scale = size / 800;
 
     // Should everything be have Div as parent?
     var text = $('<div>')

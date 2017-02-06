@@ -160,7 +160,7 @@
 
     StackSectionWidget.prototype.Serialize = function() {
         // Backing away from 'every section has a contour'.
-        if (this.Thumb) { 
+        if (this.Thumb) {
             return null;
         }
         var obj = new Object();
@@ -194,7 +194,7 @@
         }
         for(var n=0; n < obj.shapes.length; n++){
             var polylineObj = obj.shapes[n];
-            if ( polylineObj.points) { 
+            if ( polylineObj.points) {
                 var points = polylineObj.points;
                 var shape = new SAM.Polyline();
                 shape.OutlineColor = this.Color;
@@ -267,7 +267,7 @@
     StackSectionWidget.prototype.HandleMouseUp = function(event) {
         return true;
     }
-    
+
     StackSectionWidget.prototype.HandleDoubleClick = function(event) {
         return true;
     }
@@ -483,7 +483,7 @@
         trans[2] += sumr / numContributingPoints;
 
         // for debugging (the rest is in shape.js
-        //t = {cx: center[0], cy: center[1], 
+        //t = {cx: center[0], cy: center[1],
         //     c: Math.cos(trans[2]), s: Math.sin(trans[2]),
         //     sx: trans[0], sy: trans[1]};
         //for (var i = 0; i < this.Shapes.length; ++i) {
@@ -493,7 +493,7 @@
 
         return aveDist;
     }
-    
+
     StackSectionWidget.prototype.Transform = function (shift, center, roll) {
         this.Bounds = null;
         for (var i = 0; i < this.Shapes.length; ++i) {

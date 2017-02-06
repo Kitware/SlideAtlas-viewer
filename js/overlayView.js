@@ -1,4 +1,3 @@
-
 // A Renderer - layer tints an image and adds opacity.  Maybe lens in the future.
 (function () {
     "use strict";
@@ -122,7 +121,7 @@
         this.View.UpdateCanvasSize();
     }
 
-    // Only works for images served by slide atlas. 
+    // Only works for images served by slide atlas.
     OverlayView.prototype.SetImageData = function (imageObj) {
         imageObj.spacing = imageObj.spacing || [1.0, 1.0, 1.0];
         imageObj.origin  = imageObj.origin  || [0.0, 0.0, 0.0];

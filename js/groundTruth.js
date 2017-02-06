@@ -685,7 +685,7 @@
     }
 
     // Move labeled rects in detections to classes.
-    // Called before annotations are saved to 
+    // Called before annotations are saved to
     GroundTruth.prototype.SplitDetections = function () {
         var detections = this.Classes[0].widget.Shape;
         // Build an object to make indexing classes easier.
@@ -848,7 +848,7 @@
 
     // Returns the index of the closest point withing radius.
     // Returns -1 if there are no points that close.
-    // I assume radius will be smaller than binSize. 
+    // I assume radius will be smaller than binSize.
     // If it is not, this will be inefficient.
     SpatialHash.prototype.Get = function(location, radius) {
         // Find binds touching this square.
@@ -881,7 +881,7 @@
                 }
             }
         }
-        if (! best) { 
+        if (! best) {
             return {idx:-1, dist:2*radius};
         }
 

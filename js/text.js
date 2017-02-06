@@ -110,7 +110,7 @@
 
         // Pixel bounds are in text box coordiante system.
         this.PixelBounds = [0,0,0,0];
-  
+
         this.BackgroundFlag = false;
     };
 
@@ -293,7 +293,7 @@
     }
 
     Text.prototype.UpdateBuffers = function(view) {
-        if ( ! view.gl) { 
+        if ( ! view.gl) {
             // Canvas.  Compute pixel bounds.
             var strArray = this.String.split("\n");
             var height = this.Size * LINE_SPACING * strArray.length;

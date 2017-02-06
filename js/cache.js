@@ -144,7 +144,7 @@ SA.IIPSource = function () {
     // x, y, slide are integer indexes of tiles in the grid.
     this.getTileUrl = function(level, x, y, z) {
         // The number if tiles in a row for this level grid.
-        var xDim = Math.ceil(this.ImageWidth / 
+        var xDim = Math.ceil(this.ImageWidth /
                              (this.TileSize << (this.NumLevels - z - 1)));
         var idx = y * xDim + x;
         imageSrc = this.Prefix + (z+2) + "," + idx;
@@ -368,7 +368,7 @@ Cache.prototype.SetImageData = function(image) {
     if ( ! image.TileSize) {
         image.TileSize = 256;
     }
-    
+
     this.Image = image;
 
     this.Levels = new Array(image.levels);
@@ -736,7 +736,7 @@ Cache.prototype.GetTile = function(slice, level, id) {
     var dim = 1 << level;
     var x = id & (dim-1);
     var y = id >> level;
-    
+
     return this.RecursiveGetTile(level, x, y, slice);
 }
 

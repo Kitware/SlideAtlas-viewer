@@ -90,7 +90,7 @@
     ShapeGroup.prototype.SetActive = function(flag) {
         for (var i = 0; i < this.Shapes.length; ++i) {
             this.Shapes[i].SetActive(flag);
-        }        
+        }
     }
 
     ShapeGroup.prototype.SetLineWidth = function(lineWidth) {
@@ -134,7 +134,7 @@
             this.Shapes[i].ResetOrigin();
         }
     }
-    
+
     // Just returns the first.
     ShapeGroup.prototype.GetOrigin = function() {
         if (this.Shapes.length != 0) {

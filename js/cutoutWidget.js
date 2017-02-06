@@ -1,4 +1,3 @@
-
 //==============================================================================
 // Feedback for the image that will be downloaded with the cutout service.
 // Todo:
@@ -330,7 +329,7 @@
             active = active | 8;
         }
 
-        var center = [(this.DragBounds[0]+this.DragBounds[1])*0.5, 
+        var center = [(this.DragBounds[0]+this.DragBounds[1])*0.5,
                       (this.DragBounds[2]+this.DragBounds[3])*0.5];
         tolerance *= 2;
         if (Math.abs(pt[0]-center[0]) < tolerance &&

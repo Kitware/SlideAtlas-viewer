@@ -280,7 +280,7 @@
 
         // A stroke has just been finished.
         var last = this.Shapes.GetNumberOfShapes() - 1;
-        if (this.State == DRAWING && 
+        if (this.State == DRAWING &&
             event.which == 1 && last >= 0) {
             var spacing = this.Layer.GetCamera().GetSpacing();
             // NOTE: This assume that the shapes are polylines.
@@ -296,7 +296,7 @@
         if (this.State == DRAWING) {
             this.Deactivate();
             return false;
-        } 
+        }
         if (this.State == ACTIVE) {
             this.SetStateToDrawing();
             return false;

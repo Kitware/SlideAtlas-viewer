@@ -1,4 +1,3 @@
-
 // A Renderer - layer tht uses webGL to show an intensity immage maped to color-transparency.
 (function () {
     "use strict";
@@ -100,7 +99,7 @@
         this.View.UpdateCanvasSize();
     }
 
-    // Only works for images served by slide atlas. 
+    // Only works for images served by slide atlas.
     HeatMap.prototype.SetImageData = function (imageObj) {
         imageObj.spacing = imageObj.spacing || [1.0, 1.0, 1.0];
         imageObj.origin  = imageObj.origin  || [0.0, 0.0, 0.0];

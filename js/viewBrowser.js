@@ -295,8 +295,8 @@ BrowserPanel.prototype.RequestViewChildren = function(viewFolder) {
             self.PopProgress();
             self.LoadViewChildren(viewFolder, data);
         },
-        error: function() { 
-            SA.Debug( "AJAX - error() : getview" ); 
+        error: function() {
+            SA.Debug( "AJAX - error() : getview" );
             self.PopProgress();
         },
     });

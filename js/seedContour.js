@@ -78,7 +78,7 @@ function GenerateContourFromData(d, threshold, xSeed, ySeed) {
     }
 
     // Now start tracing the contour.
-    // Initialize the loop with the countour end on edge 0-1. 
+    // Initialize the loop with the countour end on edge 0-1.
     var k = s0/(s0-s1);
     var loop = [[x0+(xr*k), y0+(yr*k)]];
     xSeed = x0;  ySeed = y0;
@@ -208,4 +208,4 @@ function GenerateContourFromViewer(viewer, threshold) {
 
 
 })();
-    
+

@@ -1,4 +1,3 @@
-
 (function () {
     "use strict";
 
@@ -55,7 +54,7 @@
             return this.GetPoint0();
         } else if (idx == 1) {
             return this.GetPoint1();
-        } 
+        }
         alert("Bad correlation point index: " + idx);
         return [0,0];
     }
@@ -150,7 +149,7 @@
         }
 
         if (this.Correlations.length == 0) {
-            fpOut[0] = fpIn[0]; 
+            fpOut[0] = fpIn[0];
             fpOut[1] = fpIn[1];
             this.DeltaRoll = 0;
             return fpOut;

@@ -107,10 +107,10 @@
         }
         this.ZoomTarget = this.MainView.Camera.GetHeight();
         this.RollTarget = this.MainView.Camera.Roll;
-    
+
         this.DoubleClickX = 0;
         this.DoubleClickY = 0;
-    
+
         // For stack correlations.
         this.StackCorrelations = undefined;
         // This is only for drawing correlations.
@@ -1336,7 +1336,7 @@
         this.InteractionEnabled = false;
     }
 
-    // Used to be in EventManager. 
+    // Used to be in EventManager.
     // TODO: Evaluate and cleanup.
     Viewer.prototype.RecordMouseDown = function(event) {
         // Evaluate where LastMouseX / Y are used.
@@ -1365,7 +1365,7 @@
 
         //this.TriggerStartInteraction();
     }
-    // Used to be in EventManager. 
+    // Used to be in EventManager.
     // TODO: Evaluate and cleanup.
     Viewer.prototype.SetMousePositionFromEvent = function(event) {
         if (event.offsetX && event.offsetY) {

@@ -585,7 +585,7 @@ window.SA = window.SA || {};
             SA.WaterMark = true;
         } else {
             SA.WaterMark = false;
-        }   
+        }
 
         // This just changes the camera based on the current time.
         if (this.Viewers[0]) {
@@ -636,7 +636,7 @@ window.SA = window.SA || {};
         }
     }
 
-    // refViewerIdx is the viewer that changed and other viewers need 
+    // refViewerIdx is the viewer that changed and other viewers need
     // to be updated to match that reference viewer.
     DualViewWidget.prototype.SynchronizeViews = function (refViewerIdx, note) {
         // We allow the viewer to go one past the end.
@@ -684,7 +684,7 @@ window.SA = window.SA || {};
             }
             note.ActiveCorrelation.SetRoll(deltaRoll);
             note.ActiveCorrelation.SetHeight(0.5*(cam1.Height + cam0.Height));
-            return; 
+            return;
         } else {
             // A round about way to set and unset the active correlation.
             // Note is OK, because if there is no interaction without the shift key

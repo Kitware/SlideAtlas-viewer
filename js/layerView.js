@@ -85,7 +85,7 @@
             .css({ 'border': '1px solid #CCC',
                    'width': '20%',
                    'padding':'5px',
-                   'height': '100%', 
+                   'height': '100%',
                    'float': 'left' });
         this.ColorInput = $('<input type="color">')
             .appendTo(color_wrapper)

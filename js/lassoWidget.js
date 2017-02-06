@@ -492,7 +492,7 @@
     */
     LassoWidget.prototype.CombineStroke = function() {
         // This algorithm was desinged to have the first point be the same as the last point.
-        // To generalize polylineWidgets and lassoWidgets, I changed this and put a closed 
+        // To generalize polylineWidgets and lassoWidgets, I changed this and put a closed
         // flag (which implicitely draws the last segment) in polyline.
         // It is easier to temporarily add the extra point and them remove it, than change the algorithm.
         this.Loop.Points.push(this.Loop.Points[0]);
@@ -601,7 +601,7 @@
 
 
     // tranform all points so p0 is origin and p1 maps to (1,0)
-    // Returns false if no intersection, 
+    // Returns false if no intersection,
     // If there is an intersection, it adds that point to the loop.
     // It returns {Point: newPt, LoopIndex: i} .
     LassoWidget.prototype.FindIntersection = function(p0, p1) {
@@ -660,7 +660,7 @@
 
         return (angle > 3.14 || angle < -3.14);
     }
-    
+
     LassoWidget.prototype.ComputeArea = function() {
         var area = 0.0;
         // Use the active center. It should be more numerical stable.
@@ -682,7 +682,7 @@
         return area;
     }
 
-    
+
     SAM.LassoWidget = LassoWidget;
 
 })();

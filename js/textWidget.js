@@ -38,7 +38,7 @@
             return null;
         }
 
-        if ( typeof string != "string") { string = "";} 
+        if ( typeof string != "string") { string = "";}
 
         // create and cuystomize the dialog properties popup.
         var self = this;
@@ -55,7 +55,7 @@
             $('<div>')
             .appendTo(this.Dialog.Body)
             .css({'display':'table-row'});
-        this.Dialog.FontLabel = 
+        this.Dialog.FontLabel =
             $('<div>')
             .appendTo(this.Dialog.FontDiv)
             .text("Font (px):")
@@ -100,22 +100,22 @@
             .attr('checked', 'false')
             .css({'display': 'table-cell'});
 
-        this.Dialog.VisibilityModeInputs = []; 
-        this.Dialog.VisibilityModeInputs[0] = 
+        this.Dialog.VisibilityModeInputs = [];
+        this.Dialog.VisibilityModeInputs[0] =
             $('<input type="radio" name="visibilityoptions" value="0">Text only</input>')
             .appendTo(this.Dialog.VisibilityModeInputButtons)
             .attr('checked', 'false')
 
         $('<br>').appendTo(this.Dialog.VisibilityModeInputButtons);
 
-        this.Dialog.VisibilityModeInputs[1] = 
+        this.Dialog.VisibilityModeInputs[1] =
             $('<input type="radio" name="visibilityoptions" value="1">Arrow only, text on hover</input>')
             .appendTo(this.Dialog.VisibilityModeInputButtons)
             .attr('checked', 'false')
 
         $('<br>').appendTo(this.Dialog.VisibilityModeInputButtons);
 
-        this.Dialog.VisibilityModeInputs[2] = 
+        this.Dialog.VisibilityModeInputs[2] =
             $('<input type="radio" name="visibilityoptions" value="2">Arrow and text visible</input>')
             .appendTo(this.Dialog.VisibilityModeInputButtons)
             .attr('checked', 'true')
@@ -319,7 +319,7 @@
         this.Arrow.Origin = this.Text.Position;
     }
 
-    
+
     // Anchor is in the middle of the bounds when the shape is not visible.
     TextWidget.prototype.SetVisibilityMode = function(mode) {
         if (this.VisibilityMode == mode) { return; }
@@ -488,7 +488,7 @@
             this.LastMouse = [event.offsetX, event.offsetY];
 
             // TODO: Get the Mouse Deltas out of the layer.
-            this.Text.Anchor[0] -= dx; 
+            this.Text.Anchor[0] -= dx;
             this.Text.Anchor[1] -= dy;
             this.UpdateArrow();
             this.PlacePopup();

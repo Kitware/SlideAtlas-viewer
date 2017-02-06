@@ -1,8 +1,6 @@
 // Testing annotation widget with touch events.
 
 
-
-
 (function () {
     "use strict";
 
@@ -123,7 +121,7 @@ MobileAnnotationWidget.prototype.SetVisibility = function(v) {
 // Toggle the tool gui.
 MobileAnnotationWidget.prototype.ToggleVisibility = function() {
     this.SetVisibility( ! this.Visibility);
-    if (FAVORITES_WIDGET) { 
+    if (FAVORITES_WIDGET) {
         FAVORITES_WIDGET.FavoritesBar.ShowHideFavorites();
     }
 }

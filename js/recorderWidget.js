@@ -233,7 +233,7 @@
         }
     }
 
-    // For stacks.  A reduced version of copy view. 
+    // For stacks.  A reduced version of copy view.
     ViewerRecord.prototype.CopyAnnotations = function (viewer, userNoteFlag) {
         this.Annotations = [];
         // TODO: get rid of this hack somehow. Generalize layers?
@@ -256,7 +256,7 @@
         }
     }
 
-    // I am not sure we need to serialize.  
+    // I am not sure we need to serialize.
     // The annotations are already in database form.
     // Possibly we need to restrict which ivars get into the database.
     ViewerRecord.prototype.Serialize = function () {

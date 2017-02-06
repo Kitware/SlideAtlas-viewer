@@ -1,4 +1,4 @@
-// Two behaviors: 
+// Two behaviors:
 // 1: Single click and drag causes a vertex to follow the
 // mouse. A new vertex is inserted if the click was on an edge.  If a
 // vertex is dropped on top of its neighbor, the are merged.
@@ -628,7 +628,7 @@
         dist = Math.max(dist, this.Polyline.GetLineWidth());
         this.ActiveVertex = this.Polyline.PointOnVertex(pt, dist);
 
-        if (this.State == DRAWING_EDGE) { 
+        if (this.State == DRAWING_EDGE) {
             // TODO:  The same logic is in mouse move.  Decide which to remove.
             // Only allow the first vertex to be active (closing the loop).
             if (this.Polyline.GetNumberOfPoints() < 2 ||
@@ -707,7 +707,7 @@
     }
 
     // Active means that the widget is receiving events.  It is
-    // "hot" and waiting to do something.  
+    // "hot" and waiting to do something.
     // However, it is not active when in drawing mode.
     // This draws a circle at the active spot.
     // Vertexes are active for click and drag or double click into drawing

@@ -1,4 +1,4 @@
-// TODO: 
+// TODO:
 // BUG: Notes now have a sessionId so the navigation widget will work when
 // a note is loaded in issolation.  We are not updating this reference when
 // the view is moved.
@@ -26,7 +26,7 @@
 // variables private either.
 
 
-// Closure namespace 
+// Closure namespace
 CollectionBrowser = (function (){
 
     var PROGRESS_COUNT = 0;
@@ -144,7 +144,7 @@ CollectionBrowser = (function (){
             }
             return false; },
         false);
-                                  
+
 
     document.body.addEventListener(
         "keydown",
@@ -176,7 +176,7 @@ CollectionBrowser = (function (){
                       PopProgress();
                       console.log("ajax failed.");
                   }
-              });   
+              });
     }
 
     LibraryObject.prototype.Load = function (data) {
@@ -419,7 +419,7 @@ CollectionBrowser = (function (){
                     }
                 }
             }
-        }   
+        }
 
 
         // I am not sure that the GUI stuff belongs in this method.
@@ -567,7 +567,7 @@ CollectionBrowser = (function (){
 //==============================================================================
     // GUI objects.
     // I am going to leave SELECTED as an array of GUI objects because
-    // it is difficult to get to the GUI objects from the data objects. 
+    // it is difficult to get to the GUI objects from the data objects.
 
     function UpdateGUI() {
         for (var i = 0; i < BROWSERS.length; ++i) {
@@ -612,7 +612,7 @@ CollectionBrowser = (function (){
     var LAST_SELECTED = undefined;
     var CLONES = [];
     var BROWSERS = [];
-    var MESSAGE = 
+    var MESSAGE =
         $('<div>').appendTo('body')
               .hide()
               .text("Move")
@@ -631,16 +631,16 @@ CollectionBrowser = (function (){
         this.OptionBar = $('<div>')
             .appendTo(this.Div)
             .addClass("sa-view-browser-div");
-        
+
         this.Collections = [];
 
         this.CollectionItemList = $('<ul>')
             .appendTo(this.Div)
             .addClass("sa-view-browser-list");
-        
+
         this.DefaultCollectionLabel = "";
         this.SelectedSession = undefined;
-        this.Initialize();        
+        this.Initialize();
     }
 
 
@@ -669,7 +669,7 @@ CollectionBrowser = (function (){
         this.Div.css({"height":(height-top),
                       "width":(width-left)});
     }
-    
+
     // Called after request returns with data from the server.
     CollectionBrowser.prototype.LoadLibrary = function(library) {
         // Populate the collection menu.
@@ -701,7 +701,7 @@ CollectionBrowser = (function (){
             this.Collections[i].UpdateGUI();
         }
     }
-    
+
 
 //==============================================================================
 
@@ -795,7 +795,7 @@ CollectionBrowser = (function (){
                 AddSelected(self); //(self.View);
                 TRASH_SESSION.DropSelected(0, false, false);
             });
-        
+
         this.Item
             .hover(
                 function () {
@@ -829,7 +829,7 @@ CollectionBrowser = (function (){
                     var view = this.View;
                     event.preventDefault();
                     view.Item.unbind('mouseleave', leaveHandler);
-                    
+
                     // Unselect previously selected views when control is not pressed
                     if ( ! event.ctrlKey) {
                         ClearSelected();
@@ -872,7 +872,7 @@ CollectionBrowser = (function (){
         if (viewObject.Selected) {
             AddSelected(this);
         }
-                        
+
         var labelDiv = $('<div>')
             .appendTo(this.Item)
             .text(viewObject.Label)
@@ -894,7 +894,7 @@ CollectionBrowser = (function (){
     var LOAD_METADATA_LOADED = 2;
     // The images have been requested.
     var LOAD_IMAGES = 3;
-    
+
     function Session(sessionObject, collection) {
         this.SessionData = sessionObject;
         this.Views = [];
@@ -920,10 +920,10 @@ CollectionBrowser = (function (){
             .addClass("sa-view-browser-view-list")
             .hide();
         this.ViewListOpen = false;
-        
+
         var self = this;
         this.OpenCloseIcon.click(function(){self.ToggleViewList();});
-        
+
         // Delay loading
         this.LoadState = LOAD_INITIAL;
 
@@ -932,7 +932,7 @@ CollectionBrowser = (function (){
         this.SaveLock = false;
     }
 
-    
+
     Session.prototype.RequestMetaData = function() {
         this.LoadState = LOAD_METADATA_WAITING;
 
@@ -976,12 +976,12 @@ CollectionBrowser = (function (){
         }
         return false;
     }
-    
+
     Session.prototype.LoadViewData = function(sessionObject) {
         var self = this;
 
         this.LoadState = LOAD_METADATA_LOADED;
-        this.UpdateGUI();        
+        this.UpdateGUI();
     }
 
     Session.prototype.UpdateGUI = function () {
@@ -1028,12 +1028,12 @@ CollectionBrowser = (function (){
             this.RequestImages();
         }
     }
-    
+
 
     Session.prototype.RequestImages = function() {
         if (this.LoadState != LOAD_METADATA_LOADED) { return; }
         this.LoadState = LOAD_IMAGES;
-        
+
         for (var i = 0; i < this.Views.length; ++i) {
             var view = this.Views[i];
             var image = $('<img>')
@@ -1046,19 +1046,19 @@ CollectionBrowser = (function (){
                         if (event.which == 0) {
                             // Show larger image after about 1 second.
                             ScheduleImagePopup($(this));
-                            
+
                         }
                     })
                 .mouseleave(
                     function () {
                         // Cancel if the popup has not displayed yet.
                         ClearPendingImagePopup();
-                    });            
+                    });
 
         }
     }
 
-    
+
     Session.prototype.ToggleViewList = function() {
         if (this.ViewListOpen) {
             this.ViewListOpen = false;
@@ -1204,7 +1204,7 @@ CollectionBrowser = (function (){
             }
             CLONES = [];
             MESSAGE.hide();
-            
+
             // Actually do the move
             this.SessionData.DropSelected(this.DropTargetIndex, copy, true);
 
@@ -1279,7 +1279,7 @@ CollectionBrowser = (function (){
         var collectionIdx = this.Collection.CollectionIndex;
         // Browser index is different, but al the others are the same.
         var browserIdx = (this.Collection.Browser.BrowserIndex+1)%2;
-        var otherSession = 
+        var otherSession =
             BROWSERS[browserIdx].Collections[collectionIdx].Sessions[this.SessionIndex];
         if (otherSession.LoadState == LOAD_METADATA_WAITING ||
             otherSession.LoadState == LOAD_METADATA_LOADED) {
@@ -1300,7 +1300,7 @@ CollectionBrowser = (function (){
         }
     }
 
-    
+
 //==============================================================================
     var DROP_TARGETS = [];
     function StartViewDrag(event) {

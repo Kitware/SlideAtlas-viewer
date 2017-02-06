@@ -1,4 +1,3 @@
-
 (function () {
     "use strict";
 
@@ -410,8 +409,8 @@
             // needed if we have some other object on the clipboard.
             // The camera is needed so grid does not rotate when pasting in
             // another stack section.
-            var clip = {Type:"GridWidget", 
-                        Data: this.Serialize(), 
+            var clip = {Type:"GridWidget",
+                        Data: this.Serialize(),
                         Camera: this.Layer.GetCamera().Serialize()};
             localStorage.ClipBoard = JSON.stringify(clip);
             return false;

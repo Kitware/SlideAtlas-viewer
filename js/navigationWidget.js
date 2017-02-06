@@ -2,8 +2,6 @@
 // entwined with the notes widget at the moment.
 
 
-
-
 (function () {
     "use strict";
 

@@ -657,7 +657,7 @@
             delete this._id;
         }
         // I would like to put the session as parent, but this would be an inclomplete reference.
-        // A space is not a valid id. Niether is 'false'. Lets leave it blank. 
+        // A space is not a valid id. Niether is 'false'. Lets leave it blank.
         if (this.Parent) {
             if (typeof(this.Parent) == 'string') {
                 // When the parent is an image.
@@ -734,7 +734,7 @@
             delete this.ParentId
         }
 
-        if (SA.HideAnnotations || this.Mode == 'answer-hide' || 
+        if (SA.HideAnnotations || this.Mode == 'answer-hide' ||
             this.Model == 'answer-interactive') {
             this.TitleEntry.text("-");
         } else {

@@ -1,7 +1,6 @@
 // Generic mesh. Arbitrary control points and arbitrary triangles.
 
 
-
 (function () {
     "use strict";
 

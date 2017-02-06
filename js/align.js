@@ -1,4 +1,4 @@
-// Histogram section alignment. 
+// Histogram section alignment.
 
 //=================================================
 // contour collection stuff.
@@ -26,7 +26,7 @@
     // first section on the second axis determines which direction to
     // look for the next line on the second axis.
     function SortAndFilterContours(contours, firstContour) {
-        // pick the second contour as the closest 
+        // pick the second contour as the closest
         // to the first with similar areas.
         var firstCenter = firstContour.GetCenter();
         var closestDist2;
@@ -512,7 +512,7 @@
     // Stuff for segmentation.
     // Start with pixel classification by RGB
 
-    // TODO: 
+    // TODO:
     // -: mouse drag
     // -: Create a GUI panel with options.
     //    Toggle mask option.
@@ -1119,7 +1119,7 @@
     }
 
 
-    // Convert from simple point cooridnate and triangle corner id arrays 
+    // Convert from simple point cooridnate and triangle corner id arrays
     // to full mesh.
     TriangleMesh.prototype.CreateFullMesh = function () {
         var numPts = this.PointCoordinates.length / 2;
@@ -1439,7 +1439,7 @@
         }
 
         // There is a chance this could fail if there are no pixels between two
-        // edges.  Maybe get the mask from the thresholded image. 
+        // edges.  Maybe get the mask from the thresholded image.
         if (pline.Closed && points.length > 2 && false) {
             // Fill leaked out on one section.  Make it more robust, or
             // use the thresholded image.
@@ -1519,7 +1519,7 @@
             var x = Math.round((m0[0]*(divisions-i)+m1[0]*i)/divisions);
             var y = Math.round((m0[1]*(divisions-i)+m1[1]*i)/divisions);
             this.Map[x + (y*this.Dimensions[0])] = 0;
-        }    
+        }
     }
 
     // Rasterize points with alpha = 255
@@ -1739,7 +1739,7 @@
             //if (!data.InBounds(x3,y3)) { return polyLine;}
             // Get the other corner values.
             s2 = (data.GetIntensity(x2, y2) - threshold) * direction;
-            if (! (s2 > 0)) { 
+            if (! (s2 > 0)) {
                 s3 = (data.GetIntensity(x3, y3) - threshold) * direction;
                 if ( ! (s3 > 0)) {
                     // Entering the edge (+,-)
@@ -2016,7 +2016,7 @@
 
 
 
-    // Results: Interesting, but not useful.  
+    // Results: Interesting, but not useful.
     // Some tissue has the same value as background. I would need a fill to segment background better.
     // Deep red tissue keeps blue red component from dominating.
     function EncodePrincipleComponent(data) {
@@ -2392,11 +2392,11 @@
 
 
 
-    // Choose a threshold: 
+    // Choose a threshold:
     //    (This step can be a problem.  It latches onto white vs slide when zoomed out)
-    // Find the largest contour 
+    // Find the largest contour
     //    (We might want to find multiple tissue sections).
-    // Create a distance map from contour in viewer1.  
+    // Create a distance map from contour in viewer1.
     //    (We may want to make inside 0 distance).
     //    We may want to use euclidian instead of cityblock.
     // Rigid align contour2 to contour1
@@ -2527,7 +2527,7 @@
 
     // An idea.  Use an existing polyline instead of a new iso contour.
     // Select polylines by color.
-    // Something is not work.  
+    // Something is not work.
     // I expect two things: Coordinate system (no) or spacing (no).
     // !!!!!!!!!!!!!
 
@@ -2777,7 +2777,7 @@
             }
         }
         DEBUG_TRANS = trans;
-        
+
         // Now make new correlations from the transformed contour.
         var targetNumCorrelations = 10;
         var skip = Math.ceil(contour2.Length() / targetNumCorrelations);
@@ -2983,7 +2983,7 @@
 
     // Peal away background
     // then run pc again.
-    // Results: Interesting, but not useful.  
+    // Results: Interesting, but not useful.
     // Some tissue has the same value as background. I would need a fill to segment background better.
     // Deep red tissue keeps blue red component from dominating.
     function testPrincipleComponentEncoding() {
@@ -3543,7 +3543,7 @@
 
 
     // !!!!!!!!!!!!!!!!!!!! I had to skip the auto highres step.
-    // I lost the viewer that created the image.  I sould probably 
+    // I lost the viewer that created the image.  I sould probably
     // have the camera translate points rather than the viewer. (done)
     // Change the low res contours into a high res contour.
     var NEW_HAGFISH_CONTOURS = [];
@@ -3570,7 +3570,7 @@
 
 
     // Tasks.
-    // Finish the contour widget.  
+    // Finish the contour widget.
     //   - should we store the contour object?
     //   - should we save it in screen or world coordinates?
     // Convert viewer record stacks into note slides and back.
@@ -3610,7 +3610,7 @@
 
 
 
-    // TODO: 
+    // TODO:
     // - Number contours to show the order (Special contour widget?)
     // - Rectangle widget to create a new contour, or merge multiple contours, or
     //     cut a contour.

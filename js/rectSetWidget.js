@@ -2,7 +2,7 @@
 // No rotation for now. No direct interaction for now.
 // No properties dialog for now.
 // Only the world / slide conrdinate system supported.
-// Does nto supprot fixed size 
+// Does nto supprot fixed size
 
 // How are we going to store them in girder annotations?
 
