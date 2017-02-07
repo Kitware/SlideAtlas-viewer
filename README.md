@@ -10,11 +10,11 @@ See the [Node.js documentation](https://docs.npmjs.com/getting-started/installin
 for details on how to install it.
 
 ## Building
-To build the full distributable web code, run:
+To fetch dependencies necessary for building, run:
 
 `npm install`
 
-To quickly rebuild only the local code, without updating dependencies, run:
+To build the full distributable web code, then run:
 
 `npm run build`
 
