@@ -32,6 +32,7 @@
     "build": "grunt",
     "test": "eslint .",
     "preversion": "npm install && npm run-script build && npm test",
-    "postversion": "git push origin master --tags"
+    "version": "git checkout -B bump-version",
+    "postversion": "git push origin bump-version --tags"
   }
 }

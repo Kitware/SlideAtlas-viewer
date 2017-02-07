@@ -49,9 +49,15 @@ no outstanding changes:
   * `npm version patch`, for pure bug fixes
 
   Note, the `npm version` command will automatically install, build, and test the
-  package. It will also push the newly-tagged version to GitHub (assuming your GitHub
-  remote is called `master`).
+  package.
+
+  More importantly, it will create a new Git branch, named `bump-version`, containing a
+  Git commit and tag for the new version. This branch will be automatically pushed to
+  GitHub, but a PR must be created manually to merge this new branch.
 
 * Push the release to NPM:
 
   `npm publish`
+
+* [Create and merge a PR on GitHub](https://github.com/SlideAtlas/SlideAtlas-viewer/compare/bump-version?expand=1)
+  for the new `bump-version` branch.
