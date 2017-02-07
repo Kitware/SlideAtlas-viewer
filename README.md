@@ -1,6 +1,8 @@
 # SlideAtlas-viewer
 
- A multiresolution image viewer, optimized for whole slide images.
+  [![Travis](https://travis-ci.org/SlideAtlas/SlideAtlas-viewer.svg?branch=master)]()
+
+  A multiresolution image viewer, optimized for whole slide images.
 
 ## Prerequisites
 The development environment requires Node Package Manager to be installed.
