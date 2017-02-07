@@ -49,12 +49,9 @@ no outstanding changes:
   * `npm version patch`, for pure bug fixes
 
   Note, the `npm version` command will automatically install, build, and test the
-  package.
+  package. It will also push the newly-tagged version to GitHub (assuming your GitHub
+  remote is called `master`).
 
 * Push the release to NPM:
 
   `npm publish`
-
-* Push the release to GitHub:
-
-  `git push origin master --tags`

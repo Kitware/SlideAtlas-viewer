@@ -34,6 +34,7 @@
     "postinstall": "npm run-script build",
     "build": "grunt",
     "test": "eslint .",
-    "preversion": "npm install && npm run-script build && npm test"
+    "preversion": "npm install && npm run-script build && npm test",
+    "postversion": "git push origin master --tags"
   }
 }
