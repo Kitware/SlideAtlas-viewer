@@ -1,8 +1,12 @@
 # SlideAtlas-viewer
 
-  [![Travis](https://travis-ci.org/SlideAtlas/SlideAtlas-viewer.svg?branch=master)]()
+[![Travis](https://img.shields.io/travis/SlideAtlas/SlideAtlas-viewer.svg)](https://travis-ci.org/SlideAtlas/SlideAtlas-viewer)
+[![npm](https://img.shields.io/npm/v/slideatlas-viewer.svg)](https://www.npmjs.com/package/slideatlas-viewer)
+[![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/SlideAtlas/SlideAtlas-viewer/master/LICENSE)
+[![David](https://img.shields.io/david/SlideAtlas/SlideAtlas-viewer.svg)](https://github.com/SlideAtlas/SlideAtlas-viewer/blob/version-command/package.json)
+[![David](https://img.shields.io/david/dev/SlideAtlas/SlideAtlas-viewer.svg)](https://github.com/SlideAtlas/SlideAtlas-viewer/blob/version-command/package.json)
 
-  A multiresolution image viewer, optimized for whole slide images.
+A multiresolution image viewer, optimized for whole slide images.
 
 ## Prerequisites
 The development environment requires Node Package Manager to be installed.
