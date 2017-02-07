@@ -15,3 +15,11 @@ To build the full distributable web code, run:
 To quickly rebuild only the local code, without updating dependencies, run:
 
 `npm run build`
+
+## Testing
+To run style checks, run:
+
+`npm test`
+
+To run style checks while editing in code Vim, check out
+[this tutorial](`http://usevim.com/2016/03/07/linting/`).

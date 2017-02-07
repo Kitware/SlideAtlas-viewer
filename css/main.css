@@ -16,10 +16,9 @@
   background-color: #888;
 }
 
-.view:focus {outline:0; !important;}
-
-
-
+.view:focus {
+    outline: 0; !important;
+}
 
 .saButton:hover {
   background-color: #CEF;
@@ -30,12 +29,12 @@
 }
 
 .sa-presentation-text ul {
-  margin-top: 0em;
+  margin-top: 0;
   padding-left: 1em;
 }
 
 .sa-presentation-text ol {
-  margin-top: 0em;
+  margin-top: 0;
   padding-left: 1em;
   list-style-position: inside;
 }
@@ -43,5 +42,3 @@
 .sa-presentation-text .sa-answer {
     font-weight: bold;
 }
-
-
