@@ -104,7 +104,7 @@
 
         // this.String = "Hello World";
         // this.String = "0123456789";
-    this.String = ',./<>?[]\{}|-=~!@#$%^&*()_+';
+    this.String = ',./<>?[]\\{}|-=~!@#$%^&*()_+';
 
         // Pixel bounds are in text box coordiante system.
     this.PixelBounds = [0, 0, 0, 0];

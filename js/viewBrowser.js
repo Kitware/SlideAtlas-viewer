@@ -204,7 +204,8 @@ window.SA = window.SA || {};
         var sessionData = {'db': session.sessdb, 'sessid': session.sessid};
         var sessionItem = $('<li>')
                 .appendTo(sessionList);
-        new BrowserFolder(
+
+        new BrowserFolder( // eslint-disable-line no-new
                 sessionItem, session.label, sessionData,
                 function (folder) {
                   self.RequestSessionViews(folder);

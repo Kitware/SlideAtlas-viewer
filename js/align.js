@@ -1407,50 +1407,6 @@
     if (pline.Closed && points.length > 2) {
       this.AddEdge(m2, m0);
     }
-
-        // There is a chance this could fail if there are no pixels between two
-        // edges.  Maybe get the mask from the thresholded image.
-    if (pline.Closed && points.length > 2 && false) {
-            // Fill leaked out on one section.  Make it more robust, or
-            // use the thresholded image.
-
-      this.AddEdge(m2, m0);
-
-      if (!this.Queue) {
-        this.Queue = new MapQueue(this.Dimensions[0] +
-                                          this.Dimensions[1]);
-      }
-            // Pick a seed.
-            // Average perpendiculars to the first two edges
-      var vy = (points[2][0] - points[0][0]);
-      var vx = (points[0][1] - points[2][1]);
-            // normalize
-      var k = 1 / Math.sqrt(vx * vx + vy * vy);
-      vx *= k;
-      vy *= k;
-      var x = (points[1][0] - this.Bounds[0]) / this.Spacing;
-      var y = (points[1][1] - this.Bounds[2]) / this.Spacing;
-      var ix, iy;
-      do {
-        x += vx;
-        y += vy;
-        ix = Math.round(x);
-        iy = Math.round(y);
-        if (ix < 0 || ix >= this.Dimensions[0] ||
-                    iy < 0 || iy >= this.Dimensions[1]) {
-                    // Failed to find seed.
-          return;
-        }
-      } while (this.Map[ix + (iy * this.Dimensions[0])] === 0);
-      this.Queue.Push([ix, iy]);
-      var seed, idx;
-      while ((seed = this.Queue.Shift()) !== null) {
-        this.AddSeedToQueue(seed[0] - 1, seed[1]);
-        this.AddSeedToQueue(seed[0] + 1, seed[1]);
-        this.AddSeedToQueue(seed[0], seed[1] - 1);
-        this.AddSeedToQueue(seed[0], seed[1] + 1);
-      }
-    }
   };
 
   DistanceMap.prototype.Fill = function (ix, iy) {
@@ -2369,22 +2325,22 @@
     //    We may want to use euclidian instead of cityblock.
     // Rigid align contour2 to contour1
     // Deformable align contour2 to contour1.
-  var DEBUG_CONTOUR1;
-  var DEBUG_CONTOUR2a;
-  var DEBUG_CONTOUR2b;
-  var DEBUG_MESH1;
-  var DEBUG_MESH2;
-  var DEBUG_TRANS;
+  var debugContour1;
+  var debugContour2a;
+  var debugContour2b;
+  var debugMesh1;
+  var debugMesh2;
+  var debugTrans;
   function testDebug () {
-        // MakeContourPolyline(DEBUG_CONTOUR1, SA.VIEWERS[0]);
-        // MakeContourPolyline(DEBUG_CONTOUR2a, SA.VIEWERS[1]);
-        // MakeContourPolyline(DEBUG_CONTOUR2b, SA.VIEWERS[0]);
+        // MakeContourPolyline(debugContour1, SA.VIEWERS[0]);
+        // MakeContourPolyline(debugContour2a, SA.VIEWERS[1]);
+        // MakeContourPolyline(debugContour2b, SA.VIEWERS[0]);
 
-    DEBUG_MESH1.ConvertPointsToWorld(SA.VIEWERS[0]);
-    SA.VIEWERS[0].AddShape(DEBUG_MESH1);
+    debugMesh1.ConvertPointsToWorld(SA.VIEWERS[0]);
+    SA.VIEWERS[0].AddShape(debugMesh1);
 
-    DEBUG_MESH2.ConvertPointsToWorld(SA.VIEWERS[1]);
-    SA.VIEWERS[1].AddShape(DEBUG_MESH2);
+    debugMesh2.ConvertPointsToWorld(SA.VIEWERS[1]);
+    SA.VIEWERS[1].AddShape(debugMesh2);
   }
 
   var WAITING;
@@ -2413,7 +2369,7 @@
             .css({'left': left + 'px',
               'top': top + 'px'});
 
-        // Trying to get the waiting icon to appear....
+    // Trying to get the waiting icon to appear....
     window.setTimeout(
             function () {
                 // Resample contour for a smaller mesh.
@@ -2440,9 +2396,9 @@
               originalContour2.DeepCopy(contour2);
               DeformableAlignContours(contour1, contour2);
 
-              DEBUG_CONTOUR1 = contour1;
-              DEBUG_CONTOUR2a = originalContour2;
-              DEBUG_CONTOUR2b = contour2;
+              debugContour1 = contour1;
+              debugContour2a = originalContour2;
+              debugContour2b = contour2;
 
                 // Now clear all correlation points in the stack sections.
 
@@ -2463,7 +2419,7 @@
                   }
                 }
               }
-              DEBUG_TRANS = trans;
+              debugTrans = trans;
 
                 // Now make new correlations from the transformed contour.
               var targetNumCorrelations = 40;
@@ -2716,10 +2672,10 @@
     originalContour2.DeepCopy(contour2);
         // Lets try rigid.
     DeformableAlignContours(contour1, contour2, true);
-    DEBUG_CONTOUR1 = contour1;
-    DEBUG_CONTOUR2a = originalContour2;
-    DEBUG_CONTOUR2b = contour2;
-    DEBUG_TRANS = trans;
+    debugContour1 = contour1;
+    debugContour2a = originalContour2;
+    debugContour2b = contour2;
+    debugTrans = trans;
 
     if (replace) {
             // Remove all correlations.
@@ -2738,7 +2694,7 @@
         }
       }
     }
-    DEBUG_TRANS = trans;
+    debugTrans = trans;
 
         // Now make new correlations from the transformed contour.
     var targetNumCorrelations = 10;

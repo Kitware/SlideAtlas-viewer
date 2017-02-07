@@ -876,20 +876,20 @@ window.SA = window.SA || {};
 
   var GC_STACK = [];
   var GCT = [1, 0, 0, 1, 0, 0];
-  function GC_save () {
+  function gcSave () {
     var tmp = [GCT[0], GCT[1], GCT[2], GCT[3], GCT[4], GCT[5]];
     GC_STACK.push(tmp);
   }
-  function GC_restore () {
+  function gcRestore () {
     var tmp = GC_STACK.pop();
     GCT = tmp;
     GC.setTransform(tmp[0], tmp[1], tmp[2], tmp[3], tmp[4], tmp[5]);
   }
-  function GC_setTransform (m00, m10, m01, m11, m02, m12) {
+  function gcSetTransform (m00, m10, m01, m11, m02, m12) {
     GCT = [m00, m10, m01, m11, m02, m12];
     GC.setTransform(m00, m10, m01, m11, m02, m12);
   }
-  function GC_transform (m00, m10, m01, m11, m02, m12) {
+  function gcTransform (m00, m10, m01, m11, m02, m12) {
     var n00 = m00 * GCT[0] + m10 * GCT[2];
     var n10 = m00 * GCT[1] + m10 * GCT[3];
     var n01 = m01 * GCT[0] + m11 * GCT[2];
@@ -1003,21 +1003,18 @@ window.SA = window.SA || {};
 
     SAM.detectMobile();
     $(body).addClass('sa-view-body');
-        // Just to see if webgl is supported:
-        // var testCanvas = document.getElementById("gltest");
+      // Just to see if webgl is supported:
+      // var testCanvas = document.getElementById("gltest");
 
-        // I think the webgl viewer crashes.
-        // Maybe it is the texture leak I have seen in connectome.
-        // Just use the canvas for now.
-        // I have been getting crashes I attribute to not freeing texture
-        // memory properly.
-        // NOTE: I am getting similar crashes with the canvas too.
-        // Stack is running out of some resource.
-    if (!SAM.detectMobile() && false) { // && doesBrowserSupportWebGL(testCanvas)) {
-      initGL(); // Sets CANVAS and GL global variables
-    } else {
-      initGC();
-    }
+      // I think the webgl viewer crashes.
+      // Maybe it is the texture leak I have seen in connectome.
+      // Just use the canvas for now.
+      // I have been getting crashes I attribute to not freeing texture
+      // memory properly.
+      // NOTE: I am getting similar crashes with the canvas too.
+      // Stack is running out of some resource.
+      // initGL(); Sets CANVAS and GL global variables
+    initGC();
 
         // TODO: Get rid of this global variable.
     if (SAM.detectMobile() && MOBILE_ANNOTATION_WIDGET) {
@@ -1222,4 +1219,3 @@ window.SA = window.SA || {};
     }
   }
 })();
-

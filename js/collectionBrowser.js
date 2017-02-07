@@ -635,17 +635,9 @@ CollectionBrowser = (function () {
 
   CollectionBrowser.prototype.HandleResize = function () {
     return;
-    // We need a dynamic resize
-    var height = window.innerHeight - 2;
-    var width = window.innerWidth - 2;
-    var pos = this.Div.position();
-    var top = pos.top + 15;
-    var left = pos.left + 15;
-    this.Div.css({'height': (height - top),
-      'width': (width - left)});
   };
 
-    // Called after request returns with data from the server.
+  // Called after request returns with data from the server.
   CollectionBrowser.prototype.LoadLibrary = function (library) {
         // Populate the collection menu.
     var defaultCollection;

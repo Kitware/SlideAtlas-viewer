@@ -368,7 +368,6 @@
             .css({'box-sizing': 'border-box',
               'width': '100%',
               'height': '100%',
-              'border-style': 'solid',
               'overflow': 'auto',
               'resize': 'none',
               'border-style': 'inset',

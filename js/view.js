@@ -81,8 +81,10 @@
     var data = ctx.getImageData(0, 0, width, height);
     data.Camera = new SAM.Camera();
     data.Camera.DeepCopy(this.Camera);
-    data.__proto__ = new SAM.ImageData();
+    // This will ne slow (wrapper class, or tack on methods)
+    Object.setPrototypeOf(data, new SAM.ImageData());
     data.IncX = 4;
+      // Super has height and width which should be imutable.
     data.width = width;
     data.height = height;
     data.IncY = data.IncX * data.width;

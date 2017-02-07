@@ -461,7 +461,7 @@
         this.AnnotationLayer.LoadWidget(obj);
       }
       if (element.type === 'rectangle') {
-        if (true) {
+        if (element.type === 'rectangle') { // switch behavior to ....
           setObj.widths.push(element.width);
           setObj.heights.push(element.height);
           setObj.centers.push(element.center[0]);
