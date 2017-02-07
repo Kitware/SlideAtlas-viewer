@@ -31,8 +31,9 @@
     "grunt-contrib-copy": "~1.0.0"
   },
   "scripts": {
+    "postinstall": "npm run-script build",
     "build": "grunt",
-    "prepublish": "npm run-script build",
-    "test": "eslint ."
+    "test": "eslint .",
+    "preversion": "npm install && npm run-script build && npm test"
   }
 }
