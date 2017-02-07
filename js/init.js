@@ -33,7 +33,7 @@ window.SA = window.SA || {};
         var image = {levels:     tileSource.maxLevel + 1,
                      dimensions: [w,h],
                      bounds: [0,w-1, 0,h-1],
-                     _id : new SA.ObjectId().toString()};
+                     _id : new ObjectId().toString()};
         if (tileSource.bounds) {
             image.bounds = tileSource.bounds;
         }

@@ -54,7 +54,7 @@
 
         // A global list of notes so we can find a note by its id.
         // TODO: Legacy.  Get rid of TempId.
-        this.Id = this.TempId = new SA.ObjectId().toString();
+        this.Id = this.TempId = new ObjectId().toString();
         SA.Notes.push(this);
 
         var self = this;
