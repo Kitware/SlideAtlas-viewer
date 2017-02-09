@@ -4,7 +4,7 @@ module.exports = function (grunt) {
 
     concat: {
       options: {
-        banner: 'SlideAtlas'
+        banner: '/*SlideAtlas*/'
       },
       base: {
         src: [
@@ -13,6 +13,35 @@ module.exports = function (grunt) {
           // This is a polyfill for the HTMLCanvasElement.toBlob method
           'node_modules/blueimp-canvas-to-blob/js/canvas-to-blob.min.js',
           'node_modules/file-saver/FileSaver.min.js',
+          // fles for SA markup
+          'node_modules/gl-matrix/dist/gl-matrix-min.js',
+          'js/annotationLayer.js',
+          'js/shape.js',
+          'js/shapeGroup.js',
+          'js/cutoutWidget.js',
+          'js/text.js',
+          'js/textWidget.js',
+          'js/polyline.js',
+          'js/polylineWidget.js',
+          'js/pencilWidget.js',
+          'js/fillWidget.js',
+          'js/lassoWidget.js',
+          'js/widgetPopup.js',
+          'js/crossHairs.js',
+          'js/arrow.js',
+          'js/arrowWidget.js',
+          'js/circle.js',
+          'js/circleWidget.js',
+          'js/rectWidget.js',
+          'js/rectSetWidget.js',
+          'js/gridWidget.js',
+          'js/scaleWidget.js',
+          'js/imageAnnotation.js',
+          'js/dialog.js',
+          'js/girderWidget.js',
+          'js/groundTruth.js',
+          'js/view.js',
+	  // core SA files
           'js/cookies.js',
           'node_modules/objectid-js/src/main/javascript/Objectid.js',
           'js/init.js',
@@ -58,38 +87,6 @@ module.exports = function (grunt) {
           'node_modules/spectrum-colorpicker/spectrum.css'
         ],
         dest: 'dist/sa.css'
-      },
-      markup: {
-        src: [
-          'node_modules/gl-matrix/dist/gl-matrix-min.js',
-          'js/annotationLayer.js',
-          'js/shape.js',
-          'js/shapeGroup.js',
-          'js/cutoutWidget.js',
-          'js/text.js',
-          'js/textWidget.js',
-          'js/polyline.js',
-          'js/polylineWidget.js',
-          'js/pencilWidget.js',
-          'js/fillWidget.js',
-          'js/lassoWidget.js',
-          'js/widgetPopup.js',
-          'js/crossHairs.js',
-          'js/arrow.js',
-          'js/arrowWidget.js',
-          'js/circle.js',
-          'js/circleWidget.js',
-          'js/rectWidget.js',
-          'js/rectSetWidget.js',
-          'js/gridWidget.js',
-          'js/scaleWidget.js',
-          'js/imageAnnotation.js',
-          'js/dialog.js',
-          'js/girderWidget.js',
-          'js/groundTruth.js',
-          'js/view.js'
-        ],
-        dest: 'dist/sam.max.js'
       }
     },
     copy: {
