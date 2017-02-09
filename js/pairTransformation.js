@@ -91,13 +91,13 @@
   };
 
   PairTransformation.prototype.Load = function (obj) {
-    for (ivar in obj) {
+    for (var ivar in obj) {
       this[ivar] = obj[ivar];
     }
   };
 
   PairTransformation.prototype.AddCorrelation = function (pt0, pt1) {
-    index = this.Correlations.length;
+    var index = this.Correlations.length;
     var corr = new SA.PairCorrelation();
     corr.SetPoint0(pt0);
     corr.SetPoint1(pt1);

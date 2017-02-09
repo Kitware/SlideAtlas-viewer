@@ -28,13 +28,13 @@
   function LoadImageBrowserGUI () {
     var data = VIEW_BROWSER_INFO;
     $('#ImageBrowser').empty();
-    groupList = $('<ul>').appendTo('#ImageBrowser');
+    var groupList = $('<ul>').appendTo('#ImageBrowser');
 
-    for (i = 0; i < data.sessions.length; ++i) {
+    for (var i = 0; i < data.sessions.length; ++i) {
       var group = data.sessions[i];
       var groupItem = $('<li>').appendTo(groupList).text(group.rule);
       var sessionList = $('<ul>').appendTo(groupItem);
-      for (j = 0; j < group.sessions.length; ++j) {
+      for (var j = 0; j < group.sessions.length; ++j) {
         var session = group.sessions[j];
         $('<li>').appendTo(sessionList)
                     .text(session.label)
@@ -93,14 +93,16 @@
               function (data, status) {
                 if (status === 'success') {
                   ImageBrowserLoadImage(data);
-                } else { saDelete('ajax failed.'); }
+                } else {
+                  saDelete('ajax failed.');
+                }
               });
   }
 
   function ImageBrowserLoadImage (viewData) {
     // If we want to take origin and spacing into account, then we need to change tile geometry computation.
     var image = viewData.collection;
-    if (typeof (viewData.image) !== undefined) {
+    if (typeof (viewData.image) !== 'undefined') {
       image = viewData.image;
     }
     var imgobj = {};

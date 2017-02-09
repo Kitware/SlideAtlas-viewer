@@ -26,7 +26,7 @@
 
     this.MainView1.DrawTiles();
 
-    for (i in this.WidgetList1) {
+    for (var i in this.WidgetList1) {
       this.WidgetList1[i].Draw(this.MainView, this.AnnotationVisibility);
     }
   };

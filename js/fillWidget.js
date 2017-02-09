@@ -85,7 +85,7 @@
     // This is expensive, so initialize explicitely outside the constructor.
   FillWidget.prototype.Initialize = function (view) {
         // Now for the segmentation initialization.
-    this.Segmentation = new Segmentation(this.Viewer);
+    this.Segmentation = new SA.Segmentation(this.Viewer);
   };
 
   FillWidget.prototype.Draw = function (view) {

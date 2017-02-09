@@ -104,8 +104,8 @@
       return;
     }
 
-    dx = event.worldX - this.Shape.Origin[0];
-    dy = event.worldY - this.Shape.Origin[1];
+    var dx = event.worldX - this.Shape.Origin[0];
+    var dy = event.worldY - this.Shape.Origin[1];
 
         // We need to scale to pixels
     var cam = this.Viewer.GetCamera();

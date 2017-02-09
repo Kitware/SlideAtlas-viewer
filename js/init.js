@@ -930,8 +930,6 @@ window.SA = window.SA || {};
   var CANVAS;
 
   var CONFERENCE_WIDGET;
-  var FAVORITES_WIDGET;
-  var MOBILE_ANNOTATION_WIDGET;
 
     // ==============================================================================
 
@@ -1016,9 +1014,8 @@ window.SA = window.SA || {};
       // initGL(); Sets CANVAS and GL global variables
     initGC();
 
-        // TODO: Get rid of this global variable.
-    if (SAM.detectMobile() && MOBILE_ANNOTATION_WIDGET) {
-      MOBILE_ANNOTATION_WIDGET = new SA.MobileAnnotationWidget();
+    if (SAM.detectMobile() && SA.MOBILE_ANNOTATION_WIDGET) {
+      SA.MOBILE_ANNOTATION_WIDGET = new SA.MobileAnnotationWidget();
     }
 
     SA.MainDiv = $('<div>')
@@ -1081,8 +1078,8 @@ window.SA = window.SA || {};
             SA.DualDisplay.NavigationWidget) {
       SA.DualDisplay.NavigationWidget.SetVisibility(false);
     }
-    if (SAM.MOBILE_DEVICE && MOBILE_ANNOTATION_WIDGET) {
-      MOBILE_ANNOTATION_WIDGET.SetVisibility(false);
+    if (SAM.MOBILE_DEVICE && SA.MOBILE_ANNOTATION_WIDGET) {
+      SA.MOBILE_ANNOTATION_WIDGET.SetVisibility(false);
     }
 
         // CONFERENCE_WIDGET = new SA.ConferenceWidget();

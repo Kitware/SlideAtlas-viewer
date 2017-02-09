@@ -405,7 +405,7 @@
 
   Text.prototype.HandleMouseMove = function (event, dx, dy) {
         // convert the position to screen pixel coordinates.
-    viewer = event.CurrentViewer;
+    var viewer = event.CurrentViewer;
 
     return false;
   };

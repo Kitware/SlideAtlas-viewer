@@ -1966,7 +1966,7 @@
     }
 
     var color = '#000000';
-    str = this.Div[0].style.color;
+    var str = this.Div[0].style.color;
     if (str !== '') {
       color = str;
     }
@@ -3526,7 +3526,9 @@
         domItem, SA.ImagePathUrl + 'remove.png', 'delete',
         function () {
           // if we want to get rid of the viewer records,
-          if (item.saViewer) { saPruneViewerRecord(item.saViewer); }
+          if (item.saViewer) {
+            saPruneViewerRecord(item.saViewer);
+          }
           saButtonsDelete(domItem);
           $(domItem).remove();
         },

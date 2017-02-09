@@ -26,7 +26,7 @@
     this.Layer = layer;
 
         // Wait to create this until the first move event.
-    this.Shape = new Arrow();
+    this.Shape = new SAM.Arrow();
     this.Shape.Origin = [0, 0];
     this.Shape.SetFillColor([0.0, 0.0, 0.0]);
     this.Shape.OutlineColor = [1.0, 1.0, 1.0];

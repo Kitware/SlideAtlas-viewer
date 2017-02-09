@@ -1550,7 +1550,7 @@
         'col': 'views',
         'type': 'Favorite'}, // "favorites"
       success: function (data, status) {
-        FAVORITES_WIDGET.FavoritesBar.LoadFavorites();
+        SA.FAVORITES_WIDGET.FavoritesBar.LoadFavorites();
       },
       error: function () {
         SA.Debug('AJAX - error() : saveusernote 2');

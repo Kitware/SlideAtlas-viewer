@@ -812,7 +812,7 @@
         // presentations.
         var tmp = [];
         for (var i = 0; i < HACK_LOAD_CALLBACKS.length; ++i) {
-          tmp2 = HACK_LOAD_CALLBACKS[i];
+          var tmp2 = HACK_LOAD_CALLBACKS[i];
           if (tmp2.note === self) {
             (tmp2.callback)();
           } else {

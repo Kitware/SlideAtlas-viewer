@@ -627,7 +627,7 @@
     var editor = this.SlidePage.List.TextEntry[0];
     $(editor).attr('contenteditable', 'true');
     var sel = window.getSelection();
-    range = document.createRange();
+    var range = document.createRange();
     range.selectNodeContents(editor);
     sel.removeAllRanges();
     sel.addRange(range);
@@ -2105,7 +2105,7 @@
     for (var i = 0; i < questions.length; ++i) {
       var q = questions[i];
         // Shuffle the list.
-      for (j = q.childNodes.length; j > 0; --j) {
+      for (var j = q.childNodes.length; j > 0; --j) {
         var idx = Math.floor(Math.random() * j);
         q.appendChild(q.removeChild(q.childNodes[idx]));
       }

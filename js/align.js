@@ -33,7 +33,7 @@
     var bds = [firstCenter[0], firstCenter[0], firstCenter[1], firstCenter[1]];
     for (var i = 0; i < contours.length; ++i) {
       if (contours[i] !== firstContour) {
-        match = contours[i].GetArea() / firstContour.GetArea();
+        var match = contours[i].GetArea() / firstContour.GetArea();
         if (match < 1.2 && match > 0.8) {
           var c = contours[i].GetCenter();
           if (c[0] < bds[0]) { bds[0] = c[0]; }
@@ -144,7 +144,7 @@
     while (copy.length > 0) {
       var bestContour = null;
       var bestIdx = -1;
-      for (i = 0; i < copy.length; ++i) {
+      for (var i = 0; i < copy.length; ++i) {
         if (bestIdx < 0 || lessThanContours(copy[i], bestContour)) {
           bestIdx = i;
           bestContour = copy[i];
@@ -686,7 +686,7 @@
   };
 
   Segmentation.prototype.GetPixel = function (coords) {
-    idx = (coords[0] + (coords[1] * this.Data.width)) << 2;
+    var idx = (coords[0] + (coords[1] * this.Data.width)) << 2;
     return [this.Data.data[idx++], this.Data.data[idx++], this.Data.data[idx++], this.Data.data[idx], coords[0], coords[1]];
   };
 
@@ -1943,7 +1943,7 @@
     // Some tissue has the same value as background. I would need a fill to segment background better.
     // Deep red tissue keeps blue red component from dominating.
   function EncodePrincipleComponent (data) {
-    pc = ComputePrincipleComponent(data);
+    var pc = ComputePrincipleComponent(data);
     pc.val = Math.sqrt(pc.val);
         // first compute the average RGB
     var aver = 0.0;
@@ -2732,7 +2732,7 @@
     var bestOffset = 0;
     for (var i = 0; i < length; ++i) {
       var sum = 0;
-      for (j1 = 0; j1 < length; ++j1) {
+      for (var j1 = 0; j1 < length; ++j1) {
         var j2 = i + j1;
         if (j2 >= length) { j2 -= length; }
         sum += hist1[j1] * hist2[j2];

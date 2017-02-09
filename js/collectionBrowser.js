@@ -61,7 +61,7 @@ CollectionBrowser = (function () {
       viewObjects: []};
         // Deep copy of the view objects.
     for (var i = 0; i < sessionObj.ViewObjects.length; ++i) {
-      viewObj = new ViewObject().Copy(sessionObj.ViewObjects[i]);
+      var viewObj = new ViewObject().Copy(sessionObj.ViewObjects[i]);
       sessionItem.viewObjects.push(viewObj);
     }
     HISTORY.push(sessionItem);
@@ -206,9 +206,9 @@ CollectionBrowser = (function () {
   };
 
     // ==============================================================================
-  INITIALIZED = 0;
-  WAITING = 1;
-  LOADED = 2;
+  var INITIALIZED = 0;
+  var WAITING = 1;
+  var LOADED = 2;
   function SessionObject (data) {
     this.Id = data.sessid;
     this.Label = data.label;
@@ -276,7 +276,7 @@ CollectionBrowser = (function () {
         // this.Modified();
     this.ModifiedTime = this.SavedTime = 1;
     for (var i = 0; i < data.session.views.length; ++i) {
-      viewObject = new ViewObject(this).LoadData(data.session.views[i]);
+      var viewObject = new ViewObject(this).LoadData(data.session.views[i]);
             // Info not in views?
             // viewObject.Label = data.images[i].label;
       viewObject.Source = '/thumb?db=' + data.images[i].db + '&img=' + data.images[i].img;

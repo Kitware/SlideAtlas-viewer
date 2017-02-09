@@ -197,7 +197,7 @@
   };
 
   CircleWidget.prototype.HandleDoubleClick = function (event) {
-    ShowPropertiesDialog();
+    this.ShowPropertiesDialog();
     return false;
   };
 
@@ -283,9 +283,9 @@
   CircleWidget.prototype.HandleTouchPan = function (event) {
     var cam = this.Layer.GetCamera();
         // TODO: Last mouse should net be in layer.
-    w0 = cam.ConvertPointViewerToWorld(this.Layer.LastMouseX,
+    var w0 = cam.ConvertPointViewerToWorld(this.Layer.LastMouseX,
                                            this.Layer.LastMouseY);
-    w1 = cam.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
+    var w1 = cam.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
 
         // This is the translation.
     var dx = w1[0] - w0[0];

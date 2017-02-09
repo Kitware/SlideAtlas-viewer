@@ -585,7 +585,7 @@
     if (this.Grid.FixedSize) {
       x = event.offsetX;
       y = event.offsetY;
-      pixelSize = 1;
+      var pixelSize = 1;
     } else {
       x = event.worldX;
       y = event.worldY;
