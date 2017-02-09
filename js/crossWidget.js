@@ -5,8 +5,8 @@
 (function () {
   'use strict';
 
-    // The cross has just been created and is following the mouse.
-    // I can probably merge  this state with drag. (mouse up vs down though)
+  // The cross has just been created and is following the mouse.
+  // I can probably merge  this state with drag. (mouse up vs down though)
   var CROSS_WIDGET_DRAG = 1; // The cross is being dragged.
   var CROSS_WIDGET_WAITING = 3; // The normal (resting) state.
   var CROSS_WIDGET_ACTIVE = 4; // Mouse is over the widget and it is receiving events.
@@ -22,7 +22,7 @@
     this.Viewer.AddWidget(this);
     this.Viewer.AddShape(this.Shape);
 
-        // New flag => widget is created in drag state.
+    // New flag => widget is created in drag state.
     if (newFlag) {
       this.State = CROSS_WIDGET_DRAG;
       this.Viewer.ActivateWidget(this);
@@ -51,7 +51,7 @@
       return;
     }
     if (this.State === CROSS_WIDGET_DRAG) {
-            // We need the viewer position of the CROSS center to drag radius.
+      // We need the viewer position of the CROSS center to drag radius.
       this.OriginViewer = this.Viewer.ConvertPointWorldToViewer(this.Shape.Origin[0], this.Shape.Origin[1]);
       this.State = CROSS_WIDGET_WAITING;
     }
@@ -60,13 +60,13 @@
     }
   };
 
-    // returns false when it is finished doing its work.
+  // returns false when it is finished doing its work.
   CrossWidget.prototype.HandleMouseUp = function (event) {
     if (this.State === CROSS_WIDGET_ACTIVE && event.which === 3) {
-            // Right mouse was pressed.
-            // Pop up the properties dialog.
-            // this.State = CROSS_WIDGET_PROPERTIES_DIALOG;
-            // this.ShowPropertiesDialog();
+      // Right mouse was pressed.
+      // Pop up the properties dialog.
+      // this.State = CROSS_WIDGET_PROPERTIES_DIALOG;
+      // this.ShowPropertiesDialog();
     } else if (this.State === CROSS_WIDGET_DRAG) {
       this.SetActive(false);
     }
@@ -83,7 +83,7 @@
 
     if (this.State === CROSS_WIDGET_DRAG) {
       var tmp = this.Viewer.ConvertPointViewerToWorld(x, y);
-            // Trying to preserve pointer so I do not need to update correlation points.
+      // Trying to preserve pointer so I do not need to update correlation points.
       this.Shape.Origin[0] = tmp[0];
       this.Shape.Origin[1] = tmp[1];
       eventuallyRender();
@@ -124,7 +124,7 @@
     return active;
   };
 
-    // Multiple active states.  Active state is a bit confusing.
+  // Multiple active states.  Active state is a bit confusing.
   CrossWidget.prototype.GetActive = function () {
     if (this.State === CROSS_WIDGET_WAITING) {
       return false;
@@ -132,8 +132,8 @@
     return true;
   };
 
-    // Setting to active always puts state into "active".
-    // It can move to other states and stay active.
+  // Setting to active always puts state into "active".
+  // It can move to other states and stay active.
   CrossWidget.prototype.SetActive = function (flag) {
     if (flag === this.GetActive()) {
       return;

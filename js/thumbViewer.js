@@ -19,7 +19,7 @@
   };
 
   ThumbViewer.prototype.Draw = function () {
-        // connectome
+    // connectome
     if (!this.MainView1.Section) {
       return;
     }

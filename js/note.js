@@ -637,8 +637,8 @@
       obj.WaterMark = this.WaterMark;
     }
 
-        // user data to customize note types
-        // I needed this for background color and apsect ratio of presentations.
+    // user data to customize note types
+    // I needed this for background color and apsect ratio of presentations.
     if (this.TypeData) {
       obj.TypeData = this.TypeData;
     }
@@ -651,49 +651,49 @@
       obj._id = this.Id;
       delete this._id;
     }
-        // I would like to put the session as parent, but this would be an inclomplete reference.
-        // A space is not a valid id. Niether is 'false'. Lets leave it blank.
+    // I would like to put the session as parent, but this would be an inclomplete reference.
+    // A space is not a valid id. Niether is 'false'. Lets leave it blank.
     if (this.Parent) {
       if (typeof (this.Parent) === 'string') {
-                // When the parent is an image.
+        // When the parent is an image.
         obj.ParentId = this.Parent;
       }
       if (typeof (this.Parent) === 'object' && this.Parent.Id) {
-                // When the parent is a note.
+        // When the parent is a note.
         obj.ParentId = this.Parent.Id;
       }
-            // These snuck into the database.
+      // These snuck into the database.
       delete this.ParentId;
     }
     obj.Title = this.Title;
     obj.HiddenTitle = this.HiddenTitle;
 
     obj.Text = this.Text;
-        // The server handles copying views and the code is a pain.
-        // I would rather have the client copy notes since is can now
-        // save them one by one and get ids for new notes.
-        // However,  until I make this change, I need a simple way of copying
-        // a note and not messing up the references in the text.
-        // Code the links in the html as indexes.
-        // for (var i = 0; i < this.Children.length; ++i) {
-        //    var Child
-        // }
+    // The server handles copying views and the code is a pain.
+    // I would rather have the client copy notes since is can now
+    // save them one by one and get ids for new notes.
+    // However,  until I make this change, I need a simple way of copying
+    // a note and not messing up the references in the text.
+    // Code the links in the html as indexes.
+    // for (var i = 0; i < this.Children.length; ++i) {
+    //    var Child
+    // }
 
-        // We should probably serialize the ViewerRecords too.
+    // We should probably serialize the ViewerRecords too.
     obj.ViewerRecords = [];
 
-        // The database wants an image id, not an embedded iamge object.
-        //  The server should really take care of this since if
+    // The database wants an image id, not an embedded iamge object.
+    //  The server should really take care of this since if
     for (var i = 0; i < this.ViewerRecords.length; ++i) {
       if (!this.ViewerRecords[i].Image) continue;
       var record = this.ViewerRecords[i].Serialize();
       obj.ViewerRecords.push(record);
     }
 
-        // upper left pixel
+    // upper left pixel
     obj.CoordinateSystem = 'Pixel';
 
-        // Will this erase children if includeChildren is off?
+    // Will this erase children if includeChildren is off?
     if (!excludeChildren) {
       obj.Children = [];
       for (var i = 0; i < this.Children.length; ++i) {
@@ -704,26 +704,26 @@
     return obj;
   };
 
-    // This method of loading is causing a pain.
-    // Children are saved separately now, so the pain should be gone.
+  // This method of loading is causing a pain.
+  // Children are saved separately now, so the pain should be gone.
   Note.prototype.Load = function (obj) {
     var self = this;
 
-        // Received
+    // Received
     this.LoadState = SYNCHRONIZED;
 
     var ivar;
     for (ivar in obj) {
       this[ivar] = obj[ivar];
     }
-        // I am not sure blindly copying all of the variables is a good idea.
+    // I am not sure blindly copying all of the variables is a good idea.
     if (this._id) {
       this.Id = this._id;
       delete this._id;
     }
 
-        // It would be better not to set the ParentId of user notes in the
-        // first place. userNote.Parent is set to the id of the image.
+    // It would be better not to set the ParentId of user notes in the
+    // first place. userNote.Parent is set to the id of the image.
     if (this.Type !== 'UserNote' && this.ParentId) {
       this.Parent = SA.GetNoteFromId(this.ParentId);
       delete this.ParentId;
@@ -741,9 +741,9 @@
       var childNote = new SA.Note();
       childNote.SetParent(this);
       if (typeof (child) === 'string') {
-                // Asynchronous.  This may cause problems (race condition)
-                // We should have a load state in note.
-                // childNote.LoadViewId(child);
+        // Asynchronous.  This may cause problems (race condition)
+        // We should have a load state in note.
+        // childNote.LoadViewId(child);
         childNote.Id = child;
       } else {
         childNote.Load(child);
@@ -752,9 +752,9 @@
       childNote.Div.data('index', i);
     }
 
-        // Only used by presentations.
+    // Only used by presentations.
     if (this.UserNote) {
-            // Make the user not into a real object.
+      // Make the user not into a real object.
       var obj = this.UserNote;
       this.UserNote = new SA.Note();
       this.UserNote.Load(obj);
@@ -763,30 +763,30 @@
     for (var i = 0; i < this.ViewerRecords.length; ++i) {
       if (this.ViewerRecords[i]) {
         obj = this.ViewerRecords[i];
-                // It would be nice to have a constructor that took an object.
+        // It would be nice to have a constructor that took an object.
         this.ViewerRecords[i] = new SA.ViewerRecord();
         this.ViewerRecords[i].Load(obj);
         if (i < 3) {
-                    // Delay requesting the user notes for a long stack.
+          // Delay requesting the user notes for a long stack.
           this.ViewerRecords[i].RequestUserNote();
         }
       }
     }
   };
 
-    // Making this handle callbacks added after original load call.
-    // Will not reload. I am not really sure this feature is actually
-    // needed. I will keep it to be safe.
+  // Making this handle callbacks added after original load call.
+  // Will not reload. I am not really sure this feature is actually
+  // needed. I will keep it to be safe.
   var HACK_LOAD_CALLBACKS = [];
   Note.prototype.LoadViewId = function (viewId, callback) {
     if (this.LoadState === SYNCHRONIZED) {
-            // no realoading (could be done with an extra arg).
+      // no realoading (could be done with an extra arg).
       (callback)();
       return;
     }
     if (this.LoadState === REQUESTED) {
-            // Waiting for an ajax call to return.
-            // Add the new callback to any already pending.
+      // Waiting for an ajax call to return.
+      // Add the new callback to any already pending.
       HACK + LOAD_CALLBACKS.push({note: this, callback: callback});
       return;
     }
@@ -806,10 +806,10 @@
         if (callback) {
           (callback)();
         }
-                // Look for anycallbacks added after the ajax call.
-                // This feature may nt be used, but it is safe.
-                // I have been having problems with views note display in
-                // presentations.
+        // Look for anycallbacks added after the ajax call.
+        // This feature may nt be used, but it is safe.
+        // I have been having problems with views note display in
+        // presentations.
         var tmp = [];
         for (var i = 0; i < HACK_LOAD_CALLBACKS.length; ++i) {
           tmp2 = HACK_LOAD_CALLBACKS[i];
@@ -831,8 +831,8 @@
   Note.prototype.Collapse = function () {
     this.ChildrenVisibility = false;
     if (this.Contains(SA.notesWidget.SelectedNote)) {
-            // Selected note should not be in collapsed branch.
-            // Make the visible ancestor active.
+      // Selected note should not be in collapsed branch.
+      // Make the visible ancestor active.
       SA.SetNote(this);
     }
     this.UpdateChildrenGUI();
@@ -845,10 +845,10 @@
     SA.display.NavigationWidget.Update();
   };
 
-    // Extra stuff for stack.
+  // Extra stuff for stack.
   Note.prototype.DisplayStack = function (display) {
-        // SA.SetNote(this);
-        // For editing correlations
+    // SA.SetNote(this);
+    // For editing correlations
     if (SA.Edit && this.StartIndex + 1 < this.ViewerRecords.length) {
       var trans = this.ViewerRecords[this.StartIndex + 1].Transform;
       if (trans) {
@@ -856,7 +856,7 @@
         display.GetViewer(1).StackCorrelations = trans.Correlations;
       }
     }
-        // Indicate which section is being displayed in viewer 1
+    // Indicate which section is being displayed in viewer 1
     for (var i = 0; i < this.StackDivs.length; ++i) {
       if (i === this.StartIndex) {
         this.StackDivs[i].css({'background-color': '#BBB'});
@@ -866,8 +866,8 @@
     }
   };
 
-    // Creates default transforms for Viewer Records 1-n
-    // (if they do not exist already).  Uses cameras focal point.
+  // Creates default transforms for Viewer Records 1-n
+  // (if they do not exist already).  Uses cameras focal point.
   Note.prototype.InitializeStackTransforms = function () {
     for (var i = 1; i < this.ViewerRecords.length; ++i) {
       if (!this.ViewerRecords[i].Transform) {

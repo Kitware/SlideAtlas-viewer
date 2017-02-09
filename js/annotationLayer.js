@@ -1300,7 +1300,7 @@
   };
 
   AnnotationLayer.prototype.SaveGirderItem = function (id) {
-        // Create a new annotation.
+    // Create a new annotation.
     var annotId = '572be29d3f24e53573aa8e91';
     data = {'name': 'Test3',
       'elements': [{'type': 'circle',
@@ -1321,7 +1321,7 @@
       }
     });
 
-        // Change an existing annotation
+    // Change an existing annotation
     data = {'name': 'Test',
       'elements': [{'type': 'polyline',
         'points': [[6500, 6600, 0], [3300, 5600, 0], [10600, 500, 6]],
