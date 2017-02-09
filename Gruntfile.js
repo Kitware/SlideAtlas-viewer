@@ -8,12 +8,13 @@ module.exports = function (grunt) {
       },
       base: {
         src: [
+          'node_modules/jquery/dist/jquery.min.js',
           'node_modules/jquery-ui-dist/jquery-ui.min.js',
           'node_modules/spectrum-colorpicker/spectrum.js',
           // This is a polyfill for the HTMLCanvasElement.toBlob method
           'node_modules/blueimp-canvas-to-blob/js/canvas-to-blob.min.js',
           'node_modules/file-saver/FileSaver.min.js',
-          // fles for SA markup
+          // files for SA markup
           'node_modules/gl-matrix/dist/gl-matrix-min.js',
           'js/annotationLayer.js',
           'js/shape.js',

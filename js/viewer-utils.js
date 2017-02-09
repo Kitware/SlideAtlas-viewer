@@ -3513,19 +3513,19 @@
     for (var i = 0; i < this.length; ++i) {
       var domItem = this[i];
       if (!domItem.saDeletable) {
-            // for closure (save element)
+        // for closure (save element)
         domItem.saDeletable = new saDeletable(domItem);
       }
     }
     return this;
   };
 
-// check dom
+  // check dom
   function saDeletable (domItem) {
     this.Button = saAddButton(
         domItem, SA.ImagePathUrl + 'remove.png', 'delete',
         function () {
-            // if we want to get rid of the viewer records,
+          // if we want to get rid of the viewer records,
           if (item.saViewer) { saPruneViewerRecord(item.saViewer); }
           saButtonsDelete(domItem);
           $(domItem).remove();

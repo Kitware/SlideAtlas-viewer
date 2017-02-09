@@ -12,14 +12,14 @@
   }
 
   function Load () {
-        // Get a list of databases this user has access to.
+    // Get a list of databases this user has access to.
 
     $.get('/sessions?json=true',
               function (data, status) {
                 if (status === 'success') {
                   VIEW_BROWSER_INFO = data;
-                      // I might want to open a session to avoid an extra click.
-                      // I might want to sort the sessions to put the recent at the top.
+                  // I might want to open a session to avoid an extra click.
+                  // I might want to sort the sessions to put the recent at the top.
                   LoadImageBrowserGUI(data);
                 } else { saDelete('ajax failed.'); }
               });
@@ -45,11 +45,11 @@
   }
 
   function ImageBrowserSessionCallback (obj) {
-        // No closing yet.
-        // Already open. disable iopening twice.
+    // No closing yet.
+    // Already open. disable iopening twice.
     $(obj).unbind('click');
 
-        // We need the information in view, image and bookmark (startup_view) object.
+    // We need the information in view, image and bookmark (startup_view) object.
     var db = $(obj).attr('db');
     var sess = $(obj).attr('sessid');
     $.get('/sessions?json=true' + '&sessdb=' + $(obj).attr('db') + '&sessid=' + $(obj).attr('sessid'),
@@ -79,7 +79,7 @@
   function ImageBrowserImageCallback (obj) {
     $('#ImageBrowser').hide();
 
-        // null implies the user wants an empty view.
+    // null implies the user wants an empty view.
     if (obj === null) {
       ACTIVE_VIEWER.SetCache(null);
       eventuallyRender();
@@ -98,7 +98,7 @@
   }
 
   function ImageBrowserLoadImage (viewData) {
-        // If we want to take origin and spacing into account, then we need to change tile geometry computation.
+    // If we want to take origin and spacing into account, then we need to change tile geometry computation.
     var image = viewData.collection;
     if (typeof (viewData.image) !== undefined) {
       image = viewData.image;
@@ -112,10 +112,10 @@
 
     ACTIVE_VIEWER.SetCache(source);
 
-        // all this does is set the default camera.
+    // all this does is set the default camera.
     ACTIVE_VIEWER.SetDimensions(viewData.dimensions);
 
-        // Handle exceptions in database schema.
+    // Handle exceptions in database schema.
     if (viewData.center) {
       ACTIVE_VIEWER.SetCamera(viewData.center,
                                     viewData.rotation,

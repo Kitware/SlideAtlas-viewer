@@ -1490,9 +1490,9 @@
 
     if (typeof (MOBILE_ANNOTATION_WIDGET) !== 'undefined' &&
             MOBILE_ANNOTATION_WIDGET.Visibility) {
-            // No slide interaction with the interface up.
-            // I had bad interaction with events going to browser.
       MOBILE_ANNOTATION_WIDGET.ToggleVisibility();
+      // No slide interaction with the interface up.
+      // I had bad interaction with events going to browser.
     }
 
         // detect sweep
@@ -2058,10 +2058,10 @@
     return false;
   };
 
-    // Special one time function for paper analysis.
+  // Special one time function for paper analysis.
   Viewer.prototype.SegmentationsToCsv = function () {
     var note = SA.display.NavigationWidget.GetNote();
-        // first collect a set of segmentation labels.
+    // first collect a set of segmentation labels.
     labels = {};
     labelArray = [];
     for (var i = 0; i < note.ViewerRecords.length; ++i) {
@@ -2087,7 +2087,7 @@
     console.log(row1);
     console.log(row2);
 
-        // Make a row for each section
+    // Make a row for each section
     widget = new SAM.PolylineWidget(SA.VIEWER1.GetAnnotationLayer(), false);
     for (var i = 0; i < note.ViewerRecords.length; ++i) {
       viewerRecord = note.ViewerRecords[i];
@@ -2172,16 +2172,16 @@
       return false;
     }
 
-        // Handle paste
+    // Handle paste
     if (event.keyCode === 79) {
             // o to print out world mouse location for debugging.
       var wPt = this.ConvertPointViewerToWorld(this.LastMouseX, this.LastMouseY);
       console.log('World: ' + wPt[0] + ', ' + wPt[1]);
     }
 
-        // Handle paste
+  // Handle paste
     if (event.keyCode === 86 && event.ctrlKey) {
-            // control-v for paste
+      // control-v for paste
 
       if (localStorage.ClipBoard === undefined) {
         console.log('Clipboard Empty');

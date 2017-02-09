@@ -83,7 +83,7 @@
           'width': '100%'})
         .saFullHeight();
 
-    // Hack so all viewers will shar the same browser.
+    // Hack so all viewers will share the same browser.
     // We should really use the brower tab in the left panel.
     SA.VIEW_BROWSER = new SA.ViewBrowser(this.WindowDiv);
 

@@ -27,9 +27,6 @@ To run style checks, run:
 
 `npm test`
 
-To run style checks while editing in code Vim, check out
-[this tutorial](`http://usevim.com/2016/03/07/linting/`).
-
 ## Releasing
 To generate a new release:
 
@@ -65,3 +62,63 @@ no outstanding changes:
 
 * [Create and merge a PR on GitHub](https://github.com/SlideAtlas/SlideAtlas-viewer/compare/bump-version?expand=1)
   for the new `bump-version` branch.
+
+## Development Environment Tips
+To run style checks while editing in code Vim, check out
+[this tutorial](`http://usevim.com/2016/03/07/linting/`).
+
+To run style checks with editing code in Emacs, use Flycheck.
+[The Flycheck manual](http://flycheck.readthedocs.io/en/latest/user/installation.html)
+and
+[portions of this tutorial](http://codewinds.com/blog/2015-04-02-emacs-flycheck-eslint-jsx.html)
+provide more details on installation, but to get started quickly:
+  * Append the following code to your `~/.emacs.d/init.el` file:
+    ```
+    ;; Enable the package manager
+    (require 'package)
+    (add-to-list 'package-archives
+                 '("MELPA Stable" . "https://stable.melpa.org/packages/") t)
+    (package-initialize)
+    ```
+
+  * In Emacs, enter
+
+    `M-x package-install RET flycheck`
+
+    to install Flycheck (`RET` is the return character).
+
+  * Append the following additional code to your `~/.emacs.d/init.el` file:
+    ```
+    ;; http://www.flycheck.org/manual/latest/index.html
+    (require 'flycheck)
+
+    ;; turn on flychecking globally
+    (add-hook 'after-init-hook #'global-flycheck-mode)
+
+    ;; disable jshint since we prefer eslint checking
+    (setq-default flycheck-disabled-checkers
+      (append flycheck-disabled-checkers
+        '(javascript-jshint)))
+
+    ;; use local eslint from node_modules before global
+    ;; http://emacs.stackexchange.com/questions/21205/flycheck-with-file-relative-eslint-executable
+    (defun my/use-eslint-from-node-modules ()
+      (let* ((root (locate-dominating-file
+                    (or (buffer-file-name) default-directory)
+                    "node_modules"))
+             (eslint (and root
+                          (expand-file-name "node_modules/eslint/bin/eslint.js"
+                                            root))))
+        (when (and eslint (file-executable-p eslint))
+          (setq-local flycheck-javascript-eslint-executable eslint))))
+    (add-hook 'flycheck-mode-hook #'my/use-eslint-from-node-modules)
+    ```
+
+  * Use the following basic commands in Emacs to interact with Flycheck:
+    * `C-c ! l` to see full list of errors in a buffer
+    * `C-c ! n` to go to the next error
+    * `C-c ! p` to go to the previous error
+
+    and see
+    [the Flycheck documentation](http://flycheck.readthedocs.io/en/latest/user/error-list.html)
+    for more information on usage.
