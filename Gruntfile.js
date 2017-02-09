@@ -41,7 +41,7 @@ module.exports = function (grunt) {
           'js/girderWidget.js',
           'js/groundTruth.js',
           'js/view.js',
-	  // core SA files
+          // core SA files
           'js/cookies.js',
           'node_modules/objectid-js/src/main/javascript/Objectid.js',
           'js/init.js',
