@@ -1,8 +1,12 @@
 # SlideAtlas-viewer
 
-  [![Travis](https://travis-ci.org/SlideAtlas/SlideAtlas-viewer.svg?branch=master)]()
+[![Travis](https://img.shields.io/travis/SlideAtlas/SlideAtlas-viewer.svg)](https://travis-ci.org/SlideAtlas/SlideAtlas-viewer)
+[![npm](https://img.shields.io/npm/v/slideatlas-viewer.svg)](https://www.npmjs.com/package/slideatlas-viewer)
+[![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/SlideAtlas/SlideAtlas-viewer/master/LICENSE)
+[![David](https://img.shields.io/david/SlideAtlas/SlideAtlas-viewer.svg)](https://github.com/SlideAtlas/SlideAtlas-viewer/blob/version-command/package.json)
+[![David](https://img.shields.io/david/dev/SlideAtlas/SlideAtlas-viewer.svg)](https://github.com/SlideAtlas/SlideAtlas-viewer/blob/version-command/package.json)
 
-  A multiresolution image viewer, optimized for whole slide images.
+A multiresolution image viewer, optimized for whole slide images.
 
 ## Prerequisites
 The development environment requires Node Package Manager to be installed.
@@ -49,9 +53,15 @@ no outstanding changes:
   * `npm version patch`, for pure bug fixes
 
   Note, the `npm version` command will automatically install, build, and test the
-  package. It will also push the newly-tagged version to GitHub (assuming your GitHub
-  remote is called `master`).
+  package.
+
+  More importantly, it will create a new Git branch, named `bump-version`, containing a
+  Git commit and tag for the new version. This branch will be automatically pushed to
+  GitHub, but a PR must be created manually to merge this new branch.
 
 * Push the release to NPM:
 
   `npm publish`
+
+* [Create and merge a PR on GitHub](https://github.com/SlideAtlas/SlideAtlas-viewer/compare/bump-version?expand=1)
+  for the new `bump-version` branch.
