@@ -8,6 +8,7 @@ module.exports = function (grunt) {
       },
       base: {
         src: [
+          'node_modules/jquery/dist/jquery.min.js',
           'node_modules/jquery-ui-dist/jquery-ui.min.js',
           'node_modules/spectrum-colorpicker/spectrum.js',
           // This is a polyfill for the HTMLCanvasElement.toBlob method
