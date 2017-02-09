@@ -5,6 +5,12 @@
     },
     "globals": {
         "$": true,
+        "jQuery": true,
+        "saveAs": true,
+        "mat3": true,
+        "mat4": true,
+        "ObjectId": true,
+        "girder": true,
         "SA": true,
         "SAM": true
     },
