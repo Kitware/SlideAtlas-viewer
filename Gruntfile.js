@@ -13,7 +13,7 @@ module.exports = function (grunt) {
           // This is a polyfill for the HTMLCanvasElement.toBlob method
           'node_modules/blueimp-canvas-to-blob/js/canvas-to-blob.min.js',
           'node_modules/file-saver/FileSaver.min.js',
-          // fles for SA markup
+          // files for SA markup
           'node_modules/gl-matrix/dist/gl-matrix-min.js',
           'js/annotationLayer.js',
           'js/shape.js',
