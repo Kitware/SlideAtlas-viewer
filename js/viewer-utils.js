@@ -3740,7 +3740,7 @@
 
     this.AnimationDuration = duration;
     this.AnimationStartTime = new Date().getTime();
-    // NOTE: tiles are not requestAnimFrame does not let the image tiles get drawn.
+    // NOTE: tiles are not requestAnimationFrame does not let the image tiles get drawn.
     // Do the same animation with setInterval
     var self = this;
     this.AnimationLastTime = new Date().getTime();

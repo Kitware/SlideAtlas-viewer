@@ -539,7 +539,7 @@ window.SA = window.SA || {};
         // 2d canvas does not draw without this.
     this.Draw();
     var self = this;
-    requestAnimFrame(function () { self.AnimateViewToggle(); });
+    window.requestAnimationFrame(function () { self.AnimateViewToggle(); });
   };
 
   DualViewWidget.prototype.CreateThumbnailImage = function (height) {
