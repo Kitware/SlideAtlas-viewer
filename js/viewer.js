@@ -450,7 +450,7 @@
     if (!this.RenderPending) {
       this.RenderPending = true;
       var self = this;
-      requestAnimFrame(
+      window.requestAnimationFrame(
                 function () {
                   self.RenderPending = false;
                   self.Draw();
@@ -1762,7 +1762,7 @@
     var t = new Date().getTime();
     if (t - this.LastTime < 50) {
       var self = this;
-      this.MomentumTimerId = requestAnimFrame(function () { self.HandleMomentum(); });
+      this.MomentumTimerId = window.requestAnimationFrame(function () { self.HandleMomentum(); });
       return;
     }
 
@@ -1809,7 +1809,7 @@
       this.UpdateZoomGui();
     } else {
       var self = this;
-      this.MomentumTimerId = requestAnimFrame(function () { self.HandleMomentum(); });
+      this.MomentumTimerId = window.requestAnimationFrame(function () { self.HandleMomentum(); });
     }
   };
 

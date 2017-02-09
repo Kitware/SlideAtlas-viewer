@@ -92,7 +92,7 @@
     if (!this.RenderPending) {
       this.RenderPending = true;
       var self = this;
-      requestAnimFrame(
+      window.requestAnimationFrame(
                 function () {
                   self.RenderPending = false;
                   self.Draw();
