@@ -73,7 +73,7 @@
     }
 
     // Eliminate the GUI in the viewers.
-    $(body).css({'overflow-x': 'hidden'});
+    $('body').css({'overflow-x': 'hidden'});
 
     this.WindowDiv = $('<div>')
         .appendTo('body')

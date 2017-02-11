@@ -7,13 +7,8 @@
 // I intend to have only one object
   function MobileAnnotationWidget () {
     var size = '80px';
-    // var left = '620px';
-    var right = '0px';
-    var bottom = '170px';
     if (SAM.detectMobile() === 'iPhone') {
       size = '100px';
-      bottom = '80px';
-      left = '80px';
     }
 
     // TODO: The css style is not working for mobile devices. fix it.
@@ -78,7 +73,7 @@
     widget.Shape.Origin = [x, y];
     widget.Shape.Radius = cam.Height / 4.0;
     widget.Shape.UpdateBuffers(this.Layer.AnnotationView);
-    eventuallyRender();
+    this.Layer.EventuallyDraw();
 
     this.Layer.SetVisibility(true);
   };

@@ -6,11 +6,11 @@ window.SA = window.SA || {};
   var ROOT_DIV;
   SA.imageProgram;
   var textProgram;
-  var polyProgram;
+  SA.polyProgram;
+  sA.squarePositionBuffer; // eslint-disable-line no-undef
   var mvMatrix = mat4.create();
   var pMatrix = mat4.create();
-  var squareOutlinePositionBuffer;
-  var squarePositionBuffer;
+  SA.squareOutlinePositionBuffer;
   SA.tileVertexPositionBuffer;
   SA.tileVertexTextureCoordBuffer;
   SA.tileCellBuffer;
@@ -631,8 +631,8 @@ window.SA = window.SA || {};
   }
 */
 
-  function initShaderPrograms (gl) {
-        // Test threshold value for alpha.
+  function initShaderPrograms (view, gl) {
+    // Test threshold value for alpha.
     var heatMapTestFragmentShaderString =
             'precision highp float;' +
             'uniform sampler2D uSampler;' +
@@ -645,7 +645,7 @@ window.SA = window.SA || {};
             '   }' +
             '   gl_FragColor = textureColor;' +
             ' }';
-        // Test red->alpha, greed->hue
+    // Test red->alpha, greed->hue
     var heatMapHueFragmentShaderString =
             'precision highp float;' +
             'uniform sampler2D uSampler;' +
@@ -681,7 +681,7 @@ window.SA = window.SA || {};
             '  }' +
             '  gl_FragColor = textureColor;' +
             '}';
-        // Test red->alpha, constant color set externally
+    // Test red->alpha, constant color set externally
     var heatMapFragmentShaderString =
             'precision highp float;' +
             'uniform sampler2D uSampler;' +
@@ -712,25 +712,25 @@ window.SA = window.SA || {};
             '  vTextureCoord = aTextureCoord;' +
             '}';
 
-        // SA.imageProgram = SA.createWebGlProgram(fragmentShaderString, vertexShaderString, gl);
+    // SA.imageProgram = SA.createWebGlProgram(fragmentShaderString, vertexShaderString, gl);
     view.imageProgram = SA.createWebGlProgram(heatMapFragmentShaderString, vertexShaderString, gl);
-        // Texture coordinate attribute and texture image uniform
+    // Texture coordinate attribute and texture image uniform
     view.imageProgram.textureCoordAttribute =
-            gl.getAttribLocation(view.imageProgram, 'aTextureCoord');
+        gl.getAttribLocation(view.imageProgram, 'aTextureCoord');
     gl.enableVertexAttribArray(view.imageProgram.textureCoordAttribute);
     view.imageProgram.samplerUniform = gl.getUniformLocation(view.imageProgram, 'uSampler');
     view.imageProgram.colorUniform = gl.getUniformLocation(view.imageProgram, 'uColor');
 
-        // polyProgram = SA.createWebGlProgram("shader-poly-fs", "shader-poly-vs", gl);
-        // polyProgram.colorUniform = gl.getUniformLocation(polyProgram, "uColor");
+    // polyProgram = SA.createWebGlProgram("shader-poly-fs", "shader-poly-vs", gl);
+    // polyProgram.colorUniform = gl.getUniformLocation(polyProgram, "uColor");
 
-        // textProgram = SA.createWebGlProgram("shader-text-fs", "shader-text-vs", gl);
-        // textProgram.textureCoordAttribute
-        //    = gl.getAttribLocation(textProgram, "aTextureCoord");
-        // gl.enableVertexAttribArray(textProgram.textureCoordAttribute);
-        // textProgram.samplerUniform
-        //    = gl.getUniformLocation(textProgram, "uSampler");
-        // textProgram.colorUniform = gl.getUniformLocation(textProgram, "uColor");
+    // textProgram = SA.createWebGlProgram("shader-text-fs", "shader-text-vs", gl);
+    // textProgram.textureCoordAttribute
+    //    = gl.getAttribLocation(textProgram, "aTextureCoord");
+    // gl.enableVertexAttribArray(textProgram.textureCoordAttribute);
+    // textProgram.samplerUniform
+    //    = gl.getUniformLocation(textProgram, "uSampler");
+    // textProgram.colorUniform = gl.getUniformLocation(textProgram, "uColor");
   }
 
   SA.createWebGlProgram = function (fragmentShaderString, vertexShaderString, gl) {
@@ -765,15 +765,15 @@ window.SA = window.SA || {};
       1.0, 1.0, 0.0,
       1.0, 0.0, 0.0,
       0.0, 0.0, 0.0];
-    var squareOutlinePositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, squareOutlinePositionBuffer);
+    SA.squareOutlinePositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, SA.squareOutlinePositionBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    squareOutlinePositionBuffer.itemSize = 3;
-    squareOutlinePositionBuffer.numItems = 5;
+    SA.squareOutlinePositionBuffer.itemSize = 3;
+    SA.squareOutlinePositionBuffer.numItems = 5;
 
         // Filled square
-    var squarePositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, squarePositionBuffer);
+    SA.squarePositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, SA.squarePositionBuffer);
     vertices = [
       1.0, 1.0, 0.0,
       0.0, 1.0, 0.0,
@@ -781,8 +781,8 @@ window.SA = window.SA || {};
       0.0, 0.0, 0.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    squarePositionBuffer.itemSize = 3;
-    squarePositionBuffer.numItems = 4;
+    SA.squarePositionBuffer.itemSize = 3;
+    SA.squarePositionBuffer.numItems = 4;
   }
 
     // ==============================================================================
@@ -874,37 +874,10 @@ window.SA = window.SA || {};
     SAM.detectMobile();
   }
 
-  var GC_STACK = [];
-  var GCT = [1, 0, 0, 1, 0, 0];
-  function gcSave () {
-    var tmp = [GCT[0], GCT[1], GCT[2], GCT[3], GCT[4], GCT[5]];
-    GC_STACK.push(tmp);
-  }
-  function gcRestore () {
-    var tmp = GC_STACK.pop();
-    GCT = tmp;
-    GC.setTransform(tmp[0], tmp[1], tmp[2], tmp[3], tmp[4], tmp[5]);
-  }
-  function gcSetTransform (m00, m10, m01, m11, m02, m12) {
-    GCT = [m00, m10, m01, m11, m02, m12];
-    GC.setTransform(m00, m10, m01, m11, m02, m12);
-  }
-  function gcTransform (m00, m10, m01, m11, m02, m12) {
-    var n00 = m00 * GCT[0] + m10 * GCT[2];
-    var n10 = m00 * GCT[1] + m10 * GCT[3];
-    var n01 = m01 * GCT[0] + m11 * GCT[2];
-    var n11 = m01 * GCT[1] + m11 * GCT[3];
-    var n02 = m02 * GCT[0] + m12 * GCT[2] + GCT[4];
-    var n12 = m02 * GCT[1] + m12 * GCT[3] + GCT[5];
-
-    GCT = [n00, n10, n01, n11, n02, n12];
-    GC.setTransform(n00, n10, n01, n11, n02, n12);
-  }
-
-    // ----------------------------------------------------------
-    // Log to trackdown iPad bug.  Console does not log until
-    // debugger is running.  Bug does not occur when debugger
-    // is running.
+  // ----------------------------------------------------------
+  // Log to trackdown iPad bug.  Console does not log until
+  // debugger is running.  Bug does not occur when debugger
+  // is running.
 
   var LOGGING = false;
   var DEBUG_LOG = [];
@@ -921,11 +894,11 @@ window.SA = window.SA || {};
     }
   }
 
-    // ----------------------------------------------------------
-    // In an attempt to simplify the view.html template file, I am putting
-    // as much of the javascript from that file into this file as I can.
-    // As I abstract viewer features, these variables and functions
-    // should migrate into objects and other files.
+  // ----------------------------------------------------------
+  // In an attempt to simplify the view.html template file, I am putting
+  // as much of the javascript from that file into this file as I can.
+  // As I abstract viewer features, these variables and functions
+  // should migrate into objects and other files.
 
   var CANVAS;
 
@@ -981,15 +954,15 @@ window.SA = window.SA || {};
         // TODO: This is no longer called by a button, so change its name.
     SA.notesWidget.SaveCallback(
             function () {
-                // finished
+              // finished
               SA.SaveButton.attr('src', SA.ImagePathUrl + 'save22.png');
             });
   }
 
-    // This serializes loading a bit, but we need to know what type the note is
-    // so we can coustomize the webApp.  The server could pass the type to us.
-    // It might speed up loading.
-    // Note is the same as a view.
+  // This serializes loading a bit, but we need to know what type the note is
+  // so we can coustomize the webApp.  The server could pass the type to us.
+  // It might speed up loading.
+  // Note is the same as a view.
   function Main (rootNote) {
     SA.RootNote = rootNote;
 
@@ -1000,18 +973,18 @@ window.SA = window.SA || {};
     }
 
     SAM.detectMobile();
-    $(body).addClass('sa-view-body');
-      // Just to see if webgl is supported:
-      // var testCanvas = document.getElementById("gltest");
+    $('body').addClass('sa-view-body');
+    // Just to see if webgl is supported:
+    // var testCanvas = document.getElementById("gltest");
 
-      // I think the webgl viewer crashes.
-      // Maybe it is the texture leak I have seen in connectome.
-      // Just use the canvas for now.
-      // I have been getting crashes I attribute to not freeing texture
-      // memory properly.
-      // NOTE: I am getting similar crashes with the canvas too.
-      // Stack is running out of some resource.
-      // initGL(); Sets CANVAS and GL global variables
+    // I think the webgl viewer crashes.
+    // Maybe it is the texture leak I have seen in connectome.
+    // Just use the canvas for now.
+    // I have been getting crashes I attribute to not freeing texture
+    // memory properly.
+    // NOTE: I am getting similar crashes with the canvas too.
+    // Stack is running out of some resource.
+    // initGL(); Sets CANVAS and GL global variables
     initGC();
 
     if (SAM.detectMobile() && SA.MOBILE_ANNOTATION_WIDGET) {
@@ -1178,41 +1151,6 @@ window.SA = window.SA || {};
 
     if (SA.display) {
       SA.display.Draw();
-    }
-  }
-
-    // I had to prune all the annotations (lassos) that were not visible.
-  function keepVisible () {
-    var n = SA.display.GetNote();
-    var r = n.ViewerRecords[n.StartIndex];
-    var w = SA.VIEWER1.WidgetList;
-    var c = SA.VIEWER1.GetCamera();
-    var b = c.GetBounds();
-    for (var i = 0; i < r.Annotations.length; ++i) {
-      if (r.Annotations[i].type !== 'lasso') {
-        r.Annotations.splice(i, 1);
-        --i;
-      } else {
-        var pt = r.Annotations[i].points[0];
-        if (!pt || pt[0] < b[0] || pt[0] > b[1] || pt[1] < b[2] || pt[1] >
-                     b[3]) {
-          r.Annotations.splice(i, 1);
-          --i;
-        }
-      }
-    }
-    for (var i = 0; i < w.length; ++i) {
-      if (!(w[i] instanceof LassoWidget) || !w[i].Loop) {
-        w.splice(i, 1);
-        --i;
-      } else {
-        var pt = w[i].Loop.Points[0];
-        if (!pt || pt[0] < b[0] || pt[0] > b[1] || pt[1] < b[2] || pt[1] >
-                     b[3]) {
-          w.splice(i, 1);
-          --i;
-        }
-      }
     }
   }
 })();

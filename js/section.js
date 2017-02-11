@@ -161,7 +161,7 @@
       for (var i = 0; i < tiles.length; ++i) {
         tiles[i].LoadState = 1;
                 // Add the tile at the front of the queue.
-        LOAD_QUEUE.push(tiles[i]);
+        SA.LoadQueue.push(tiles[i]);
       }
     }
     SA.LoadQueueUpdate();

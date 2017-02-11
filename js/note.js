@@ -787,7 +787,7 @@
     if (this.LoadState === REQUESTED) {
       // Waiting for an ajax call to return.
       // Add the new callback to any already pending.
-      HACK + LOAD_CALLBACKS.push({note: this, callback: callback});
+      // HACK + LOAD_CALLBACKS.push({note: this, callback: callback});
       return;
     }
 

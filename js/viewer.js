@@ -9,6 +9,7 @@
 
     // I think this can go away now that we have hover mode in text.
 
+  var SAVING_IMAGE = false;
   var INTERACTION_NONE = 0;
   var INTERACTION_DRAG = 1;
   var INTERACTION_ROTATE = 2;
@@ -690,9 +691,9 @@
     // Cancel the large image request before it finishes.
   Viewer.prototype.CancelLargeImage = function () {
         // This will abort the save blob that occurs after rendering.
-    ClearFinishedLoadingCallbacks();
+    SA.ClearFinishedLoadingCallbacks();
         // We also need to stop the request for pending tiles.
-    ClearQueue();
+    SA.ClearQueue();
         // Incase some of the queued tiles were for normal rendering.
     this.EventuallyRender(false);
   };

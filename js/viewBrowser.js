@@ -58,7 +58,7 @@ window.SA = window.SA || {};
   ViewBrowser.prototype.SelectView = function (viewObj) {
     if (viewObj === null) {
       this.Viewer.SetCache(null);
-      eventuallyRender();
+      this.Viewer.eventuallyRender();
     }
 
     // This will get the camera and the annotations too.
@@ -78,7 +78,7 @@ window.SA = window.SA || {};
 
     SA.RecordState();
 
-    eventuallyRender();
+    this.Viewer.eventuallyRender();
   };
 
 // Open the dialog. (ShowViewBrowser).

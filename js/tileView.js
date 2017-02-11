@@ -79,7 +79,6 @@
   };
 
     // I want only the annotation to create a mask image.
-  var MASK_HACK = false;
     // Note: Tile in the list may not be loaded yet.
     // Returns true if all the tiles to render were available.
     // False implies that the user shoudl render again.
@@ -91,9 +90,6 @@
         // }
         // console.time("  ViewDraw");
     if (this.gl) {
-      if (MASK_HACK) {
-        return;
-      }
       return this.Section.Draw(this);
     } else {
       this.Clear();
@@ -112,10 +108,6 @@
                                      0.0, 0.5 * this.Viewport[3],
                                      0.5 * this.Viewport[2],
                                      0.5 * this.Viewport[3]);
-
-      if (MASK_HACK) {
-        return;
-      }
 
       return this.Section.Draw(this);
     }

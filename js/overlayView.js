@@ -133,8 +133,7 @@
   };
 
   OverlayView.prototype.Draw = function (masterView, inCam) {
-        // TODO: Clear any pending renders.
-
+    // TODO: Clear any pending renders.
     if (masterView) {
       inCam = inCam || masterView.Camera;
     }
@@ -143,7 +142,7 @@
       if (this.Transform) {
         this.Transform.ForwardTransformCamera(inCam, this.View.GetCamera());
       } else {
-                // Use spacing and origin for a transformation.
+        // Use spacing and origin for a transformation.
         var outCam = this.View.Camera;
         var imageObj = this.View.GetCache().Image;
         outCam.DeepCopy(inCam);
@@ -152,7 +151,7 @@
         outCam.Width /= imageObj.spacing[0];
         outCam.Height /= imageObj.spacing[1];
         outCam.ComputeMatrix();
-        this.Camera.DeepCopy(cam);
+        this.Camera.DeepCopy(outCam);
       }
     }
 

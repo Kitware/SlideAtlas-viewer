@@ -460,8 +460,8 @@
       return true;
     }
 
-    var w0 = this.Layer.GetCamera().ConvertPointViewerToWorld(EVENT_MANAGER.LastMouseX,
-                                                              EVENT_MANAGER.LastMouseY);
+    var w0 = this.Layer.GetCamera().ConvertPointViewerToWorld(this.Layer.LastMouseX,
+                                                              this.Layer.LastMouseY);
     var w1 = this.Layer.GetCamera().ConvertPointViewerToWorld(event.offsetX, event.offsetY);
 
         // This is the translation.

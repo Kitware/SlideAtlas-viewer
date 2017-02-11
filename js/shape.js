@@ -87,7 +87,7 @@
       this.Matrix[13] = y;
       this.Matrix[14] = this.ZOffset;
 
-      var program = polyProgram;
+      var program = SA.polyProgram;
 
       view.gl.useProgram(program);
       view.gl.disable(view.gl.BLEND);

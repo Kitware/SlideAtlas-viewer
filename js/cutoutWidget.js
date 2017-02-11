@@ -11,15 +11,15 @@
   function CutoutWidget (parent, viewer) {
     this.Viewer = viewer;
     this.Layer = viewer.GetAnnotationLayer();
-    var cam = layer.GetCamera();
+    var cam = this.Layer.GetCamera();
     var fp = cam.GetFocalPoint();
 
     var rad = cam.Height / 4;
     this.Bounds = [fp[0] - rad, fp[0] + rad, fp[1] - rad, fp[1] + rad];
     this.DragBounds = [fp[0] - rad, fp[0] + rad, fp[1] - rad, fp[1] + rad];
 
-    layer.AddWidget(this);
-    eventuallyRender();
+    this.Layer.AddWidget(this);
+    this.Viewer.EventuallyRender();
 
         // Bits that indicate which edges are active.
     this.Active = 0;
@@ -190,7 +190,7 @@
     }
 
     this.DragBounds = this.Bounds.slice(0);
-    eventuallyRender();
+    this.Viewer.EventuallyRender();
   };
 
   CutoutWidget.prototype.HandleMouseMove = function (event) {
@@ -226,7 +226,7 @@
         this.DragBounds[3] += dy;
       }
       this.UpdateBounds();
-      eventuallyRender();
+      this.Viewer.EventuallyRender();
       return true;
     }
     return false;
@@ -334,7 +334,7 @@
 
     if (active !== this.Active) {
       this.SetActive(active);
-      eventuallyRender();
+      this.Viewewr.EventuallyRender();
     }
 
     return false;
@@ -353,7 +353,7 @@
     this.Layer.DeactivateWidget(this);
     this.Layer.RemoveWidget(this);
 
-    eventuallyRender();
+    this.Viewer.EventuallyRender();
   };
 
     // Setting to active always puts state into "active".
@@ -369,7 +369,7 @@
     } else {
       this.Layer.DeactivateWidget(this);
     }
-    eventuallyRender();
+    this.Viewer.EventuallyRender();
   };
 
   SAM.CutoutWidget = CutoutWidget;

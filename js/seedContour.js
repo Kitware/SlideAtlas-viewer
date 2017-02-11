@@ -190,7 +190,7 @@
     plWidget.Shape.Closed = true;
     plWidget.LineWidth = 0;
     plWidget.Shape.UpdateBuffers(this.Layer.AnnotationView);
-    eventuallyRender();
+    viewer.EventuallyRender();
   }
 })();
 

@@ -120,7 +120,7 @@
     }
     this.Shape.FixedSize = fixedSizeFlag;
     this.Shape.UpdateBuffers();
-    eventuallyRender();
+    this.Layer.EventuallyDraw();
   };
 
   ArrowWidget.prototype.HandleKeyPress = function (keyCode, shift) {
@@ -173,7 +173,7 @@
     if (this.State === ARROW_WIDGET_NEW || this.State === ARROW_WIDGET_DRAG) {
       var viewport = this.Layer.GetViewport();
       this.Shape.Origin = this.Layer.ConvertPointViewerToWorld(x + this.TipOffset[0], y + this.TipOffset[1]);
-      eventuallyRender();
+      this.Layer.EventuallyDraw();
     }
 
     if (this.State === ARROW_WIDGET_DRAG_TAIL) {
@@ -187,7 +187,7 @@
       this.Shape.Length = Math.sqrt(dx * dx + dy * dy);
       this.Shape.Orientation = Math.atan2(dy, dx) * 180.0 / Math.PI;
       this.Shape.UpdateBuffers();
-      eventuallyRender();
+      this.Layer.EventuallyDraw();
     }
 
     if (this.State === ARROW_WIDGET_WAITING) {
@@ -262,12 +262,12 @@
       this.State = ARROW_WIDGET_ACTIVE;
       this.Shape.Active = true;
       this.Layer.ActivateWidget(this);
-      eventuallyRender();
+      this.Layer.EventuallyDraw();
     } else {
       this.State = ARROW_WIDGET_WAITING;
       this.Shape.Active = false;
       this.Layer.DeactivateWidget(this);
-      eventuallyRender();
+      this.Layer.EventuallyDraw();
     }
   };
 
@@ -294,7 +294,7 @@
     // I need this because old schemes cannot use "Load"
   ArrowWidget.prototype.SetColor = function (hexColor) {
     this.Shape.SetFillColor(hexColor);
-    eventuallyRender();
+    this.Layer.EventuallyDraw();
   };
 
   function ArrowPropertyDialogApply () {
@@ -310,7 +310,7 @@
       widget.SetActive(false);
             // widget.SetFixedSize(fixedSizeFlag);
     }
-    eventuallyRender();
+    this.Layer.EventuallyDraw();
   }
 
   function ArrowPropertyDialogCancel () {
@@ -327,7 +327,7 @@
             // We need to remove an item from a list.
             // shape list and widget list.
       widget.RemoveFromLayer();
-      eventuallyRender();
+      this.Layer.EventuallyDraw();
     }
   }
 

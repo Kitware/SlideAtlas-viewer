@@ -86,7 +86,7 @@
       // Trying to preserve pointer so I do not need to update correlation points.
       this.Shape.Origin[0] = tmp[0];
       this.Shape.Origin[1] = tmp[1];
-      eventuallyRender();
+      this.Viewer.EventuallyRender();
     }
 
     if (this.State === CROSS_WIDGET_WAITING) {
@@ -143,12 +143,12 @@
       this.State = CROSS_WIDGET_ACTIVE;
       this.Shape.Active = true;
       this.Viewer.ActivateWidget(this);
-      eventuallyRender();
+      this.Viewer.EventuallyRender();
     } else {
       this.State = CROSS_WIDGET_WAITING;
       this.Shape.Active = false;
       this.Viewer.DeactivateWidget(this);
-      eventuallyRender();
+      this.Viewer.EventuallyRender();
     }
   };
 
