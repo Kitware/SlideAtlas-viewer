@@ -7,7 +7,7 @@ window.SA = window.SA || {};
   SA.imageProgram;
   var textProgram;
   SA.polyProgram;
-  sA.squarePositionBuffer; // eslint-disable-line no-undef
+  SA.squarePositionBuffer; // eslint-disable-line no-undef
   var mvMatrix = mat4.create();
   var pMatrix = mat4.create();
   SA.squareOutlinePositionBuffer;
