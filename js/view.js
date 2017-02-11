@@ -373,7 +373,7 @@
 
     // NOTE: Not used anymore. Viewer uses a DOM.
   View.prototype.DrawCopyright = function (copyright) {
-    if (copyright === undefined || MASK_HACK) {
+    if (copyright === undefined) {
       return;
     }
     if (this.gl) {
@@ -393,7 +393,7 @@
     // I think this was only used for webgl.  Not used anymore
   View.prototype.DrawOutline = function (backgroundFlag) {
     if (this.gl) {
-      var program = polyProgram;
+      var program = SA.polyProgram;
       this.gl.useProgram(program);
 
       this.gl.viewport(this.Viewport[0],
@@ -421,22 +421,22 @@
         this.OutlineCamMatrix[14] = viewBackZ; // back plane
         this.gl.uniformMatrix4fv(program.pMatrixUniform, false, this.OutlineCamMatrix);
         this.gl.uniform3f(program.colorUniform, 1.0, 1.0, 1.0);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, squarePositionBuffer);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, SA.squarePositionBuffer);
         this.gl.vertexAttribPointer(program.vertexPositionAttribute,
-                                            squarePositionBuffer.itemSize,
+                                            SA.squarePositionBuffer.itemSize,
                                             this.gl.FLOAT, false, 0, 0);
-        this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, squarePositionBuffer.numItems);
+        this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, SA.squarePositionBuffer.numItems);
       }
 
             // outline
       this.OutlineCamMatrix[14] = viewFrontZ; // force in front
       this.gl.uniformMatrix4fv(program.pMatrixUniform, false, this.OutlineCamMatrix);
       this.gl.uniform3f(program.colorUniform, this.OutlineColor[0], this.OutlineColor[1], this.OutlineColor[2]);
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, squareOutlinePositionBuffer);
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, SA.squareOutlinePositionBuffer);
       this.gl.vertexAttribPointer(program.vertexPositionAttribute,
-                                        squareOutlinePositionBuffer.itemSize,
+                                        SA.squareOutlinePositionBuffer.itemSize,
                                         this.gl.FLOAT, false, 0, 0);
-      this.gl.drawArrays(this.gl.LINE_STRIP, 0, squareOutlinePositionBuffer.numItems);
+      this.gl.drawArrays(this.gl.LINE_STRIP, 0, SA.squareOutlinePositionBuffer.numItems);
     }
   };
 

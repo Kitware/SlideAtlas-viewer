@@ -65,7 +65,6 @@ module.exports = function (grunt) {
           'js/camera.js',
           'js/cutout.js',
           'js/seedContour.js',
-          'js/align.js',
           'js/tile.js',
           'js/cache.js',
           'js/section.js',

@@ -428,7 +428,7 @@
     if (this.DeactivateCallback) {
       this.DeactivateCallback();
     }
-    eventuallyRender();
+    this.Layer.EventuallyDraw();
   };
 
     // Setting to active always puts state into "active".
@@ -442,13 +442,13 @@
       this.State = ACTIVE;
       this.Shape.Active = true;
       this.Layer.ActivateWidget(this);
-      eventuallyRender();
+      this.Layer.EventuallyDraw();
             // Compute the location for the pop up and show it.
       this.PlacePopup();
     } else {
       this.Deactivate();
     }
-    eventuallyRender();
+    this.Layer.EventuallyDraw();
   };
 
   SAM.ScaleWidget = ScaleWidget;

@@ -142,11 +142,6 @@ window.SA = window.SA || {};
     }
   };
 
-  ViewEditMenu.prototype.DetectTissueSections = function () {
-    initHagfish();
-    findHagFishSections(2, 0.0002, 0.01);
-  };
-
   ViewEditMenu.prototype.ToggleHistory = function () {
     this.Tab.PanelOff();
 
@@ -188,7 +183,7 @@ window.SA = window.SA || {};
       (bounds[2] + bounds[3]) / 2]);
     this.Viewer.OverView.Camera.SetHeight(bounds[3] - bounds[2]);
     this.Viewer.OverView.Camera.ComputeMatrix();
-    eventuallyRender();
+    this.Viewer.eventuallyRender();
 
     // Save automatically if user has permission.
     var self = this;
@@ -226,7 +221,7 @@ window.SA = window.SA || {};
       (bounds[2] + bounds[3]) / 2]);
     viewer.OverView.Camera.SetHeight(bounds[3] - bounds[2]);
     viewer.OverView.Camera.ComputeMatrix();
-    eventuallyRender();
+    viewer.EventuallyRender();
 
     var data = JSON.stringify(bounds);
     $.ajax({

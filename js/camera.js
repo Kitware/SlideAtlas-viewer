@@ -267,23 +267,6 @@ window.SAM = window.SAM || {};
     this.Matrix[15] = 0.5 * w;
   };
 
-    // TODO: ROOT_SPACING IS UNDEFINED.
-    // Reset is not bound to any event.
-  Camera.prototype.Reset = function () {
-        // Compute the bounds
-    var bounds = [];
-    bounds[0] = bounds[2] = bounds[4] = 0.0;
-    bounds[1] = TILE_DIMENSIONS[0] * ROOT_SPACING[0];
-    bounds[3] = TILE_DIMENSIONS[1] * ROOT_SPACING[1];
-    bounds[5] = NUMBER_OF_SECTIONS * ROOT_SPACING[2];
-
-    this.SetFocalPoint([(bounds[0] + bounds[1]) * 0.5,
-      (bounds[2] + bounds[3]) * 0.5]);
-
-    this.SetHeight(bounds[3] - bounds[2]);
-    this.ComputeMatrix();
-  };
-
     // Currenly assumes parallel projection and display z range = [-1,1].
     // Also no rotation!
     // a.k.a. This method does not work.
@@ -357,7 +340,7 @@ window.SAM = window.SAM || {};
             var orx = overviewCam.GetWidth() * 0.5;
             var ory = overviewCam.GetHeight() * 0.5;
 
-            program = polyProgram;
+            program = SA.polyProgram;
             gl.useProgram(program);
             gl.uniform3f(program.colorUniform, 0.9, 0.0, 0.9);
 
@@ -376,13 +359,13 @@ window.SAM = window.SAM || {};
             mvMatrix[0] = 2*rx/orx;
             mvMatrix[5] = 2*ry/ory;
 
-            gl.bindBuffer(gl.ARRAY_BUFFER, squareOutlinePositionBuffer);
+            gl.bindBuffer(gl.ARRAY_BUFFER, SA.squareOutlinePositionBuffer);
             gl.vertexAttribPointer(program.vertexPositionAttribute,
-                                   squareOutlinePositionBuffer.itemSize,
+                                   SA.squareOutlinePositionBuffer.itemSize,
                                    gl.FLOAT, false, 0, 0);
             gl.uniformMatrix4fv(program.mvMatrixUniform, false, mvMatrix);
             gl.drawArrays(gl.LINE_STRIP, 0,
-            squareOutlinePositionBuffer.numItems);
+            SA.squareOutlinePositionBuffer.numItems);
             */
     } else {
             // Transform focal point from -1->1 to viewport

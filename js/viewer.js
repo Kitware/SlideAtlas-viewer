@@ -9,6 +9,7 @@
 
     // I think this can go away now that we have hover mode in text.
 
+  var SAVING_IMAGE = false;
   var INTERACTION_NONE = 0;
   var INTERACTION_DRAG = 1;
   var INTERACTION_ROTATE = 2;
@@ -690,9 +691,9 @@
     // Cancel the large image request before it finishes.
   Viewer.prototype.CancelLargeImage = function () {
         // This will abort the save blob that occurs after rendering.
-    ClearFinishedLoadingCallbacks();
+    SA.ClearFinishedLoadingCallbacks();
         // We also need to stop the request for pending tiles.
-    ClearQueue();
+    SA.ClearQueue();
         // Incase some of the queued tiles were for normal rendering.
     this.EventuallyRender(false);
   };
@@ -1339,9 +1340,9 @@
     if (SA.LinkDiv && SA.LinkDiv.is(':visible')) {
       SA.LinkDiv.fadeOut();
     }
-    if (typeof FAVORITES_WIDGET !== 'undefined' &&
-           FAVORITES_WIDGET.hidden === false) {
-      FAVORITES_WIDGET.ShowHideFavorites();
+    if (typeof SA.FAVORITES_WIDGET !== 'undefined' &&
+           SA.FAVORITES_WIDGET.hidden === false) {
+      SA.FAVORITES_WIDGET.ShowHideFavorites();
     }
 
     var date = new Date();
@@ -1488,11 +1489,11 @@
       SA.display.NavigationWidget.ToggleVisibility();
     }
 
-    if (typeof (MOBILE_ANNOTATION_WIDGET) !== 'undefined' &&
-            MOBILE_ANNOTATION_WIDGET.Visibility) {
-      MOBILE_ANNOTATION_WIDGET.ToggleVisibility();
+    if (typeof (SA.MOBILE_ANNOTATION_WIDGET) !== 'undefined' &&
+            SA.MOBILE_ANNOTATION_WIDGET.Visibility) {
       // No slide interaction with the interface up.
       // I had bad interaction with events going to browser.
+      SA.MOBILE_ANNOTATION_WIDGET.ToggleVisibility();
     }
 
         // detect sweep
@@ -1729,8 +1730,8 @@
         if (SA.display && SA.display.NavigationWidget) {
           SA.display.NavigationWidget.ToggleVisibility();
         }
-        if (typeof (MOBILE_ANNOTATION_WIDGET) !== 'undefined') {
-          MOBILE_ANNOTATION_WIDGET.ToggleVisibility();
+        if (typeof (SA.MOBILE_ANNOTATION_WIDGET) !== 'undefined') {
+          SA.MOBILE_ANNOTATION_WIDGET.ToggleVisibility();
         }
         return;
       }
@@ -2062,12 +2063,13 @@
   Viewer.prototype.SegmentationsToCsv = function () {
     var note = SA.display.NavigationWidget.GetNote();
     // first collect a set of segmentation labels.
-    labels = {};
-    labelArray = [];
+    var labels = {};
+    var labelArray = [];
+    var label;
     for (var i = 0; i < note.ViewerRecords.length; ++i) {
-      annotations = note.ViewerRecords[i].Annotations;
+      var annotations = note.ViewerRecords[i].Annotations;
       for (var j = 0; j < annotations.length; ++j) {
-        annot = annotations[j];
+        var annot = annotations[j];
         if (annot.type === 'polyline' && annot.text) {
           if (!labels[annot.text]) {
             labelArray.push(annot.text);
@@ -2077,20 +2079,18 @@
       }
     }
 
-    row1 = '';
-    row2 = ',';
+    var row1 = '';
+    var row2 = ',';
     for (var i = 0; i < labelArray.length; ++i) {
       row1 += ',,';
       row1 += labelArray[i];
       row2 += ',AREA µm^2,LINE LENGTH µm';
     }
-    console.log(row1);
-    console.log(row2);
 
     // Make a row for each section
-    widget = new SAM.PolylineWidget(SA.VIEWER1.GetAnnotationLayer(), false);
+    var widget = new SAM.PolylineWidget(SA.VIEWER1.GetAnnotationLayer(), false);
     for (var i = 0; i < note.ViewerRecords.length; ++i) {
-      viewerRecord = note.ViewerRecords[i];
+      var viewerRecord = note.ViewerRecords[i];
       var row = viewerRecord.Image.label + ',' + (i + 1) + ',';
       for (var j = 0; j < labelArray.length; ++j) {
         label = labelArray[j];
@@ -2114,7 +2114,6 @@
           row += labels[label].area.toString() + ',' + labels[label].perimeter.toString() + ',';
         }
       }
-      console.log(row);
     }
   };
 

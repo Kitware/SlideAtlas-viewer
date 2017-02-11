@@ -5,12 +5,17 @@
     },
     "globals": {
         "$": true,
+        "jQuery": true,
+        "saveAs": true,
+        "mat3": true,
+        "mat4": true,
+        "ObjectId": true,
+        "girder": true,
         "SA": true,
         "SAM": true
     },
     "rules": {
         "no-unused-vars": 0,
-        "no-undef": 0,
         "no-redeclare": 0,
         "new-cap": 0,
         "no-unmodified-loop-condition": 0

@@ -85,7 +85,7 @@
     // This is expensive, so initialize explicitely outside the constructor.
   FillWidget.prototype.Initialize = function (view) {
         // Now for the segmentation initialization.
-    this.Segmentation = new Segmentation(this.Viewer);
+    this.Segmentation = new SA.Segmentation(this.Viewer);
   };
 
   FillWidget.prototype.Draw = function (view) {
@@ -146,7 +146,7 @@
     if (this.DeactivateCallback) {
       this.DeactivateCallback();
     }
-    eventuallyRender();
+    this.Viewer.EventuallyRender();
   };
 
   FillWidget.prototype.HandleMouseDown = function (event) {
@@ -179,7 +179,7 @@
       this.Cursor.hide();
       this.Segmentation.Update();
       this.Segmentation.Draw();
-      eventuallyRender();
+      this.Viewer.EventuallyRender();
     }
   };
 
@@ -271,7 +271,7 @@
         this.Shapes[i].Active = true;
       }
       this.PlacePopup();
-      eventuallyRender();
+      this.Viewer.EventuallyRender();
     } else {
       this.Deactivate();
       this.Viewer.DeactivateWidget(this);
@@ -302,7 +302,7 @@
     }
     this.SetActive(false);
     if (window.SA) { SA.RecordState(); }
-    eventuallyRender();
+    this.Viewer.EventuallyRender();
   };
 
   SAM.FillWidget = FillWidget;

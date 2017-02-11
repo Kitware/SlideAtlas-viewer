@@ -86,7 +86,7 @@
       // Trying to preserve pointer so I do not need to update correlation points.
       this.Shape.Origin[0] = tmp[0];
       this.Shape.Origin[1] = tmp[1];
-      eventuallyRender();
+      this.Viewer.EventuallyRender();
     }
 
     if (this.State === CROSS_WIDGET_WAITING) {
@@ -104,8 +104,8 @@
       return;
     }
 
-    dx = event.worldX - this.Shape.Origin[0];
-    dy = event.worldY - this.Shape.Origin[1];
+    var dx = event.worldX - this.Shape.Origin[0];
+    var dy = event.worldY - this.Shape.Origin[1];
 
         // We need to scale to pixels
     var cam = this.Viewer.GetCamera();
@@ -143,12 +143,12 @@
       this.State = CROSS_WIDGET_ACTIVE;
       this.Shape.Active = true;
       this.Viewer.ActivateWidget(this);
-      eventuallyRender();
+      this.Viewer.EventuallyRender();
     } else {
       this.State = CROSS_WIDGET_WAITING;
       this.Shape.Active = false;
       this.Viewer.DeactivateWidget(this);
-      eventuallyRender();
+      this.Viewer.EventuallyRender();
     }
   };
 

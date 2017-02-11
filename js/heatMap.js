@@ -128,7 +128,7 @@
         outCam.Width /= imageObj.spacing[0];
         outCam.Height /= imageObj.spacing[1];
         outCam.ComputeMatrix();
-        this.Camera.DeepCopy(cam);
+        this.Camera.DeepCopy(outCam);
       }
     }
 

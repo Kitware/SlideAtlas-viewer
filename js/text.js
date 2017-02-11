@@ -64,34 +64,17 @@
          [0, 413, 50, 98], [0, 413, 50, 98], [0, 413, 50, 98], [0, 413, 50, 98], [0, 413, 50, 98], // 250
          [0, 413, 50, 98]];
 
-    // All text object use the same texture map.
-
-  function GetTextureLoadedFunction (text) {
-    return function () { text.HandleLoadedTexture(); };
-  }
+  // All text object use the same texture map.
 
   function TextError () {
     alert('Could not load font');
   }
 
-  function Text (gl) {
-        // All text objects sare the same texture map.
-        // if (TEXT_TEXTURE === undefined ) {
-        // }
-    if (gl) {
-      this.gl = gl;
-      this.TextureLoaded = false;
-      this.Texture = gl.createTexture();
-      this.Image = new Image();
-      this.Image.onload = GetTextureLoadedFunction(this);
-            // this.Image.onerror = TextError(); // Always fires for some reason.
-            // This starts the loading.
-      this.Image.src = SA.ImagePathUrl + 'letters.gif';
-    }
+  function Text () {
     this.Color = [0.5, 1.0, 1.0];
     this.Size = 12; // Height in pixels
 
-        // Position of the anchor in the world coordinate system.
+    // Position of the anchor in the world coordinate system.
     this.Position = [100, 100];
     this.Orientation = 0.0; // in degrees, counter clockwise, 0 is left
 
@@ -116,23 +99,6 @@
         // Get rid of the buffers?
   };
 
-    // TODO: Although this only used for the webL renderer, we should really
-    // Hava a callback and let the application (or widget) call eventually render.
-  Text.prototype.HandleLoadedTexture = function () {
-    if (this.gl) {
-      var texture = this.Texture;
-      this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
-      this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.Image);
-      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
-      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_NEAREST);
-      this.gl.generateMipmap(this.gl.TEXTURE_2D);
-      this.gl.bindTexture(this.gl.TEXTURE_2D, null);
-      this.TextureLoaded = true;
-    }
-    eventuallyRender();
-  };
-
   Text.prototype.Draw = function (view) {
         // Place the anchor of the text.
         // First transform the world anchor to view.
@@ -152,124 +118,51 @@
       this.Anchor = [-50, 0];
     }
 
-    if (view.gl) {
-      if (this.TextureLoaded === false) {
-        return;
-      }
-      if (this.Matrix === undefined) {
-        this.UpdateBuffers(view);
-        this.Matrix = mat4.create();
-        mat4.identity(this.Matrix);
-      }
-      var program = textProgram;
-      view.gl.useProgram(program);
+    // (x,y) is the screen position of the text.
+    // Canvas text location is lower left of first letter.
+    var strArray = this.String.split('\n');
+    // Move (x,y) from tip of the arrow to the upper left of the text box.
+    var ctx = view.Context2d;
+    ctx.save();
+    var radians = this.Orientation * Math.PI / 180;
+    var s = Math.sin(radians);
+    var c = Math.cos(radians);
+    ctx.setTransform(c, -s, s, c, x, y);
+    x = -this.Anchor[0];
+    y = -this.Anchor[1];
 
-            // ZERO,ONE,SRC_COLOR,ONE_MINUS_SRC_COLOR,ONE_MINUS_DST_COLOR,
-            // SRC_ALPHA,ONE_MINUS_SRC_ALPHA,
-            // DST_ALPHA,ONE_MINUS_DST_ALHPA,GL_SRC_ALPHA_SATURATE
-            // gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-      view.gl.blendFunc(view.gl.SRC_ALPHA, view.gl.ONE_MINUS_SRC_ALPHA);
-      view.gl.enable(view.gl.BLEND);
-            // view.gl.disable(view.gl.DEPTH_TEST);
-
-            // These are the same for every tile.
-            // Vertex points (shifted by tiles matrix)
-      view.gl.bindBuffer(view.gl.ARRAY_BUFFER, this.VertexPositionBuffer);
-            // Needed for outline ??? For some reason, DrawOutline did not work
-            // without this call first.
-      view.gl.vertexAttribPointer(program.vertexPositionAttribute,
-                                   this.VertexPositionBuffer.itemSize,
-                                   view.gl.FLOAT, false, 0, 0);     // Texture coordinates
-      view.gl.bindBuffer(view.gl.ARRAY_BUFFER, this.VertexTextureCoordBuffer);
-      view.gl.vertexAttribPointer(program.textureCoordAttribute,
-                                   this.VertexTextureCoordBuffer.itemSize,
-                                   view.gl.FLOAT, false, 0, 0);
-            // Cell Connectivity
-      view.gl.bindBuffer(view.gl.ELEMENT_ARRAY_BUFFER, this.CellBuffer);
-
-            // Color of text
-      if (this.Active) {
-        view.gl.uniform3f(program.colorUniform, 1.0, 1.0, 0.0);
-      } else {
-        view.gl.uniform3f(program.colorUniform, this.Color[0], this.Color[1], this.Color[2]);
-      }
-            // Draw characters.
-      view.gl.viewport(view.Viewport[0], view.Viewport[1],
-                        view.Viewport[2], view.Viewport[3]);
-
-      var viewFrontZ = view.Camera.ZRange[0] + 0.01;
-
-            // Lets use the camera to change coordinate system to pixels.
-            // TODO: Put this camera in the view or viewer to avoid creating one each render.
-      var camMatrix = mat4.create();
-      mat4.identity(camMatrix);
-      camMatrix[0] = 2.0 / view.Viewport[2];
-      camMatrix[12] = -1.0;
-      camMatrix[5] = -2.0 / view.Viewport[3];
-      camMatrix[13] = 1.0;
-      camMatrix[14] = viewFrontZ; // In front of everything (no depth buffer anyway).
-      view.gl.uniformMatrix4fv(program.pMatrixUniform, false, camMatrix);
-
-            // Translate the anchor to x,y
-      this.Matrix[12] = x - this.Anchor[0];
-      this.Matrix[13] = y - this.Anchor[1];
-      view.gl.uniformMatrix4fv(program.mvMatrixUniform, false, this.Matrix);
-
-      view.gl.activeTexture(view.gl.TEXTURE0);
-      view.gl.bindTexture(view.gl.TEXTURE_2D, this.Texture);
-      view.gl.uniform1i(program.samplerUniform, 0);
-
-      view.gl.drawElements(view.gl.TRIANGLES, this.CellBuffer.numItems, view.gl.UNSIGNED_SHORT, 0);
-    } else {
-            // (x,y) is the screen position of the text.
-            // Canvas text location is lower left of first letter.
-      var strArray = this.String.split('\n');
-            // Move (x,y) from tip of the arrow to the upper left of the text box.
-      var ctx = view.Context2d;
-      ctx.save();
-      var radians = this.Orientation * Math.PI / 180;
-      var s = Math.sin(radians);
-      var c = Math.cos(radians);
-      ctx.setTransform(c, -s, s, c, x, y);
-      x = -this.Anchor[0];
-      y = -this.Anchor[1];
-
-      ctx.font = this.Size + 'pt Calibri';
-      var width = this.PixelBounds[1];
-      var height = this.PixelBounds[3];
-            // Draw the background text box.
-      if (this.BackgroundFlag) {
-                // ctx.fillStyle = '#fff';
-                // ctx.strokeStyle = '#000';
-                // ctx.fillRect(x - 2, y - 2, this.PixelBounds[1] + 4, (this.PixelBounds[3] + this.Size/3)*1.4);
-        roundRect(ctx, x - 2, y - 2, width + 6, height + 2, this.Size / 2, true, false);
-      }
-
-            // Choose the color for the text.
-      if (this.Active) {
-        ctx.fillStyle = '#FF0';
-      } else {
-        ctx.fillStyle = SAM.ConvertColorToHex(this.Color);
-      }
-
-            // Convert (x,y) from upper left of textbox to lower left of first character.
-      y = y + this.Size;
-            // Draw the lines of the text.
-      for (var i = 0; i < strArray.length; ++i) {
-        ctx.fillText(strArray[i], x, y);
-                // Move to the lower left of the next line.
-        y = y + this.Size * LINE_SPACING;
-      }
-
-      ctx.stroke();
-      ctx.restore();
+    ctx.font = this.Size + 'pt Calibri';
+    var width = this.PixelBounds[1];
+    var height = this.PixelBounds[3];
+    // Draw the background text box.
+    if (this.BackgroundFlag) {
+      // ctx.fillStyle = '#fff';
+      // ctx.strokeStyle = '#000';
+      // ctx.fillRect(x - 2, y - 2, this.PixelBounds[1] + 4, (this.PixelBounds[3] + this.Size/3)*1.4);
+      roundRect(ctx, x - 2, y - 2, width + 6, height + 2, this.Size / 2, true, false);
     }
+
+    // Choose the color for the text.
+    if (this.Active) {
+      ctx.fillStyle = '#FF0';
+    } else {
+      ctx.fillStyle = SAM.ConvertColorToHex(this.Color);
+    }
+
+    // Convert (x,y) from upper left of textbox to lower left of first character.
+    y = y + this.Size;
+    // Draw the lines of the text.
+    for (var i = 0; i < strArray.length; ++i) {
+      ctx.fillText(strArray[i], x, y);
+      // Move to the lower left of the next line.
+      y = y + this.Size * LINE_SPACING;
+    }
+
+    ctx.stroke();
+    ctx.restore();
   };
 
   function roundRect (ctx, x, y, width, height, radius) {
-        /* if (typeof stroke === "undefined" ) {
-          stroke = true;
-          } */
     if (typeof radius === 'undefined') {
       radius = 5;
     }
@@ -405,7 +298,7 @@
 
   Text.prototype.HandleMouseMove = function (event, dx, dy) {
         // convert the position to screen pixel coordinates.
-    viewer = event.CurrentViewer;
+    var viewer = event.CurrentViewer;
 
     return false;
   };

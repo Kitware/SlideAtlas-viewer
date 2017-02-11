@@ -145,7 +145,7 @@
       var xDim = Math.ceil(this.ImageWidth /
                              (this.TileSize << (this.NumLevels - z - 1)));
       var idx = y * xDim + x;
-      imageSrc = this.Prefix + (z + 2) + ',' + idx;
+      var imageSrc = this.Prefix + (z + 2) + ',' + idx;
     };
 
     this.ImageWidth = 0;
@@ -681,7 +681,7 @@
 
 // Set parent to be minimum of children.
   Cache.prototype.UpdateBranchTimeStamp = function (tile) {
-    var min = GetCurrentTime();
+    var min = SA.GetCurrentTime();
     if (tile.Children[0] !== null) {
       if (tile.Children[0].BranchTimeStamp < min) {
         min = tile.Children[0].BranchTimeStamp;
@@ -702,7 +702,7 @@
         min = tile.Children[3].BranchTimeStamp;
       }
     }
-    if (min === GetCurrentTime()) { // no children
+    if (min === SA.GetCurrentTime()) { // no children
       min = tile.TimeStamp;
     }
     if (min !== tile.BranchTimeStamp) {

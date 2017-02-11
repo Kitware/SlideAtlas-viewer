@@ -581,7 +581,7 @@
       distObj.value *= 1e3;
       return distObj.value;
     }
-    console.log('Unknown units: ' + units);
+    console.log('Unknown units: ' + distObj.units);
     return distObj.value;
   };
 
@@ -1302,7 +1302,7 @@
   AnnotationLayer.prototype.SaveGirderItem = function (id) {
     // Create a new annotation.
     var annotId = '572be29d3f24e53573aa8e91';
-    data = {'name': 'Test3',
+    var data = {'name': 'Test3',
       'elements': [{'type': 'circle',
         'lineColor': '#FFFF00',
         'lineWidth': 20,

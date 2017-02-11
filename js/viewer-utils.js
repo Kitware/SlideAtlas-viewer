@@ -1966,7 +1966,7 @@
     }
 
     var color = '#000000';
-    str = this.Div[0].style.color;
+    var str = this.Div[0].style.color;
     if (str !== '') {
       color = str;
     }
@@ -3177,7 +3177,7 @@
         scale = args.scale;
         if (typeof (scale) === 'string') {
           if (scale.substring(-1) === '%') {
-            scale = parseFloat(scale.substr(0, str.length - 1)) / 100;
+            scale = parseFloat(scale.substr(0, scale.length - 1)) / 100;
           } else {
             scale = parseFloat(scale);
           }
@@ -3526,7 +3526,9 @@
         domItem, SA.ImagePathUrl + 'remove.png', 'delete',
         function () {
           // if we want to get rid of the viewer records,
-          if (item.saViewer) { saPruneViewerRecord(item.saViewer); }
+          if (domItem.saViewer) {
+            saPruneViewerRecord(domItem.saViewer);
+          }
           saButtonsDelete(domItem);
           $(domItem).remove();
         },

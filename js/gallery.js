@@ -109,7 +109,7 @@
     if (sessions.length > 0) {
       this.SelectSession(defaultSessionIndex);
     }
-    handleResize();
+    this.handleResize();
   };
 
   Gallery.prototype.SelectSession = function (idx) {
@@ -255,9 +255,9 @@
 
   Gallery.prototype.FilterCallback = function () {
     var str = this.FilterInput.val().toLowerCase();
-    keys = str.split(' ');
+    var keys = str.split(' ');
         // Todo: find a different way to iterate through the images.
-    items = this.GalleryDiv.children();
+    var items = this.GalleryDiv.children();
     for (var i = 0; i < items.length; ++i) {
       var item = $(items[i]);
       var label = item.children('div').text();

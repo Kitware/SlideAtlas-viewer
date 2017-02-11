@@ -905,36 +905,10 @@
           ip[0] = Math.round(ip[0] - dim / 2);
           ip[1] = Math.round(ip[1] - dim / 2);
           var data = ctx.getImageData(ip[0], ip[1], dim, dim);
-          DownloadImageData(data, root + '_' + count + '.png');
+          SA.DownloadImageData(data, root + '_' + count + '.png');
           ++count;
         }
       }
-    }
-  };
-
-    // Save images with centers inside the polyline.
-  PolylineWidget.prototype.SampleStack = function (dim, spacing, skip, root, count) {
-    var cache = LAYERS[0].GetCache();
-    var bds = this.Polyline.GetBounds();
-    for (var y = bds[2]; y < bds[3]; y += skip) {
-      for (var x = bds[0]; x < bds[1]; x += skip) {
-        if (this.PointInside(x, y)) {
-          SA.GetCutoutimage(cache, dim, [x, y], spacing, 0, null,
-                                   function (data) {
-                                     DownloadImageData(data, root + '_' + count + '.png');
-                                     ++count;
-                                   });
-        }
-      }
-    }
-  };
-
-    // Save images with centers inside the polyline.
-  PolylineWidget.prototype.DownloadStack = function (x, y, dim, spacing, root) {
-    var cache = LAYERS[0].GetCache();
-    for (var i = 0; i < 3; ++i) {
-      var levelSpacing = spacing << i;
-      SA.GetCutoutImage(cache, dim, [x, y], levelSpacing, 0, root + i + '.png', null);
     }
   };
 

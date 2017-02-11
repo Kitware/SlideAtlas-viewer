@@ -249,7 +249,7 @@
     for (var i = 0; i < this.Shapes.length; ++i) {
       this.Shapes[i].Active = false;
     }
-    eventuallyRender();
+    this.Viewer.EventuallyRender();
   };
 
   StackSectionWidget.prototype.HandleKeyPress = function (keyCode, shift) {
@@ -289,7 +289,7 @@
         this.Shapes[i].Active = true;
       }
 
-      eventuallyRender();
+      this.Viewer.EventuallyRender();
     } else {
       this.Deactivate();
       this.Viewer.DeactivateWidget(this);
@@ -356,7 +356,7 @@
     }
     distMap.Update();
 
-    eventuallyRender();
+    this.ViewerEventuallyRender();
         // Coordinate system has changed.
     this.RigidAlignWithMap(distMap, trans);
   };
