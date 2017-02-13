@@ -378,27 +378,27 @@
     var dx;
     var dy;
     if (this.State === DRAG_CORNER) {
-            // Center remains fixed, and a corner follows the mouse.
-            // This is an non standard interaction.  Usually one corner
-            // remains fixed and the second corner follows the mouse.
-            // Width Height Origin
+      // Center remains fixed, and a corner follows the mouse.
+      // This is an non standard interaction.  Usually one corner
+      // remains fixed and the second corner follows the mouse.
+      // Width Height Origin
       var corner = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
       dx = corner[0] - this.Shape.Origin[0];
       dy = corner[1] - this.Shape.Origin[1];
-            // This keeps small movements during a click from change the
-            // size of the rect.
+      // This keeps small movements during a click from change the
+      // size of the rect.
       if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
         return false;
       }
-            // Rotate the drag vector in the the rectangles coordinate
-            // system.
+      // Rotate the drag vector in the the rectangles coordinate
+      // system.
       var a = this.Shape.Orientation * Math.PI / 180.0;
       var c = Math.cos(a);
       var s = Math.sin(a);
       var rx = dx * c - dy * s;
       var ry = dy * c + dx * s;
 
-            // console.log("a: "+this.Shape.Orientation+", w: "+dx+","+dy+", r: "+rx+","+ry);
+      // console.log("a: "+this.Shape.Orientation+", w: "+dx+","+dy+", r: "+rx+","+ry);
 
       this.Shape.Width = Math.abs(2 * rx);
       this.Shape.Height = Math.abs(2 * ry);
@@ -413,7 +413,7 @@
       var cam = this.Layer.GetCamera;
       dx = x - this.OriginViewer[0];
       dy = y - this.OriginViewer[1];
-            // Change units from pixels to world.
+      // Change units from pixels to world.
       this.Shape.UpdateBuffers(this.Layer.AnnotationView);
       this.PlacePopup();
       this.Layer.EventuallyDraw();
@@ -596,9 +596,6 @@
     var pt = this.Layer.GetCamera().ConvertPointWorldToViewer(x, y);
     this.Popup.Show(pt[0], pt[1]);
   };
-
-    // Can we bind the dialog apply callback to an objects method?
-  var DIALOG_SELF;
 
   RectWidget.prototype.ShowPropertiesDialog = function () {
     this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Shape.OutlineColor));

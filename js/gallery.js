@@ -177,37 +177,37 @@
     var labelStrings = [];
     this.GalleryDiv.empty();
 
-        // Lets compute an optimal size for images.
+    // Lets compute an optimal size for images.
     var size = this.ComputeGalleryImageSize(data.Images.length);
     for (var i = 0; i < data.Images.length; ++i) {
       var imgObj = data.Images[i];
       labelStrings.push(imgObj.label);
       var listItem = $('<li>')
-                .appendTo(this.GalleryDiv)
-                .data('imgdb', imgdb)
-                .data('imgid', imgObj._id)
-                .data('label', imgObj.label)
-                .addClass('sa-view-gallery-item')
-                .hover(
-                    function () { $(this).addClass('sa-active'); },
-                    function () { $(this).removeClass('sa-active'); })
-                .mousedown(function (event) {
-                    // TODO: Make this a callback
-                  self.SelectCallback($(this).data('imgdb'),
-                                        $(this).data('imgid'),
-                                        $(this).data('label'));
-                });
+        .appendTo(this.GalleryDiv)
+        .data('imgdb', imgdb)
+        .data('imgid', imgObj._id)
+        .data('label', imgObj.label)
+        .addClass('sa-view-gallery-item')
+        .hover(
+            function () { $(this).addClass('sa-active'); },
+            function () { $(this).removeClass('sa-active'); })
+        .mousedown(function (event) {
+            // TODO: Make this a callback
+          self.SelectCallback($(this).data('imgdb'),
+                                $(this).data('imgid'),
+                                $(this).data('label'));
+        });
 
-      var image = $('<img>').appendTo(listItem)
-                .data('imgdb', imgdb)
-                .data('imgid', imgObj._id)
-                .attr('alt', imgObj.label)
-                .attr('height', size + 'px')
-                .attr('src', '/thumb?db=' + imgdb + '&img=' + imgObj._id);
-      var labelDiv = $('<div>')
-                .appendTo(listItem)
-                .text(data.Images[i].label)
-                .addClass('sa-view-gallery-item-div');
+      $('<img>').appendTo(listItem)
+        .data('imgdb', imgdb)
+        .data('imgid', imgObj._id)
+        .attr('alt', imgObj.label)
+        .attr('height', size + 'px')
+        .attr('src', '/thumb?db=' + imgdb + '&img=' + imgObj._id);
+      $('<div>')
+        .appendTo(listItem)
+        .text(data.Images[i].label)
+        .addClass('sa-view-gallery-item-div');
     }
     this.FilterInput.autocomplete({source: labelStrings});
   };
@@ -223,31 +223,31 @@
     for (var i = 0; i < data.session.views.length; ++i) {
       labelStrings.push(data.session.views[i].label);
       var listItem = $('<li>')
-                .appendTo(this.GalleryDiv)
-                .addClass('sa-view-gallery-item')
-                .hover(
-                    function () { $(this).addClass('sa-active'); },
-                    function () { $(this).removeClass('sa-active'); });
-      var image = $('<img>')
-                .appendTo(listItem)
-                .attr('copy', 1)
-                .attr('imgdb', data.images[i].db)
-                .attr('img', data.images[i].img)
-                .attr('view', data.session.views[i].id)
-                .attr('height', size + 'px')
-                .attr('src', '/thumb?db=' + data.images[i].db + '&img=' + data.images[i].img)
-                .attr('alt', data.images[i].label)
-                .mousedown(function () {
-                    // TODO: Make this a call back
-                  self.SelectCallback($(this).attr('imgdb'),
-                                        $(this).attr('img'),
-                                        $(this).attr('alt'),
-                                        $(this).attr('view'));
-                });
-      var labelDiv = $('<div>')
-                .appendTo(listItem)
-                .text(data.images[i].label)
-                .addClass('sa-view-gallery-item-div');
+        .appendTo(this.GalleryDiv)
+        .addClass('sa-view-gallery-item')
+        .hover(
+            function () { $(this).addClass('sa-active'); },
+            function () { $(this).removeClass('sa-active'); });
+      $('<img>')
+        .appendTo(listItem)
+        .attr('copy', 1)
+        .attr('imgdb', data.images[i].db)
+        .attr('img', data.images[i].img)
+        .attr('view', data.session.views[i].id)
+        .attr('height', size + 'px')
+        .attr('src', '/thumb?db=' + data.images[i].db + '&img=' + data.images[i].img)
+        .attr('alt', data.images[i].label)
+        .mousedown(function () {
+            // TODO: Make this a call back
+          self.SelectCallback($(this).attr('imgdb'),
+                                $(this).attr('img'),
+                                $(this).attr('alt'),
+                                $(this).attr('view'));
+        });
+      $('<div>')
+        .appendTo(listItem)
+        .text(data.images[i].label)
+        .addClass('sa-view-gallery-item-div');
     }
 
     this.FilterInput.autocomplete({source: labelStrings});

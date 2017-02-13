@@ -15,7 +15,6 @@
         "SAM": true
     },
     "rules": {
-        "no-unused-vars": 0,
         "new-cap": 0
     }
 }

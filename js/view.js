@@ -175,10 +175,10 @@
     return true;
   };
 
-    // This is meant to be called internally by UpdateCanvasSize.
-    // However, if the parent(canvasDiv) is hidden, it might need to be
-    // set explcitly.
-    // TODO: Change this to simply width and height.
+  // This is meant to be called internally by UpdateCanvasSize.
+  // However, if the parent(canvasDiv) is hidden, it might need to be
+  // set explcitly.
+  // TODO: Change this to simply width and height.
   View.prototype.SetViewport = function (viewport) {
     var width = viewport[2];
     var height = viewport[3];
@@ -186,12 +186,12 @@
     this.Canvas.attr('width', width.toString());
     this.Canvas.attr('height', height.toString());
 
-        // TODO: Get rid of this ivar
+    // TODO: Get rid of this ivar
     this.Viewport = viewport;
 
-        // TODO: Just set the width and height of the camera.
-        // There is no reason, the camera needs to know the
-        // the position of the cameraDiv.
+    // TODO: Just set the width and height of the camera.
+    // There is no reason, the camera needs to know the
+    // the position of the cameraDiv.
     this.Camera.SetViewport(viewport);
   };
 
@@ -202,15 +202,15 @@
     return newImg;
   };
 
-    // Legacy
-    // A list of shapes to render in the view
+  // Legacy
+  // A list of shapes to render in the view
   View.prototype.AddShape = function (shape) {
     this.ShapeList.push(shape);
   };
 
-    // NOTE: AnnotationLayer has the api where the shapes draw themselves (with
-    // reference to this view.  I like that better than the view knowing
-    // how to draw all these things.
+  // NOTE: AnnotationLayer has the api where the shapes draw themselves (with
+  // reference to this view.  I like that better than the view knowing
+  // how to draw all these things.
   View.prototype.DrawShapes = function () {
     if (!this.CanvasDiv.is(':visible')) {
       return;
@@ -234,20 +234,20 @@
       ctx.save();
       ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-            // Start with a transform that flips the y axis.
+      // Start with a transform that flips the y axis.
       ctx.setTransform(1, 0, 0, -1, 0, this.Viewport[3]);
 
-            // Map (-1->1, -1->1) to the viewport.
-            // Origin of the viewport does not matter because drawing is relative
-            // to this view's canvas.
+      // Map (-1->1, -1->1) to the viewport.
+      // Origin of the viewport does not matter because drawing is relative
+      // to this view's canvas.
       ctx.transform(0.5 * this.Viewport[2], 0.0,
                           0.0, 0.5 * this.Viewport[3],
                           0.5 * this.Viewport[2],
                           0.5 * this.Viewport[3]);
 
-            // ctx.fillRect(0.0,0.1,0.5,0.5); // left, right, width, height
+      // ctx.fillRect(0.0,0.1,0.5,0.5); // left, right, width, height
 
-            // The camera maps the world coordinate system to (-1->1, -1->1).
+      // The camera maps the world coordinate system to (-1->1, -1->1).
       var cam = this.Camera;
       var aspectRatio = cam.ViewportWidth / cam.ViewportHeight;
 
@@ -270,7 +270,7 @@
                               s, c,
                               cam.FocalPoint[0], cam.FocalPoint[1]);
 
-                // Compute the zoom factor for opacity.
+        // Compute the zoom factor for opacity.
         var opacity = 2 * windowHeight / height;
         if (opacity > 1.0) { opacity = 1.0; }
 
@@ -283,7 +283,7 @@
     }
   };
 
-    // Draw a cross hair in the center of the view.
+  // Draw a cross hair in the center of the view.
   View.prototype.DrawFocalPoint = function () {
     if (this.gl) {
       alert('Drawing focal point does not work with webGl yet.');

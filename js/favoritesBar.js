@@ -74,33 +74,33 @@
   };
 
   FavoritesBar.prototype.LoadFavoritesCallback = function (sessionData) {
-        // var sessionItem = $("[sessid="+sessionData.sessid+"]");
-        // var viewList = $('<ul>').appendTo(sessionItem)
+    // var sessionItem = $("[sessid="+sessionData.sessid+"]");
+    // var viewList = $('<ul>').appendTo(sessionItem)
     var self = this;
 
     this.Favorites = sessionData.viewArray;
 
     this.FavoritesGUI.ImageList.html('');
 
-        // for (var i = 0; i < sessionData.viewArray.length; ++i) {
+    // for (var i = 0; i < sessionData.viewArray.length; ++i) {
     for (var i = sessionData.viewArray.length - 1; i >= 0; --i) {
       var favorite = $('<div>').appendTo(this.FavoritesGUI.ImageList)
                 .addClass('sa-view-favorites-callback-div');
 
       var thumb = sessionData.viewArray[i].Thumb;
 
-      var view = $('<img>').appendTo(favorite)
-                .attr('src', thumb)
-                .attr('height', '110px')
-                .addClass('sa-view-favorites-callback-img')
-                .attr('index', i)
-                .click(function () { self.LoadFavorite(this); });
+      $('<img>').appendTo(favorite)
+        .attr('src', thumb)
+        .attr('height', '110px')
+        .addClass('sa-view-favorites-callback-img')
+        .attr('index', i)
+        .click(function () { self.LoadFavorite(this); });
 
-      var del = $('<div>').appendTo(favorite)
-                .html('X')
-                .addClass('sa-view-favorites-callback-del')
-                .attr('index', i)
-                .click(function () { self.DeleteFavorite(this); });
+      $('<div>').appendTo(favorite)
+        .html('X')
+        .addClass('sa-view-favorites-callback-del')
+        .attr('index', i)
+        .click(function () { self.DeleteFavorite(this); });
     }
   };
 

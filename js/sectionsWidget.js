@@ -233,7 +233,9 @@
   };
 
   SectionsWidget.prototype.RemoveSection = function (section) {
-    if (this.ActiveSection === section) this.ActiveSection = null;
+    if (this.ActiveSection === section) {
+      this.ActiveSection = null;
+    }
     var idx = this.Sections.indexOf(section);
     if (idx > -1) {
       this.Sections.splice(idx, 1);
@@ -249,7 +251,7 @@
     } else {
       section.Active = true;
       this.DeleteButton.show();
-            // Draw moves it to the correct location.
+      // Draw moves it to the correct location.
     }
     this.ActiveSection = section;
     this.Layer.EventuallyDraw();
@@ -259,13 +261,13 @@
     if (section) {
       var p = section.ViewUpperRight;
       this.DeleteButton
-                .show()
-                .css({'left': (p[0] - 10) + 'px',
-                  'top': (p[1] - 10) + 'px'});
+        .show()
+        .css({'left': (p[0] - 10) + 'px',
+          'top': (p[1] - 10) + 'px'});
     }
   };
 
-    // world is a boolean indicating the bounds should be drawn in slide coordinates.
+  // world is a boolean indicating the bounds should be drawn in slide coordinates.
   SectionsWidget.prototype.DrawBounds = function (view, bds, world, color) {
     var pt0 = [bds[0], bds[2]];
     var pt1 = [bds[1], bds[2]];
@@ -448,8 +450,8 @@
     return this.Active;
   };
 
-    // Setting to active always puts state into "active".
-    // It can move to other states and stay active.
+  // Setting to active always puts state into "active".
+  // It can move to other states and stay active.
   SectionsWidget.prototype.SetActive = function (flag) {
     if (flag) {
       this.Layer.ActivateWidget(this);
@@ -468,7 +470,7 @@
     this.SetActive(false);
   };
 
-    // The multiple actions of bounds might be confusing to the user.
+  // The multiple actions of bounds might be confusing to the user.
   SectionsWidget.prototype.ProcessBounds = function (bds) {
     var tmp;
     if (bds[0] > bds[1]) {
@@ -491,48 +493,50 @@
       if (mode === 2) { full.push(section); }
       if (mode === 1) { partial.push(section); }
     }
-        // If the rectangle fully contains more than one shape, group them
+    // If the rectangle fully contains more than one shape, group them
     if (full.length > 1) {
       for (i = 1; i < full.length; ++i) {
         full[0].Union(full[i]);
         this.RemoveSection(full[i]);
       }
     }
-        // If bounds do not contain any section, process the image for a new one.
+    // If bounds do not contain any section, process the image for a new one.
     if (full.length === 0 && partial.length === 0) {
-            // My decision to keep bounds in slide space is causing problems
-            // here. I might want to change all bounds comparison to view.
-            // It would require recomputation of bounds when the view changes,
-            // but that would not be too expensive.  It would require a
-            // view change event to invalidate all bounds.
-            // For now just get the data in view coordinates.
-            // Compute the resolution.
+      // My decision to keep bounds in slide space is causing problems
+      // here. I might want to change all bounds comparison to view.
+      // It would require recomputation of bounds when the view changes,
+      // but that would not be too expensive.  It would require a
+      // view change event to invalidate all bounds.
+      // For now just get the data in view coordinates.
+      // Compute the resolution.
       var self = this;
       var scale = (bds[1] - bds[0] + bds[3] - bds[2]) / 600;
       if (scale < 1) { scale = 1; }
 
-      SA.GetCutoutImage(this.Viewer.GetCache(),
-                           [Math.round((bds[1] - bds[0]) / scale), Math.round((bds[3] - bds[2]) / scale)],
-                           [0.5 * (bds[0] + bds[1]), 0.5 * (bds[2] + bds[3])],
-                           scale, 0, null,
-                           function (data) {
-                               // slow: SmoothDataAlphaRGB(data, 2);
-                             var histogram = SA.ComputeIntensityHistogram(data, true);
-                             var threshold = SA.PickThreshold(histogram);
-                               // TODO: Move the hagfish specific method in to this class.
-                             var contours = self.GetBigContours(data, threshold);
-                             if (contours.length === 0) { return; }
-                             var w = new SA.StackSectionWidget();
-                             for (var i = 0; i < contours.length; ++i) {
-                               w.Shapes.push(contours[i].MakePolyline([0, 1, 0]));
-                             }
-                             self.Sections.push(w);
-                             self.Layer.EventuallyDraw();
-                           });
+      SA.GetCutoutImage(
+        this.Viewer.GetCache(),
+        [Math.round((bds[1] - bds[0]) / scale), Math.round((bds[3] - bds[2]) / scale)],
+        [0.5 * (bds[0] + bds[1]), 0.5 * (bds[2] + bds[3])],
+        scale, 0, null,
+        function (data) {
+          // slow: SmoothDataAlphaRGB(data, 2);
+          var histogram = SA.ComputeIntensityHistogram(data, true);
+          var threshold = SA.PickThreshold(histogram);
+          // TODO: Move the hagfish specific method in to this class.
+          var contours = self.GetBigContours(data, threshold);
+          if (contours.length === 0) { return; }
+          var w = new SA.StackSectionWidget();
+          for (var i = 0; i < contours.length; ++i) {
+            w.Shapes.push(contours[i].MakePolyline([0, 1, 0]));
+          }
+          self.Sections.push(w);
+          self.Layer.EventuallyDraw();
+        }
+      );
     }
 
-        // If the contours partially contains only one section, and clean
-        // separates the shapes, then split them.
+    // If the contours partially contains only one section, and clean
+    // separates the shapes, then split them.
     if (full.length === 0 && partial.length === 1) {
       section = partial[0];
       full = [];
@@ -544,7 +548,7 @@
       }
       if (partial.length === 0) {
         var idx;
-                // Split it up.
+        // Split it up.
         var newSection = new SA.StackSectionWidget();
         newSection.Shapes = full;
         for (i = 0; i < full.length; ++i) {
@@ -560,15 +564,15 @@
     }
   };
 
-    // Returns all contours (including inside out contours).
+  // Returns all contours (including inside out contours).
   SectionsWidget.prototype.GetContours = function (data, threshold) {
-        // Loop over the cells.
-        // Start at the bottom left: y up then x right.
-        // (The order of sections on the hagfish slides.)
+    // Loop over the cells.
+    // Start at the bottom left: y up then x right.
+    // (The order of sections on the hagfish slides.)
     var contours = [];
     for (var x = 1; x < data.width; ++x) {
       for (var y = 1; y < data.height; ++y) {
-                // Look for contours crossing the xMax and yMax edges.
+        // Look for contours crossing the xMax and yMax edges.
         var xContour = SA.SeedIsoContour(data, x, y, x - 1, y, threshold);
         if (xContour) {
           var c = new SA.Contour();
@@ -595,11 +599,11 @@
     return contours;
   };
 
-    // Returns all contours at least 50% the area of the largest contour.
+  // Returns all contours at least 50% the area of the largest contour.
   SectionsWidget.prototype.GetBigContours = function (data, threshold) {
     var contours = this.GetContours(data, threshold);
 
-        // Area is cached in the contour object.
+    // Area is cached in the contour object.
     var largestArea = 0;
     for (var i = 0; i < contours.length; ++i) {
       if (contours[i].GetArea() > largestArea) {

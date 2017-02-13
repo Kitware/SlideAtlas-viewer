@@ -10,12 +10,12 @@
   var DRAG_LEFT = 7;
   var DRAG_RIGHT = 8;
 
-    // view argument is the main view (needed to get the spacing...)
-    // Viewer coordinates.
-    // Horizontal or verticle
+  // view argument is the main view (needed to get the spacing...)
+  // Viewer coordinates.
+  // Horizontal or vertical
   function Scale () {
     SAM.Shape.call(this);
-        // Dimension of scale element
+    // Dimension of scale element
     this.BinLength = 100.0; // unit length in screen pixels
     this.TickSize = 6; // Screen pixels
     this.NumberOfBins = 1;
@@ -29,21 +29,21 @@
   Scale.prototype = new SAM.Shape();
 
   Scale.prototype.destructor = function () {
-        // Get rid of the buffers?
+    // Get rid of the buffers?
   };
 
   Scale.prototype.UpdateBuffers = function (view) {
-        // TODO: Having a single poly line for a shape is to simple.
-        // Add cell arrays.
+    // TODO: Having a single poly line for a shape is to simple.
+    // Add cell arrays.
     this.PointBuffer = [];
 
-        // Matrix is computed by the draw method in Shape superclass.
-        // TODO: Used to detect first initialization.
-        // Get this out of this method.
+    // Matrix is computed by the draw method in Shape superclass.
+    // TODO: Used to detect first initialization.
+    // Get this out of this method.
     this.Matrix = mat4.create();
     mat4.identity(this.Matrix);
 
-        // Draw all of the x lines.
+    // Draw all of the x lines.
     var x = 0;
     var y = this.TickSize;
     this.PointBuffer.push(x);
@@ -71,8 +71,6 @@
   };
 
   function ScaleWidget (layer) {
-    var self = this;
-
     if (layer === null) {
       return;
     }
@@ -90,8 +88,8 @@
     this.Text.Position = [30, 5];
     this.Text.String = '';
     this.Text.Color = [0.0, 0.0, 0.0];
-        // I want the anchor to be the center of the text.
-        // This is a hackl estimate.
+    // I want the anchor to be the center of the text.
+    // This is a hackl estimate.
     this.Text.Anchor = [20, 0];
 
     this.Update(layer.GetPixelsPerUnit());

@@ -761,8 +761,6 @@
     this.Popup.Show(pt[0], pt[1]);
   };
 
-    // Can we bind the dialog apply callback to an objects method?
-  var DIALOG_SELF;
   PolylineWidget.prototype.ShowPropertiesDialog = function () {
     this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Polyline.OutlineColor));
     this.Dialog.ClosedInput.prop('checked', this.Polyline.Closed);

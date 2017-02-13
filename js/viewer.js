@@ -2163,12 +2163,14 @@
       if (!SAVING_IMAGE.SavingFlag) {
         SAVING_IMAGE.SavingFlag = true;
         SAVING_IMAGE.Show(1);
-        this.EventuallySaveImage('slideAtlas' + SA.ZERO_PAD(SAVING_IMAGE.Count, 3),
-                                         function () {
-                                           SAVING_IMAGE.SavingFlag = false;
-                                           SAVING_IMAGE.Count += 1;
-                                           SAVING_IMAGE.Hide();
-                                         });
+        this.EventuallySaveImage(
+          'slideAtlas' + SA.ZERO_PAD(SAVING_IMAGE.Count, 3),
+           function () {
+             SAVING_IMAGE.SavingFlag = false;
+             SAVING_IMAGE.Count += 1;
+             SAVING_IMAGE.Hide();
+           }
+         );
       }
       return false;
     }

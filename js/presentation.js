@@ -763,7 +763,6 @@
     this.HtmlPage.Div.find('.sa-answer')
         .css({'color': '#000'});
 
-    var self = this;
     this.TitlePage.UpdateEdits();
     this.SlidePage.UpdateEdits();
     this.HtmlPage.UpdateEdits();
@@ -1612,7 +1611,6 @@
         .saScalableFont({scale: '0.1'});
 
     if (this.Edit) {
-      var self = this;
       this.Title
             .focusin(function () { SA.ContentEditableHasFocus = true; })
             .focusout(function () { SA.ContentEditableHasFocus = false; });
@@ -1830,7 +1828,7 @@
     this.InsertRectangle('#073E87', '0%', '31%', '97.5%', '25%');
     // Should everything be have Div as parent?
     // Todo: make this look like jquery.
-    var titleText = this.InsertTextBox(50)
+    this.InsertTextBox(50)
         .addClass('sa-presentation-title')
         .css({'color': 'white',
           'left': '10%',
@@ -1838,7 +1836,7 @@
           'top': '40%'})
         .text('Title');
 
-    var authorText = this.InsertTextBox(28)
+    this.InsertTextBox(28)
         .css({'left': '10%',
           'width': '88%',
           'top': '59%'})
@@ -1858,7 +1856,7 @@
 
     // Should everything be have Div as parent?
     // Todo: make this look like jquery.
-    var titleText = this.InsertTextBox(42)
+    this.InsertTextBox(42)
         .css({'color': 'white',
           'left': '18%',
           'width': '70%',
@@ -1950,7 +1948,7 @@
 // Make the title bar movable and resizable.
 // left, top, width and height should be in percentages. i.e. '50%'
   HtmlPage.prototype.InsertRectangle = function (color, left, top, width, height) {
-    var bar = $('<div>')
+    $('<div>')
         .appendTo(this.Div)
         .css({'background-color': color,
           'border': '1px solid rgba(255, 255, 255, 0)',
@@ -2456,7 +2454,7 @@
       }
       var thumb = new SA.CutoutThumb(image, 100);
       thumb.Div.appendTo(imageDiv);
-      var labelDiv = $('<div>')
+      $('<div>')
             .css({'font-size': '50%'})
             .appendTo(imageDiv)
             .text(imgObj.label); // Should really have the image label.
@@ -2513,7 +2511,7 @@
       if (view.Thumb.substring(0, 6) === 'http:/') {
         view.Thumb = view.Thumb.substring(6);
       }
-      var thumb = $('<img>')
+      $('<img>')
             .appendTo(this.ClipboardDiv)
             .attr('src', view.Thumb)
             .prop('title', view.Title)
@@ -2537,7 +2535,6 @@
   };
 
   ClipboardPanel.prototype.ClipboardDeleteAll = function () {
-    var self = this;
     this.ClipboardDiv.empty();
 
     for (var i = 0; i < this.ClipboardViews.length; ++i) {

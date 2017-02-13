@@ -61,13 +61,12 @@
             .attr('type', 'image')
             .attr('src', SAM.ImagePathUrl + 'brush1.jpg');
 
-    var self = this;
-        // I am trying to stop images from getting move events and displaying a circle/slash.
-        // This did not work.  preventDefault did not either.
-        // this.Cursor.mousedown(function (event) {self.HandleMouseDown(event);})
-        // this.Cursor.mousemove(function (event) {self.HandleMouseMove(event);})
-        // this.Cursor.mouseup(function (event) {self.HandleMouseUp(event);})
-        // .preventDefault();
+    // I am trying to stop images from getting move events and displaying a circle/slash.
+    // This did not work.  preventDefault did not either.
+    // this.Cursor.mousedown(function (event) {self.HandleMouseDown(event);})
+    // this.Cursor.mousemove(function (event) {self.HandleMouseMove(event);})
+    // this.Cursor.mouseup(function (event) {self.HandleMouseUp(event);})
+    // .preventDefault();
 
     this.ActiveCenter = [0, 0];
 
@@ -76,15 +75,15 @@
       this.State = FILL_WIDGET_WAITING;
     }
 
-        // Lets save the zoom level (sort of).
-        // Load will overwrite this for existing annotations.
-        // This will allow us to expand annotations into notes.
+    // Lets save the zoom level (sort of).
+    // Load will overwrite this for existing annotations.
+    // This will allow us to expand annotations into notes.
     this.CreationCamera = viewer.GetCamera().Serialize;
   }
 
-    // This is expensive, so initialize explicitely outside the constructor.
+  // This is expensive, so initialize explicitely outside the constructor.
   FillWidget.prototype.Initialize = function (view) {
-        // Now for the segmentation initialization.
+    // Now for the segmentation initialization.
     this.Segmentation = new SA.Segmentation(this.Viewer);
   };
 
@@ -92,7 +91,7 @@
     this.Segmentation.ImageAnnotation.Draw(view);
   };
 
-    // I do not know what we are saving yet.
+  // I do not know what we are saving yet.
   FillWidget.prototype.Serialize = function () {
         /*
           var obj = new Object();
@@ -169,13 +168,13 @@
   };
 
   FillWidget.prototype.HandleMouseUp = function (event) {
-        // Middle mouse deactivates the widget.
+    // Middle mouse deactivates the widget.
     if (event.which === 2) {
-            // Middle mouse was pressed.
+      // Middle mouse was pressed.
       this.Deactivate();
     }
 
-        // A stroke has just been finished.
+    // A stroke has just been finished.
     if (event.which === 1 || event.which === 3) {
       this.Cursor.hide();
       this.Segmentation.Update();
@@ -191,7 +190,7 @@
     var x = this.Viewer.MouseX;
     var y = this.Viewer.MouseY;
 
-        // Move the paint bucket icon to follow the mouse.
+    // Move the paint bucket icon to follow the mouse.
     this.Cursor.css({'left': (x + 4), 'top': (y - 32)});
 
     if (this.Viewer.MouseDown === true && this.State === FILL_WIDGET_DRAWING) {
@@ -286,8 +285,7 @@
     }
   };
 
-    // Can we bind the dialog apply callback to an objects method?
-  var FILL_WIDGET_DIALOG_SELF;
+  // Can we bind the dialog apply callback to an objects method?
   FillWidget.prototype.ShowPropertiesDialog = function () {
     this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Shapes[0].OutlineColor));
     this.Dialog.LineWidthInput.val((this.Shapes[0].LineWidth).toFixed(2));

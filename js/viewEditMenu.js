@@ -157,7 +157,9 @@ window.SA = window.SA || {};
 // Record the viewer into the current note and save into the database.
   ViewEditMenu.prototype.SaveView = function () {
     this.Tab.PanelOff();
-    if (SA.notesWidget) SA.notesWidget.SaveCallback();
+    if (SA.notesWidget) {
+      SA.notesWidget.SaveCallback();
+    }
   };
 
   ViewEditMenu.prototype.GetViewerBounds = function (viewer) {
@@ -223,7 +225,6 @@ window.SA = window.SA || {};
     viewer.OverView.Camera.ComputeMatrix();
     viewer.EventuallyRender();
 
-    var data = JSON.stringify(bounds);
     $.ajax({
       type: 'post',
       url: 'webgl-viewer/set-image-bounds',

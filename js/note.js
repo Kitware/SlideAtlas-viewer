@@ -225,20 +225,19 @@
     }
   };
 
-    // When the note is deleted, this clear associated text links.
-    // However, it does not remove the span id.
+  // When the note is deleted, this clear associated text links.
+  // However, it does not remove the span id.
   Note.prototype.ClearHyperlink = function () {
-    var self = this;
     if (this.Id) {
-            // I think is will be best to seelct the element and then replace
-            // it with text.
+      // I think is will be best to seelct the element and then replace
+      // it with text.
       this.SelectHyperlink();
       var sel = window.getSelection();
       document.execCommand('insertText', sel.toString());
     }
   };
 
-    // Programatically select the hyper link (when the note is selected).
+  // Pragmatically select the hyper link (when the note is selected).
   Note.prototype.SelectHyperlink = function () {
     if (this.Id) {
       var el = document.getElementById(this.Id);
@@ -253,7 +252,7 @@
     }
   };
 
-    // Programatically select the hyper link (when the note is selected).
+  // Pragmatically select the hyper link (when the note is selected).
   Note.prototype.UnselectHyperlink = function () {
     if (this.Id) {
       var el = document.getElementById(this.Id);
@@ -268,7 +267,6 @@
   };
 
   Note.prototype.SetParent = function (parent) {
-    var self = this;
     this.Parent = parent;
     if (parent && SA.Edit) {
       this.RemoveButton.show();
@@ -406,7 +404,6 @@
   // TODO: Get the GUI stuff out of note objects.
   Note.prototype.UpdateChildrenGUI = function () {
     // Callback trick
-    var self = this;
     var i;
 
     // Clear
@@ -708,8 +705,6 @@
   // This method of loading is causing a pain.
   // Children are saved separately now, so the pain should be gone.
   Note.prototype.Load = function (obj) {
-    var self = this;
-
     // Received
     this.LoadState = SYNCHRONIZED;
 

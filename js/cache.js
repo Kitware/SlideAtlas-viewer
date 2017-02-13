@@ -92,7 +92,9 @@
       while (true) {
         var gridLevelDim = [Math.ceil(xDim / 256), Math.ceil(yDim / 256)];
         this.Levels += 1;
-        if (gridLevelDim[0] === 1 && gridLevelDim[1] === 1) return;
+        if (gridLevelDim[0] === 1 && gridLevelDim[1] === 1) {
+          return;
+        }
         xDim = xDim / 2;
         yDim = yDim / 2;
       }
@@ -642,7 +644,6 @@
       bounds[3] = Math.min(bounds[3], this.Image.bounds[3]);
     }
 
-    var id;
     var idList = [];
     var dim = 1 << level;
     var bds = [];
@@ -659,6 +660,7 @@
     // current indexing scheme.
 
     /*
+    var id;
     for (var y = bds[2]; y <= bds[3]; ++y) {
       for (var x = bds[0]; x <= bds[1]; ++x) {
         id = x | (y << level);

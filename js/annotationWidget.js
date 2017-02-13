@@ -2,13 +2,13 @@
 // Each view will need its own widget.
 // I am less happy about this than the right click menu implementation.
 // It would be nice to expand the drawing tools on hover, but
-// the toggle for annotation visibiity naturally suggests
+// the toggle for annotation visibility naturally suggests
 // the same state should show drawing tool palette.
 
 // Todo:
 // - Make an object out of it to support two views.
 // - Change behavior of text widget to first drag an arrow when created.
-// - eliminate polyLine verticies when they are dragged ontop of another vert.
+// - eliminate polyLine vertices when they are dragged on top of another vertex.
 // or maybe the delete key.
 
 (function () {
@@ -203,27 +203,27 @@
 // Probably want a singleton pencil.
   AnnotationWidget.prototype.NewPencil = function () {
     var button = this.PencilButton;
-    var widget = this.ActivateButton(button, SAM.PencilWidget);
+    this.ActivateButton(button, SAM.PencilWidget);
   };
 
   AnnotationWidget.prototype.NewLasso = function () {
     var button = this.LassoButton;
-    var widget = this.ActivateButton(button, SAM.LassoWidget);
+    this.ActivateButton(button, SAM.LassoWidget);
   };
 
   AnnotationWidget.prototype.NewPolyline = function () {
     var button = this.PolylineButton;
-    var widget = this.ActivateButton(button, SAM.PolylineWidget);
+    this.ActivateButton(button, SAM.PolylineWidget);
   };
 
   AnnotationWidget.prototype.NewCircle = function () {
     var button = this.CircleButton;
-    var widget = this.ActivateButton(button, SAM.CircleWidget);
+    this.ActivateButton(button, SAM.CircleWidget);
   };
 
   AnnotationWidget.prototype.NewRect = function () {
     var button = this.RectButton;
-    var widget = this.ActivateButton(button, SAM.RectWidget);
+    this.ActivateButton(button, SAM.RectWidget);
   };
 
   AnnotationWidget.prototype.NewGrid = function () {
@@ -293,11 +293,11 @@
     var button = this.SectionsButton;
     if (widget) {
       if (button.Pressed) {
-            // The user pressed the button again (while it was active).
+        // The user pressed the button again (while it was active).
         widget.Deactivate();
         return;
       }
-        // This call sets pressed to false as a side action.
+      // This call sets pressed to false as a side action.
       widget.Deactivate();
     }
     button.Pressed = true;
@@ -308,13 +308,13 @@
     var widgets = this.Layer.GetWidgets();
     for (var i = 0; i < widgets.length && widget === null; ++i) {
       var w = widgets[i];
-        // if (w instanceOf SectionsWidget) {
+      // if (w instanceOf SectionsWidget) {
       if (w.Type === 'sections') {
         widget = w;
       }
     }
     if (widget === null) {
-        // Find sections to initialize sections widget.
+      // Find sections to initialize sections widget.
       widget = new SA.SectionsWidget(this.Layer, this.Viewer, false);
       widget.ComputeSections(this.Viewer);
       if (widget.IsEmpty()) {

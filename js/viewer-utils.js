@@ -522,21 +522,19 @@
 
     // aspect ratio does something even with no arguments.
     if (args.length > 0) {
-        // generic method call. Give jquery ui access to all this objects methods.
+      // generic method call. Give jquery ui access to all this objects methods.
       if (typeof (this[args[0]]) === 'function') {
-            // first list item is the method name,
-            // the rest are arguments to the method.
+        // first list item is the method name,
+        // the rest are arguments to the method.
         return this[args[0]].apply(this, Array.prototype.slice.call(args, 1));
       }
-        // Handle the legacy behavior.
-        // One argument: an object (like jqueryUI).
+      // Handle the legacy behavior.
+      // One argument: an object (like jqueryUI).
       args = args[0];
     } else {
-        // looks like aspect processing wiht no args ...  Cannot just return?
+      // looks like aspect processing with no args ...  Cannot just return?
       args = {};
     }
-
-    var self = this;
 
     if (args.position) {
       this.Position = args.position;
@@ -546,7 +544,7 @@
     // AspectRatio is a boolean.
     if (args.aspectRatio !== undefined) {
       if (args.apsectRatio === '') {
-            // Actively remove the aspect ratio.
+        // Actively remove the aspect ratio.
         delete this.AspectRatio;
         this.Div.removeAttr('sa-aspect-ratio');
       } else {
@@ -555,7 +553,7 @@
         this.Div.attr('sa-aspect-ratio', args.aspectRatio);
       }
     } else {
-        // try and get a saved aspect ratio.
+      // try and get a saved aspect ratio.
       this.AspectRatio = this.Div.attr('sa-aspect-ratio');
     }
 
@@ -564,8 +562,8 @@
         this.EditableOn();
       } else {
         this.EditableOff();
-            // hack hack hack (for view browser).
-            // Trying to make slide thumbnails completly passive.
+        // hack hack hack (for view browser).
+        // Trying to make slide thumbnails completly passive.
         this.Div.attr('contenteditable', 'false')
                 .addClass('sa-noselect');
         this.Div.find('div').attr('contenteditable', 'false')
@@ -1426,8 +1424,6 @@
   };
 
   saQuestion.prototype.AddAnswerTo = function (parent, answerList, text, checked) {
-    var self = this;
-
     // Make a new answer box;
     var answerDiv = $('<div>')
         .appendTo(parent)
@@ -2460,8 +2456,8 @@
     return domElement.saDialog;
   }
 
-// Remove the dialog.
-// Incomplete. I need to remove the dialog button.
+  // Remove the dialog.
+  // Incomplete. I need to remove the dialog button.
   var saDialogDelete = function (element) {
     if (!element.saDialog) { return; }
     element.saDialog.Dialog.Body.empty;
@@ -3011,8 +3007,8 @@
     this.ShiftY = 0;
 
     // Setup events to pan and zoom the presentation window.
-    var self = this;
-    /* this.Div.on(
+    /* var self = this;
+    this.Div.on(
         'mousedown.presentation',
         function (e) {
             return self.HandleMouseDown(e);
@@ -3728,8 +3724,6 @@
 
     // update
     this.SetWidth(this.Width + (this.AnimationTarget - this.Width) * k);
-
-    var self = this;
   };
 
 // Open and close the panel

@@ -319,11 +319,9 @@
   };
 
   LassoWidget.prototype.ComputeActiveCenter = function () {
-    var count = 0;
     var sx = 0.0;
     var sy = 0.0;
     var shape = this.Loop;
-    var points = [];
     for (var j = 0; j < shape.Points.length; ++j) {
       sx += shape.Points[j][0];
       sy += shape.Points[j][1];

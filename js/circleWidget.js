@@ -408,8 +408,6 @@
     this.Popup.Show(pt[0], pt[1]);
   };
 
-    // Can we bind the dialog apply callback to an objects method?
-  var DIALOG_SELF;
   CircleWidget.prototype.ShowPropertiesDialog = function () {
     this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Shape.OutlineColor));
 

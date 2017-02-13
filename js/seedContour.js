@@ -70,7 +70,7 @@
     }
 
     // Now start tracing the contour.
-    // Initialize the loop with the countour end on edge 0-1.
+    // Initialize the loop with the contour end on edge 0-1.
     var k = s0 / (s0 - s1);
     var loop = [[x0 + (xr * k), y0 + (yr * k)]];
     xSeed = x0; ySeed = y0;
@@ -79,7 +79,7 @@
       s2 = GetDataValue(d, x0 + xu, y0 + yu, threshold, insideOut);
       if (s2 > 0) {
         s3 = GetDataValue(d, x1 + xu, y1 + yu, threshold, insideOut);
-        if (s3 > 0) { // The new propoagating edge is 1-3.
+        if (s3 > 0) { // The new propagating edge is 1-3.
           k = s1 / (s1 - s3);
           loop.push([x1 + (xu * k), y1 + (yu * k)]);
                 // point 1 does not change. p0 moves to p3.
@@ -87,14 +87,14 @@
                 // Rotate the coordinate system.
           xr = -xu; yr = -yu;
           xu = -yr; yu = xr;
-        } else { // The new propoagating edge is 2-3.
+        } else { // The new propagating edge is 2-3.
           k = s2 / (s2 - s3);
           loop.push([x0 + xu + (xr * k), y0 + yu + (yr * k)]);
                 // No rotation just move "up"
           s0 = s2; x0 += xu; y0 += yu;
           s1 = s3; x1 += xu; y1 += yu;
         }
-      } else { // The new propoagating edge is 0-2.
+      } else { // The new propagating edge is 0-2.
         k = s0 / (s0 - s2);
         loop.push([x0 + (xu * k), y0 + (yu * k)]);
             // point 0 does not change. P1 moves to p2.
