@@ -184,6 +184,7 @@
   }
 
   Text.prototype.UpdateBuffers = function (view) {
+    var i;
     if (!view.gl) {
             // Canvas.  Compute pixel bounds.
       var strArray = this.String.split('\n');
@@ -197,7 +198,7 @@
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.font = this.Size + 'pt Calibri';
             // Compute the width of the text box.
-      for (var i = 0; i < strArray.length; ++i) {
+      for (i = 0; i < strArray.length; ++i) {
         var lineWidth = ctx.measureText(strArray[i]).width;
         if (lineWidth > width) { width = lineWidth; }
       }
@@ -216,7 +217,7 @@
     var ptId = 0;
     this.PixelBounds = [0, 0, 0, this.Size];
 
-    for (var i = 0; i < this.String.length; ++i) {
+    for (i = 0; i < this.String.length; ++i) {
       var idx = this.String.charCodeAt(i);
       if (idx === 10 || idx === 13) { // newline
         charLeft = 0;

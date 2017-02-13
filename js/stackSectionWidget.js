@@ -374,10 +374,11 @@
         // Try several rotations to see which is the best.
     var bestTrans = null;
     var bestDist = -1;
+    var i;
     for (var a = -180; a < 180; a += 30) {
       tmpTrans = [trans[0], trans[1], Math.PI * a / 180];
       var dist;
-      for (var i = 0; i < 5; ++i) {
+      for (i = 0; i < 5; ++i) {
         dist = this.RigidDecentStep(tmpTrans, center, distMap, 200000);
       }
             // For symetrical cases, give no rotation a slight advantage.
@@ -392,7 +393,7 @@
     tmpTrans = bestTrans;
         // Slowing discount outliers.
     var aveDist = 200000;
-    for (var i = 0; i < 100; ++i) {
+    for (i = 0; i < 100; ++i) {
       aveDist = this.RigidDecentStep(tmpTrans, center, distMap, aveDist);
     }
         // caller can do this if they want.

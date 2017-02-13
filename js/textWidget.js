@@ -136,11 +136,11 @@
             .attr('checked', 'true')
             .css({'display': 'table-cell'});
 
-        // Create the hover popup for deleting and showing properties dialog.
+    // Create the hover popup for deleting and showing properties dialog.
     this.Layer = layer;
     this.Popup = new SAM.WidgetPopup(this);
-        // Text widgets are created with the dialog open (to set the string).
-        // I do not think we have to do this because ShowPropertiesDialog is called after constructor.
+    // Text widgets are created with the dialog open (to set the string).
+    // I do not think we have to do this because ShowPropertiesDialog is called after constructor.
     this.State = WAITING;
     this.CursorLocation = 0; // REMOVE
 
@@ -153,11 +153,11 @@
     this.Text.Anchor = [0.5 * (this.Text.PixelBounds[0] + this.Text.PixelBounds[1]),
       0.5 * (this.Text.PixelBounds[2] + this.Text.PixelBounds[3])];
 
-        // I would like to setup the ancoh in the middle of the screen,
-        // And have the Anchor in the middle of the text.
+    // I would like to setup the anchor in the middle of the screen,
+    // And have the Anchor in the middle of the text.
     this.Text.Position = [cam.FocalPoint[0], cam.FocalPoint[1], 0];
 
-        // The anchor shape could be put into the text widget, but I might want a thumb tack anchor.
+    // The anchor shape could be put into the text widget, but I might want a thumb tack anchor.
     this.Arrow = new SAM.Arrow();
     this.Arrow.Origin = this.Text.Position; // note: both point to the same memory now.
     this.Arrow.Length = 50;
@@ -173,10 +173,10 @@
     layer.AddWidget(this);
     this.ActiveReason = 1;
 
-        // It is odd the way the Anchor is set.  Leave the above for now.
+    // It is odd the way the Anchor is set.  Leave the above for now.
     this.SetTextOffset(50, 0);
 
-        // Get default properties.
+    // Get default properties.
     this.VisibilityMode = 2;
     this.Text.BackgroundFlag = true;
     this.Dialog.BackgroundInput.prop('checked', true);
@@ -331,9 +331,9 @@
       this.Arrow.Origin = this.Text.Position;
       this.UpdateArrow();
     } else if (mode === 0) { // turn glyph off
-            // save the old anchor incase glyph is turned back on.
+      // save the old anchor incase glyph is turned back on.
       this.SavedTextAnchor = this.Text.Anchor.slice(0);
-            // Put the new (invisible rotation point (anchor) in the middle bottom of the bounds.
+      // Put the new (invisible rotation point (anchor) in the middle bottom of the bounds.
       this.Text.UpdateBuffers(this.Layer.AnnotationView); // computes pixel bounds.
       this.Text.Anchor = [(this.Text.PixelBounds[0] + this.Text.PixelBounds[1]) * 0.5, this.Text.PixelBounds[2]];
       this.Arrow.Visibility = false;
@@ -341,28 +341,29 @@
     this.Layer.EventuallyDraw();
   };
 
-    // Change orientation and length of arrow based on the anchor location.
+  // Change orientation and length of arrow based on the anchor location.
   TextWidget.prototype.UpdateArrow = function () {
-        // Compute the middle of the text bounds.
+    // Compute the middle of the text bounds.
     var xMid = 0.5 * (this.Text.PixelBounds[0] + this.Text.PixelBounds[1]);
     var yMid = 0.5 * (this.Text.PixelBounds[2] + this.Text.PixelBounds[3]);
     var xRad = 0.5 * (this.Text.PixelBounds[1] - this.Text.PixelBounds[0]);
     var yRad = 0.5 * (this.Text.PixelBounds[3] - this.Text.PixelBounds[2]);
 
-        // Compute the angle of the arrow.
+    // Compute the angle of the arrow.
     var dx = this.Text.Anchor[0] - xMid;
     var dy = this.Text.Anchor[1] - yMid;
     this.Arrow.Orientation = -(180.0 + Math.atan2(dy, dx) * 180.0 / Math.PI);
-        // Compute the length of the arrow.
+    // Compute the length of the arrow.
     var length = Math.sqrt(dx * dx + dy * dy);
-        // Find the intersection of the vector and the bounding box.
+    // Find the intersection of the vector and the bounding box.
     var min = length;
+    var d;
     if (dy !== 0) {
-      var d = Math.abs(length * yRad / dy);
+      d = Math.abs(length * yRad / dy);
       if (min > d) { min = d; }
     }
     if (dx !== 0) {
-      var d = Math.abs(length * xRad / dx);
+      d = Math.abs(length * xRad / dx);
       if (min > d) { min = d; }
     }
     length = length - min - 5;
@@ -372,12 +373,12 @@
   };
 
   TextWidget.prototype.HandleMouseWheel = function (event) {
-        // TODO: Scale the size of the text.
+    // TODO: Scale the size of the text.
     return false;
   };
 
   TextWidget.prototype.HandleKeyDown = function (event) {
-        // The dialog consumes all key events.
+    // The dialog consumes all key events.
     if (this.State === PROPERTIES_DIALOG) {
       return false;
     }

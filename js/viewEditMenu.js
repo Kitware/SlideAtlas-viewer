@@ -245,7 +245,6 @@ window.SA = window.SA || {};
     this.Tab.PanelOff();
 
     var cam = this.Viewer.GetCamera();
-    var copyCam;
     var copyCam = this.OtherViewer.GetCamera();
 
     this.Viewer.AnimateCamera(cam.GetFocalPoint(), cam.Roll, copyCam.Height);
@@ -577,12 +576,13 @@ window.SA = window.SA || {};
       var pixelsPerInch = parseInt(d.SizeResInput.val());
       var width = parseInt(d.PxWidthInput.val());
       d.SizeWidthInput.val((width / pixelsPerInch).toFixed(2));
+      var height;
       if (d.ProportionsCheckbox.prop('checked')) {
-        var height = width / d.AspectRatio;
+        height = width / d.AspectRatio;
         d.PxHeightInput.val(height.toFixed());
         d.SizeHeightInput.val((height / pixelsPerInch).toFixed(2));
       } else {
-        var height = parseInt(d.PxHeightInput.val());
+        height = parseInt(d.PxHeightInput.val());
         d.AspectRatio = width / height;
       }
     }
@@ -592,12 +592,13 @@ window.SA = window.SA || {};
       var pixelsPerInch = parseInt(d.SizeResInput.val());
       var height = parseInt(d.PxHeightInput.val());
       d.SizeHeightInput.val((height / pixelsPerInch).toFixed(2));
+      var width;
       if (d.ProportionsCheckbox.prop('checked')) {
-        var width = height * d.AspectRatio;
+        width = height * d.AspectRatio;
         d.PxWidthInput.val(width.toFixed());
         d.SizeWidthInput.val((width / pixelsPerInch).toFixed(2));
       } else {
-        var width = parseInt(d.PxWidthInput.val());
+        width = parseInt(d.PxWidthInput.val());
         d.AspectRatio = width / height;
       }
     }
@@ -607,12 +608,13 @@ window.SA = window.SA || {};
       var pixelsPerInch = parseInt(d.SizeResInput.val());
       var width = parseInt(d.SizeWidthInput.val());
       d.PxWidthInput.val((width * pixelsPerInch).toFixed());
+      var height;
       if (d.ProportionsCheckbox.prop('checked')) {
-        var height = width / d.AspectRatio;
+        height = width / d.AspectRatio;
         d.SizeHeightInput.val(height.toFixed(2));
         d.PxHeightInput.val((height * pixelsPerInch).toFixed());
       } else {
-        var height = parseInt(d.SizeHeightInput.val());
+        height = parseInt(d.SizeHeightInput.val());
         d.AspectRatio = width / height;
       }
     }
@@ -622,12 +624,13 @@ window.SA = window.SA || {};
       var pixelsPerInch = parseInt(d.SizeResInput.val());
       var height = parseInt(d.SizeHeightInput.val());
       d.PxHeightInput.val((height * pixelsPerInch).toFixed());
+      var width;
       if (d.ProportionsCheckbox.prop('checked')) {
-        var width = height * d.AspectRatio;
+        width = height * d.AspectRatio;
         d.SizeWidthInput.val(width.toFixed(2));
         d.PxWidthInput.val((width * pixelsPerInch).toFixed());
       } else {
-        var width = parseInt(d.SizeWidthInput.val());
+        width = parseInt(d.SizeWidthInput.val());
         d.AspectRatio = width / height;
       }
     }

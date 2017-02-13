@@ -370,14 +370,18 @@ window.SA = window.SA || {};
         // Since text concatinates children,
         // containers only have to consume siblings.
     var children = item.children();
-    for (var i = 0; i < children.length; ++i) {
+    var i;
+    var j;
+    var tag;
+    var foundTag;
+    var grandChildren;
+    for (i = 0; i < children.length; ++i) {
       var child = $(children[i]);
 
-            // Look for an existing class from our set.
-            // If we find one, terminate processing for the item and ites children.
-            // Terminate the container collecting items.
-      var foundTag;
-      for (var j = 0; j < tags.length; ++j) {
+      // Look for an existing class from our set.
+      // If we find one, terminate processing for the item and ites children.
+      // Terminate the container collecting items.
+      for (j = 0; j < tags.length; ++j) {
         if (child.hasClass(tags[j].class)) {
           foundTag = tags[j];
         }
@@ -387,26 +391,26 @@ window.SA = window.SA || {};
         continue;
       }
 
-            // special  (one line tag)
+      // special (one line tag)
       if (child.hasClass('sa-ssc-title')) {
         container = undefined;
         continue;
       }
 
-            // Look for a tag string inthe text
+      // Look for a tag string inthe text
       var text = child.text();
-            // Special case: treat the title as a single line.
+      // Special case: treat the title as a single line.
       if (SA.TagCompare('SSC', text, true) && !child.hasClass('sa-ssc-title')) {
         child.addClass('sa-ssc-title');
       }
 
-            // Make sure tags are not grouped.
-            // SA is a bit of a hack.  THere are too many ways html can be formatted.
+      // Make sure tags are not grouped.
+      // SA is a bit of a hack.  THere are too many ways html can be formatted.
       if (child.children().length > 1) {
-        for (var j = 0; j < tags.length; ++j) {
-          var tag = tags[j];
+        for (j = 0; j < tags.length; ++j) {
+          tag = tags[j];
           if (SA.TagCompare(tag.string, text, false) > 0) {
-            var grandChildren = child.children();
+            grandChildren = child.children();
             grandChildren.remove();
             grandChildren.insertAfter(child);
             children = item.children();
@@ -416,10 +420,10 @@ window.SA = window.SA || {};
         }
       }
 
-            // These tags consume children followint the tag.
-      var foundTag = false;
-      for (var j = 0; j < tags.length; ++j) {
-        var tag = tags[j];
+      // These tags consume children followint the tag.
+      foundTag = false;
+      for (j = 0; j < tags.length; ++j) {
+        tag = tags[j];
         if (SA.TagCompare(tag.string, text, true)) {
           foundTag = tag;
           break;
@@ -427,16 +431,16 @@ window.SA = window.SA || {};
       }
 
       if (foundTag) {
-                // If the outer is a div,  reuse it for the container.
-                // There was a bug with diagnosis in the history container.
-                // This will ungroup multiple tags. However recursion may be
-                // needed.
+        // If the outer is a div,  reuse it for the container.
+        // There was a bug with diagnosis in the history container.
+        // This will ungroup multiple tags. However recursion may be
+        // needed.
         if (child[0].tagName === 'DIV') {
-          var grandChildren = child.children();
+          grandChildren = child.children();
 
-                    // child.empty() // looses text that is not a child.
-                    // child.contents()[0] gets it. Maybe make a span and
-                    // put it after 'child'.
+          // child.empty() // looses text that is not a child.
+          // child.contents()[0] gets it. Maybe make a span and
+          // put it after 'child'.
           child.children().remove();
 
           grandChildren.insertAfter(child);
@@ -445,11 +449,11 @@ window.SA = window.SA || {};
           ++i;
           child = $(children[i]);
         } else {
-                    // Start a new container.
+          // Start a new container.
           container = $('<div>')
                         .insertBefore(child);
           children = item.children();
-                    // Manipulating a list we are traversing is a pain.
+          // Manipulating a list we are traversing is a pain.
           ++i;
         }
         container.addClass(foundTag.class);
@@ -1083,7 +1087,7 @@ window.SA = window.SA || {};
       SA.display.UpdateGui();
 
             // ==============================
-            // Experiment wit combining tranparent webgl ontop of canvas.
+            // Experiment wit combining transparent webgl ontop of canvas.
             /*
             var imageObj = {prefix:"/tile?img=560b4011a7a1412197c0cc76&db=5460e35a4a737abc47a0f5e3&name=",
                             levels:     12,

@@ -64,10 +64,10 @@
     newCam.SetFocalPoint(focalPoint);
     newCam.SetRoll(roll);
     newCam.SetHeight(height * scale);
-        // TODO:  Hide matrix computation.  Make it automatic.
+    // TODO:  Hide matrix computation.  Make it automatic.
     newCam.ComputeMatrix();
 
-        // Load only the tiles we need.
+    // Load only the tiles we need.
     var tiles = cache.ChooseTiles(newCam, 0, []);
     for (var i = 0; i < tiles.length; ++i) {
       SA.LoadQueueAddTile(tiles[i]);
@@ -82,9 +82,9 @@
     console.log('trigger ' + SA.LoadQueue.length + ' ' + SA.LoadingCount);
   };
 
-    // This probably does not need to be exposed.
+  // This probably does not need to be exposed.
   SA.GetCutoutImage2 = function (view, fileName, returnCallback) {
-        // All the tiles are loaded and waiting in the cache.
+    // All the tiles are loaded and waiting in the cache.
     view.DrawTiles();
     var viewport = view.GetViewport();
 
@@ -99,16 +99,16 @@
     }
   };
 
-    // This works great!
-    // Light weight viewer.
-    // Attempt to make a div with multiple images.
-    // image = database image object.
-    // height = height in screen pixels of the returned div image.
-    // request = (optional) bounds of cropped image in slide pixel units.
-    //           if request is not defined, it defaults to the whole image bounds.
-    // Events are funny,  The mouse position is realtive to
-    // the tiles.  click and bounds are callback functions to make
-    // interaction simpler.
+  // This works great!
+  // Light weight viewer.
+  // Attempt to make a div with multiple images.
+  // image = database image object.
+  // height = height in screen pixels of the returned div image.
+  // request = (optional) bounds of cropped image in slide pixel units.
+  //           if request is not defined, it defaults to the whole image bounds.
+  // Events are funny,  The mouse position is relative to
+  // the tiles.  click and bounds are callback functions to make
+  // interaction simpler.
   var CutoutThumb = function (image, height, request) {
     if (!request) {
       request = image.bounds;
@@ -124,22 +124,26 @@
         // Crop the request so we do not ask for tiles that do not exist.
     var levelReq;
     if (image.bounds) {
-      var levelReq = [Math.max(request[0], image.bounds[0]),
+      levelReq = [
+        Math.max(request[0], image.bounds[0]),
         Math.min(request[1], image.bounds[1]),
         Math.max(request[2], image.bounds[2]),
         Math.min(request[3], image.bounds[3])];
     } else {
-      levelReq = [Math.max(request[0], 0), request[1],
-        Math.max(request[2], 0), request[3]];
+      levelReq = [
+        Math.max(request[0], 0),
+        request[1],
+        Math.max(request[2], 0),
+        request[3]];
     }
 
-        // Size of each tile.
+    // Size of each tile.
     var tileDim = 256;
     if (image.tile_size) {
       tileDim = image.tile_size;
     }
 
-        // Pick the level to use.
+    // Pick the level to use.
     this.Level = 0; // 0 = leaves
     while ((levelReq[3] - levelReq[2]) > this.Height &&
                this.Level < image.levels - 1) {
@@ -150,8 +154,8 @@
       levelReq[3] *= 0.5;
     }
 
-        // Size of each tile.
-    var tileDim = 256;
+    // Size of each tile.
+    tileDim = 256;
     if (image.tile_size) {
       tileDim = image.tile_size;
     }
@@ -159,20 +163,20 @@
     this.ScreenPixelSpacing = (request[3] - request[2]) / this.Height;
     var imgSize = (tileDim << this.Level) / this.ScreenPixelSpacing;
 
-        // grid of tiles to render.
+    // grid of tiles to render.
     this.GridReq = [Math.floor(levelReq[0] / tileDim),
       Math.floor(levelReq[1] / tileDim),
       Math.floor(levelReq[2] / tileDim),
       Math.floor(levelReq[3] / tileDim)];
 
-        // Compute the origin: the upper left corner of the upper left image.
+    // Compute the origin: the upper left corner of the upper left image.
     this.ScreenPixelOrigin = [this.GridReq[0] * (tileDim << this.Level),
       this.GridReq[2] * (tileDim << this.Level)];
 
-        // loop over the tiles.
+    // loop over the tiles.
     for (var y = this.GridReq[2]; y <= this.GridReq[3]; ++y) {
       for (var x = this.GridReq[0]; x <= this.GridReq[1]; ++x) {
-                // Compute the tile name.
+        // Compute the tile name.
         var tx = x;
         var ty = y;
         var tl = this.Level;
@@ -212,7 +216,7 @@
     var self = this;
     this.ClickCallback = callback;
     this.Div.click(function (e) {
-            // It is a real pain to get the mouse position rlative to the div.
+            // It is a real pain to get the mouse position relative to the div.
       var x = e.pageX;
       var y = e.pageY;
             // Now get the location of this thumb on the screen.
@@ -234,7 +238,7 @@
     // - debug why some slides are not working.
     // - Get the average color of sections and get rid of outliers.
     //     (Maybe after delete)?
-    // - First pass rigid aligment in stack creator.
+    // - First pass rigid alignment in stack creator.
     // - save the contour with the stack sections.
     // - move the transformations to load with the sections.
     // - Toggle slide / section view in stack viewer.

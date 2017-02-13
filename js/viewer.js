@@ -81,10 +81,10 @@
       this.OverView.Camera.SetHeight(22000.0);
       this.OverView.Camera.ComputeMatrix();
 
-            // One must be true for the icon to be active (opaque).
+      // One must be true for the icon to be active (opaque).
       this.RotateIconHover = false;
-            // I am not making this part of the InteractionState because
-            // I want to make the overview its own widget.
+      // I am not making this part of the InteractionState because
+      // I want to make the overview its own widget.
       this.RotateIconDrag = false;
 
       this.RotateIcon =
@@ -99,8 +99,8 @@
                 .on('dragstart', function () {
                   return false;
                 });
-            // Try to make the overview be on top of the rotate icon
-            // It should receive events before the rotate icon.
+      // Try to make the overview be on top of the rotate icon
+      // It should receive events before the rotate icon.
       this.OverViewDiv.css({'z-index': '200'});
     }
     this.ZoomTarget = this.MainView.Camera.GetHeight();
@@ -109,12 +109,11 @@
     this.DoubleClickX = 0;
     this.DoubleClickY = 0;
 
-        // For stack correlations.
+    // For stack correlations.
     this.StackCorrelations = undefined;
-        // This is only for drawing correlations.
+    // This is only for drawing correlations.
     this.RecordIndex = 0; // Only used for drawing correlations.
 
-    var self = this;
     var can = this.MainView.CanvasDiv;
         // So we can programatically set the keyboard focus
     can.attr('tabindex', '1');
@@ -185,7 +184,7 @@
       //                    false);
 
     if (this.OverView) {
-      var can = this.OverView.CanvasDiv;
+      can = this.OverView.CanvasDiv;
       can.on(
                 'mousedown.viewer',
                 function (e) {
@@ -406,7 +405,6 @@
     var note = SA.GetNoteFromId(noteId);
     if (!note) {
       note = new SA.Note();
-      var self = this;
       note.LoadViewId(
                 noteId,
                 function () {
@@ -534,28 +532,28 @@
       }
     }
 
-        // I do not know the way the viewport is used to place
-        // this overview.  It should be like other widgets
-        // and be placed relative to the parent.
+    // I do not know the way the viewport is used to place
+    // this overview.  It should be like other widgets
+    // and be placed relative to the parent.
     if (this.OverView) {
       var width = this.MainView.GetWidth();
       var height = this.MainView.GetHeight();
       var area = width * height;
       var bounds = this.GetOverViewBounds();
       var aspect = (bounds[1] - bounds[0]) / (bounds[3] - bounds[2]);
-            // size of overview
+      // size of overview
       var h = Math.sqrt(area * this.OverViewScale / aspect);
       var w = h * aspect;
-            // Limit size
+      // Limit size
       if (h > height / 2) {
         h = height / 2;
-        var w = h * aspect;
+        w = h * aspect;
         this.OverViewScale = w * h / area;
       }
-            // center of overview
+      // center of overview
       var radius = Math.sqrt(h * h + w * w) / 2;
-            // Construct the viewport.  Hack: got rid of viewport[0]
-            // TODO: I really need to get rid of the viewport stuff
+      // Construct the viewport.  Hack: got rid of viewport[0]
+      // TODO: I really need to get rid of the viewport stuff
       this.OverViewport = [width - radius - w / 2,
         radius - h / 2,
         w, h];
@@ -569,8 +567,8 @@
     }
   };
 
-    // TODO: Events are a pain because most are handled by parent.
-    // Time to make the overview a real widget?
+  // TODO: Events are a pain because most are handled by parent.
+  // Time to make the overview a real widget?
   Viewer.prototype.RollUp = function (e) {
     this.RotateIconDrag = false;
     if (!this.RotateIconHover) {
@@ -745,8 +743,9 @@
                                                 width, height, stack,
                                                 finishedCallback) {
     var sectionFileName = fileName;
+    var note;
     if (stack) {
-      var note = SA.display.GetNote();
+      note = SA.display.GetNote();
       var idx = fileName.indexOf('.');
       if (idx < 0) {
         sectionFileName = fileName + SA.ZERO_PAD(note.StartIndex, 4) + '.png';
@@ -771,7 +770,7 @@
 
     view.Canvas[0].toBlob(function (blob) { saveAs(blob, sectionFileName); }, 'image/png');
     if (stack) {
-      var note = SA.display.GetNote();
+      note = SA.display.GetNote();
       if (note.StartIndex < note.ViewerRecords.length - 1) {
         SA.display.NavigationWidget.NextNote();
         var self = this;
@@ -926,38 +925,38 @@
     return this.MainView.GetCache();
   };
 
-    // ORIGIN SEEMS TO BE BOTTOM LEFT !!!
-    // I intend this method to get called when the window resizes.
-    // TODO: Redo all this overview viewport junk.
-    // viewport: [left, top, width, height]
-    // When I remove this function, move the logic to UpdateSize().
+  // ORIGIN SEEMS TO BE BOTTOM LEFT !!!
+  // I intend this method to get called when the window resizes.
+  // TODO: Redo all this overview viewport junk.
+  // viewport: [left, top, width, height]
+  // When I remove this function, move the logic to UpdateSize().
   Viewer.prototype.SetViewport = function (viewport) {
-        // TODO: Get rid of this positioning hack.
-        // Caller should be positioning the parent.
-        // The whole "viewport" concept needs to be eliminated.
-        // this.MainView.SetViewport(viewport, this.Parent);
-        // this.MainView.Camera.ComputeMatrix();
+    // TODO: Get rid of this positioning hack.
+    // Caller should be positioning the parent.
+    // The whole "viewport" concept needs to be eliminated.
+    // this.MainView.SetViewport(viewport, this.Parent);
+    // this.MainView.Camera.ComputeMatrix();
 
-        // I do not know the way the viewport is used to place
-        // this overview.  It should be like other widgets
-        // and be placed relative to the parent.
+    // I do not know the way the viewport is used to place
+    // this overview.  It should be like other widgets
+    // and be placed relative to the parent.
     if (this.OverView) {
       var area = viewport[2] * viewport[3];
       var bounds = this.GetOverViewBounds();
       var aspect = (bounds[1] - bounds[0]) / (bounds[3] - bounds[2]);
-            // size of overview
+      // size of overview
       var h = Math.sqrt(area * this.OverViewScale / aspect);
       var w = h * aspect;
-            // Limit size
+      // Limit size
       if (h > viewport[3] / 2) {
         h = viewport[3] / 2;
-        var w = h * aspect;
+        w = h * aspect;
         this.OverViewScale = w * h / area;
       }
-            // center of overview
+      // center of overview
       var radius = Math.sqrt(h * h + w * w) / 2;
-            // Construct the viewport.  Hack: got rid of viewport[0]
-            // TODO: I really need to get rid of the viewport stuff
+      // Construct the viewport.  Hack: got rid of viewport[0]
+      // TODO: I really need to get rid of the viewport stuff
       this.OverViewport = [viewport[2] - radius - w / 2,
         viewport[1] + radius - h / 2,
         w, h];
@@ -976,7 +975,7 @@
     return this.MainView.Viewport;
   };
 
-    // To fix a bug in the perk and elmer uploader.
+  // To fix a bug in the perk and elmer uploader.
   Viewer.prototype.ToggleMirror = function () {
     this.MainView.Camera.Mirror = !this.MainView.Camera.Mirror;
     if (this.OverView) {
@@ -1230,6 +1229,7 @@
   };
 
   Viewer.prototype.Animate = function () {
+    var roll;
     if (this.AnimateDuration <= 0.0) {
       return;
     }
@@ -1244,18 +1244,18 @@
       this.ConstrainCamera();
       if (this.OverView) {
                 // this.OverView.Camera.Roll = this.RollTarget;
-        var roll = this.RollTarget;
+        roll = this.RollTarget;
         this.OverView.CanvasDiv.css({'transform': 'rotate(' + roll + 'rad'});
         this.OverView.Camera.Roll = 0;
         this.OverView.Camera.ComputeMatrix();
       }
       this.UpdateZoomGui();
-            // Save the state when the animation is finished.
+      // Save the state when the animation is finished.
       if (SA.RECORDER_WIDGET) {
         SA.RECORDER_WIDGET.RecordState();
       }
     } else {
-            // Interpolate
+      // Interpolate
       var currentHeight = this.MainView.Camera.GetHeight();
       var currentCenter = this.MainView.Camera.GetFocalPoint();
       var currentRoll = this.MainView.Camera.Roll;
@@ -1273,15 +1273,15 @@
                  (timeNow - this.AnimateLast) / this.AnimateDuration]);
       this.ConstrainCamera();
       if (this.OverView) {
-                // this.OverView.Camera.Roll = this.MainView.Camera.Roll;
-        var roll = this.MainView.Camera.Roll;
+        // this.OverView.Camera.Roll = this.MainView.Camera.Roll;
+        roll = this.MainView.Camera.Roll;
         this.OverView.CanvasDiv.css({'transform': 'rotate(' + roll + 'rad'});
         this.OverView.Camera.Roll = 0;
         this.OverView.Camera.ComputeMatrix();
       }
       this.AnimateDuration -= (timeNow - this.AnimateLast);
-            // We are not finished yet.
-            // Schedule another render
+      // We are not finished yet.
+      // Schedule another render
       this.EventuallyRender(true);
     }
     this.MainView.Camera.ComputeMatrix();
@@ -1289,14 +1289,14 @@
       this.OverView.Camera.ComputeMatrix();
     }
     this.AnimateLast = timeNow;
-        // Synchronize cameras is necessary
+    // Synchronize cameras is necessary
   };
 
   Viewer.prototype.OverViewPlaceCamera = function (x, y) {
     if (!this.OverView) {
       return;
     }
-        // Compute focal point from inverse overview camera.
+    // Compute focal point from inverse overview camera.
     x = x / this.OverView.Viewport[2];
     y = y / this.OverView.Viewport[3];
     x = (x * 2.0 - 1.0) * this.OverView.Camera.Matrix[15];
@@ -1306,7 +1306,7 @@
     var xNew = (x * m[5] - y * m[4] + m[4] * m[13] - m[5] * m[12]) / det;
     var yNew = (y * m[0] - x * m[1] - m[0] * m[13] + m[1] * m[12]) / det;
 
-        // Animate to get rid of jerky panning (overview to low resolution).
+    // Animate to get rid of jerky panning (overview to low resolution).
     this.TranslateTarget[0] = xNew;
     this.TranslateTarget[1] = yNew;
     this.AnimateLast = new Date().getTime();
@@ -1388,26 +1388,25 @@
     this.DoubleClick = false;
   };
 
-    /**/
-    // Save the previous touches and record the new
-    // touch locations in viewport coordinates.
+  // Save the previous touches and record the new
+  // touch locations in viewport coordinates.
   Viewer.prototype.HandleTouch = function (e, startFlag) {
     var date = new Date();
     var t = date.getTime();
-        // I have had trouble on the iPad with 0 delta times.
-        // Lets see how it behaves with fewer events.
-        // It was a bug in iPad4 Javascript.
-        // This throttle is not necessary.
+    // I have had trouble on the iPad with 0 delta times.
+    // Lets see how it behaves with fewer events.
+    // It was a bug in iPad4 Javascript.
+    // This throttle is not necessary.
     if (t - this.Time < 20 && !startFlag) { return false; }
 
     this.LastTime = this.Time;
     this.Time = t;
 
     if (!e) {
-      var e = event;
+      e = event;
     }
 
-        // Still used on mobile devices?
+    // Still used on mobile devices?
     var viewport = this.GetViewport();
     this.LastTouches = this.Touches;
     var can = this.Canvas;
@@ -1422,18 +1421,18 @@
     this.LastMouseX = this.MouseX;
     this.LastMouseY = this.MouseY;
 
-        // Compute the touch average.
+    // Compute the touch average.
     var numTouches = this.Touches.length;
     this.MouseX = this.MouseY = 0.0;
-    for (var i = 0; i < numTouches; ++i) {
+    for (i = 0; i < numTouches; ++i) {
       this.MouseX += this.Touches[i][0];
       this.MouseY += this.Touches[i][1];
     }
     this.MouseX = this.MouseX / numTouches;
     this.MouseY = this.MouseY / numTouches;
 
-        // Hack because we are moving away from using the event manager
-        // Mouse interaction are already independant...
+    // Hack because we are moving away from using the event manager
+    // Mouse interaction are already independent...
     this.offsetX = this.MouseX;
     this.offsetY = this.MouseY;
 
@@ -1443,7 +1442,7 @@
   Viewer.prototype.HandleTouchStart = function (event) {
     if (!this.InteractionEnabled) { return true; }
 
-        // Stuff from event manager
+    // Stuff from event manager
     this.HandleTouch(event, true);
     this.StartTouchTime = this.Time;
 
@@ -1753,8 +1752,9 @@
   };
 
   Viewer.prototype.HandleMomentum = function () {
-        // I see an odd intermittent camera matrix problem
-        // on the iPad that looks like a thread safety issue.
+    var self = this;
+    // I see an odd intermittent camera matrix problem
+    // on the iPad that looks like a thread safety issue.
     if (this.MomentumTimerId) {
       window.cancelAnimationFrame(this.MomentumTimerId);
       this.MomentumTimerId = 0;
@@ -1762,12 +1762,11 @@
 
     var t = new Date().getTime();
     if (t - this.LastTime < 50) {
-      var self = this;
       this.MomentumTimerId = window.requestAnimationFrame(function () { self.HandleMomentum(); });
       return;
     }
 
-        // Integrate the momentum.
+    // Integrate the momentum.
     this.LastTime = this.Time;
     this.Time = t;
     var dt = this.Time - this.LastTime;
@@ -1786,12 +1785,12 @@
       cam2.Roll = cam.Roll;
       cam2.ComputeMatrix();
     }
-        // I think the problem with the ipad is thie asynchronous render.
-        // Maybe two renders occur at the same time.
-        // this.EventuallyRender();
+    // I think the problem with the ipad is thie asynchronous render.
+    // Maybe two renders occur at the same time.
+    // this.EventuallyRender();
     this.Draw();
 
-        // Decay the momentum.
+    // Decay the momentum.
     this.MomentumX *= decay;
     this.MomentumY *= decay;
     this.MomentumScale *= decay;
@@ -1799,7 +1798,7 @@
 
     if (Math.abs(this.MomentumX) < 0.01 && Math.abs(this.MomentumY) < 0.01 &&
             Math.abs(this.MomentumRoll) < 0.0002 && Math.abs(this.MomentumScale) < 0.00005) {
-            // Change is small. Stop the motion.
+      // Change is small. Stop the motion.
       this.MomentumTimerId = 0;
       if (this.InteractionState !== INTERACTION_NONE) {
         this.InteractionState = INTERACTION_NONE;
@@ -1809,7 +1808,6 @@
       }
       this.UpdateZoomGui();
     } else {
-      var self = this;
       this.MomentumTimerId = window.requestAnimationFrame(function () { self.HandleMomentum(); });
     }
   };
@@ -1817,7 +1815,7 @@
   Viewer.prototype.ConstrainCamera = function () {
     var bounds = this.GetOverViewBounds();
     if (!bounds) {
-            // Cache has not been set.
+      // Cache has not been set.
       return;
     }
     var spacing = this.MainView.GetLeafSpacing();
@@ -1965,11 +1963,13 @@
 
     var x = event.offsetX;
     var y = event.offsetY;
+    var dx;
+    var dy;
 
-        // Drag camera in main view.
-        // Dragging is too slow.  I want to accelerate dragging the further
-        // this mouse moves.  This is a moderate change, so I am
-        // going to try to accelerate with speed.
+    // Drag camera in main view.
+    // Dragging is too slow.  I want to accelerate dragging the further
+    // this mouse moves.  This is a moderate change, so I am
+    // going to try to accelerate with speed.
     if (this.InteractionState === INTERACTION_ROTATE) {
             // Rotate
             // Origin in the center.
@@ -1983,7 +1983,7 @@
       this.RollTarget = this.MainView.Camera.Roll;
       this.UpdateCamera();
     } else if (this.InteractionState === INTERACTION_ZOOM) {
-      var dy = this.MouseDeltaY / this.MainView.Viewport[2];
+      dy = this.MouseDeltaY / this.MainView.Viewport[2];
       this.MainView.Camera.SetHeight(this.MainView.Camera.GetHeight() /
                                            (1.0 + (dy * 5.0)));
       this.ZoomTarget = this.MainView.Camera.GetHeight();
@@ -1992,8 +1992,8 @@
             // Translate
             // Convert to view [-0.5,0.5] coordinate system.
             // Note: the origin gets subtracted out in delta above.
-      var dx = -this.MouseDeltaX / this.MainView.Viewport[2];
-      var dy = -this.MouseDeltaY / this.MainView.Viewport[2];
+      dx = -this.MouseDeltaX / this.MainView.Viewport[2];
+      dy = -this.MouseDeltaY / this.MainView.Viewport[2];
             // compute the speed of the movement.
       var speed = Math.sqrt(dx * dx + dy * dy) / this.MouseDeltaTime;
       speed = 1.0 + speed * 1000; // f(0) = 1 and increasing.
@@ -2009,8 +2009,8 @@
     this.TriggerInteraction();
     this.EventuallyRender(true);
 
-    var x = event.offsetX;
-    var y = event.offsetY;
+    x = event.offsetX;
+    y = event.offsetY;
 
     return false;
   };
@@ -2066,9 +2066,11 @@
     var labels = {};
     var labelArray = [];
     var label;
-    for (var i = 0; i < note.ViewerRecords.length; ++i) {
+    var i;
+    var j;
+    for (i = 0; i < note.ViewerRecords.length; ++i) {
       var annotations = note.ViewerRecords[i].Annotations;
-      for (var j = 0; j < annotations.length; ++j) {
+      for (j = 0; j < annotations.length; ++j) {
         var annot = annotations[j];
         if (annot.type === 'polyline' && annot.text) {
           if (!labels[annot.text]) {
@@ -2081,7 +2083,7 @@
 
     var row1 = '';
     var row2 = ',';
-    for (var i = 0; i < labelArray.length; ++i) {
+    for (i = 0; i < labelArray.length; ++i) {
       row1 += ',,';
       row1 += labelArray[i];
       row2 += ',AREA µm^2,LINE LENGTH µm';
@@ -2089,15 +2091,15 @@
 
     // Make a row for each section
     var widget = new SAM.PolylineWidget(SA.VIEWER1.GetAnnotationLayer(), false);
-    for (var i = 0; i < note.ViewerRecords.length; ++i) {
+    for (i = 0; i < note.ViewerRecords.length; ++i) {
       var viewerRecord = note.ViewerRecords[i];
       var row = viewerRecord.Image.label + ',' + (i + 1) + ',';
-      for (var j = 0; j < labelArray.length; ++j) {
+      for (j = 0; j < labelArray.length; ++j) {
         label = labelArray[j];
         labels[label].area = 0.0;
         labels[label].perimeter = 0.0;
       }
-      for (var j = 0; j < viewerRecord.Annotations.length; ++j) {
+      for (j = 0; j < viewerRecord.Annotations.length; ++j) {
         annot = viewerRecord.Annotations[j];
         if (annot.type === 'polyline' && annot.text) {
           widget.Load(annot);
@@ -2106,7 +2108,7 @@
           labels[annot.text].perimeter += widget.ComputeLength() * 0.25;
         }
       }
-      for (var j = 0; j < labelArray.length; ++j) {
+      for (j = 0; j < labelArray.length; ++j) {
         label = labelArray[j];
         if (labels[label].area === 0.0) {
           row += ',,';
@@ -2192,24 +2194,25 @@
         camera = new SAM.Camera();
         camera.Load(clip.Camera);
       }
+      var widget;
       if (clip.Type === 'CircleWidget') {
-        var widget = new SAM.CircleWidget(this.GetAnnotationLayer(), false);
+        widget = new SAM.CircleWidget(this.GetAnnotationLayer(), false);
         widget.PasteCallback(clip.Data, this.GetAnnotationLayer().MouseWorld, camera);
       }
       if (clip.Type === 'PolylineWidget') {
-        var widget = new SAM.PolylineWidget(this.GetAnnotationLayer(), false);
+        widget = new SAM.PolylineWidget(this.GetAnnotationLayer(), false);
         widget.PasteCallback(clip.Data, this.GetAnnotationLayer().MouseWorld, camera);
       }
       if (clip.Type === 'TextWidget') {
-        var widget = new SAM.TextWidget(this.GetAnnotationLayer(), '');
+        widget = new SAM.TextWidget(this.GetAnnotationLayer(), '');
         widget.PasteCallback(clip.Data, this.GetAnnotationLayer().MouseWorld, camera);
       }
       if (clip.Type === 'RectWidget') {
-        var widget = new SAM.RectWidget(this.GetAnnotationLayer(), '');
+        widget = new SAM.RectWidget(this.GetAnnotationLayer(), '');
         widget.PasteCallback(clip.Data, this.MouseWorld, camera);
       }
       if (clip.Type === 'GridWidget') {
-        var widget = new SAM.GridWidget(this.GetAnnotationLayer(), '');
+        widget = new SAM.GridWidget(this.GetAnnotationLayer(), '');
         widget.PasteCallback(clip.Data, this.MouseWorld, camera);
       }
 
@@ -2224,15 +2227,22 @@
       return false;
     }
 
+    var cam;
+    var c;
+    var s;
+    var dx;
+    var dy;
+    var rx;
+    var ry;
     if (event.keyCode === 38) {
             // Up cursor key
-      var cam = this.GetCamera();
-      var c = Math.cos(cam.Roll);
-      var s = -Math.sin(cam.Roll);
-      var dx = 0.0;
-      var dy = -0.8 * cam.GetHeight();
-      var rx = dx * c - dy * s;
-      var ry = dx * s + dy * c;
+      cam = this.GetCamera();
+      c = Math.cos(cam.Roll);
+      s = -Math.sin(cam.Roll);
+      dx = 0.0;
+      dy = -0.8 * cam.GetHeight();
+      rx = dx * c - dy * s;
+      ry = dx * s + dy * c;
       this.TranslateTarget[0] = cam.FocalPoint[0] + rx;
       this.TranslateTarget[1] = cam.FocalPoint[1] + ry;
       this.AnimateLast = new Date().getTime();
@@ -2241,13 +2251,13 @@
       return false;
     } else if (event.keyCode === 40) {
             // Down cursor key
-      var cam = this.GetCamera();
-      var c = Math.cos(cam.Roll);
-      var s = -Math.sin(cam.Roll);
-      var dx = 0.0;
-      var dy = 0.8 * cam.GetHeight();
-      var rx = dx * c - dy * s;
-      var ry = dx * s + dy * c;
+      cam = this.GetCamera();
+      c = Math.cos(cam.Roll);
+      s = -Math.sin(cam.Roll);
+      dx = 0.0;
+      dy = 0.8 * cam.GetHeight();
+      rx = dx * c - dy * s;
+      ry = dx * s + dy * c;
       this.TranslateTarget[0] = cam.FocalPoint[0] + rx;
       this.TranslateTarget[1] = cam.FocalPoint[1] + ry;
       this.AnimateLast = new Date().getTime();
@@ -2256,13 +2266,13 @@
       return false;
     } else if (event.keyCode === 37) {
             // Left cursor key
-      var cam = this.GetCamera();
-      var c = Math.cos(cam.Roll);
-      var s = -Math.sin(cam.Roll);
-      var dx = -0.8 * cam.GetWidth();
-      var dy = 0.0;
-      var rx = dx * c - dy * s;
-      var ry = dx * s + dy * c;
+      cam = this.GetCamera();
+      c = Math.cos(cam.Roll);
+      s = -Math.sin(cam.Roll);
+      dx = -0.8 * cam.GetWidth();
+      dy = 0.0;
+      rx = dx * c - dy * s;
+      ry = dx * s + dy * c;
       this.TranslateTarget[0] = cam.FocalPoint[0] + rx;
       this.TranslateTarget[1] = cam.FocalPoint[1] + ry;
       this.AnimateLast = new Date().getTime();
@@ -2271,13 +2281,13 @@
       return false;
     } else if (event.keyCode === 39) {
             // Right cursor key
-      var cam = this.GetCamera();
-      var c = Math.cos(cam.Roll);
-      var s = -Math.sin(cam.Roll);
-      var dx = 0.8 * cam.GetWidth();
-      var dy = 0.0;
-      var rx = dx * c - dy * s;
-      var ry = dx * s + dy * c;
+      cam = this.GetCamera();
+      c = Math.cos(cam.Roll);
+      s = -Math.sin(cam.Roll);
+      dx = 0.8 * cam.GetWidth();
+      dy = 0.0;
+      rx = dx * c - dy * s;
+      ry = dx * s + dy * c;
       this.TranslateTarget[0] = cam.FocalPoint[0] + rx;
       this.TranslateTarget[1] = cam.FocalPoint[1] + ry;
       this.AnimateLast = new Date().getTime();
@@ -2570,14 +2580,16 @@
       return false;
     }
 
+    var w;
+    var p;
     if (this.InteractionState === INTERACTION_OVERVIEW) {
             // Do not start dragging until the mouse has moved some distance.
       if (Math.abs(event.pageX - this.OverviewEventX) > 5 ||
                 Math.abs(event.pageY - this.OverviewEventY) > 5) {
                 // Start dragging the overview window.
         this.InteractionState = INTERACTION_OVERVIEW_DRAG;
-        var w = this.GetViewport()[2];
-        var p = Math.max(w - event.pageX, event.pageY);
+        w = this.GetViewport()[2];
+        p = Math.max(w - event.pageX, event.pageY);
         this.OverViewScaleLast = p;
       }
       return false;
@@ -2591,8 +2603,8 @@
     }
 
         // Drag to change overview size
-    var w = this.GetViewport()[2];
-    var p = Math.max(w - event.pageX, event.pageY);
+    w = this.GetViewport()[2];
+    p = Math.max(w - event.pageX, event.pageY);
     var d = p / this.OverViewScaleLast;
     this.OverViewScale *= d * d;
     this.OverViewScaleLast = p;

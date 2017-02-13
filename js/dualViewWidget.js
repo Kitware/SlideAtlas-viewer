@@ -233,11 +233,11 @@ window.SA = window.SA || {};
   };
 
   DualViewWidget.prototype.SetNote = function (note) {
-        // NOTE: Even when this.saNote === note, we still need to set the
-        // camera and annotations because the user might have changed these.
+    // NOTE: Even when this.saNote === note, we still need to set the
+    // camera and annotations because the user might have changed these.
 
-        // If the note is not loaded, request the note, and call this method
-        // when the note is finally loaded.
+    // If the note is not loaded, request the note, and call this method
+    // when the note is finally loaded.
     var self = this;
     if (note && note.LoadState !== 2) {
       note.LoadViewId(
@@ -259,14 +259,13 @@ window.SA = window.SA || {};
     this.saViewerIndex = viewIdx;
     if (this.NavigationWidget) {
       this.NavigationWidget.SetNote(note);
-            // this.NavigationWidget.Update(); // not sure if this is necessary
+      // this.NavigationWidget.Update(); // not sure if this is necessary
     }
     this.DisplayNote(note);
     if (note.Type === 'Stack') {
-            // TODO: Can I move this logic into the display? SetNote maybe?
-            // Possibly nagivationWidget (we need to know which viewer is referecne.
-            // Select only gets called when the stack is first loaded.
-      var self = this;
+      // TODO: Can I move this logic into the display? SetNote maybe?
+      // Possibly nagivationWidget (we need to know which viewer is referecne.
+      // Select only gets called when the stack is first loaded.
       this.GetViewer(0).OnInteraction(function () {
         self.SynchronizeViews(0, note);
       });
@@ -274,8 +273,8 @@ window.SA = window.SA || {};
         self.SynchronizeViews(1, note);
       });
       note.DisplayStack(this);
-            // First view is set by viewer record camera.
-            // Second is set relative to the first.
+      // First view is set by viewer record camera.
+      // Second is set relative to the first.
       this.SynchronizeViews(0, note);
     }
   };
@@ -302,12 +301,12 @@ window.SA = window.SA || {};
     var p2 = p2a;
     pt = viewerRecord2.Transform.ForwardTransformPoint(p1);
     console.log(p2[0] + ',' + p2[1] + ':' + pt[0] + ',' + pt[1]);
-    var p1 = p1b;
-    var p2 = p2b;
+    p1 = p1b;
+    p2 = p2b;
     pt = viewerRecord2.Transform.ForwardTransformPoint(p1);
     console.log(p2[0] + ',' + p2[1] + ':' + pt[0] + ',' + pt[1]);
-    var p1 = p1c;
-    var p2 = p2c;
+    p1 = p1c;
+    p2 = p2c;
     pt = viewerRecord2.Transform.ForwardTransformPoint(p1);
     console.log(p2[0] + ',' + p2[1] + ':' + pt[0] + ',' + pt[1]);
 
@@ -629,16 +628,16 @@ window.SA = window.SA || {};
     }
   };
 
-    // refViewerIdx is the viewer that changed and other viewers need
-    // to be updated to match that reference viewer.
+  // refViewerIdx is the viewer that changed and other viewers need
+  // to be updated to match that reference viewer.
   DualViewWidget.prototype.SynchronizeViews = function (refViewerIdx, note) {
-        // We allow the viewer to go one past the end.
+    // We allow the viewer to go one past the end.
     if (refViewerIdx + note.StartIndex >= note.ViewerRecords.length) {
       return;
     }
 
-        // Special case for when the shift key is pressed.
-        // Translate only one camera and modify the tranform to match.
+    // Special case for when the shift key is pressed.
+    // Translate only one camera and modify the tranform to match.
     if (SA.Edit && SA.StackCursorFlag) {
       var trans = note.ViewerRecords[note.StartIndex + 1].Transform;
       if (!note.ActiveCorrelation && trans.Correlations) {
@@ -660,7 +659,7 @@ window.SA = window.SA || {};
           }
         }
 
-                // Now make a new replacement correlation.
+        // Now make a new replacement correlation.
         note.ActiveCorrelation = new SA.PairCorrelation();
         trans.Correlations.push(note.ActiveCorrelation);
       }
@@ -668,28 +667,28 @@ window.SA = window.SA || {};
       var cam1 = this.GetViewer(1).GetCamera();
       note.ActiveCorrelation.SetPoint0(cam0.GetFocalPoint());
       note.ActiveCorrelation.SetPoint1(cam1.GetFocalPoint());
-            // I really do not want to set the roll unless the user specifically changed it.
-            // It would be hard to correct if the wrong value got set early in the aligment.
+      // I really do not want to set the roll unless the user specifically changed it.
+      // It would be hard to correct if the wrong value got set early in the aligment.
       var deltaRoll = cam1.Roll - cam0.Roll;
       if (trans.Correlations && trans.Correlations.length > 1) {
         deltaRoll = 0;
-                // Let roll be set by multiple correlation points.
+        // Let roll be set by multiple correlation points.
       }
       note.ActiveCorrelation.SetRoll(deltaRoll);
       note.ActiveCorrelation.SetHeight(0.5 * (cam1.Height + cam0.Height));
       return;
     } else {
-            // A round about way to set and unset the active correlation.
-            // Note is OK, because if there is no interaction without the shift key
-            // the active correlation will not change anyway.
+      // A round about way to set and unset the active correlation.
+      // Note is OK, because if there is no interaction without the shift key
+      // the active correlation will not change anyway.
       note.ActiveCorrelation = undefined;
     }
 
-        // No shift modifier:
-        // Synchronize all the cameras.
-        // Hard coded for two viewers (recored 0 and 1 too).
-        // First place all the cameras into an array for code simplicity.
-        // Cameras used for preloading.
+    // No shift modifier:
+    // Synchronize all the cameras.
+    // Hard coded for two viewers (recored 0 and 1 too).
+    // First place all the cameras into an array for code simplicity.
+    // Cameras used for preloading.
     if (!note.PreCamera) { note.PreCamera = new SAM.Camera(); }
     if (!note.PostCamera) { note.PostCamera = new SAM.Camera(); }
     var cameras = [note.PreCamera,
@@ -697,11 +696,13 @@ window.SA = window.SA || {};
       this.GetViewer(1).GetCamera(),
       note.PostCamera];
     var refCamIdx = refViewerIdx + 1; // An extra to account for PreCamera.
-        // Start with the reference section and move forward.
-        // With two sections, the second has the transform.
+    // Start with the reference section and move forward.
+    // With two sections, the second has the transform.
 
-    for (var i = refCamIdx + 1; i < cameras.length; ++i) {
-      var transIdx = i - 1 + note.StartIndex;
+    var i;
+    var transIdx;
+    for (i = refCamIdx + 1; i < cameras.length; ++i) {
+      transIdx = i - 1 + note.StartIndex;
       if (transIdx < note.ViewerRecords.length) {
         note.ViewerRecords[transIdx].Transform
                     .ForwardTransformCamera(cameras[i - 1], cameras[i]);
@@ -710,10 +711,10 @@ window.SA = window.SA || {};
       }
     }
 
-        // Start with the reference section and move backward.
-        // With two sections, the second has the transform.
-    for (var i = refCamIdx; i > 0; --i) {
-      var transIdx = i + note.StartIndex - 1;
+    // Start with the reference section and move backward.
+    // With two sections, the second has the transform.
+    for (i = refCamIdx; i > 0; --i) {
+      transIdx = i + note.StartIndex - 1;
       if (transIdx > 0) { // First section does not have a transform
         note.ViewerRecords[transIdx].Transform
                     .ReverseTransformCamera(cameras[i], cameras[i - 1]);
@@ -722,27 +723,29 @@ window.SA = window.SA || {};
       }
     }
 
-        // Preload the adjacent sections.
+    // Preload the adjacent sections.
+    var cache;
+    var tiles;
     if (cameras[0]) {
-      var cache = SA.FindCache(note.ViewerRecords[note.StartIndex - 1].Image);
+      cache = SA.FindCache(note.ViewerRecords[note.StartIndex - 1].Image);
       cameras[0].SetViewport(this.GetViewer(0).GetViewport());
-      var tiles = cache.ChooseTiles(cameras[0], 0, []);
-      for (var i = 0; i < tiles.length; ++i) {
+      tiles = cache.ChooseTiles(cameras[0], 0, []);
+      for (i = 0; i < tiles.length; ++i) {
         tiles[i].LoadQueueAdd();
       }
       SA.LoadQueueUpdate();
     }
     if (cameras[3]) {
-      var cache = SA.FindCache(note.ViewerRecords[note.StartIndex + 2].Image);
+      cache = SA.FindCache(note.ViewerRecords[note.StartIndex + 2].Image);
       cameras[3].SetViewport(this.GetViewer(0).GetViewport());
-      var tiles = cache.ChooseTiles(cameras[3], 0, []);
-      for (var i = 0; i < tiles.length; ++i) {
+      tiles = cache.ChooseTiles(cameras[3], 0, []);
+      for (i = 0; i < tiles.length; ++i) {
         tiles[i].LoadQueueAdd();
       }
       SA.LoadQueueUpdate();
     }
 
-        // OverView cameras need to be updated.
+    // OverView cameras need to be updated.
     if (refViewerIdx === 0) {
       this.GetViewer(1).UpdateCamera();
       this.GetViewer(1).EventuallyRender(false);
@@ -751,9 +754,9 @@ window.SA = window.SA || {};
       this.GetViewer(0).EventuallyRender(false);
     }
 
-        // Synchronize annotation visibility.
+    // Synchronize annotation visibility.
     var refViewer = this.GetViewer(refViewerIdx);
-    for (var i = 0; i < 2; ++i) {
+    for (i = 0; i < 2; ++i) {
       if (i !== refViewerIdx) {
         var viewer = this.GetViewer(i);
         if (viewer.AnnotationWidget && refViewer.AnnotationWidget) {
@@ -764,9 +767,9 @@ window.SA = window.SA || {};
     }
   };
 
-    // Called from the console for renal stack.
-    // For every polyline in the left viewer, try to find a corresponding
-    // polyline in the right viewer. If found, change its color to match.
+  // Called from the console for renal stack.
+  // For every polyline in the left viewer, try to find a corresponding
+  // polyline in the right viewer. If found, change its color to match.
   DualViewWidget.prototype.MatchPolylines = function (color, tolerance) {
     tolerance = tolerance || 0.5;
     var widgets0 = this.Viewers[0].GetAnnotationLayer().GetWidgets();

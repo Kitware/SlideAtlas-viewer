@@ -8,7 +8,7 @@
 
 // My feature requests from creating poster:
 // Snap to objects.
-// Text background options like rectange (gradient)
+// Text background options like rectangle (gradient)
 //   option to enter css text, or select color gui
 // Group objects.
 // Copy and paste object or group.
@@ -819,7 +819,7 @@
     // Check to see if the root is in the session. If not, add it.
     var noteInSession = false;
     var session = SA.Session.session.views;
-    for (var i = 0; i < session.length && !noteInSession; ++i) {
+    for (i = 0; i < session.length && !noteInSession; ++i) {
       if (session[i].id === this.RootNote.Id) {
         noteInSession = true;
       }
@@ -1037,15 +1037,14 @@
     }
 
     for (var i = 0; i < this.GetNumberOfSlides(); ++i) {
-        // get a title
+      // get a title
       var note = this.GetSlide(i);
-      var title;
       var title = note.Text;
       var idx = title.indexOf('sa-presentation-text');
       if (idx === -1) {
         title = note.Title;
         if (title === '') {
-                // Nothing i the text / html to use as a title.
+          // Nothing i the text / html to use as a title.
           title = 'Slide ' + i;
         }
       } else {
@@ -1053,8 +1052,8 @@
         idx = title.indexOf('>');
         title = title.substring(idx + 1);
         idx = title.indexOf('<');
-            // We may have other formating blocks.
-            // An xml parser would be nice.
+        // We may have other formating blocks.
+        // An xml parser would be nice.
         while (idx === 0) {
           idx = title.indexOf('>');
           title = title.substring(idx + 1);
@@ -1198,7 +1197,7 @@
             viewer.GetAnnotationLayer(), viewer);
       this.AnnotationWidget1.SetVisibility(2);
 
-      var viewer = this.ViewerDiv2[0].saViewer;
+      viewer = this.ViewerDiv2[0].saViewer;
       this.AnnotationWidget2 = new SA.AnnotationWidget(
             viewer.GetAnnotationLayer(), viewer);
       this.AnnotationWidget2.SetVisibility(2);
@@ -1411,7 +1410,7 @@
     var vHeight = viewport[3] * 0.8;
     var cam = record.Camera;
     var scale = vHeight / cam.Height;
-    var vWidth = scale * cam.Width;
+    vWidth = scale * cam.Width;
     if (vWidth > viewport[2] * 0.8) {
       vWidth = viewport[2] * 0.8;
       scale = vWidth / cam.Width;
@@ -1930,7 +1929,7 @@
 
     var vid = $('<video controls>')
         .appendTo(vidDiv);
-    var src = $('<source type="video/mp4">')
+    src = $('<source type="video/mp4">')
         .appendTo(vid)
         .attr('src', src);
 
@@ -1997,10 +1996,13 @@
     // Youtube size has to be set in the original html string.
     var width, height;
     var start = html.indexOf('width');
+    var str;
+    var end;
+    var tmp;
     if (start !== -1) {
-      var str = html.substring(start + 7);
-      var end = str.indexOf('"');
-      var tmp = str.substr(0, end);
+      str = html.substring(start + 7);
+      end = str.indexOf('"');
+      tmp = str.substr(0, end);
       width = parseInt(tmp) / (800 * 1.333);
       width = Math.round(width * 100);
       width = width + '%';
@@ -2008,9 +2010,9 @@
     }
     start = html.indexOf('height');
     if (start !== -1) {
-      var str = html.substring(start + 8);
-      var end = str.indexOf('"');
-      var tmp = str.substr(0, end);
+      str = html.substring(start + 8);
+      end = str.indexOf('"');
+      tmp = str.substr(0, end);
       height = parseInt(tmp) / 800;
       height = Math.round(height * 100);
       height = height + '%';

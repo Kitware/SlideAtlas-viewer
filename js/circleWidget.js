@@ -262,7 +262,7 @@
 
     if (this.State === DRAG_RADIUS) {
       var viewport = this.Layer.GetViewport();
-      var cam = this.Layer.GetCamera();
+      cam = this.Layer.GetCamera();
       var dx = x - this.OriginViewer[0];
       var dy = y - this.OriginViewer[1];
             // Change units from pixels to world.

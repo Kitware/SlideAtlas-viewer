@@ -184,7 +184,7 @@
       }
       return false;
     }
-        // Compute and save view bounds for each section.
+    // Compute and save view bounds for each section.
     for (var i = 0; i < this.Sections.length; ++i) {
       var section = this.Sections[i];
       section.ViewBounds = section.GetViewBounds(this.Layer.AnnotationView);
@@ -192,8 +192,8 @@
       SA.PermuteBounds(section.ViewBounds, axis1, direction1);
     }
 
-        // Use lessThan to sort (insertion).
-    for (var i = 1; i < this.Sections.length; ++i) {
+    // Use lessThan to sort (insertion).
+    for (i = 1; i < this.Sections.length; ++i) {
       var bestBds = this.Sections[i - 1].ViewBounds;
       var bestIdx = -1;
       for (var j = i; j < this.Sections.length; ++j) {
@@ -470,28 +470,30 @@
 
     // The multiple actions of bounds might be confusing to the user.
   SectionsWidget.prototype.ProcessBounds = function (bds) {
+    var tmp;
     if (bds[0] > bds[1]) {
-      var tmp = bds[0];
+      tmp = bds[0];
       bds[0] = bds[1];
       bds[1] = tmp;
     }
     if (bds[2] > bds[3]) {
-      var tmp = bds[2];
+      tmp = bds[2];
       bds[2] = bds[3];
       bds[3] = tmp;
     }
 
     var full = [];
     var partial = [];
+    var section;
     for (var i = 0; i < this.Sections.length; ++i) {
-      var section = this.Sections[i];
+      section = this.Sections[i];
       var mode = section.ContainedInBounds(bds);
       if (mode === 2) { full.push(section); }
       if (mode === 1) { partial.push(section); }
     }
         // If the rectangle fully contains more than one shape, group them
     if (full.length > 1) {
-      for (var i = 1; i < full.length; ++i) {
+      for (i = 1; i < full.length; ++i) {
         full[0].Union(full[i]);
         this.RemoveSection(full[i]);
       }
@@ -532,10 +534,10 @@
         // If the contours partially contains only one section, and clean
         // separates the shapes, then split them.
     if (full.length === 0 && partial.length === 1) {
-      var section = partial[0];
+      section = partial[0];
       full = [];
       partial = [];
-      for (var i = 0; i < section.Shapes.length; ++i) {
+      for (i = 0; i < section.Shapes.length; ++i) {
         var contains = section.Shapes[i].ContainedInBounds(bds);
         if (contains === 1) { partial.push(section.Shapes[i]); }
         if (contains === 2) { full.push(section.Shapes[i]); }
@@ -545,7 +547,7 @@
                 // Split it up.
         var newSection = new SA.StackSectionWidget();
         newSection.Shapes = full;
-        for (var i = 0; i < full.length; ++i) {
+        for (i = 0; i < full.length; ++i) {
           idx = section.Shapes.indexOf(full[i]);
           if (idx !== -1) {
             section.Shapes.splice(idx, 1);
@@ -606,7 +608,7 @@
     }
 
     var bigContours = [];
-    for (var i = 0; i < contours.length; ++i) {
+    for (i = 0; i < contours.length; ++i) {
       if (contours[i].GetArea() > largestArea * 0.5) {
         bigContours.push(contours[i]);
       }

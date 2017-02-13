@@ -52,7 +52,6 @@
 
     this.Visibility = false;
 
-    var self = this;
     // SA.OnStartInteraction( function () { self.SetVisibility(false);} );
   }
 
@@ -86,7 +85,7 @@
     }
 
     this.Layer.SetVisibility(true);
-    var widget = new SAM.TextWidget(this.Layer, '');
+    widget = new SAM.TextWidget(this.Layer, '');
     var cam = this.Layer.GetCamera();
     var x = cam.FocalPoint[0];
     var y = cam.FocalPoint[1];

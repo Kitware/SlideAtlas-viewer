@@ -98,28 +98,29 @@
     return -1;
   };
 
-    // Returns undefined if the point is not on the shape.
-    // Otherwise returns the indexes of the segment touched [i0, i1, k].
+  // Returns undefined if the point is not on the shape.
+  // Otherwise returns the indexes of the segment touched [i0, i1, k].
   Polyline.prototype.PointOnShape = function (pt, dist) {
-        // Make a copy of the point (array).
+    // Make a copy of the point (array).
     pt = pt.slice(0);
     pt[0] -= this.Origin[0];
     pt[1] -= this.Origin[1];
-        // NOTE: bounds already includes lineWidth
+    // NOTE: bounds already includes lineWidth
     if (pt[0] + dist < this.Bounds[0] || pt[0] - dist > this.Bounds[1] ||
             pt[1] + dist < this.Bounds[2] || pt[1] - dist > this.Bounds[3]) {
       return undefined;
     }
-        // Check for mouse touching an edge.
+    // Check for mouse touching an edge.
+    var k;
     for (var i = 1; i < this.Points.length; ++i) {
-      var k = this.IntersectPointLine(pt, this.Points[i - 1],
+      k = this.IntersectPointLine(pt, this.Points[i - 1],
                                             this.Points[i], dist);
       if (k !== undefined) {
         return [i - 1, i, k];
       }
     }
     if (this.Closed) {
-      var k = this.IntersectPointLine(pt, this.Points[this.Points.length - 1],
+      k = this.IntersectPointLine(pt, this.Points[this.Points.length - 1],
                                             this.Points[0], dist);
       if (k !== undefined) {
         return [this.Points.length - 1, 0, k];
@@ -149,15 +150,15 @@
     return bestPt;
   };
 
-    // Note, self intersection can cause unexpected areas.
-    // i.e looping around a point twice ...
+  // Note, self intersection can cause unexpected areas.
+  // i.e looping around a point twice ...
   Polyline.prototype.ComputeArea = function () {
     if (this.Points.length < 3) {
       return 0.0;
     }
 
-        // Compute the center. It should be more numerically stable.
-        // I could just choose the first point as the origin.
+    // Compute the center. It should be more numerically stable.
+    // I could just choose the first point as the origin.
     var cx = 0;
     var cy = 0;
     for (var j = 0; j < this.Points.length; ++j) {
@@ -168,13 +169,13 @@
     cy = cy / this.Points.length;
 
     var area = 0.0;
-        // Iterate over triangles adding the area of each
+    // Iterate over triangles adding the area of each
     var last = this.Points.length - 1;
     var vx1 = this.Points[last][0] - cx;
     var vy1 = this.Points[last][1] - cy;
-        // First and last point form another triangle (they are not the same).
-    for (var j = 0; j < this.Points.length; ++j) {
-            // Area of triangle is 1/2 magnitude of cross product.
+    // First and last point form another triangle (they are not the same).
+    for (j = 0; j < this.Points.length; ++j) {
+      // Area of triangle is 1/2 magnitude of cross product.
       var vx2 = vx1;
       var vy2 = vy1;
       vx1 = this.Points[j][0] - cx;
@@ -182,7 +183,7 @@
       area += (vx1 * vy2) - (vx2 * vy1);
     }
 
-        // Handle both left hand loops and right hand loops.
+    // Handle both left hand loops and right hand loops.
     if (area < 0) {
       area = -area;
     }
@@ -278,11 +279,11 @@
     }
   };
 
-    // NOTE: Line thickness is handled by style in canvas.
-    // I think the GL version that uses triangles is broken.
+  // NOTE: Line thickness is handled by style in canvas.
+  // I think the GL version that uses triangles is broken.
   Polyline.prototype.UpdateBuffers = function (view) {
-        // Hack: Annotations really do not need to worry about webgl
-        // anymore. And the view is only used to get the webgl context.
+    // Hack: Annotations really do not need to worry about webgl
+    // anymore. And the view is only used to get the webgl context.
     view = view || {};
 
     var points = this.Points.slice(0);
@@ -296,31 +297,32 @@
     mat4.identity(this.Matrix);
 
     if (this.Points.length === 0) { return; }
-        // xMin,xMax, yMin,yMax
+    // xMin,xMax, yMin,yMax
     this.Bounds = [points[0][0], points[0][0], points[0][1], points[0][1]];
 
+    var i;
     if (this.LineWidth === 0 || !view.gl) {
-      for (var i = 0; i < points.length; ++i) {
+      for (i = 0; i < points.length; ++i) {
         this.PointBuffer.push(points[i][0]);
         this.PointBuffer.push(points[i][1]);
         this.PointBuffer.push(0.0);
         this.AddPointToBounds(points[i], 0);
       }
-            // Not used for line width === 0.
-      for (var i = 2; i < points.length; ++i) {
+      // Not used for line width === 0.
+      for (i = 2; i < points.length; ++i) {
         cellData.push(0);
         cellData.push(i - 1);
         cellData.push(i);
       }
     } else {
-            // Compute a list normals for middle points.
+      // Compute a list normals for middle points.
       var edgeNormals = [];
       var mag;
       var x;
       var y;
       var end = points.length - 1;
-            // Compute the edge normals.
-      for (var i = 0; i < end; ++i) {
+      // Compute the edge normals.
+      for (i = 0; i < end; ++i) {
         x = points[i + 1][0] - points[i][0];
         y = points[i + 1][1] - points[i][1];
         mag = Math.sqrt(x * x + y * y);
@@ -339,7 +341,7 @@
         this.PointBuffer.push(points[0][1] + dy);
         this.PointBuffer.push(0.0);
         this.AddPointToBounds(points[i], half);
-        for (var i = 1; i < end; ++i) {
+        for (i = 1; i < end; ++i) {
           this.PointBuffer.push(points[i][0] - dx);
           this.PointBuffer.push(points[i][1] - dy);
           this.PointBuffer.push(0.0);
@@ -362,8 +364,8 @@
         this.PointBuffer.push(points[end][1] + dy);
         this.PointBuffer.push(0.0);
       }
-            // Generate the triangles for a thick line
-      for (var i = 0; i < end; ++i) {
+      // Generate the triangles for a thick line
+      for (i = 0; i < end; ++i) {
         lineCellData.push(0 + 4 * i);
         lineCellData.push(1 + 4 * i);
         lineCellData.push(3 + 4 * i);
@@ -372,8 +374,8 @@
         lineCellData.push(2 + 4 * i);
       }
 
-            // Not used.
-      for (var i = 2; i < points.length; ++i) {
+      // Not used.
+      for (i = 2; i < points.length; ++i) {
         cellData.push(0);
         cellData.push((2 * i) - 1);
         cellData.push(2 * i);
@@ -403,26 +405,26 @@
     }
   };
 
-    // GLOBAL To Position the orientatation of the edge.
+  // GLOBAL To Position the orientation of the edge.
   var EDGE_COUNT = 0;
   var EDGE_ANGLE = (2 * Math.PI) * 0 / 24;
   var EDGE_OFFSET = 0; // In screen pixels.
   var EDGE_ROOT = 'edge';
   var EDGE_DELAY = 200;
-    // Saves images centered at spots on the edge.
-    // Roll is set to put the edge horizontal.
-    // Step is in screen pixel units
-    // Count is the starting index for file name generation.
+  // Saves images centered at spots on the edge.
+  // Roll is set to put the edge horizontal.
+  // Step is in screen pixel units
+  // Count is the starting index for file name generation.
   Polyline.prototype.SampleEdge = function (viewer, dim, step, count, callback) {
     var cam = viewer.GetCamera();
     var scale = cam.GetHeight() / cam.ViewportHeight;
-        // Convert the step from screen pixels to world.
+    // Convert the step from screen pixels to world.
     step *= scale;
     var cache = viewer.GetCache();
     var dimensions = [dim, dim];
-        // Distance between edge p0 to next sample point.
+    // Distance between edge p0 to next sample point.
     var remaining = step / 2;
-        // Recursive to serialize asynchronous cutouts.
+    // Recursive to serialize asynchronous cutouts.
     this.RecursiveSampleEdge(this.Points.length - 1, 0, remaining, step, count,
                                  cache, dimensions, scale, callback);
   };
@@ -430,17 +432,17 @@
                                                       cache, dimensions, scale, callback) {
     var pt0 = this.Points[i0];
     var pt1 = this.Points[i1];
-        // Compute the length of the edge.
+    // Compute the length of the edge.
     var dx = pt1[0] - pt0[0];
     var dy = pt1[1] - pt0[1];
     var length = Math.sqrt(dx * dx + dy * dy);
-        // Take steps along the edge (size 'step')
+    // Take steps along the edge (size 'step')
     if (remaining > length) {
-            // We passed over this edge. Move to the next edge.
+      // We passed over this edge. Move to the next edge.
       remaining = remaining - length;
       i0 = i1;
       i1 += 1;
-            // Test for terminating condition.
+      // Test for terminating condition.
       if (i1 < this.Points.length) {
         this.RecursiveSampleEdge(i0, i1, remaining, step, count,
                                          cache, dimensions, scale, callback);
@@ -449,31 +451,35 @@
       }
     } else {
       var self = this;
-            // Compute the sample point and tangent on this edge.
+      // Compute the sample point and tangent on this edge.
       var edgeAngle = -Math.atan2(dy, dx) + EDGE_ANGLE;
       var k = remaining / length;
       var x = pt0[0] + k * (pt1[0] - pt0[0]);
       var y = pt0[1] + k * (pt1[1] - pt0[1]);
-            // Normal (should be out if loop is clockwise).
+      // Normal (should be out if loop is clockwise).
       var nx = -dy;
       var ny = dx;
       var mag = Math.sqrt(nx * nx + ny * ny);
       nx = (nx / mag) * EDGE_OFFSET * scale;
       ny = (ny / mag) * EDGE_OFFSET * scale;
 
-            // Save an image at this sample point.
-      SA.GetCutoutImage(cache, dimensions, [x + nx, y + ny], scale,
-                           edgeAngle, EDGE_ROOT + count + '.png',
-                           function () {
-                             setTimeout(
-                                   function () {
-                                     ++count;
-                                     EDGE_COUNT = count;
-                                     remaining += step;
-                                     self.RecursiveSampleEdge(i0, i1, remaining, step, count,
-                                                                cache, dimensions, scale, callback);
-                                   }, EDGE_DELAY);
-                           });
+      // Save an image at this sample point.
+      SA.GetCutoutImage(
+        cache, dimensions, [x + nx, y + ny], scale,
+        edgeAngle, EDGE_ROOT + count + '.png',
+        function () {
+          setTimeout(
+            function () {
+              ++count;
+              EDGE_COUNT = count;
+              remaining += step;
+              self.RecursiveSampleEdge(
+                i0, i1, remaining, step, count,
+                cache, dimensions, scale, callback);
+            },
+            EDGE_DELAY);
+        }
+      );
     }
   };
 
