@@ -199,7 +199,7 @@
     this.User = note.User;
         // this.UserText = note.UserText;
     this.ViewerRecords = [];
-    for (var i = 0; i < note.ViewerRecords.length; ++i) {
+    for (i = 0; i < note.ViewerRecords.length; ++i) {
       var record = new SA.ViewerRecord();
       record.DeepCopy(note.ViewerRecords[i]);
       this.ViewerRecords.push(record);
@@ -403,19 +403,20 @@
     this.UpdateChildrenGUI();
   };
 
-    // TODO: Get the GUI stuff out of note objects.
+  // TODO: Get the GUI stuff out of note objects.
   Note.prototype.UpdateChildrenGUI = function () {
-        // Callback trick
+    // Callback trick
     var self = this;
+    var i;
 
-        // Clear
+    // Clear
     this.ChildrenDiv.empty();
 
-        // Stacks
+    // Stacks
     if (this.Type === 'Stack') {
-            // I want viewer records to look like children for stacks.
+      // I want viewer records to look like children for stacks.
       this.StackDivs = [];
-      for (var i = 0; i < this.ViewerRecords.length; ++i) {
+      for (i = 0; i < this.ViewerRecords.length; ++i) {
         var sectionDiv = $('<div>')
                     .addClass('note')
                     .appendTo(this.ChildrenDiv);
@@ -432,30 +433,30 @@
       return;
     }
 
-        // Notes
+    // Notes
     if (this.Children.length === 0) {
       return;
     }
 
-        // Move all the views to the end.  They do not take part in the notes
-        // gui. They are for text links.  They may mess up drag ordering.
+    // Move all the views to the end.  They do not take part in the notes
+    // gui. They are for text links.  They may mess up drag ordering.
     var newChildren = [];
-    for (var i = 0; i < this.Children.length; ++i) {
+    for (i = 0; i < this.Children.length; ++i) {
       if (this.Children[i].Type === 'Note') {
         newChildren.push(this.Children[i]);
       }
     }
-    for (var i = 0; i < this.Children.length; ++i) {
+    for (i = 0; i < this.Children.length; ++i) {
       if (this.Children[i].Type !== 'Note') {
         newChildren.push(this.Children[i]);
       }
     }
     this.Children = newChildren;
 
-    for (var i = 0; i < this.Children.length; ++i) {
+    for (i = 0; i < this.Children.length; ++i) {
       if (this.Children[i].Type === 'Note') {
         this.Children[i].DisplayGUI(this.ChildrenDiv);
-                // Indexes used for sorting.
+        // Indexes used for sorting.
         this.Children[i].Div.data('index', i);
         if (this.Children.length > 1) {
           this.Children[i].SortHandle.addClass('sa-sort-handle');
@@ -696,7 +697,7 @@
     // Will this erase children if includeChildren is off?
     if (!excludeChildren) {
       obj.Children = [];
-      for (var i = 0; i < this.Children.length; ++i) {
+      for (i = 0; i < this.Children.length; ++i) {
         obj.Children.push(this.Children[i].Serialize(excludeChildren));
       }
     }
@@ -755,12 +756,12 @@
     // Only used by presentations.
     if (this.UserNote) {
       // Make the user not into a real object.
-      var obj = this.UserNote;
+      obj = this.UserNote;
       this.UserNote = new SA.Note();
       this.UserNote.Load(obj);
     }
 
-    for (var i = 0; i < this.ViewerRecords.length; ++i) {
+    for (i = 0; i < this.ViewerRecords.length; ++i) {
       if (this.ViewerRecords[i]) {
         obj = this.ViewerRecords[i];
         // It would be nice to have a constructor that took an object.

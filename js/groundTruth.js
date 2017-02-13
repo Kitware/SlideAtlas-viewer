@@ -1,7 +1,7 @@
 // ==============================================================================
 // Collection widget, No serialize or load.
-// Manage 3 annotation sets,  detection, posives (ground truth) and false positives.
-// Sort the detections into the positive anntoations.
+// Manage 3 annotation sets,  detection, positives (ground truth) and false positives.
+// Sort the detections into the positive annotations.
 // These will be stored in three different rect sets.
 // Create my own layer.
 
@@ -196,16 +196,16 @@
         this.ActionState = KEY_UP;
         return false;
       }
-            // Mouse click (with key modifier) was used to recenter an
-            // annotation inside the sequences. We need to advance.
+      // Mouse click (with key modifier) was used to recenter an
+      // annotation inside the sequences. We need to advance.
       if (this.ActionState === KEY_USED_ADVANCE) {
-                // Just advance to the next
+        // Just advance to the next
         setTimeout(function () { self.ChangeCurrent(1); }, 300);
         this.ActionState = KEY_UP;
         return false;
       }
       this.ActionState = KEY_UP;
-            // Escape key stops iteration.
+      // Escape key stops iteration.
       if (event.keyCode === 27) { // escape
         this.Stop();
         return false;
@@ -213,19 +213,20 @@
     }
 
     var rectIdx = this.HighlightedRect.idx;
+    var rectSet;
     if (rectIdx > -1) {
-            // A rectancle is highlighted
+      // A rectangle is highlighted
       var rectWidget = this.HighlightedRect.widget;
-      var rectSet = rectWidget.Shape;
+      rectSet = rectWidget.Shape;
 
-            // Change the class of the highlighted rect.
+      // Change the class of the highlighted rect.
       var classIdx = event.keyCode - 48;
       if (classIdx >= 0 && classIdx < this.Classes.length) {
         var classLabel = this.Classes[classIdx].label;
-                // set a class label of a single detection
+        // set a class label of a single detection
         rectSet.Labels[rectIdx] = classLabel;
         this.Layer.EventuallyDraw();
-                // Automatically move to the next, to save clicks.
+        // Automatically move to the next, to save clicks.
         if (this.InteractionState === ITERATING &&
                     rectWidget === this.Classes[0].widget && rectIdx === this.IteratorIndex) {
           setTimeout(function () { self.ChangeCurrent(1); }, 300);
@@ -233,25 +234,25 @@
         return false;
       }
 
-            // Delete applies to the selected / highlighted rect.
+      // Delete applies to the selected / highlighted rect.
       if (event.keyCode === 46) { // Delete key
-                // remove the rectangle
+        // remove the rectangle
         rectSet.DeleteRectangle(rectIdx);
-                // Rebuild the hash.
-                // I could do this incrementally but I am lazy.
+        // Rebuild the hash.
+        // I could do this incrementally but I am lazy.
         var bds = this.Layer.GetViewer().GetOverViewBounds();
         rectWidget.Hash.Build(rectWidget.Shape.Centers, bds);
-                // Deleted rect was in the detection set while iterating
+        // Deleted rect was in the detection set while iterating
         if (this.InteractionState === ITERATING &&
                     rectWidget === this.Classes[0].widget) {
-                    // If we deleted a rect before the current, ...
+          // If we deleted a rect before the current, ...
           if (rectIdx < this.IteratorIndex) {
             this.SetIteratorIndex(this.IteratorIndex - 1);
           } else if (rectIdx === this.IteratorIndex) {
-                        // Animate to the next (rectIdx does not actually
-                        // change). Hack to find next under threshold
+            // Animate to the next (rectIdx does not actually
+            // change). Hack to find next under threshold
             this.IteratorIndex -= 1;
-                        // hack to get the next to highlight
+            // hack to get the next to highlight
             this.HighlightedRect.idx -= 1;
             setTimeout(function () { self.ChangeCurrent(1); }, 300);
           }
@@ -261,13 +262,13 @@
       }
     }
 
-        // Forward and backward.
+    // Forward and backward.
     if (this.InteractionState === ITERATING) {
-      var rectSet = this.Classes[0].widget.Shape;
+      rectSet = this.Classes[0].widget.Shape;
       var index = this.IteratorIndex;
       if (event.keyCode === 40) {
-                // down cursor key
-                // Move to the previous without a label
+        // down cursor key
+        // Move to the previous without a label
         while (index < rectSet.Widths.length) {
           if (rectSet.Labels[index] === 'detection') {
             this.SetIteratorIndex(index);
@@ -275,15 +276,15 @@
           }
           index += 1;
         }
-                // Got to end without finding one.
+        // Got to end without finding one.
         this.Layer.DeactivateWidget(this);
         return false;
       } else if (event.keyCode === 37) {
-                // Left cursor key
+        // Left cursor key
         this.ChangeCurrent(-1);
         return false;
       } else if (event.keyCode === 39) {
-                // Right cursor key
+        // Right cursor key
         this.ChangeCurrent(1);
         return false;
       }
@@ -556,12 +557,12 @@
     }
   };
 
-    // TODO: Share this code (to parse girder data) with girderWidget.
+  // TODO: Share this code (to parse girder data) with girderWidget.
   GroundTruth.prototype.LoadAnnotation = function (data, classObj) {
-        // Used for saving the annotation back to girder.
+    // Used for saving the annotation back to girder.
     classObj.annotation = data.annotation;
 
-        // Put all the rectangles into one set.
+    // Put all the rectangles into one set.
     var setObj = {};
     setObj.type = 'rect_set';
     setObj.centers = [];
@@ -584,7 +585,7 @@
           element.scalar = 1.0;
         }
         setObj.confidences.push(element.scalar);
-                // ignore the database label because we use our own
+        // ignore the database label because we use our own
         setObj.labels.push(classObj.label);
       }
     }
@@ -595,12 +596,12 @@
     var bds = this.Layer.GetViewer().GetOverViewBounds();
     widget.Hash.Build(widget.Shape.Centers, bds);
 
-        // We want to color by labels (not widget)
+    // We want to color by labels (not widget)
     var shape = widget.Shape;
     if (!shape.LabelColors) {
       shape.LabelColors = {};
-            // Colors setup in contructor.
-      for (var i = 0; i < this.Classes.length; ++i) {
+      // Colors setup in contructor.
+      for (i = 0; i < this.Classes.length; ++i) {
         shape.LabelColors[this.Classes[i].label] = this.Classes[i].color;
       }
     }
@@ -626,12 +627,12 @@
 
   GroundTruth.prototype.Start = function () {
     var self = this;
-        // Now always active
-        // this.Layer.ActivateWidget(this);
+    // Now always active
+    // this.Layer.ActivateWidget(this);
     this.InteractionState = ITERATING;
     this.Layer.LayerDiv.focus();
 
-        // zoom in
+    // zoom in
     var viewer = this.Layer.GetViewer();
     var cam = viewer.GetCamera();
     viewer.ZoomTarget = 500;
@@ -700,7 +701,7 @@
       this.Classes[i].newRectSet.LabelColors = this.Classes[i].widget.Shape.LabelColors;
     }
 
-    for (var i = 0; i < this.Classes.length; ++i) {
+    for (i = 0; i < this.Classes.length; ++i) {
       var inRectSet = this.Classes[i].widget.Shape;
       for (var inIdx = 0; inIdx < inRectSet.GetLength(); ++inIdx) {
         var label = inRectSet.Labels[inIdx];
@@ -710,8 +711,8 @@
       }
     }
 
-        // Now keep the new rectsets and dispose of the old.
-    for (var i = 0; i < this.Classes.length; ++i) {
+    // Now keep the new rectsets and dispose of the old.
+    for (i = 0; i < this.Classes.length; ++i) {
       this.Classes[i].widget.Shape = this.Classes[i].newRectSet;
       delete this.Classes[i].newRectSet;
     }
@@ -722,9 +723,10 @@
   GroundTruth.prototype.Save = function () {
     this.Classes[0].widget.Deactivate();
     this.SplitDetections();
+    var annotation;
     if (window.girder) {
             // Save in the database
-      var annotation = this.Classes[0].annotation;
+      annotation = this.Classes[0].annotation;
       annotation.elements = this.RectSetToGirderElements(this.Classes[0].widget);
       SA.PushProgress();
       girder.restRequest({
@@ -735,7 +737,7 @@
       }).done(function () { SA.PopProgress(); });
       for (var i = 0; i < this.Classes.length; ++i) {
         var widget = this.Classes[i].widget;
-        var annotation = this.Classes[i].annotation;
+        annotation = this.Classes[i].annotation;
         annotation.elements = this.RectSetToGirderElements(widget);
         SA.PushProgress();
                 // not sure about this id

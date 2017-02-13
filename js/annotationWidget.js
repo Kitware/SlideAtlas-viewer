@@ -304,7 +304,7 @@
     button.addClass('sa-active');
 
     // See if a SectionsWidget already exists.
-    var widget = null;
+    widget = null;
     var widgets = this.Layer.GetWidgets();
     for (var i = 0; i < widgets.length && widget === null; ++i) {
       var w = widgets[i];

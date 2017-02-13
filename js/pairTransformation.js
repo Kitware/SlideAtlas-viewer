@@ -1,11 +1,11 @@
 (function () {
   'use strict';
 
-    // ==============================================================================
-    // A correlation is just a pair of matching points from two sections.
-    // Abstract the correlation so we have an api for getting points.
-    // Currently, stack has direct access to correlation ivars / points.
-    // The api will make forward and back transformations use the same code.
+  // ==============================================================================
+  // A correlation is just a pair of matching points from two sections.
+  // Abstract the correlation so we have an api for getting points.
+  // Currently, stack has direct access to correlation ivars / points.
+  // The api will make forward and back transformations use the same code.
 
   function PairCorrelation () {
     this.point0 = [0, 0];
@@ -140,29 +140,33 @@
       return fpOut;
     }
 
+    var correlation;
+    var c;
+    var s;
     if (this.Correlations.length <= 1) {
-      var correlation = this.Correlations[0];
+      correlation = this.Correlations[0];
       this.DeltaRoll = correlation.GetRoll(idx1);
       pt0 = correlation.GetPoint(idx0);
       var dx = fpIn[0] - pt0[0];
       var dy = fpIn[1] - pt0[1];
-      var c = Math.cos(this.DeltaRoll);
-      var s = Math.sin(this.DeltaRoll);
+      c = Math.cos(this.DeltaRoll);
+      s = Math.sin(this.DeltaRoll);
       pt1 = correlation.GetPoint(idx1);
       fpOut[0] = c * dx + s * dy + pt1[0];
       fpOut[1] = c * dy - s * dx + pt1[1];
       return fpOut;
     }
 
-        // Compute the average weighted correlation point for each image.
+    // Compute the average weighted correlation point for each image.
     var pt0, pt1;
     var x, y;
     var sigma2 = sigma * sigma;
     var sumGauss = 0.0;
     var sum0 = [0.0, 0.0];
     var sum1 = [0.0, 0.0];
+    var gauss;
     for (var i = 0; i < this.Correlations.length; ++i) {
-      var correlation = this.Correlations[i];
+      correlation = this.Correlations[i];
       pt0 = correlation.GetPoint(idx0);
       pt1 = correlation.GetPoint(idx1);
             // Distance from the focal point being transformed (for weight)
@@ -170,7 +174,7 @@
       y = pt0[1] - fpIn[1];
       var dist2 = x * x + y * y;
             // Compute the gaussian (minimum for numerical stability)
-      var gauss = Math.max(Math.exp(-dist2 / sigma2), 0.0000001);
+      gauss = Math.max(Math.exp(-dist2 / sigma2), 0.0000001);
 
       sumGauss += gauss;
       sum0[0] += gauss * pt0[0];
@@ -183,25 +187,25 @@
     sum1[0] = sum1[0] / sumGauss;
     sum1[1] = sum1[1] / sumGauss;
 
-        // Now compute orientation.
+    // Now compute orientation.
     this.DeltaRoll = 0;
 
-        // For now lets ignore the roll in the correlation
-        // and compute roll from multiple points.
+    // For now lets ignore the roll in the correlation
+    // and compute roll from multiple points.
 
-        // Compute rotation
+    // Compute rotation
     var roll = 0;
-    var sumGauss = 0.0;
+    sumGauss = 0.0;
     var sumTheta = 0.0;
-    for (var i = 0; i < this.Correlations.length; ++i) {
-      var correlation = this.Correlations[i];
+    for (i = 0; i < this.Correlations.length; ++i) {
+      correlation = this.Correlations[i];
       pt0 = correlation.GetPoint(idx0);
       pt1 = correlation.GetPoint(idx1);
             // Distance from the focal point (for weight).
       x = pt0[0] - fpIn[0];
       y = pt0[1] - fpIn[1];
       var dist = x * x + y * y;
-      var gauss = Math.max(Math.exp(-dist / sigma2), 0.0000001);
+      gauss = Math.max(Math.exp(-dist / sigma2), 0.0000001);
             // Compute the two angles using the average centers.
             // angle 0:
       x = pt0[0] - sum0[0];
@@ -240,11 +244,11 @@
         // We need to translate center to origin, rotate, then translate back.
     fpOut[0] -= sum0[0];
     fpOut[1] -= sum0[1];
-    var c = Math.cos(roll);
-    var s = Math.sin(roll);
+    c = Math.cos(roll);
+    s = Math.sin(roll);
         // Left handed pixel coordinate system messes the rotation.
-    var x = c * fpOut[0] + s * fpOut[1];
-    var y = c * fpOut[1] - s * fpOut[0];
+    x = c * fpOut[0] + s * fpOut[1];
+    y = c * fpOut[1] - s * fpOut[0];
 
     fpOut[0] = x + sum1[0];
     fpOut[1] = y + sum1[1];

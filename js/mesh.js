@@ -29,7 +29,7 @@
       vertexPositionData.push(-10.0);
     }
 
-    for (var i = 0; i < this.Triangles.length; ++i) {
+    for (i = 0; i < this.Triangles.length; ++i) {
       cellData.push(this.Triangles[i][0]);
       cellData.push(this.Triangles[i][1]);
       cellData.push(this.Triangles[i][2]);

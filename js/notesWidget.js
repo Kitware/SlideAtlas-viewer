@@ -189,7 +189,7 @@
 
     var x = this.AvailableLeft;
     var y = this.AvailableTop;
-    var w = this.AvailableWidth;
+    w = this.AvailableWidth;
     var h = this.AvailableHeight;
 
     if (xIdx !== 1) {
@@ -304,7 +304,6 @@
               self.Body.css({'top': top + 'px'});
             });
 
-    var self = this;
     this.Display = display;
     this.Parent = parent;
         // I do not want the text editable until the note is set.
@@ -775,7 +774,6 @@
     var selectedText = sel.toString();
 
     if (!this.UrlDialog) {
-      var self = this;
       var dialog = new SAM.Dialog(function () {
         self.InsertUrlLinkAccept();
       });

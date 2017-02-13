@@ -9,17 +9,17 @@
   var SLICE = 0;
 
   function Section () {
-        // Warping to align this section with previous / next.
-        // This is only a matrix transformation.
+    // Warping to align this section with previous / next.
+    // This is only a matrix transformation.
     this.Matrix = mat4.create();
     mat4.identity(this.Matrix);
-        // The list of caches is really just a list of images in the montage.
+    // The list of caches is really just a list of images in the montage.
     this.Caches = [];
-        // For debugging stitching.
+    // For debugging stitching.
     this.Markers = [];
   }
 
-    // For limiting interaction.
+  // For limiting interaction.
   Section.prototype.GetBounds = function () {
     var bounds = [0, 10000, 0, 10000];
 
@@ -47,7 +47,7 @@
     return bounds;
   };
 
-    // Size of a pixel at the highest resolution.
+  // Size of a pixel at the highest resolution.
   Section.prototype.GetLeafSpacing = function () {
     if (!this.LeafSpacing) {
       for (var cIdx = 0; cIdx < this.Caches.length; ++cIdx) {
@@ -96,7 +96,7 @@
                         view.Viewport[2], view.Viewport[3]);
       gl.uniformMatrix4fv(program.pMatrixUniform, false, view.Camera.Matrix);
     } else {
-            // The camera maps the world coordinate system to (-1->1, -1->1).
+      // The camera maps the world coordinate system to (-1->1, -1->1).
       var h = 1.0 / view.Camera.Matrix[15];
       view.Context2d.transform(view.Camera.Matrix[0] * h, view.Camera.Matrix[1] * h,
                                      view.Camera.Matrix[4] * h, view.Camera.Matrix[5] * h,
@@ -105,12 +105,12 @@
 
     for (var i = 0; i < this.Caches.length; ++i) {
       var cache = this.Caches[i];
-            // Select the tiles to render first.
+      // Select the tiles to render first.
       this.Tiles = cache.ChooseTiles(view.Camera, SLICE, view.Tiles);
-            // For the 2d viewer, the order the tiles are drawn is very important.
-            // Low-resolution tiles have to be drawn first.  Make a new sorted array.
-            // The problem is that unloaded tiles fall back to rendering parents.
-            // Make  copy (although we could just destroy the "Tiles" array which is not really used again).
+      // For the 2d viewer, the order the tiles are drawn is very important.
+      // Low-resolution tiles have to be drawn first.  Make a new sorted array.
+      // The problem is that unloaded tiles fall back to rendering parents.
+      // Make  copy (although we could just destroy the "Tiles" array which is not really used again).
       var tiles = this.Tiles.slice(0);
       var loadedTiles = [];
       var j = 0;
@@ -120,22 +120,22 @@
           loadedTiles.push(tile);
         } else {
           if (tiles[j].LoadState < 3) {
-                        // Keep rendering until we have all the tiles.
+            // Keep rendering until we have all the tiles.
             finishedRendering = false;
           }
           if (tile.Parent) { // Queue up the parent.
-                        // Note: Parents might be added multiple times by different siblings.
-                        // Ok, lets render the whole tree (low res first) to
-                        // cover cracks.  This is done in choose tiles.
-                        // This is not needed for prgressive rendering then.
-                        // tiles.push(tile.Parent);
+            // Note: Parents might be added multiple times by different siblings.
+            // Ok, lets render the whole tree (low res first) to
+            // cover cracks.  This is done in choose tiles.
+            // This is not needed for prgressive rendering then.
+            // tiles.push(tile.Parent);
           }
         }
         ++j;
       }
 
-            // Reverse order to render low res tiles first.
-      for (var j = loadedTiles.length - 1; j >= 0; --j) {
+      // Reverse order to render low res tiles first.
+      for (j = loadedTiles.length - 1; j >= 0; --j) {
         loadedTiles[j].Draw(program, view);
       }
     }
@@ -145,34 +145,34 @@
   Section.prototype.LoadTilesInView = function (view) {
     for (var i = 0; i < this.Caches.length; ++i) {
       var cache = this.Caches[i];
-            // Select the tiles to render first.
-            // This also adds the tiles returned to the loading queue.
+      // Select the tiles to render first.
+      // This also adds the tiles returned to the loading queue.
       this.Tiles = cache.ChooseTiles(view.Camera, SLICE, view.Tiles);
     }
   };
 
-    // The above will load the first ancestor not loaded and will stop.
-    // I need to pre load the actual high res tiles for connectome.
+  // The above will load the first ancestor not loaded and will stop.
+  // I need to pre load the actual high res tiles for connectome.
   Section.prototype.LoadTilesInView2 = function (view) {
     for (var cIdx = 0; cIdx < this.Caches.length; ++cIdx) {
       var cache = this.Caches[cIdx];
-            // Select the tiles to load (loading is a byproduct).
+      // Select the tiles to load (loading is a byproduct).
       var tiles = cache.ChooseTiles(view.Camera, SLICE);
       for (var i = 0; i < tiles.length; ++i) {
         tiles[i].LoadState = 1;
-                // Add the tile at the front of the queue.
+        // Add the tile at the front of the queue.
         SA.LoadQueue.push(tiles[i]);
       }
     }
     SA.LoadQueueUpdate();
   };
 
-    // This load tiles in the view like draw but does not render them.
-    // I want to preload tiles in the next section.
+  // This load tiles in the view like draw but does not render them.
+  // I want to preload tiles in the next section.
   Section.prototype.LoadTilesInView = function (view) {
     for (var cIdx = 0; cIdx < this.Caches.length; ++cIdx) {
       var cache = this.Caches[cIdx];
-            // Select the tiles to load (loading is a byproduct).
+      // Select the tiles to load (loading is a byproduct).
       var tiles = cache.ChooseTiles(view.Camera, SLICE);
     }
   };

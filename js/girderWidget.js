@@ -135,7 +135,7 @@
   };
 
   GirderWidget.prototype.LoadAnnotationItem = function (annotId) {
-        // var annotId = "572be29d3f24e53573aa8e91";
+    // var annotId = "572be29d3f24e53573aa8e91";
     var self = this;
     girder.restRequest({
       path: 'annotation/' + annotId,
@@ -146,12 +146,15 @@
     });
   };
 
-    // Converts annotation layer widgets into girder annotation elements.
-    // returns an elements array.
+  // Converts annotation layer widgets into girder annotation elements.
+  // returns an elements array.
   GirderWidget.prototype.RecordAnnotation = function () {
     var returnElements = [];
+    var i;
+    var j;
+    var points;
 
-        // record the view.
+    // record the view.
     var cam = this.AnnotationLayer.GetCamera();
     var element = {'type': 'view',
       'center': cam.GetFocalPoint(),
@@ -162,7 +165,7 @@
     returnElements.push(element);
     element = undefined;
 
-    for (var i = 0; i < this.AnnotationLayer.GetNumberOfWidgets(); ++i) {
+    for (i = 0; i < this.AnnotationLayer.GetNumberOfWidgets(); ++i) {
       var widget = this.AnnotationLayer.GetWidget(i).Serialize();
       if (widget.type === 'circle') {
         widget.origin[2] = 0; // z coordinate
@@ -172,7 +175,7 @@
       }
       if (widget.type === 'text') {
                 // Will not keep scale feature..
-        var points = [widget.position, widget.offset];
+        points = [widget.position, widget.offset];
         points[1][0] += widget.position[0];
         points[1][1] += widget.position[1];
         points[0][2] = 0;
@@ -205,7 +208,7 @@
       }
       if (widget.type === 'rect_set') {
         var num = widget.widths.length;
-        for (var j = 0; j < num; ++j) {
+        for (j = 0; j < num; ++j) {
           element = {'type': 'rectangle',
             'label': {'value': widget.labels[j]},
             'center': [widget.centers[2 * j], widget.centers[2 * j + 1], 0],
@@ -218,8 +221,8 @@
         element = undefined;
       }
       if (widget.type === 'polyline') {
-                // add the z coordinate
-        for (var j = 0; j < widget.points.length; ++j) {
+        // add the z coordinate
+        for (j = 0; j < widget.points.length; ++j) {
           widget.points[j][2] = 0;
         }
         element = {'type': 'polyline',
@@ -228,25 +231,25 @@
       }
       if (widget.type === 'lasso') {
                 // add the z coordinate
-        for (var j = 0; j < widget.points.length; ++j) {
+        for (j = 0; j < widget.points.length; ++j) {
           widget.points[j][2] = 0;
         }
         element = {'type': 'polyline',
           'closed': true,
           'points': widget.points};
       }
-            // Pencil scheme not exact match.  Need to split up polylines.
+      // Pencil scheme not exact match.  Need to split up polylines.
       if (widget.type === 'pencil') {
-        for (var i = 0; i < widget.shapes.length; ++i) {
-          var points = widget.shapes[i];
+        for (i = 0; i < widget.shapes.length; ++i) {
+          points = widget.shapes[i];
                     // add the z coordinate
-          for (var j = 0; j < points.length; ++j) {
+          for (j = 0; j < points.length; ++j) {
             points[j][2] = 0;
           }
           element = {'type': 'polyline',
             'closed': false,
             'points': points};
-                    // Hackish way to deal with multiple lines.
+          // Hackish way to deal with multiple lines.
           if (widget.outlinecolor) {
             element.lineColor = SAM.ConvertColorToHex(widget.outlinecolor);
           }
@@ -270,9 +273,9 @@
     return returnElements;
   };
 
-    // Replace an existing annotation with the current state of the
-    // annotation layer.  Saves in the database too.
-    // NOTE: We have no safe way for the database save to fail.
+  // Replace an existing annotation with the current state of the
+  // annotation layer.  Saves in the database too.
+  // NOTE: We have no safe way for the database save to fail.
   GirderWidget.prototype.SnapShotAnnotation = function (annotObj) {
     this.Highlight(annotObj);
     annotObj.Data.annotation.elements = this.RecordAnnotation();
@@ -287,24 +290,25 @@
     }
   };
 
-    // Delete button in menu calls this.
-    // Remove the annotation from the gui and database.
-    // TODO: animate the circles moving up.
+  // Delete button in menu calls this.
+  // Remove the annotation from the gui and database.
+  // TODO: animate the circles moving up.
   GirderWidget.prototype.DeleteAnnotation = function (deleteAnnotObj) {
     var found = false;
     var newObjects = [];
+    var y;
     for (var i = 0; i < this.AnnotationObjects.length; ++i) {
       var annotObj = this.AnnotationObjects[i];
       if (found) {
-                // Animate the dots up to fill the space.
-        var y = 70 + ((i - 1) * 6 * this.Radius);
+        // Animate the dots up to fill the space.
+        y = 70 + ((i - 1) * 6 * this.Radius);
         annotObj.Circle.animate({'top': y + 'px'});
         newObjects.push(annotObj);
       } else if (deleteAnnotObj === annotObj) {
         found = true;
         annotObj.Circle.remove();
         if (window.girder) {
-                    // Remove the annotation from the database.
+          // Remove the annotation from the database.
           girder.restRequest({
             path: 'annotation/' + annotObj.Data._id,
             method: 'DELETE',
@@ -315,15 +319,15 @@
         newObjects.push(annotObj);
       }
     }
-        // Animate the "Add Annotation" button up too.
-    var y = 70 + ((i - 1) * 6 * this.Radius);
+    // Animate the "Add Annotation" button up too.
+    y = 70 + ((i - 1) * 6 * this.Radius);
     this.Plus.animate({'top': y + 'px'});
     this.AnnotationObjects = newObjects;
   };
 
-    // Animate the "add annotation" button down to make room for another
-    // annotation button.  Make a new annotation and save it in the
-    // database. Return the annotationObject which has GUI and data.
+  // Animate the "add annotation" button down to make room for another
+  // annotation button.  Make a new annotation and save it in the
+  // database. Return the annotationObject which has GUI and data.
   GirderWidget.prototype.AddAnnotation = function (data) {
     var idx = this.AnnotationObjects.length;
     var y = 70 + (idx * 6 * this.Radius);

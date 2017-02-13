@@ -153,14 +153,15 @@
     var x = this.Viewer.MouseX;
     var y = this.Viewer.MouseY;
 
+    var ptWorld;
     if (event.which === 1) {
-      var ptWorld = this.Viewer.ConvertPointViewerToWorld(x, y);
+      ptWorld = this.Viewer.ConvertPointViewerToWorld(x, y);
       this.Cursor.attr('src', SAM.ImagePathUrl + 'brush1.jpg');
       this.Cursor.show();
       this.Segmentation.AddPositive(ptWorld);
     }
     if (event.which === 3) {
-      var ptWorld = this.Viewer.ConvertPointViewerToWorld(x, y);
+      ptWorld = this.Viewer.ConvertPointViewerToWorld(x, y);
       this.Cursor.attr('src', SAM.ImagePathUrl + 'eraser1.jpg');
       this.Cursor.show();
       this.Segmentation.AddNegative(ptWorld);
@@ -194,12 +195,13 @@
     this.Cursor.css({'left': (x + 4), 'top': (y - 32)});
 
     if (this.Viewer.MouseDown === true && this.State === FILL_WIDGET_DRAWING) {
+      var ptWorld;
       if (event.which === 1) {
-        var ptWorld = this.Viewer.ConvertPointViewerToWorld(x, y);
+        ptWorld = this.Viewer.ConvertPointViewerToWorld(x, y);
         this.Segmentation.AddPositive(ptWorld);
       }
       if (event.which === 3) {
-        var ptWorld = this.Viewer.ConvertPointViewerToWorld(x, y);
+        ptWorld = this.Viewer.ConvertPointViewerToWorld(x, y);
         this.Segmentation.AddNegative(ptWorld);
       }
 

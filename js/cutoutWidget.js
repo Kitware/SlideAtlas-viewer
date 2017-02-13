@@ -91,9 +91,8 @@
     if (view.gl) {
       alert('webGL cutout not supported');
     } else {
-            // The 2d canvas was left in world coordinates.
+      // The 2d canvas was left in world coordinates.
       var ctx = view.Context2d;
-      var cam = view.Camera;
       ctx.save();
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       this.DrawRectangle(ctx, this.Bounds, cam, '#00A', 1, 0);
@@ -178,13 +177,14 @@
 
     // returns false when it is finished doing its work.
   CutoutWidget.prototype.HandleMouseUp = function () {
+    var tmp;
     if (this.Bounds[0] > this.Bounds[1]) {
-      var tmp = this.Bounds[0];
+      tmp = this.Bounds[0];
       this.Bounds[0] = this.Bounds[1];
       this.Bounds[1] = tmp;
     }
     if (this.Bounds[2] > this.Bounds[3]) {
-      var tmp = this.Bounds[2];
+      tmp = this.Bounds[2];
       this.Bounds[2] = this.Bounds[3];
       this.Bounds[3] = tmp;
     }
@@ -239,31 +239,47 @@
   CutoutWidget.prototype.UpdateBounds = function (event) {
     var cache = this.Viewer.GetCache();
     var tileSize = cache.Image.TileSize;
-        // this.Bounds[0] = Math.floor(this.DragBounds[0]/tileSize) * tileSize;
-        // this.Bounds[1] =  Math.ceil(this.DragBounds[1]/tileSize) * tileSize;
-        // this.Bounds[2] = Math.floor(this.DragBounds[2]/tileSize) * tileSize;
-        // this.Bounds[3] =  Math.ceil(this.DragBounds[3]/tileSize) * tileSize;
+    // this.Bounds[0] = Math.floor(this.DragBounds[0]/tileSize) * tileSize;
+    // this.Bounds[1] =  Math.ceil(this.DragBounds[1]/tileSize) * tileSize;
+    // this.Bounds[2] = Math.floor(this.DragBounds[2]/tileSize) * tileSize;
+    // this.Bounds[3] =  Math.ceil(this.DragBounds[3]/tileSize) * tileSize;
     var bds = [0, 0, 0, 0];
     bds[0] = Math.round(this.DragBounds[0] / tileSize) * tileSize;
     bds[1] = Math.round(this.DragBounds[1] / tileSize) * tileSize;
     bds[2] = Math.round(this.DragBounds[2] / tileSize) * tileSize;
     bds[3] = Math.round(this.DragBounds[3] / tileSize) * tileSize;
 
-        // Keep the bounds in the image.
-        // min and max could be inverted.
-        // I am not sure the image bounds have to be on the tile boundaries.
+    // Keep the bounds in the image.
+    // min and max could be inverted.
+    // I am not sure the image bounds have to be on the tile boundaries.
     var imgBds = cache.Image.bounds;
-    if (bds[0] < imgBds[0]) bds[0] = imgBds[0];
-    if (bds[1] < imgBds[0]) bds[1] = imgBds[0];
-    if (bds[2] < imgBds[2]) bds[2] = imgBds[2];
-    if (bds[3] < imgBds[2]) bds[3] = imgBds[2];
+    if (bds[0] < imgBds[0]) {
+      bds[0] = imgBds[0];
+    }
+    if (bds[1] < imgBds[0]) {
+      bds[1] = imgBds[0];
+    }
+    if (bds[2] < imgBds[2]) {
+      bds[2] = imgBds[2];
+    }
+    if (bds[3] < imgBds[2]) {
+      bds[3] = imgBds[2];
+    }
 
-    if (bds[0] > imgBds[1]) bds[0] = imgBds[1];
-    if (bds[1] > imgBds[1]) bds[1] = imgBds[1];
-    if (bds[2] > imgBds[3]) bds[2] = imgBds[3];
-    if (bds[3] > imgBds[3]) bds[3] = imgBds[3];
+    if (bds[0] > imgBds[1]) {
+      bds[0] = imgBds[1];
+    }
+    if (bds[1] > imgBds[1]) {
+      bds[1] = imgBds[1];
+    }
+    if (bds[2] > imgBds[3]) {
+      bds[2] = imgBds[3];
+    }
+    if (bds[3] > imgBds[3]) {
+      bds[3] = imgBds[3];
+    }
 
-        // Do not the bounds go to zero area.
+    // Do not the bounds go to zero area.
     if (bds[0] !== bds[1]) {
       this.Bounds[0] = bds[0];
       this.Bounds[1] = bds[1];

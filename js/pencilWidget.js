@@ -13,11 +13,11 @@
 // Color (property window).
 
 (function () {
-    // Depends on the CIRCLE widget
+  // Depends on the CIRCLE widget
   'use strict';
 
   var DRAWING = 0;
-    // Active means highlighted.
+  // Active means highlighted.
   var ACTIVE = 1;
   var DRAG = 2;
   var WAITING = 3;
@@ -27,17 +27,17 @@
       return;
     }
 
-        // Keep track of annotation created by students without edit
-        // permission.
+    // Keep track of annotation created by students without edit
+    // permission.
     this.UserNoteFlag = !SA.Edit;
     this.Type = 'pencil';
 
     var self = this;
     this.Dialog = new SAM.Dialog(function () { self.DialogApplyCallback(); });
-        // Customize dialog for a pencil.
+    // Customize dialog for a pencil.
     this.Dialog.Title.text('Pencil Annotation Editor');
     this.Dialog.Body.css({'margin': '1em 2em'});
-        // Color
+    // Color
     this.Dialog.ColorDiv =
             $('<div>')
             .appendTo(this.Dialog.Body)
@@ -87,7 +87,6 @@
     this.Popup = new SAM.WidgetPopup(this);
     this.Layer.AddWidget(this);
 
-    var self = this;
     this.Shapes = new SAM.ShapeGroup();
     this.SetStateToDrawing();
 
@@ -96,9 +95,9 @@
       this.Layer.GetCanvasDiv().css({'cursor': 'default'});
     }
 
-        // Lets save the zoom level (sort of).
-        // Load will overwrite this for existing annotations.
-        // This will allow us to expand annotations into notes.
+    // Lets save the zoom level (sort of).
+    // Load will overwrite this for existing annotations.
+    // This will allow us to expand annotations into notes.
     this.CreationCamera = layer.GetCamera().Serialize();
   }
 
@@ -138,7 +137,7 @@
     return obj;
   };
 
-    // Load a widget from a json object (origin MongoDB).
+  // Load a widget from a json object (origin MongoDB).
   PencilWidget.prototype.Load = function (obj) {
     this.LineWidth = parseFloat(obj.linewidth);
     this.UserNoteFlag = obj.user_note_flag;
@@ -164,7 +163,7 @@
       shape.UpdateBuffers(this.Layer.AnnotationView);
     }
 
-        // How zoomed in was the view when the annotation was created.
+    // How zoomed in was the view when the annotation was created.
     if (obj.view_height !== undefined) {
       this.CreationCamera = obj.creation_camera;
     }

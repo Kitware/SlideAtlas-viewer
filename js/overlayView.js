@@ -75,8 +75,7 @@
     shaderProgram.centerUniform = gl.getUniformLocation(shaderProgram, 'uCenter');
     this.View.ShaderProgram = shaderProgram;
 
-    var self = this;
-        // this.View.Canvas
+    // this.View.Canvas
     this.OverlayViewDiv.on(
       'mousemove.overlay',
       function (event) {
@@ -87,7 +86,7 @@
       });
   }
 
-    // To compress draw events.
+  // To compress draw events.
   OverlayView.prototype.EventuallyDraw = function () {
     if (!this.RenderPending) {
       this.RenderPending = true;

@@ -21,6 +21,8 @@
     this.PointBuffer = [];
     var cellData = [];
     var lineCellData = [];
+    var i;
+    var theta;
     var numEdges = Math.floor(this.Radius / 2) + 10;
         // NOTE: numEdges logic will not work in world coordinates.
         // Limit numEdges to 180 to mitigate this issue.
@@ -33,17 +35,17 @@
 
     if (view.gl) {
       if (this.LineWidth === 0) {
-        for (var i = 0; i <= numEdges; ++i) {
-          var theta = i * 2 * 3.14159265359 / numEdges;
+        for (i = 0; i <= numEdges; ++i) {
+          theta = i * 2 * 3.14159265359 / numEdges;
           this.PointBuffer.push(this.Radius * Math.cos(theta));
           this.PointBuffer.push(this.Radius * Math.sin(theta));
           this.PointBuffer.push(0.0);
         }
 
-                // Now create the triangles
-                // It would be nice to have a center point,
-                // but this would mess up the outline.
-        for (var i = 2; i < numEdges; ++i) {
+        // Now create the triangles
+        // It would be nice to have a center point,
+        // but this would mess up the outline.
+        for (i = 2; i < numEdges; ++i) {
           cellData.push(0);
           cellData.push(i - 1);
           cellData.push(i);
@@ -61,12 +63,12 @@
         this.CellBuffer.itemSize = 1;
         this.CellBuffer.numItems = cellData.length;
       } else {
-                // var minRad = this.Radius - (this.LineWidth/2.0);
-                // var maxRad = this.Radius + (this.LineWidth/2.0);
+        // var minRad = this.Radius - (this.LineWidth/2.0);
+        // var maxRad = this.Radius + (this.LineWidth/2.0);
         var minRad = this.Radius;
         var maxRad = this.Radius + this.LineWidth;
-        for (var i = 0; i <= numEdges; ++i) {
-          var theta = i * 2 * 3.14159265359 / numEdges;
+        for (i = 0; i <= numEdges; ++i) {
+          theta = i * 2 * 3.14159265359 / numEdges;
           this.PointBuffer.push(minRad * Math.cos(theta));
           this.PointBuffer.push(minRad * Math.sin(theta));
           this.PointBuffer.push(0.0);
@@ -80,10 +82,10 @@
         this.VertexPositionBuffer.itemSize = 3;
         this.VertexPositionBuffer.numItems = this.PointBuffer.length / 3;
 
-                // Now create the fill triangles
-                // It would be nice to have a center point,
-                // but this would mess up the outline.
-        for (var i = 2; i < numEdges; ++i) {
+        // Now create the fill triangles
+        // It would be nice to have a center point,
+        // but this would mess up the outline.
+        for (i = 2; i < numEdges; ++i) {
           cellData.push(0);
           cellData.push((i - 1) * 2);
           cellData.push(i * 2);
@@ -94,8 +96,8 @@
         this.CellBuffer.itemSize = 1;
         this.CellBuffer.numItems = cellData.length;
 
-                // Now the thick line
-        for (var i = 0; i < numEdges; ++i) {
+        // Now the thick line
+        for (i = 0; i < numEdges; ++i) {
           lineCellData.push(0 + i * 2);
           lineCellData.push(1 + i * 2);
           lineCellData.push(2 + i * 2);
@@ -110,8 +112,8 @@
         this.LineCellBuffer.numItems = lineCellData.length;
       }
     } else {
-      for (var i = 0; i <= numEdges; ++i) {
-        var theta = i * 2 * 3.14159265359 / numEdges;
+      for (i = 0; i <= numEdges; ++i) {
+        theta = i * 2 * 3.14159265359 / numEdges;
         this.PointBuffer.push(this.Radius * Math.cos(theta));
         this.PointBuffer.push(this.Radius * Math.sin(theta));
         this.PointBuffer.push(0.0);

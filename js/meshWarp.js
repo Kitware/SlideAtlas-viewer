@@ -74,30 +74,35 @@
     return dist;
   };
 
-// This method converts a point in image coordinates to a point in world coordinates.
+  // This method converts a point in image coordinates to a point in world coordinates.
   meshWarp.prototype.ImageToWorld = function (imagePt) {
-  // If point is outside all triangles, choose the best / closest.
+    // If point is outside all triangles, choose the best / closest.
     var bestTriangleIds;
     var bestParams = null;
     var bestDist;
     var dist;
-  // Find the triangle that contains the point.
-    for (var i = 0; i < this.Triangles.length; ++i) {
+    var worldPt;
+    var i;
+    var j;
+    var k;
+    // Find the triangle that contains the point.
+    for (i = 0; i < this.Triangles.length; ++i) {
       var triangleIds = this.Triangles[i];
-      var trianglePoints = [this.Points[triangleIds[0]].ImagePt,
+      var trianglePoints = [
+        this.Points[triangleIds[0]].ImagePt,
         this.Points[triangleIds[1]].ImagePt,
         this.Points[triangleIds[2]].ImagePt];
-    // Params is an array of three weights.
+      // Params is an array of three weights.
       var params = this.ComputePointParameters(imagePt, trianglePoints);
       if (params) {
-      // Compute a distance of point from the triangle.
+        // Compute a distance of point from the triangle.
         dist = this.ComputeDistance(params);
         if (dist === 0.0) {
-        // Point is inside the triangle.
-        // Compute the world point from the weights.
-          var worldPt = [0.0, 0.0, 0.0];
-          for (var j = 0; j < 2; ++j) {
-            for (var k = 0; k < 3; ++k) {
+          // Point is inside the triangle.
+          // Compute the world point from the weights.
+          worldPt = [0.0, 0.0, 0.0];
+          for (j = 0; j < 2; ++j) {
+            for (k = 0; k < 3; ++k) {
               worldPt[j] += params[k] * this.Points[triangleIds[k]].WorldPt[j];
             }
           }
@@ -116,10 +121,10 @@
       return null;
     }
 
-  // Point is outside the mesh.  Use the closest / best triangle we could find.
-    var worldPt = [0.0, 0.0, 0.0];
-    for (var j = 0; j < 2; ++j) {
-      for (var k = 0; k < 3; ++k) {
+    // Point is outside the mesh.  Use the closest / best triangle we could find.
+    worldPt = [0.0, 0.0, 0.0];
+    for (j = 0; j < 2; ++j) {
+      for (k = 0; k < 3; ++k) {
         worldPt[j] += bestParams[k] * this.Points[bestTriangleIds[k]].WorldPt[j];
       }
     }
@@ -128,27 +133,31 @@
 
 // This method converts a point in world coordinates to a point in cache-image coordinates.
   meshWarp.prototype.WorldToImage = function (worldPt) {
-  // If point is outside all triangles, choose the best / closest.
+    // If point is outside all triangles, choose the best / closest.
     var bestTriangleIds;
     var bestParams = null;
     var bestDist;
     var dist;
-  // Find the triangle that contains the point.
+    var imagePt;
+    var j;
+    var k;
+    // Find the triangle that contains the point.
     for (var i = 0; i < this.Triangles.length; ++i) {
       var triangleIds = this.Triangles[i];
-      var trianglePoints = [this.Points[triangleIds[0]].WorldPt,
+      var trianglePoints = [
+        this.Points[triangleIds[0]].WorldPt,
         this.Points[triangleIds[1]].WorldPt,
         this.Points[triangleIds[2]].WorldPt];
-    // Params is an array of three weights.
+      // Params is an array of three weights.
       var params = this.ComputePointParameters(worldPt, trianglePoints);
       if (params) {
         dist = this.ComputeDistance(params);
         if (dist === 0.0) {
-        // Point is inside the triangle.
-        // Compute the world point from the weights.
-          var imagePt = [0.0, 0.0, 0.0];
-          for (var j = 0; j < 2; ++j) {
-            for (var k = 0; k < 3; ++k) {
+          // Point is inside the triangle.
+          // Compute the world point from the weights.
+          imagePt = [0.0, 0.0, 0.0];
+          for (j = 0; j < 2; ++j) {
+            for (k = 0; k < 3; ++k) {
               imagePt[j] += params[k] * this.Points[triangleIds[k]].ImagePt[j];
             }
           }
@@ -167,11 +176,11 @@
       return null;
     }
 
-  // This is problematic. It causes the boundary tiles to be wrong.
-  // Point is outside the mesh.  Use the closest / best triangle we could find.
-    var imagePt = [0.0, 0.0, 0.0];
-    for (var j = 0; j < 2; ++j) {
-      for (var k = 0; k < 3; ++k) {
+    // This is problematic. It causes the boundary tiles to be wrong.
+    // Point is outside the mesh.  Use the closest / best triangle we could find.
+    imagePt = [0.0, 0.0, 0.0];
+    for (j = 0; j < 2; ++j) {
+      for (k = 0; k < 3; ++k) {
         imagePt[j] += bestParams[k] * this.Points[bestTriangleIds[k]].ImagePt[j];
       }
     }

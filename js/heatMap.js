@@ -111,7 +111,7 @@
   };
 
   HeatMap.prototype.Draw = function (masterView, inCam) {
-    var inCam = inCam || masterView.Camera;
+    inCam = inCam || masterView.Camera;
 
     if (inCam) {
       if (this.Transform) {

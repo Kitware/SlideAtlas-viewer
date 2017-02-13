@@ -7,21 +7,21 @@
 // How are we going to store them in girder annotations?
 
 (function () {
-    // Depends on the CIRCLE widget
+  // Depends on the CIRCLE widget
   'use strict';
 
-    // use shape api, bu this is simpler so do not subclass.
+  // use shape api, bu this is simpler so do not subclass.
   function RectSet () {
-        // a single array [x,y,x,y,x,y...]
+    // a single array [x,y,x,y,x,y...]
     this.Centers = [];
     this.Widths = [];
     this.Heights = [];
     this.Labels = [];
     this.Confidences = [];
-        // Hack to hide rects below a specific confidence.
+    // Hack to hide rects below a specific confidence.
     this.Threshold = 0.0;
 
-        // For now, one can be active.  Highlight one
+    // For now, one can be active.  Highlight one
     this.ActiveIndex = -1;
   }
 
@@ -92,12 +92,12 @@
     this.Color = SAM.ConvertColorToHex(c);
   };
 
-    // do not worry about webGl for now.  Only canvas drawing.
-    // webgl would support more rects I assume.
+  // do not worry about webGl for now.  Only canvas drawing.
+  // webgl would support more rects I assume.
   RectSet.prototype.Draw = function (view) {
-        // 2d Canvas -----------------------------------------------
+    // 2d Canvas -----------------------------------------------
     view.Context2d.save();
-        // Identity.
+    // Identity.
     view.Context2d.setTransform(1, 0, 0, 1, 0, 0);
 
         // only supported case: this.PositionCoordinateSystem === Shape.SLIDE
@@ -109,12 +109,12 @@
 
     var scale = view.Viewport[3] / view.Camera.GetHeight();
 
-        // First transform the origin-world to view.
+    // First transform the origin-world to view.
     var m = view.Camera.Matrix;
     var x = m[12] / m[15];
     var y = m[13] / m[15];
 
-        // convert origin-view to pixels (view coordinate system).
+    // convert origin-view to pixels (view coordinate system).
     x = view.Viewport[2] * (0.5 * (1.0 + x));
     y = view.Viewport[3] * (0.5 * (1.0 - y));
     view.Context2d.transform(matrix0, matrix1, matrix4, matrix5, x, y);
@@ -123,8 +123,8 @@
     var path = true;
 
     var cIdx = 0;
-    var x = 0;
-    var y = 0;
+    x = 0;
+    y = 0;
     for (var i = 0; i < this.Widths.length; ++i) {
       if (this.Confidences[i] >= this.Threshold) {
         var hw = this.Widths[i] / 2;
@@ -152,7 +152,7 @@
         view.Context2d.stroke();
 
         if (i === this.ActiveIndex) {
-                    // mark the rectangle
+          // mark the rectangle
           view.Context2d.beginPath();
           view.Context2d.strokeStyle = '#00ffff';
           view.Context2d.moveTo((x - hw) * scale, y * scale);
@@ -173,8 +173,8 @@
 
   function RectSetWidget (layer, newFlag) {
     this.Visibility = true;
-        // Keep track of annotation created by students without edit
-        // permission.
+    // Keep track of annotation created by students without edit
+    // permission.
     this.UserNoteFlag = !SA.Edit;
 
     if (layer === null) {
@@ -193,10 +193,10 @@
     return this.Shape.Widths.length;
   };
 
-    // Sort by confidences
-    // Note: Not used yet.
+  // Sort by confidences
+  // Note: Not used yet.
   RectSetWidget.prototype.Sort = function (lowToHigh) {
-        // Create an array to sort that also keeps the indexes.
+    // Create an array to sort that also keeps the indexes.
     var sortable = new Array(this.Confidences.length);
     var reverse = 1;
     if (lowToHigh) {
@@ -212,14 +212,14 @@
       if (a.conf < b.conf) {
         return -1;
       }
-            // a must be equal to b
+      // a must be equal to b
       return 0;
     });
-        // Update all arrays.
+    // Update all arrays.
     var newConfidences = new Array(this.Confidences.length);
     var newCenters = new Array(this.Centers.length);
     var newLabels = new Array(this.Centers.length);
-    for (var i = 0; i < newConfidences.length; ++i) {
+    for (i = 0; i < newConfidences.length; ++i) {
       var i2 = sortable[i].idx;
       newLabels[i] = this.Labels[i2];
       newConfidences[i] = this.Confidences[i2];

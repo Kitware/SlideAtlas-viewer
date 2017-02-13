@@ -1,5 +1,5 @@
 // For automatic segmentation.  I need the tissue volume for crystal percentage.
-// It is too dificult to segment manually.
+// It is too difficult to segment manually.
 // This class will grab data from the canvas and perform seeded marching sqaures.
 // My plan: Start from a seed point. Move right until I find the contour (cross the threshold).
 //    Start propagating marching squares until the loop closes.
@@ -150,8 +150,8 @@
         var y = loop[0][1];
         var bounds = [x, x, y, y];
         for (var i = 1; i < loop.length; ++i) {
-          var x = loop[i][0];
-          var y = loop[i][1];
+          x = loop[i][0];
+          y = loop[i][1];
           if (bounds[0] > x) { bounds[0] = x; }
           if (bounds[1] < x) { bounds[1] = x; }
           if (bounds[2] > y) { bounds[2] = y; }

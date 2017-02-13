@@ -169,8 +169,9 @@
     // Special case to link to IIIF? Harvard art..
     // http://ids.lib.harvard.edu/ids/view/Converter?id=834753&c=jpgnocap&s=1&r=0&x=0&y=0&w=600&h=600
 
+    var tileSource;
     if (image._id === '556e0ad63ed65909dbc2e383') {
-      var tileSource = new SA.IIIFSource();
+      tileSource = new SA.IIIFSource();
       tileSource.Prefix = 'http://ids.lib.harvard.edu/ids/view/Converter?id=47174896';
         // "width":2087,"height":2550,"scale_factors":[1,2,4,8,16,32],
       tileSource.setDimensions(2087, 2550);
@@ -183,7 +184,7 @@
     }
 
     if (image._id === '556c89a83ed65909dbc2e317') {
-      var tileSource = new SA.IIIFSource();
+      tileSource = new SA.IIIFSource();
       tileSource.Prefix = 'http://ids.lib.harvard.edu/ids/view/Converter?id=834753&c=jpgnocap';
       tileSource.setDimensions(3890, 5787);
       image.levels = tileSource.Levels;
@@ -196,7 +197,7 @@
 
     // Special case to link to gigamacro.
     if (image._id === '555a1af93ed65909dbc2e19a') {
-      var tileSource = new SA.GigamacroSource();
+      tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/AMNH/unit_box_test2_05-01-2015/zoomify/';
       tileSource.setDimensions(14316, 8459);
       image.levels = tileSource.Levels;
@@ -207,7 +208,7 @@
       return cache;
     }
     if (image._id === '555a5e163ed65909dbc2e19d') {
-      var tileSource = new SA.GigamacroSource();
+      tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/cmnh/redbug_bottom/zoomify/';
       tileSource.setDimensions(64893, 40749);
       image.levels = tileSource.Levels;
@@ -218,7 +219,7 @@
       return cache;
     }
     if (image._id === '555b66483ed65909dbc2e1a0') {
-      var tileSource = new SA.GigamacroSource();
+      tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/cmnh/redbug_top/zoomify/';
       tileSource.setDimensions(64893, 40749);
       image.levels = tileSource.Levels;
@@ -229,7 +230,7 @@
       return cache;
     }
     if (image._id === '555b664d3ed65909dbc2e1a3') {
-      var tileSource = new SA.GigamacroSource();
+      tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/AMNH/drawer_unit_box_test_05-01-2015_08-52-29_0000/zoomify/';
       tileSource.setDimensions(11893, 7322);
       image.levels = tileSource.Levels;
@@ -240,7 +241,7 @@
       return cache;
     }
     if (image._id === '555b66523ed65909dbc2e1a6') {
-      var tileSource = new SA.GigamacroSource();
+      tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/AMNH/full_drawer_test_05-01-2015_09-04-17_0000/zoomify/';
       tileSource.setDimensions(44245, 34013);
       image.levels = tileSource.Levels;
@@ -251,7 +252,7 @@
       return cache;
     }
     if (image._id === '555c93973ed65909dbc2e1b5') {
-      var tileSource = new SA.GigamacroSource();
+      tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/gigamacro/impasto_polarized/zoomify/';
       tileSource.setDimensions(76551, 57364);
       image.levels = tileSource.Levels;
@@ -262,7 +263,7 @@
       return cache;
     }
     if (image._id === '555c93913ed65909dbc2e1b2') {
-      var tileSource = new SA.GigamacroSource();
+      tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/gigamacro/restoration_polaraized/zoomify/';
       tileSource.setDimensions(55884, 55750);
       image.levels = tileSource.Levels;
@@ -274,7 +275,7 @@
     }
 
     if (image._id === '555f46503ed65909dbc2e1b8') {
-      var tileSource = new SA.GigamacroSource();
+      tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/gigamacro/eucalyptus_10-31-2010/zoomify/';
       tileSource.setDimensions(38392, 45242);
       image.levels = tileSource.Levels;
@@ -285,7 +286,7 @@
       return cache;
     }
     if (image._id === '555f46553ed65909dbc2e1bb') {
-      var tileSource = new SA.GigamacroSource();
+      tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/Bunton/leaf_fossil_04-30-2015/zoomify/';
       tileSource.setDimensions(22590, 10793);
       image.levels = tileSource.Levels;
@@ -296,7 +297,7 @@
       return cache;
     }
     if (image._id === '555f465a3ed65909dbc2e1be') {
-      var tileSource = new SA.GigamacroSource();
+      tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/formsandsurfaces/maiden_hair_fern_v1_7-6-2012/zoomify/';
       tileSource.setDimensions(22092, 22025);
       image.levels = tileSource.Levels;
@@ -307,7 +308,7 @@
       return cache;
     }
     if (image._id === '555f46623ed65909dbc2e1c1') {
-      var tileSource = new SA.GigamacroSource();
+      tileSource = new SA.GigamacroSource();
       tileSource.Prefix = 'http://www.gigamacro.com/content/gigamacro/nancy_plants_7-28-2014/zoomify/';
       tileSource.setDimensions(40687, 69306);
       image.levels = tileSource.Levels;
@@ -537,28 +538,64 @@
 
     // Adjust bounds to compensate for warping.
     if (this.Warp) {
-        // If this is too slow (occurs every render) we can estimate.
+      // If this is too slow (occurs every render) we can estimate.
       var iPt = this.WorldToImage([bounds[0], bounds[2]]);
-      if (!iPt) { tiles.length = 0; return tiles; }
+      if (!iPt) {
+        tiles.length = 0;
+        return tiles;
+      }
       var iBounds = [iPt[0], iPt[0], iPt[1], iPt[1]];
       iPt = this.WorldToImage([bounds[1], bounds[2]]);
-      if (!iPt) { tiles.length = 0; return tiles; }
-      if (iBounds[0] > iPt[0]) { iBounds[0] = iPt[0]; }
-      if (iBounds[1] < iPt[0]) { iBounds[1] = iPt[0]; }
-      if (iBounds[2] > iPt[1]) { iBounds[2] = iPt[1]; }
-      if (iBounds[3] < iPt[1]) { iBounds[3] = iPt[1]; }
+      if (!iPt) {
+        tiles.length = 0;
+        return tiles;
+      }
+      if (iBounds[0] > iPt[0]) {
+        iBounds[0] = iPt[0];
+      }
+      if (iBounds[1] < iPt[0]) {
+        iBounds[1] = iPt[0];
+      }
+      if (iBounds[2] > iPt[1]) {
+        iBounds[2] = iPt[1];
+      }
+      if (iBounds[3] < iPt[1]) {
+        iBounds[3] = iPt[1];
+      }
       iPt = this.WorldToImage([bounds[0], bounds[3]]);
-      if (!iPt) { tiles.length = 0; return tiles; }
-      if (iBounds[0] > iPt[0]) { iBounds[0] = iPt[0]; }
-      if (iBounds[1] < iPt[0]) { iBounds[1] = iPt[0]; }
-      if (iBounds[2] > iPt[1]) { iBounds[2] = iPt[1]; }
-      if (iBounds[3] < iPt[1]) { iBounds[3] = iPt[1]; }
+      if (!iPt) {
+        tiles.length = 0;
+        return tiles;
+      }
+      if (iBounds[0] > iPt[0]) {
+        iBounds[0] = iPt[0];
+      }
+      if (iBounds[1] < iPt[0]) {
+        iBounds[1] = iPt[0];
+      }
+      if (iBounds[2] > iPt[1]) {
+        iBounds[2] = iPt[1];
+      }
+      if (iBounds[3] < iPt[1]) {
+        iBounds[3] = iPt[1];
+      }
       iPt = this.WorldToImage([bounds[1], bounds[3]]);
-      if (!iPt) { tiles.length = 0; return tiles; }
-      if (iBounds[0] > iPt[0]) { iBounds[0] = iPt[0]; }
-      if (iBounds[1] < iPt[0]) { iBounds[1] = iPt[0]; }
-      if (iBounds[2] > iPt[1]) { iBounds[2] = iPt[1]; }
-      if (iBounds[3] < iPt[1]) { iBounds[3] = iPt[1]; }
+      if (!iPt) {
+        tiles.length = 0;
+        return tiles;
+      }
+      if (iBounds[0] > iPt[0]) {
+        iBounds[0] = iPt[0];
+      }
+      if (iBounds[1] < iPt[0]) {
+        iBounds[1] = iPt[0];
+      }
+      if (iBounds[2] > iPt[1]) {
+        iBounds[2] = iPt[1];
+      }
+      if (iBounds[3] < iPt[1]) {
+        iBounds[3] = iPt[1];
+      }
       bounds = iBounds;
     }
 
@@ -567,7 +604,7 @@
 
     var tile;
     var tileIds;
-    var tiles = [];
+    tiles = [];
     // TODO: Make a "GetVisibleTiles" method.
     // Render all tiles from low res to high.
     // Although this is extra work, it covers up cracks.
@@ -728,9 +765,9 @@
     if (tile) {
       return tile;
     }
-    var tile = new SA.Tile(x, y, z, level,
-                        this.TileSource.getTileUrl(level, x, y, z),
-                        this);
+    tile = new SA.Tile(x, y, z, level,
+                       this.TileSource.getTileUrl(level, x, y, z),
+                       this);
     this.Levels[level].SetTile(tile);
     if (level > 0) {
       var parent = this.RecursiveGetTile(level - 1, x >> 1, y >> 1, z);

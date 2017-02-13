@@ -89,8 +89,6 @@
     this.Popup = new SAM.WidgetPopup(this);
     this.Layer.AddWidget(this);
 
-    var self = this;
-
     this.Loop = new SAM.Polyline();
     this.Loop.OutlineColor = [0.0, 0.0, 0.0];
     this.Loop.SetOutlineColor(this.Dialog.ColorInput.val());
@@ -525,23 +523,24 @@
 
     var sanityCheck = 0;
 
-        // If we have two intersections, clip the loop with the stroke.
+    // If we have two intersections, clip the loop with the stroke.
     if (intersection1 !== undefined) {
-            // We will have two parts.
-            // Build both loops keeing track of their lengths.
-            // Keep the longer part.
+      // We will have two parts.
+      // Build both loops keeing track of their lengths.
+      // Keep the longer part.
       var points0 = [];
       var len0 = 0.0;
       var points1 = [];
       var len1 = 0.0;
-      var i;
-            // Add the clipped stroke to both loops.
+      var dx;
+      var dy;
+      // Add the clipped stroke to both loops.
       for (i = intersection0.StrokeIndex; i < intersection1.StrokeIndex; ++i) {
         points0.push(this.Stroke.Points[i]);
         points1.push(this.Stroke.Points[i]);
       }
-            // Now the two new loops take different directions around the original loop.
-            // Decreasing
+      // Now the two new loops take different directions around the original loop.
+      // Decreasing
       i = intersection1.LoopIndex;
       while (i !== intersection0.LoopIndex) {
         if (++sanityCheck > 1000000) {
@@ -549,19 +548,21 @@
           return;
         }
         points0.push(this.Loop.Points[i]);
-        var dx = this.Loop.Points[i][0];
-        var dy = this.Loop.Points[i][1];
-                // decrement around loop.  First and last loop points are the same.
-        if (--i === 0) { i = this.Loop.Points.length - 1; }
-                // Integrate distance.
+        dx = this.Loop.Points[i][0];
+        dy = this.Loop.Points[i][1];
+        // decrement around loop.  First and last loop points are the same.
+        if (--i === 0) {
+          i = this.Loop.Points.length - 1;
+        }
+        // Integrate distance.
         dx -= this.Loop.Points[i][0];
         dy -= this.Loop.Points[i][1];
         len0 += Math.sqrt(dx * dx + dy * dy);
       }
-            // Duplicate the first point in the loop
+      // Duplicate the first point in the loop
       points0.push(intersection0.Point);
 
-            // Increasing
+      // Increasing
       i = intersection1.LoopIndex;
       while (i !== intersection0.LoopIndex) {
         if (++sanityCheck > 1000000) {
@@ -569,16 +570,18 @@
           return;
         }
         points1.push(this.Loop.Points[i]);
-        var dx = this.Loop.Points[i][0];
-        var dy = this.Loop.Points[i][1];
-                // increment around loop.  First and last loop points are the same.
-        if (++i === this.Loop.Points.length - 1) { i = 0; }
-                // Integrate distance.
+        dx = this.Loop.Points[i][0];
+        dy = this.Loop.Points[i][1];
+        // increment around loop.  First and last loop points are the same.
+        if (++i === this.Loop.Points.length - 1) {
+          i = 0;
+        }
+        // Integrate distance.
         dx -= this.Loop.Points[i][0];
         dy -= this.Loop.Points[i][1];
         len1 += Math.sqrt(dx * dx + dy * dy);
       }
-            // Duplicate the first point in the loop
+      // Duplicate the first point in the loop
       points1.push(intersection0.Point);
 
       if (len0 > len1) {
@@ -590,7 +593,7 @@
       if (window.SA) { SA.RecordState(); }
     }
 
-        // Remove the extra point added at the begining of this method.
+    // Remove the extra point added at the begining of this method.
     this.Loop.Points.pop();
     this.Loop.UpdateBuffers(this.Layer.AnnotationView);
     this.ComputeActiveCenter();
@@ -599,15 +602,17 @@
     this.Layer.EventuallyDraw();
   };
 
-    // tranform all points so p0 is origin and p1 maps to (1,0)
-    // Returns false if no intersection,
-    // If there is an intersection, it adds that point to the loop.
-    // It returns {Point: newPt, LoopIndex: i} .
+  // transform all points so p0 is origin and p1 maps to (1,0)
+  // Returns false if no intersection,
+  // If there is an intersection, it adds that point to the loop.
+  // It returns {Point: newPt, LoopIndex: i} .
   LassoWidget.prototype.FindIntersection = function (p0, p1) {
     var best = false;
     var p = [(p1[0] - p0[0]), (p1[1] - p0[1])];
     var mag = Math.sqrt(p[0] * p[0] + p[1] * p[1]);
-    if (mag < 0.0) { return false; }
+    if (mag < 0.0) {
+      return false;
+    }
     p[0] = p[0] / mag;
     p[1] = p[1] / mag;
 
@@ -617,8 +622,10 @@
 
     for (var i = 1; i < this.Loop.Points.length; ++i) {
       var m1 = this.Loop.Points[i];
-            // Avoid an infinite loop inserting points.
-      if (p0 === m0 || p0 === m1) { continue; }
+      // Avoid an infinite loop inserting points.
+      if (p0 === m0 || p0 === m1) {
+        continue;
+      }
       var n1 = [(m1[0] - p0[0]) / mag, (m1[1] - p0[1]) / mag];
       var k1 = [(n1[0] * p[0] + n1[1] * p[1]), (n1[1] * p[0] - n1[0] * p[1])];
       if ((k1[1] >= 0.0 && k0[1] <= 0.0) || (k1[1] <= 0.0 && k0[1] >= 0.0)) {
@@ -642,9 +649,9 @@
     return best;
   };
 
-    // This is not actually needed!  So it is not used.
+  // This is not actually needed!  So it is not used.
   LassoWidget.prototype.IsPointInsideLoop = function (x, y) {
-        // Sum up angles.  Inside poitns will sum to 2pi, outside will sum to 0.
+    // Sum up angles.  Inside poitns will sum to 2pi, outside will sum to 0.
     var angle = 0.0;
     var pt0 = this.Loop.Points[this.Loop.length - 1];
     for (var i = 0; i < this.Loop.length; ++i) {
@@ -661,12 +668,12 @@
 
   LassoWidget.prototype.ComputeArea = function () {
     var area = 0.0;
-        // Use the active center. It should be more numerical stable.
-        // Iterate over triangles
+    // Use the active center. It should be more numerical stable.
+    // Iterate over triangles
     var vx1 = this.Loop.Points[0][0] - this.ActiveCenter[0];
     var vy1 = this.Loop.Points[0][1] - this.ActiveCenter[1];
     for (var j = 1; j < this.Loop.Points.length; ++j) {
-            // Area of triangle is 1/2 magnitude of cross product.
+      // Area of triangle is 1/2 magnitude of cross product.
       var vx2 = vx1;
       var vy2 = vy1;
       vx1 = this.Loop.Points[j][0] - this.ActiveCenter[0];

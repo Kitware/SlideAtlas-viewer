@@ -86,7 +86,7 @@
     var h = SA.VIEWER1.GetCamera().GetHeight() / 2;
     var v = [c[0] - w, c[0] + w, c[1] - h, c[1] + h];
     var l = SA.VIEWER1.GetAnnotationLayer();
-    var w = l.WidgetList;
+    w = l.WidgetList;
     var n = [];
     var r = [w.length, 0];
     for (var i = 0; i < w.length; ++i) {
@@ -637,8 +637,7 @@
               'z-index': '100'})
             .addClass('sa-resize');
 
-        // I do not like modifying the parent.
-    var self = this;
+    // I do not like modifying the parent.
     this.LayerDiv.saOnResize(
             function () {
               self.UpdateSize();
@@ -661,7 +660,6 @@
         // saved with the notes.
     this.ScaleWidget = new SAM.ScaleWidget(this);
 
-    var self = this;
     var can = this.LayerDiv;
     can.on(
             'mousedown.viewer',
@@ -848,7 +846,7 @@
         break;
       case 'sections':
         if (window.SA) {
-                // HACK.....
+          // HACK.....
           widget = new SA.SectionsWidget(this, SA.VIEWER1);
         }
         break;
@@ -863,29 +861,29 @@
         break;
     }
     widget.Load(obj);
-        // TODO: Get rid of this hack.
-        // This is the messy way of detecting widgets that did not load
-        // properly.
+    // TODO: Get rid of this hack.
+    // This is the messy way of detecting widgets that did not load
+    // properly.
     if (widget.Type === 'sections' && widget.IsEmpty()) {
       return undefined;
     }
 
-        // We may want to load without adding.
-        // this.AddWidget(widget);
+    // We may want to load without adding.
+    // this.AddWidget(widget);
 
     return widget;
   };
 
-    // I expect only the widget SetActive to call these method.
-    // A widget cannot call this if another widget is active.
-    // The widget deals with its own activation and deactivation.
+  // I expect only the widget SetActive to call these method.
+  // A widget cannot call this if another widget is active.
+  // The widget deals with its own activation and deactivation.
   AnnotationLayer.prototype.ActivateWidget = function (widget) {
-        // not getting key events for copy.
+    // not getting key events for copy.
     this.LayerDiv.focus();
     if (this.ActiveWidget === widget) {
       return;
     }
-        // Make sure only one popup is visible at a time.
+    // Make sure only one popup is visible at a time.
     for (var i = 0; i < this.WidgetList.length; ++i) {
       if (this.WidgetList[i].Popup) {
         this.WidgetList[i].Popup.Hide();
@@ -897,12 +895,12 @@
   };
   AnnotationLayer.prototype.DeactivateWidget = function (widget) {
     if (this.ActiveWidget !== widget || widget === null) {
-            // Do nothing if the widget is not active.
+      // Do nothing if the widget is not active.
       return;
     }
-        // Incase the widget changed the cursor.  Change it back.
+    // Incase the widget changed the cursor.  Change it back.
     this.LayerDiv.css({'cursor': 'default'});
-        // The cursor does not change immediatly.  Try to flush.
+    // The cursor does not change immediatly.  Try to flush.
     this.EventuallyDraw();
     this.ActiveWidget = null;
     widget.SetActive(false);
@@ -911,40 +909,40 @@
     return this.ActiveWidget;
   };
 
-    // Return to initial state.
+  // Return to initial state.
   AnnotationLayer.prototype.Reset = function () {
     this.WidgetList = [];
   };
 
   AnnotationLayer.prototype.ComputeMouseWorld = function (event) {
     this.MouseWorld = this.GetCamera().ConvertPointViewerToWorld(event.offsetX, event.offsetY);
-        // Put this extra ivar in the even object.
+    // Put this extra ivar in the even object.
     event.worldX = this.MouseWorld[0];
     event.worldY = this.MouseWorld[1];
     return this.MouseWorld;
   };
 
-    // TODO: share this code with viewer.
-    // I think MouseX,Y and, offestX,Y are both
-    // Save the previous touches and record the new
-    // touch locations in viewport coordinates.
+  // TODO: share this code with viewer.
+  // I think MouseX,Y and, offestX,Y are both
+  // Save the previous touches and record the new
+  // touch locations in viewport coordinates.
   AnnotationLayer.prototype.HandleTouch = function (e, startFlag) {
     var date = new Date();
     var t = date.getTime();
-        // I have had trouble on the iPad with 0 delta times.
-        // Lets see how it behaves with fewer events.
-        // It was a bug in iPad4 Javascript.
-        // This throttle is not necessary.
+    // I have had trouble on the iPad with 0 delta times.
+    // Lets see how it behaves with fewer events.
+    // It was a bug in iPad4 Javascript.
+    // This throttle is not necessary.
     if (t - this.Time < 20 && !startFlag) { return false; }
 
     this.LastTime = this.Time;
     this.Time = t;
 
     if (!e) {
-      var e = event;
+      e = event;
     }
 
-        // Still used on mobile devices?
+    // Still used on mobile devices?
     var viewport = this.GetViewport();
     this.LastTouches = this.Touches;
     this.Touches = [];
@@ -958,18 +956,18 @@
     this.LastMouseX = this.MouseX;
     this.LastMouseY = this.MouseY;
 
-        // Compute the touch average.
+    // Compute the touch average.
     var numTouches = this.Touches.length;
     this.MouseX = this.MouseY = 0.0;
-    for (var i = 0; i < numTouches; ++i) {
+    for (i = 0; i < numTouches; ++i) {
       this.MouseX += this.Touches[i][0];
       this.MouseY += this.Touches[i][1];
     }
     this.MouseX = this.MouseX / numTouches;
     this.MouseY = this.MouseY / numTouches;
 
-        // Hack because we are moving away from using the event manager
-        // Mouse interaction are already independant...
+    // Hack because we are moving away from using the event manager
+    // Mouse interaction are already independant...
     this.offsetX = this.MouseX;
     this.offsetY = this.MouseY;
 
@@ -983,9 +981,9 @@
     }
     this.HandleTouch(event, true);
 
-        // Code from a conflict
-        // Touch was not activating widgets on the ipad.
-        // Show text on hover.
+    // Code from a conflict
+    // Touch was not activating widgets on the ipad.
+    // Show text on hover.
     if (this.Visibility) {
       for (var touchIdx = 0; touchIdx < this.Touches.length; ++touchIdx) {
         event.offsetX = this.Touches[touchIdx][0];
@@ -1003,7 +1001,7 @@
   };
 
   AnnotationLayer.prototype.HandleTouchMove = function (e) {
-        // Put a throttle on events
+    // Put a throttle on events
     if (!this.HandleTouch(e, false)) { return; }
 
     if (this.Touches.length === 1) {
@@ -1012,10 +1010,10 @@
     if (this.Touches.length === 2) {
       return this.HandleTouchPinch(this);
     }
-        // if (this.Touches.length === 3) {
-        //    this.HandleTouchRotate(this);
-        //    return
-        // }
+    // if (this.Touches.length === 3) {
+    //    this.HandleTouchRotate(this);
+    //    return
+    // }
   };
 
   AnnotationLayer.prototype.HandleTouchPan = function (event) {
@@ -1087,7 +1085,7 @@
     if (this.ActiveWidget && this.ActiveWidget.HandleMouseDown) {
       return this.ActiveWidget.HandleMouseDown(event);
     }
-        // We do not know if the widget will handle click or double click.
+    // We do not know if the widget will handle click or double click.
     return true;
   };
 
@@ -1141,20 +1139,20 @@
       if ((this.MouseTime - this.MouseDownTime) > 400) {
         this.MouseClick = false;
       }
-            // Wait to process a move until we know it will not
-            // be a click.
+      // Wait to process a move until we know it will not
+      // be a click.
       return false;
     }
 
-        // The event position is relative to the target which can be a tab on
-        // top of the canvas.  Just skip these events.
+    // The event position is relative to the target which can be a tab on
+    // top of the canvas.  Just skip these events.
     if ($(event.target).width() !== $(event.currentTarget).width()) {
       return true;
     }
 
     this.ComputeMouseWorld(event);
 
-        // Firefox does not set "which" for move events.
+    // Firefox does not set "which" for move events.
     event.which = event.buttons;
     if (event.which === 2) {
       event.which = 3;
@@ -1173,8 +1171,8 @@
       }
     }
 
-        // An active widget should stop propagation even if it does not
-        // respond to the event.
+    // An active widget should stop propagation even if it does not
+    // respond to the event.
     return true;
   };
 
@@ -1208,9 +1206,9 @@
     return true;
   };
 
-    // Called on mouse motion with no button pressed.
-    // Looks for widgets under the cursor to make active.
-    // Returns true if a widget is active.
+  // Called on mouse motion with no button pressed.
+  // Looks for widgets under the cursor to make active.
+  // Returns true if a widget is active.
   AnnotationLayer.prototype.CheckActive = function (event) {
     if (!this.GetVisibility()) {
       return true;
@@ -1236,7 +1234,7 @@
     return this.WidgetList[i];
   };
 
-    // Legacy
+  // Legacy
   AnnotationLayer.prototype.GetWidgets = function () {
     return this.WidgetList;
   };
@@ -1273,7 +1271,7 @@
       'sort': 'lowerName',
       'sortdir': 1};
 
-        // This gives an array of {_id:"....",annotation:{name:"...."},itemId:"...."}
+    // This gives an array of {_id:"....",annotation:{name:"...."},itemId:"...."}
     girder.restRequest({
       type: 'get',
       url: 'annotation',
@@ -1289,11 +1287,11 @@
     var annotationId = '572be29d3f24e53573aa8e91';
     girder.restRequest({
       path: 'annotation/' + annotationId,    // note that you don't need
-            // api/v1
+      // api/v1
       method: 'GET',                          // data will be put in the
-            // body of a POST
+      // body of a POST
       contentType: 'application/json'        // this tells jQuery that we
-            // are passing JSON in the body
+      // are passing JSON in the body
     }).done(function (data) {
       console.log('done');
     });
@@ -1360,13 +1358,13 @@
 (function () {
   'use strict';
 
-    // ==============================================================================
-    // A correlation is just a pair of matching points from two sections.
-    // Abstract the correlation so we have an api for getting points.
-    // Currently, stack has direct access to correlation ivars / points.
-    // The api will make forward and back transformations use the same code.
+  // ==============================================================================
+  // A correlation is just a pair of matching points from two sections.
+  // Abstract the correlation so we have an api for getting points.
+  // Currently, stack has direct access to correlation ivars / points.
+  // The api will make forward and back transformations use the same code.
 
-    // Pass in world to image transformation (3x3) for each image.
+  // Pass in world to image transformation (3x3) for each image.
   function MatrixTransformation () {
     this.WorldToImage1 = mat3.create();
     this.Image1ToWorld = mat3.create();
@@ -1384,37 +1382,37 @@
       m1[2] * m2[0] + m1[3] * m2[2], m1[2] * m2[1] + m1[3] * m2[3]];
   };
 
-    // Initialize with 3 corresponding points.
+  // Initialize with 3 corresponding points.
   MatrixTransformation.prototype.InitializeWithPoints = function (p1a, p2a, p1b, p2b, p1c, p2c) {
     var m1 = mat3.create();
     var m2 = mat3.create();
     mat3.identity(m1);
     mat3.identity(m2);
-        // Take the first point as the origin.
+    // Take the first point as the origin.
     m1[2] = p1a[0]; m1[5] = p1a[1];
     m2[2] = p2a[0]; m2[5] = p2a[1];
-        // Assume that the image1 coordinates (minus origin) are world.
-        // Matrix to transform i,j to new basis b,c
+    // Assume that the image1 coordinates (minus origin) are world.
+    // Matrix to transform i,j to new basis b,c
     var A1 = [p1b[0] - p1a[0], p1c[0] - p1a[0],
       p1b[1] - p1a[1], p1c[1] - p1a[1]];
     var A2 = [p2b[0] - p2a[0], p2c[0] - p2a[0],
       p2b[1] - p2a[1], p2c[1] - p2a[1]];
     var M = this.M2Multiply(A2, this.M2Invert(A1));
-        // Use the 2x2 in the 3x3
+    // Use the 2x2 in the 3x3
     m2[0] = M[0]; m2[1] = M[1];
     m2[3] = M[2]; m2[4] = M[3];
 
     this.Initialize(m1, m2);
   };
 
-    // Pass in two matrixes (World to image)
+  // Pass in two matrixes (World to image)
   MatrixTransformation.prototype.Initialize = function (m1, m2) {
-        // Now invert these matrixes.
+    // Now invert these matrixes.
     mat3.set(m1, this.WorldToImage1);
     mat3.set(m2, this.WorldToImage2);
 
-        // A lot of hastle to get the inverse for a 3x3.
-        // It is not that hard to compute.
+    // A lot of hastle to get the inverse for a 3x3.
+    // It is not that hard to compute.
     var m4a = mat4.create();
     var m4b = mat4.create();
     mat3.toMat4(this.WorldToImage1, m4a);
@@ -1426,9 +1424,9 @@
     mat4.toMat3(m4b, this.Image2ToWorld);
   };
 
-    // 1->2
-    // This is confusing because for slides I consider image as world.
-    // World here is geo location.
+  // 1->2
+  // This is confusing because for slides I consider image as world.
+  // World here is geo location.
   MatrixTransformation.prototype.ForwardTransformPoint = function (ptIn) {
     var m = this.Image1ToWorld;
     var x = ptIn[0] * m[0] + ptIn[1] * m[1] + m[2];
@@ -1440,7 +1438,7 @@
     var h2 = x * m[6] + y * m[7] + h * m[8];
     return [x2 / h2, y2 / h2];
   };
-    // 2->1
+  // 2->1
   MatrixTransformation.prototype.ReverseTransformPoint = function (ptIn) {
     var m = this.Image2ToWorld;
     var x = ptIn[0] * m[0] + ptIn[1] * m[1] + m[2];
@@ -1453,7 +1451,7 @@
     return [x2 / h2, y2 / h2];
   };
 
-    // 1->2
+  // 1->2
   MatrixTransformation.prototype.ForwardTransformCamera = function (camIn, camOut) {
     var fpIn = camIn.FocalPoint;
     var fpOut = camOut.FocalPoint;
@@ -1465,15 +1463,15 @@
     upOut[0] -= fpOut[0];
     upOut[1] -= fpOut[1];
     var scale = Math.sqrt(upOut[0] * upOut[0] + upOut[1] * upOut[1]);
-        // compute the height.
+    // compute the height.
     camOut.SetHeight(camIn.GetHeight() * scale);
-        // Compute the rotation. upOut = [Sin,cos];
+    // Compute the rotation. upOut = [Sin,cos];
     var angle = Math.atan2(upOut[1], upOut[0]);
     camOut.Roll = camIn.Roll;// - angle;
     camOut.ComputeMatrix();
   };
 
-    // 2->1
+  // 2->1
   MatrixTransformation.prototype.ReverseTransformCamera = function (camIn, camOut) {
     var fpIn = camIn.FocalPoint;
     var fpOut = camOut.FocalPoint;
@@ -1485,9 +1483,9 @@
     upOut[0] -= fpOut[0];
     upOut[1] -= fpOut[1];
     var scale = Math.sqrt(upOut[0] * upOut[0] + upOut[1] * upOut[1]);
-        // compute the height.
+    // compute the height.
     camOut.SetHeight(camIn.GetHeight() * scale);
-        // Compute the rotation. upOut = [Sin,cos];
+    // Compute the rotation. upOut = [Sin,cos];
     var angle = Math.atan2(upOut[1], upOut[0]);
     camOut.Roll = camIn.Roll;// - angle;
     camOut.ComputeMatrix();

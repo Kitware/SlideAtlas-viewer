@@ -56,7 +56,7 @@
     var halfWidth = totalWidth / 2;
     var halfHeight = totalHeight / 2;
 
-        // Draw all of the x polylines.
+    // Draw all of the x polylines.
     var x = this.Dimensions[1] % 2 ? 0 : totalWidth;
     var y = 0;
     this.PointBuffer.push(x - halfWidth);
@@ -64,7 +64,7 @@
     this.PointBuffer.push(0.0);
 
     for (var i = 0; i < this.Dimensions[1]; ++i) {
-            // shuttle back and forth.
+      // shuttle back and forth.
       x = x ? 0 : totalWidth;
       this.PointBuffer.push(x - halfWidth);
       this.PointBuffer.push(y - halfHeight);
@@ -74,15 +74,15 @@
       this.PointBuffer.push(y - halfHeight);
       this.PointBuffer.push(0.0);
     }
-        // shuttle back and forth.
+    // shuttle back and forth.
     x = x ? 0 : totalWidth;
     this.PointBuffer.push(x - halfWidth);
     this.PointBuffer.push(y - halfHeight);
     this.PointBuffer.push(0.0);
 
-        // Draw all of the y lines.
-    for (var i = 0; i < this.Dimensions[0]; ++i) {
-            // shuttle up and down.
+    // Draw all of the y lines.
+    for (i = 0; i < this.Dimensions[0]; ++i) {
+      // shuttle up and down.
       y = y ? 0 : totalHeight;
       this.PointBuffer.push(x - halfWidth);
       this.PointBuffer.push(y - halfHeight);

@@ -258,7 +258,7 @@
 
       var timeLine = SA.recorderWidget.TimeLine;
       for (var i = 0; i < timeLine.length; ++i) {
-        var cam = timeLine[i].ViewerRecords[0].Camera;
+        cam = timeLine[i].ViewerRecords[0].Camera;
         var height = cam.Height;
         var width = cam.Width;
                 // camer roll is already in radians.

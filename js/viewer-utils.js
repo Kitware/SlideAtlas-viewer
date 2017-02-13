@@ -489,9 +489,10 @@
   saElement.prototype.DialogApply = function () {
     // ActiveOff was setting border back after dialog changed it.
     delete this.SavedBorder;
+    var width;
     if (this.Dialog.BorderCheck.is(':checked')) {
       var color = this.Dialog.BorderColor.spectrum('get');
-      var width = parseFloat(this.Dialog.BorderWidth.val());
+      width = parseFloat(this.Dialog.BorderWidth.val());
       this.Div.css({'border': width + 'px solid ' + color});
     } else {
       this.Div.css('border', '');
@@ -499,7 +500,7 @@
 
     // Border Radius
     if (this.Dialog.BorderRadiusCheck.is(':checked')) {
-      var width = parseFloat(this.Dialog.BorderRadius.val());
+      width = parseFloat(this.Dialog.BorderRadius.val());
       this.Div.css({'borderRadius': width + 'px'});
     } else {
       this.Div.css('borderRadius', '');
@@ -765,14 +766,16 @@
       if (this.AspectRatio && typeof (this.AspectRatio) !== 'number') {
         this.AspectRatio = width / height;
       }
+      var left;
+      var top;
       if (this.MoveState === 0) {
-        var left = pos.left + dx;
-        var top = pos.top + dy;
+        left = pos.left + dx;
+        top = pos.top + dy;
         this.Div[0].style.top = top.toString() + 'px';
         this.Div[0].style.left = left.toString() + 'px';
         return false;
       } else if (this.MoveState === 1) {
-        var left = pos.left + dx;
+        left = pos.left + dx;
         width = width - dx;
         this.Div[0].style.left = left.toString() + 'px';
         if (sizing === 'border-box') {
@@ -798,7 +801,7 @@
         this.Div.trigger('resize');
         return false;
       } else if (this.MoveState === 3) {
-        var top = pos.top + dy;
+        top = pos.top + dy;
         height = height - dy;
         this.Div[0].style.top = top.toString() + 'px';
         if (sizing === 'border-box') {
@@ -825,8 +828,8 @@
         return false;
       } else if (this.MoveState === 5) {
             // upper left corner resize
-        var left = pos.left + dx;
-        var top = pos.top + dy;
+        left = pos.left + dx;
+        top = pos.top + dy;
         width = width - dx;
         height = height - dy;
         this.Div[0].style.top = top.toString() + 'px';
@@ -861,7 +864,7 @@
         return false;
       } else if (this.MoveState === 7) {
             // lower left corner resize
-        var left = pos.left + dx;
+        left = pos.left + dx;
         width = width - dx;
         height = height + dy;
         this.Div[0].style.left = left.toString() + 'px';
@@ -879,7 +882,7 @@
         return false;
       } else if (this.MoveState === 8) {
             // upper right corner resize
-        var top = pos.top + dy;
+        top = pos.top + dy;
         width = width + dx;
         height = height - dy;
         this.Div[0].style.top = top.toString() + 'px';
@@ -1585,6 +1588,7 @@
         .addClass('sa-q')
         .text(this.Question.text());
 
+    var i;
     if (this.QuestionTypeSelect.val() === 'Multiple Choice') {
       this.Div.attr('type', 'multiple-choice');
       tmp = $('<ol>')
@@ -1593,18 +1597,20 @@
 
         // Shuffle the answers.
       var shuffled = [];
+      var answer;
+      var a;
       while (this.MultipleChoiceAnswers.length > 0) {
         var idx = Math.floor(Math.random() * this.MultipleChoiceAnswers.length);
-        var answer = this.MultipleChoiceAnswers.splice(idx, 1)[0];
+        answer = this.MultipleChoiceAnswers.splice(idx, 1)[0];
         shuffled.push(answer);
       }
       this.MultipleChoiceAnswers = shuffled;
 
-        // Convert to html
-      for (var i = 0; i < this.MultipleChoiceAnswers.length; ++i) {
-        var answer = this.MultipleChoiceAnswers[i];
+      // Convert to html
+      for (i = 0; i < this.MultipleChoiceAnswers.length; ++i) {
+        answer = this.MultipleChoiceAnswers[i];
         if (answer.Input.text() !== '') {
-          var a = $('<li>')
+          a = $('<li>')
                     .appendTo(tmp)
                     .addClass('sa-answer')
                     .text(answer.Input.text());
@@ -1622,10 +1628,10 @@
       tmp = $('<ol>')
             .appendTo(this.Div)
             .css({'margin': '0px 0px 0px 0.5em'});
-      for (var i = 0; i < this.TrueFalseAnswers.length; ++i) {
-        var answer = this.TrueFalseAnswers[i];
+      for (i = 0; i < this.TrueFalseAnswers.length; ++i) {
+        answer = this.TrueFalseAnswers[i];
         if (answer.Input.text() !== '') {
-          var a = $('<li>')
+          a = $('<li>')
                     .appendTo(tmp)
                     .addClass('sa-true-false-answer')
                     .text(answer.Input.text());
@@ -1638,7 +1644,7 @@
     }
     if (this.QuestionTypeSelect.val() === 'Short Answer') {
       this.Div.attr('type', 'short-answer');
-      var tmp = $('<div>')
+      tmp = $('<div>')
             .appendTo(this.Div)
             .css({'color': '#00C'})
             .addClass('sa-short-answer')
@@ -1824,7 +1830,6 @@
     this.Div[0].saElement.EditableOff();
     this.Div[0].saElement.Clickable = false;
 
-    var self = this;
     this.Div
         .attr('contenteditable', 'true')
         .css({'cursor': 'text'});
@@ -1934,7 +1939,7 @@
     this.FontColor.spectrum('set', color);
 
     var lineHeight = 120; // default value?
-    var str = this.Div[0].style.lineHeight;
+    str = this.Div[0].style.lineHeight;
     if (str !== '') {
       if (str.substring(str.length - 1) === '%') {
         lineHeight = parseFloat(str.substr(0, str.length - 1));
@@ -1960,12 +1965,13 @@
       this.Div[0].style.lineHeight = lineHeight + '%';
     }
 
+    var color;
     if (this.FontColor) {
-      var color = this.FontColor.spectrum('get');
+      color = this.FontColor.spectrum('get');
       this.Div[0].style.color = color;
     }
 
-    var color = '#000000';
+    color = '#000000';
     var str = this.Div[0].style.color;
     if (str !== '') {
       color = str;
@@ -1985,7 +1991,6 @@
     var selectedText = sel.toString();
 
     if (!this.UrlDialog) {
-      var self = this;
       var dialog = new SAM.Dialog(
             function () {
               self.InsertUrlLinkAccept();
@@ -2491,13 +2496,14 @@
   var SA_BUTTONS_VISIBLE = null;
 
   jQuery.prototype.saButtons = function (cmd) {
+    var i;
     if (cmd === 'enable') {
-      for (var i = 0; i < this.length; ++i) {
+      for (i = 0; i < this.length; ++i) {
         saButtonsEnable(this[i]);
       }
     }
     if (cmd === 'disable') {
-      for (var i = 0; i < this.length; ++i) {
+      for (i = 0; i < this.length; ++i) {
         saButtonsDisable(this[i]);
       }
     }
@@ -2940,7 +2946,7 @@
     // $('.sa-resize').trigger('resize');
     // call onresize manually.
     var elements = $('.sa-resize');
-    for (var i = 0; i < elements.length; ++i) {
+    for (i = 0; i < elements.length; ++i) {
       if (elements[i].onresize) {
         elements[i].onresize();
       }
@@ -3817,7 +3823,6 @@
       self.InsertMenu.hide();
     });
 
-    var self = this;
     menuButton.mouseover(
         function () { self.ShowInsertMenu(); });
     this.InsertMenu.mouseover(
@@ -3883,8 +3888,8 @@
         item.saAnnotationWidget = new SA.AnnotationWidget(item.saViewer);
         item.saAnnotationWidget.SetVisibility(2);
       }
-        // This hides and shows the button/tools but does not change the
-        // visibility of the annotations in the viewer.
+      // This hides and shows the button/tools but does not change the
+      // visibility of the annotations in the viewer.
       if (args === 'hide') {
         item.saAnnotationWidget.hide();
       } else if (args === 'show') {
@@ -3895,92 +3900,16 @@
     return this;
   };
 
-  function saMenuButton (args, menuButton) {
-    this.InsertMenuTimer = 0;
-    this.InsertMenu = $('<ul>')
-        .appendTo(menuButton)
-        // How do I customize the menu location?
-        .css({'position': 'absolute',
-          'left': '-110px',
-          'top': '25px',
-          'width': '150px',
-          'font-size': '18px',
-          'box-shadow': '10px 10px 5px #AAA',
-          'z-index': '5'})
-        .hide();
-
-    for (var label in args) {
-      this.AddMenuItem(label, args[label]);
-    }
-    // Jquery UI formatting
-    this.InsertMenu.menu();
-
-    // Make it easy to select the first item
-    var self = this;
-    label = Object.keys(args)[0];
-    menuButton.click(function () {
-      (args[label])();
-      self.InsertMenu.hide();
-    });
-
-    var self = this;
-    menuButton.mouseover(
-        function () { self.ShowInsertMenu(); });
-    this.InsertMenu.mouseover(
-        function () { self.ShowInsertMenu(); });
-
-    menuButton.mouseleave(
-        function () { self.EventuallyHideInsertMenu(); });
-    this.InsertMenu.mouseleave(
-        function () { self.EventuallyHideInsertMenu(); });
-  }
-
-  saMenuButton.prototype.AddMenuItem = function (label, callback) {
-    var self = this;
-
-    this[label] = $('<li>')
-        .appendTo(this.InsertMenu)
-        .text(label)
-        .addClass('saButton') // for hover effect
-        .click(function () {
-          (callback)();
-          self.InsertMenu.hide();
-          return false;
-        });
-  };
-
-  saMenuButton.prototype.ShowInsertMenu = function () {
-    if (this.InsertMenuTimer) {
-      clearTimeout(this.InsertMenuTimer);
-      this.InsertMenuTimer = 0;
-    }
-    this.InsertMenu.show();
-  };
-
-  saMenuButton.prototype.EventuallyHideInsertMenu = function () {
-    if (this.InsertMenuTimer) {
-      clearTimeout(this.InsertMenuTimer);
-      this.InsertMenuTimer = 0;
-    }
-    var self = this;
-    this.InsertMenuTimer = setTimeout(
-        function () {
-          self.InsertMenuTimer = 0;
-          self.InsertMenu.fadeOut();
-          this.InsertMenuTimer = 0;
-        }, 500);
-  };
-
-    // I have struggled with the issue of making a second div fill
-    // available space when the first div fits its contents with any size.
-    // Here is a programatic solution.
+  // I have struggled with the issue of making a second div fill
+  // available space when the first div fits its contents with any size.
+  // Here is a programmatic solution.
 
   SA.FillDiv = function (div) {
     div.saOnResize(
-            function () {
-              var height = div.parent().height() - div.position().top;
-              div.height(height);
-            });
+      function () {
+        var height = div.parent().height() - div.position().top;
+        div.height(height);
+      });
   };
 
   SA.ResizePanel = ResizePanel;
