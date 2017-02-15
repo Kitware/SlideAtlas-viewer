@@ -16,11 +16,9 @@
   'use strict';
 
   function StackSectionWidget (viewer) {
-    var self = this;
-
     this.Thumb = null; // default click. in stack creator.
 
-        // Active is just to turn the section yellow temporarily.
+    // Active is just to turn the section yellow temporarily.
     this.Active = false;
     this.Color = [0, 1, 0];
     this.Shapes = [];
@@ -36,7 +34,7 @@
     return this.Shapes.length === 0;
   };
 
-    // Add all the lines in the in section to this section.
+  // Add all the lines in the in section to this section.
   StackSectionWidget.prototype.Union = function (section) {
     for (var i = 0; i < section.Shapes.length; ++i) {
       this.Shapes.push(section.Shapes[i]);
@@ -44,24 +42,24 @@
     this.Bounds = null;
   };
 
-    // Bounds are in slide / world coordinates.
-    // Returns 0 if is does not overlap at all.
-    // Returns 1 if part of the section is in the bounds.
-    // Returns 2 if all of the section is in the bounds.
+  // Bounds are in slide / world coordinates.
+  // Returns 0 if is does not overlap at all.
+  // Returns 1 if part of the section is in the bounds.
+  // Returns 2 if all of the section is in the bounds.
   StackSectionWidget.prototype.ContainedInBounds = function (bds) {
     var sBds = this.GetBounds();
     if (sBds[0] > bds[0] && sBds[1] < bds[1] &&
             sBds[2] > bds[2] && sBds[3] < bds[3]) {
-            // section is fully contained in the bounds.
+      // section is fully contained in the bounds.
       return 2;
     }
     if (sBds[1] < bds[0] || sBds[0] > bds[1] ||
             sBds[3] < bds[2] || sBds[2] > bds[3]) {
-            // No overlap of bounds.
+      // No overlap of bounds.
       return 0;
     }
 
-        // Bounds partially overlap.  Look closer.
+    // Bounds partially overlap.  Look closer.
     var pointsIn = false;
     var pointsOut = false;
     for (var i = 0; i < this.Shapes.length; ++i) {
@@ -93,8 +91,8 @@
                                                      (bds[2] + bds[3]) * 0.5);
   };
 
-    // We need bounds in view coordiantes for sorting.
-    // Do not bother caching the value.
+  // We need bounds in view coordinates for sorting.
+  // Do not bother caching the value.
   StackSectionWidget.prototype.GetViewBounds = function (view) {
     if (this.Shapes.length === 0) {
       return [0, 0, 0, 0];
@@ -116,8 +114,8 @@
   };
 
   StackSectionWidget.prototype.ComputeViewUpperRight = function (view) {
-        // Compute the upper right corner in view coordinates.
-        // This is used by the SectionsWidget holds this section.
+    // Compute the upper right corner in view coordinates.
+    // This is used by the SectionsWidget holds this section.
     var bds = this.GetBounds();
     var p0 = view.Camera.ConvertPointWorldToViewer(bds[0], bds[2]);
     var p1 = view.Camera.ConvertPointWorldToViewer(bds[0], bds[3]);
@@ -235,10 +233,18 @@
       this.Bounds = this.Shapes[0].GetBounds();
       for (var i = 1; i < this.Shapes.length; ++i) {
         var bds = this.Shapes[i].GetBounds();
-        if (bds[0] < this.Bounds[0]) this.Bounds[0] = bds[0];
-        if (bds[1] > this.Bounds[1]) this.Bounds[1] = bds[1];
-        if (bds[2] < this.Bounds[2]) this.Bounds[2] = bds[2];
-        if (bds[3] > this.Bounds[3]) this.Bounds[3] = bds[3];
+        if (bds[0] < this.Bounds[0]) {
+          this.Bounds[0] = bds[0];
+        }
+        if (bds[1] > this.Bounds[1]) {
+          this.Bounds[1] = bds[1];
+        }
+        if (bds[2] < this.Bounds[2]) {
+          this.Bounds[2] = bds[2];
+        }
+        if (bds[3] > this.Bounds[3]) {
+          this.Bounds[3] = bds[3];
+        }
       }
     }
     return this.Bounds.slice(0);
@@ -335,7 +341,7 @@
     bds2[1] = Math.max(bds1[1], bds2[1]);
     bds2[2] = Math.min(bds1[2], bds2[2]);
     bds2[3] = Math.max(bds1[3], bds2[3]);
-        // Exapnd the contour by 10%
+    // Expand the contour by 10%
     var xMid = (bds2[0] + bds2[1]) * 0.5;
     var yMid = (bds2[2] + bds2[3]) * 0.5;
     bds2[0] = xMid + 1.1 * (bds1[0] - xMid);
@@ -343,35 +349,34 @@
     bds2[2] = yMid + 1.1 * (bds1[2] - yMid);
     bds2[3] = yMid + 1.1 * (bds1[3] - yMid);
 
-    var spacing;
-        // choose a spacing.
-        // about 160,000 kPixels (400x400);
-    spacing = Math.sqrt((bds2[1] - bds2[0]) * (bds2[3] - bds2[2]) / 160000);
-        // Note. gradient decent messes up with spacing too small.
+    // choose a spacing.
+    // about 160,000 kPixels (400x400);
+    var spacing = Math.sqrt((bds2[1] - bds2[0]) * (bds2[3] - bds2[2]) / 160000);
+    // Note. gradient decent messes up with spacing too small.
 
     var distMap = new SA.DistanceMap(bds2, spacing);
     for (var i = 0; i < section.Shapes.length; ++i) {
-            // ignore origin.
+      // ignore origin.
       distMap.AddPolyline(section.Shapes[i]);
     }
     distMap.Update();
 
     this.ViewerEventuallyRender();
-        // Coordinate system has changed.
+    // Coordinate system has changed.
     this.RigidAlignWithMap(distMap, trans);
   };
 
-    // Perform gradient descent on the transform....
-    // Do not apply to the points.
-    // trans is the starting position as well as the return value.
+  // Perform gradient descent on the transform....
+  // Do not apply to the points.
+  // trans is the starting position as well as the return value.
   StackSectionWidget.prototype.RigidAlignWithMap = function (distMap, trans) {
-        // Compute center of rotation
+    // Compute center of rotation
     var center = this.GetCenter();
 
-        // shiftX, shiftY, roll
+    // shiftX, shiftY, roll
     var tmpTrans = [0, 0, 0];
 
-        // Try several rotations to see which is the best.
+    // Try several rotations to see which is the best.
     var bestTrans = null;
     var bestDist = -1;
     var i;
@@ -381,7 +386,7 @@
       for (i = 0; i < 5; ++i) {
         dist = this.RigidDecentStep(tmpTrans, center, distMap, 200000);
       }
-            // For symetrical cases, give no rotation a slight advantage.
+      // For symmetrical cases, give no rotation a slight advantage.
       dist = dist * (1.0 + Math.abs(a / 180));
       if (bestDist < 0 || dist < bestDist) {
         bestDist = dist;
@@ -389,29 +394,29 @@
       }
     }
 
-        // Now the real gradient decent.
+    // Now the real gradient decent.
     tmpTrans = bestTrans;
-        // Slowing discount outliers.
+    // Slowing discount outliers.
     var aveDist = 200000;
     for (i = 0; i < 100; ++i) {
       aveDist = this.RigidDecentStep(tmpTrans, center, distMap, aveDist);
     }
-        // caller can do this if they want.
-        // this.Transform([trans[0],trans[1]], center, trans[2]);
-        // Just return the transformation parameters.
-        // The center is als part of the transform, but it can be gotten with GetCenter.
+    // caller can do this if they want.
+    // this.Transform([trans[0],trans[1]], center, trans[2]);
+    // Just return the transformation parameters.
+    // The center is als part of the transform, but it can be gotten with GetCenter.
     trans[0] = tmpTrans[0];
     trans[1] = tmpTrans[1];
     trans[2] = tmpTrans[2];
   };
 
-    // Returns the average distance as the error.
-    // trans is the starting transform (dx,dy, dRoll). This state is modified
-    // by this method.
-    // Center: center of rotation.
-    // distMap is the array of distances.
-    // Threshold sets large distances to a constant. It should be reduced to
-    // minimize the contribution of outliers. Thresh is in units of map pixels.
+  // Returns the average distance as the error.
+  // trans is the starting transform (dx,dy, dRoll). This state is modified
+  // by this method.
+  // Center: center of rotation.
+  // distMap is the array of distances.
+  // Threshold sets large distances to a constant. It should be reduced to
+  // minimize the contribution of outliers. Thresh is in units of map pixels.
   StackSectionWidget.prototype.RigidDecentStep = function (trans, center,
                                                              distMap, thresh) {
     var vx, vy, rx, ry;
@@ -424,14 +429,14 @@
     var numContributingPoints = 0;
     for (var j = 0; j < this.Shapes.length; ++j) {
       var shape = this.Shapes[j];
-            // var debugScalars = new Array(shape.Points.length);
-            // shape.DebugScalars = debugScalars;
+      // var debugScalars = new Array(shape.Points.length);
+      // shape.DebugScalars = debugScalars;
       for (var k = 0; k < shape.Points.length; ++k) {
         var pt = shape.Points[k];
         var x = pt[0];
         var y = pt[1];
 
-                // transform the point.
+        // transform the point.
         vx = (x - center[0]);
         vy = (y - center[1]);
         rx = c * vx + s * vy;
@@ -439,38 +444,38 @@
         x = x + (rx - vx) + trans[0];
         y = y + (ry - vy) + trans[1];
 
-                // Get the distance for this point.
+        // Get the distance for this point.
         var dist = distMap.GetDistance(x, y) * distMap.Spacing;
         totalDist += dist;
-                // Use threshold to minimize effect of outliers.
-                // debugScalars[k] = (thresh)/(thresh + dist);
-                // dist = (thresh*dist)/(thresh + dist);
+        // Use threshold to minimize effect of outliers.
+        // debugScalars[k] = (thresh)/(thresh + dist);
+        // dist = (thresh*dist)/(thresh + dist);
 
-                // debugScalars[k] = (dist < thresh) ? 1:0;
-                // if (dist > thresh) {dist = 0;}
-                // debugScalars[k] = Math.exp(-0.69*(dist*dist)/(thresh*thresh));
+        // debugScalars[k] = (dist < thresh) ? 1:0;
+        // if (dist > thresh) {dist = 0;}
+        // debugScalars[k] = Math.exp(-0.69*(dist*dist)/(thresh*thresh));
         var gs = 1;
         if (thresh > 0) { gs = Math.exp(-0.69 * (dist * dist) / (thresh * thresh)); }
         dist = dist * gs;
 
-                // Scale the negative gradient by thresholded distance.
+        // Scale the negative gradient by thresholded distance.
         var grad = distMap.GetGradient(x, y);
         var mag = Math.sqrt(grad[0] * grad[0] + grad[1] * grad[1]);
 
         if (mag > 0) {
           ++numContributingPoints;
 
-                    // Keep a total for translation
+          // Keep a total for translation
           grad[0] = -grad[0] * dist / mag;
           grad[1] = -grad[1] * dist / mag;
           sumx += grad[0];
           sumy += grad[1];
 
-                    // For rotation
+          // For rotation
           var cross = ry * grad[0] - rx * grad[1];
           sumr += cross / (rx * rx + ry * ry);
         } else {
-          var skip = 1;
+          // skip
         }
       }
     }

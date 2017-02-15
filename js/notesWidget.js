@@ -350,9 +350,6 @@
                              self.ChangeBulletSize('0.9em');
                            });
 
-        // this.AddEditButton(SA.ImagePathUrl+"parse.png", "parse",
-        //                   function() {self.ParseText();});
-        // TODO: Get selected text to see if we can convert it into a question.
     this.AddEditButton(SA.ImagePathUrl + 'question.png', 'add question',
                            function () {
                              self.AddQuestion();
@@ -664,25 +661,17 @@
   };
 
   TextEditor.prototype.AddEditButton = function (src, tooltip, callback) {
-    var self = this;
     var button = $('<img>');
     if (tooltip) {
             // button = $('<img title="'+tooltip+'">')
       button.prop('title', tooltip);
     }
     button
-            .appendTo(this.Header)
-            .addClass('editButton')
-            .attr('src', src)
-            .click(callback);
+      .appendTo(this.Header)
+      .addClass('editButton')
+      .attr('src', src)
+      .click(callback);
     this.EditButtons.push(button);
-  };
-
-  TextEditor.prototype.ParseText = function () {
-    var text = this.TextEntry.text();
-        // Remove empty lines.
-        // Not developing this further because .text() does not containe
-        // new lines.
   };
 
   TextEditor.prototype.AddQuestion = function () {
@@ -751,9 +740,7 @@
     // execCommand fontSize does change bullet size.
     // This is a work around.
   TextEditor.prototype.ChangeBulletSize = function (sizeString) {
-    var self = this;
-    var sel = window.getSelection();
-        // This call will clear the selected text if it is not in this editor.
+    // This call will clear the selected text if it is not in this editor.
     var range = SA.GetSelectionRange(this.TextEntry);
     range = range || SA.MakeSelectionRange(this.TextEntry);
     var listItems = $('li');
@@ -867,19 +854,14 @@
 
     range.insertNode(link);
     if (range.noCursor) {
-            // Leave the selection the same as we found it.
-            // Ready for the next link.
+      // Leave the selection the same as we found it.
+      // Ready for the next link.
       sel.removeAllRanges();
     }
     this.UpdateNote();
   };
 
-    // This global variable is an attempt to enumerate generated
-    // names for links.  The flaw is it always starts over when page is
-    // loaded. It does not detect links from previous edits.
-  var LINKS_WITH_NO_NAME = 0;
-
-    // TODO: Untangle view links from the note.
+  // TODO: Untangle view links from the note.
   TextEditor.prototype.InsertCameraLink = function () {
         // Create a child note.
     var parentNote = this.Note;
@@ -887,14 +869,14 @@
       parentNote = SA.display.GetRootNote();
     }
 
-        // Create a new note to hold the view.
-        // Put the new note at the end of the list.
+    // Create a new note to hold the view.
+    // Put the new note at the end of the list.
     var childIdx = parentNote.Children.length;
-        // var childIdx = 0; // begining
+    // var childIdx = 0; // begining
     var childNote = parentNote.NewChild(childIdx, text);
-        // Setup and save
+    // Setup and save
     childNote.RecordView(this.Display);
-        // Block subnotes and separate text.
+    // Block subnotes and separate text.
     childNote.Type = 'View';
 
         // TODO: I think an icon as a default view link would look nicer.
@@ -908,8 +890,8 @@
     childNote.Title = text;
     range.deleteContents();
 
-        // Simply put a span tag around the text with the id of the view.
-        // It will be formated by the note hyperlink code.
+    // Simply put a span tag around the text with the id of the view.
+    // It will be formated by the note hyperlink code.
     var span = document.createElement('span');
         // This id identifies the span as a hyperlink to this note.
         // The note will format the link and add callbacks later.

@@ -16,8 +16,6 @@
 
     var self = this;
     var size = '40px';
-    var left = '170px';
-    var bottom = '10px';
     if (SAM.detectMobile()) {
         // fake a tab
       this.Tab = {};

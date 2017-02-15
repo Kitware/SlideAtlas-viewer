@@ -12,7 +12,6 @@
     // dragging while just created cannot be relative.  It places the tip on the mouse.
   var ARROW_WIDGET_NEW = 0;
   var ARROW_WIDGET_DRAG = 1; // The whole arrow is being dragged.
-  var ARROW_WIDGET_DRAG_TIP = 2;
   var ARROW_WIDGET_DRAG_TAIL = 3;
   var ARROW_WIDGET_WAITING = 4; // The normal (resting) state.
   var ARROW_WIDGET_ACTIVE = 5; // Mouse is over the widget and it is receiving events.
@@ -171,7 +170,6 @@
     }
 
     if (this.State === ARROW_WIDGET_NEW || this.State === ARROW_WIDGET_DRAG) {
-      var viewport = this.Layer.GetViewport();
       this.Shape.Origin = this.Layer.ConvertPointViewerToWorld(x + this.TipOffset[0], y + this.TipOffset[1]);
       this.Layer.EventuallyDraw();
     }
@@ -271,65 +269,22 @@
     }
   };
 
-    // Can we bind the dialog apply callback to an objects method?
-  var ARROW_WIDGET_DIALOG_SELF;
+  // Can we bind the dialog apply callback to an objects method?
   ArrowWidget.prototype.ShowPropertiesDialog = function () {
-        // var fs = document.getElementById("ArrowFixedSize");
-        // fs.checked = this.Shape.FixedSize;
+    // var fs = document.getElementById("ArrowFixedSize");
+    // fs.checked = this.Shape.FixedSize;
 
     var color = document.getElementById('arrowcolor');
     color.value = SAM.ConvertColorToHex(this.Shape.FillColor);
 
-    var lengthLabel = document.getElementById('ArrowLength');
-        // if (fs.checked) {
-        //  lengthLabel.innerHTML = "Length: " + (this.Shape.Length).toFixed(2) + " pixels";
-        // } else {
-        //  lengthLabel.innerHTML = "Length: " + (this.Shape.Length).toFixed(2) + " units";
-        // }
-
-    ARROW_WIDGET_DIALOG_SELF = this;
     $('#arrow-properties-dialog').dialog('open');
   };
 
-    // I need this because old schemes cannot use "Load"
+  // I need this because old schemes cannot use "Load"
   ArrowWidget.prototype.SetColor = function (hexColor) {
     this.Shape.SetFillColor(hexColor);
     this.Layer.EventuallyDraw();
   };
-
-  function ArrowPropertyDialogApply () {
-    var widget = ARROW_WIDGET_DIALOG_SELF;
-    if (!widget) {
-      return;
-    }
-
-    var hexcolor = document.getElementById('arrowcolor').value;
-        // var fixedSizeFlag = document.getElementById("ArrowFixedSize").checked;
-    widget.Shape.SetFillColor(hexcolor);
-    if (widget !== null) {
-      widget.SetActive(false);
-            // widget.SetFixedSize(fixedSizeFlag);
-    }
-    this.Layer.EventuallyDraw();
-  }
-
-  function ArrowPropertyDialogCancel () {
-    var widget = ARROW_WIDGET_DIALOG_SELF;
-    if (widget !== null) {
-      widget.SetActive(false);
-    }
-  }
-
-  function ArrowPropertyDialogDelete () {
-    var widget = ARROW_WIDGET_DIALOG_SELF;
-    if (widget !== null) {
-      this.Layer.ActiveWidget = null;
-            // We need to remove an item from a list.
-            // shape list and widget list.
-      widget.RemoveFromLayer();
-      this.Layer.EventuallyDraw();
-    }
-  }
 
   SAM.ArrowWidget = ArrowWidget;
 })();

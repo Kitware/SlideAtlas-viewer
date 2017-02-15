@@ -173,7 +173,7 @@
     for (var cIdx = 0; cIdx < this.Caches.length; ++cIdx) {
       var cache = this.Caches[cIdx];
       // Select the tiles to load (loading is a byproduct).
-      var tiles = cache.ChooseTiles(view.Camera, SLICE);
+      cache.ChooseTiles(view.Camera, SLICE);
     }
   };
 

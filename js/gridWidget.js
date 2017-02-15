@@ -1,7 +1,6 @@
 (function () {
   'use strict';
 
-  var NEW = 0;
   var WAITING = 3; // The normal (resting) state.
   var ACTIVE = 4; // Mouse is over the widget and it is receiving events.
   var PROPERTIES_DIALOG = 5; // Properties dialog is up
@@ -11,15 +10,14 @@
   var DRAG_RIGHT = 8;
   var DRAG_TOP = 9;
   var DRAG_BOTTOM = 10;
-  var ROTATE = 11;
-    // Worry about corners later.
+  // Worry about corners later.
 
   function Grid () {
     SAM.Shape.call(this);
-        // Dimension of grid bin
+    // Dimension of grid bin
     this.BinWidth = 20.0;
     this.BinHeight = 20.0;
-        // Number of grid bins in x and y
+    // Number of grid bins in x and y
     this.Dimensions = [10, 8];
     this.Orientation = 0; // Angle with respect to x axis ?
     this.Origin = [10000, 10000]; // middle.
@@ -30,21 +28,17 @@
 
   Grid.prototype = new SAM.Shape();
 
-  Grid.prototype.destructor = function () {
-        // Get rid of the buffers?
-  };
-
   Grid.prototype.UpdateBuffers = function (view) {
-        // TODO: Having a single poly line for a shape is to simple.
-        // Add cell arrays.
+    // TODO: Having a single poly line for a shape is to simple.
+    // Add cell arrays.
     this.PointBuffer = [];
 
-        // Matrix is computed by the draw method in Shape superclass.
-        // TODO: Used to detect first initialization.
-        // Get this out of this method.
+    // Matrix is computed by the draw method in Shape superclass.
+    // TODO: Used to detect first initialization.
+    // Get this out of this method.
     this.Matrix = mat4.create();
     mat4.identity(this.Matrix);
-        // mat4.rotateZ(this.Matrix, this.Orientation / 180.0 * 3.14159);
+    // mat4.rotateZ(this.Matrix, this.Orientation / 180.0 * 3.14159);
 
     if (this.Dimensions[0] < 1 || this.Dimensions[1] < 1 ||
             this.BinWidth <= 0.0 || this.BinHeight <= 0.0) {
@@ -585,20 +579,19 @@
     if (this.Grid.FixedSize) {
       x = event.offsetX;
       y = event.offsetY;
-      var pixelSize = 1;
     } else {
       x = event.worldX;
       y = event.worldY;
     }
     x = x - this.Grid.Origin[0];
     y = y - this.Grid.Origin[1];
-        // Rotate to grid.
+    // Rotate to grid.
     var c = Math.cos(3.14156 * this.Grid.Orientation / 180.0);
     var s = Math.sin(3.14156 * this.Grid.Orientation / 180.0);
     var rx = c * x - s * y;
     var ry = c * y + s * x;
 
-        // Convert to grid coordinates (0 -> dims)
+    // Convert to grid coordinates (0 -> dims)
     x = (0.5 * this.Grid.Dimensions[0]) + (rx / this.Grid.BinWidth);
     y = (0.5 * this.Grid.Dimensions[1]) + (ry / this.Grid.BinHeight);
     var ix = Math.round(x);
@@ -609,11 +602,11 @@
       return false;
     }
 
-        // x,y get the residual in pixels.
+    // x,y get the residual in pixels.
     x = (x - ix) * this.Grid.BinWidth;
     y = (y - iy) * this.Grid.BinHeight;
 
-        // Compute the screen pixel size for tollerance.
+    // Compute the screen pixel size for tollerance.
     var tolerance = 5.0 / this.Layer.GetPixelsPerUnit();
 
     if (Math.abs(x) < tolerance || Math.abs(y) < tolerance) {
@@ -688,9 +681,6 @@
     pt = cam.ConvertPointWorldToViewer(pt[0], pt[1]);
     this.Popup.Show(pt[0] + 10, pt[1] - 30);
   };
-
-    // Can we bind the dialog apply callback to an objects method?
-  var DIALOG_SELF;
 
   GridWidget.prototype.ShowPropertiesDialog = function () {
     this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Grid.OutlineColor));

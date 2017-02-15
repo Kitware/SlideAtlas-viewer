@@ -21,9 +21,6 @@
 (function () {
   'use strict';
 
-    // for debugging
-  var CUTOUT_VIEW;
-
   SA.DownloadImageData = function (data, filename) {
         // The only way I know if is to put in into a canvas.
 
@@ -57,7 +54,6 @@
     var viewport = [0, 0, width, height];
 
     var view = new SA.TileView();
-    CUTOUT_VIEW = view;
     view.SetCache(cache);
     view.SetViewport(viewport);
     var newCam = view.Camera;
@@ -86,14 +82,12 @@
   SA.GetCutoutImage2 = function (view, fileName, returnCallback) {
     // All the tiles are loaded and waiting in the cache.
     view.DrawTiles();
-    var viewport = view.GetViewport();
 
     if (fileName && fileName !== '') {
       view.Canvas[0].toBlob(function (blob) { saveAs(blob, fileName); }, 'image/png');
     }
 
     if (returnCallback) {
-      var ctx = view.Context2d;
       var data = view.GetImageData();
       returnCallback(data);
     }
@@ -192,15 +186,15 @@
         }
         var left = (((x << this.Level) * tileDim) - request[0]) / this.ScreenPixelSpacing;
         var top = (((y << this.Level) * tileDim) - request[2]) / this.ScreenPixelSpacing;
-        var img = $('<img>')
-                    .appendTo(this.Div)
-                    .attr('width', imgSize)
-                    .attr('height', imgSize)
-                    .attr('src', '/tile?img=' + image.img + '&db=' + image.db + '&name=t' + tileName + '.jpg')
-                    .attr('alt', image.label)
-                    .css({'left': left.toString() + 'px',
-                      'top': top.toString() + 'px'})
-                    .addClass('sa-view-cutout-thumb-tile');
+        // img
+        $('<img>')
+          .appendTo(this.Div)
+          .attr('width', imgSize)
+          .attr('height', imgSize)
+          .attr('src', '/tile?img=' + image.img + '&db=' + image.db + '&name=t' + tileName + '.jpg')
+          .attr('alt', image.label)
+          .css({'left': left.toString() + 'px', 'top': top.toString() + 'px'})
+          .addClass('sa-view-cutout-thumb-tile');
       }
     }
   };

@@ -410,8 +410,7 @@
     this.Layer = null;
   };
 
-    // Can we bind the dialog apply callback to an objects method?
-  var DIALOG_SELF;
+  // Can we bind the dialog apply callback to an objects method?
   PencilWidget.prototype.ShowPropertiesDialog = function () {
     this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Shapes.GetOutlineColor()));
     this.Dialog.LineWidthInput.val((this.Shapes.GetLineWidth()).toFixed(2));

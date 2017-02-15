@@ -18,8 +18,6 @@
     // Depends on the CIRCLE widget
   'use strict';
 
-  var DEBUG;
-
   var WAITING = 0;
   var ACTIVE = 1;
   var ACTIVE_TEXT = 2;
@@ -33,7 +31,6 @@
     this.UserNoteFlag = !SA.Edit;
     this.Type = 'text';
 
-    DEBUG = this;
     if (layer === null) {
       return null;
     }
@@ -254,8 +251,7 @@
     // Load a widget from a json object (origin MongoDB).
   TextWidget.prototype.Load = function (obj) {
     this.UserNoteFlag = obj.user_note_flag;
-    var string = obj.string;
-        // Some empty strings got in my database.  I connot delete them from the gui.
+    // Some empty strings got in my database.  I cannot delete them from the gui.
     if (obj.string && obj.string === '') {
       this.Layer.RemoveWidget(this);
       return;
@@ -406,7 +402,6 @@
             // LastMouse necessary for dragging.
       var x = event.offsetX;
       var y = event.offsetY;
-      var cam = this.Layer.GetCamera();
       this.LastMouse = [x, y];
       if (this.State === ACTIVE) {
         this.State = DRAG;
@@ -532,7 +527,7 @@
         // then check to see if the point is no the bounds of the text.
 
     if (this.Arrow.Visibility && this.Arrow.PointInShape(tMouse[0] - this.Text.Anchor[0], tMouse[1] - this.Text.Anchor[1])) {
-            // Doulbe hack. // Does not get highlighted because widget already active.
+            // Double hack. // Does not get highlighted because widget already active.
       this.Arrow.Active = true;
       this.Layer.EventuallyDraw();
       this.SetActive(true, ACTIVE);

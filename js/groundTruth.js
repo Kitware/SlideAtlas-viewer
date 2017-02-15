@@ -119,26 +119,26 @@
     return true;
   };
 
-    // Stepping through the detection sequence.
-    // -1 is none
+  // Stepping through the detection sequence.
+  // -1 is none
   GroundTruth.prototype.SetIteratorIndex = function (idx) {
-        // Highilght the current
+    // Highlight the current
     this.SetHighlightedRect(this.Classes[0], idx);
     this.IteratorIndex = idx;
-        // Animate to put this rec in the middle of the view.
+    // Animate to put this rec in the middle of the view.
     this.UpdateActiveView();
   };
 
-    // The highlighted rect (sometimes the same as the
-    // iteration index / rect).
+  // The highlighted rect (sometimes the same as the
+  // iteration index / rect).
   GroundTruth.prototype.SetHighlightedRect = function (classObj, idx) {
     var widget = classObj.widget;
-        // No change,  just return.
+    // No change,  just return.
     if (this.HighlightedRect && this.HighlightedRect.idx === idx && this.HighlightedRect.widget === widget) {
       return;
     }
 
-        // Remove the highlight fromthe previous.
+    // Remove the highlight from the previous.
     if (this.HighlightedRect.idx > -1) {
       this.HighlightedRect.widget.Shape.ActiveIndex = -1;
       this.HighlightedRect.idx = -1;
@@ -163,9 +163,9 @@
     // Actions are taken on key up.  Key down sets up a modifier in case a
     // mouse click is handled before the keyup.  This is only necesary when
     // iterating.  Mouse click changes the class label and advances.  The
-    // keydown determines the label.
+  // keydown determines the label.
   GroundTruth.prototype.HandleKeyDown = function (event) {
-        // Always active now.
+    // Always active now.
     if (this.InteractionState === ITERATING) {
       if (this.ActionState !== KEY_UP) {
         return false;
@@ -180,18 +180,17 @@
       return false;
     }
 
-        // Let the viewer pan with arrows.
+    // Let the viewer pan with arrows.
     return true;
   };
   GroundTruth.prototype.HandleKeyUp = function (event) {
-    var direction = 0;
     var self = this;
 
-        // Handle the complex decision to adavance or not.
-        // If the key only modified a click, do not advance.
+    // Handle the complex decision to adavance or not.
+    // If the key only modified a click, do not advance.
     if (this.InteractionState === ITERATING) {
-            // Mouse click (with key modifier) was used to add an annotation
-            // outside the sequence and no advancement is necessary.
+      // Mouse click (with key modifier) was used to add an annotation
+      // outside the sequence and no advancement is necessary.
       if (this.ActionState === KEY_USED_NO_ADVANCE) {
         this.ActionState = KEY_UP;
         return false;
@@ -314,8 +313,7 @@
     }
 
     var viewer = this.Layer.GetViewer();
-    var cam = viewer.GetCamera();
-        // viewer.ZoomTarget = this.Layer.GetCamera().GetHeight();
+    // viewer.ZoomTarget = this.Layer.GetCamera().GetHeight();
     viewer.RollTarget = this.Layer.GetCamera().Roll;
     viewer.TranslateTarget = rectSet.GetCenter(this.IteratorIndex);
     viewer.AnimateLast = new Date().getTime();
@@ -408,85 +406,85 @@
   };
 
   GroundTruth.prototype.CheckActive = function (event) {
-        // return this.GetActive();
-        // Changing to alwasy acive so annotations can be changed and added
-        // in the waiting state.
+    // return this.GetActive();
+    // Changing to alwasy acive so annotations can be changed and added
+    // in the waiting state.
     return true;
   };
 
-    // Initialize the gui / dom
+  // Initialize the gui / dom
   GroundTruth.prototype.InitializeGui = function (parent, label) {
     var self = this;
 
-        // The wrapper div that controls a single layer.
+    // The wrapper div that controls a single layer.
     var layerControl = $('<div>')
-            .appendTo(parent)
-            .css({
-              'border': '1px solid #CCC',
-              'width': '100%'
-            });
+      .appendTo(parent)
+      .css({
+        'border': '1px solid #CCC',
+        'width': '100%'
+      });
 
-    this.ActiveLabel =
-            $('<div>').appendTo(layerControl)
-            .prop('title', 'Start sorting detections')
-            .attr('contenteditable', 'false')
-            .text('');
+    this.ActiveLabel = $('<div>')
+      .appendTo(layerControl)
+      .prop('title', 'Start sorting detections')
+      .attr('contenteditable', 'false')
+      .text('');
 
-    var sizeContainer =
-            $('<p>').appendTo(layerControl);
-    this.SizeLabel =
-            $('<label>').appendTo(sizeContainer)
-            .text('Size:  ');
-    this.SizeInput =
-            $('<input type="number">').appendTo(sizeContainer)
-            .prop('title', 'Change the size of the glyphs')
-            .on('change', function () { self.ChangeSize(); });
+    var sizeContainer = $('<p>')
+      .appendTo(layerControl);
+    this.SizeLabel = $('<label>')
+      .appendTo(sizeContainer)
+      .text('Size:  ');
+    this.SizeInput = $('<input type="number">')
+      .appendTo(sizeContainer)
+      .prop('title', 'Change the size of the glyphs')
+      .on('change', function () { self.ChangeSize(); });
 
-    var buttonContainer =
-            $('<p>').appendTo(layerControl);
-    this.StartStopButton =
-            $('<button>').appendTo(buttonContainer)
-            .text('Start')
-            .css({'background-color': '#5F5'})
-            .prop('title', 'Start sorting detections')
-            // .button()
-            .css({'width': '5em'})
-            .on('click', function () { self.Start(); });
-    var saveButton =
-            $('<button>').appendTo(buttonContainer)
-            .text('Save')
-            .prop('title', 'Save annotations to server')
-            .click(function () { self.Save(); });
+    var buttonContainer = $('<p>')
+      .appendTo(layerControl);
+    this.StartStopButton = $('<button>')
+      .appendTo(buttonContainer)
+      .text('Start')
+      .css({'background-color': '#5F5'})
+      .prop('title', 'Start sorting detections')
+      // .button()
+      .css({'width': '5em'})
+      .on('click', function () { self.Start(); });
+    $('<button>')
+      .appendTo(buttonContainer)
+      .text('Save')
+      .prop('title', 'Save annotations to server')
+      .click(function () { self.Save(); });
 
-        // Wrapper for the confidence slider.
+    // Wrapper for the confidence slider.
     var confWrapper = $('<div>')
-            .appendTo(layerControl)
-            .css({
-              'border': '1px solid #CCC',
-              'width': '100%',
-              'height': '50px'
-            });
+      .appendTo(layerControl)
+      .css({
+        'border': '1px solid #CCC',
+        'width': '100%',
+        'height': '50px'
+      });
 
     this.Slider = $('<input type="range" min="0" max="100">')
-            .appendTo(confWrapper)
-            .on('input',
-                function () {
-                  self.SliderCallback();
-                });
-        // this.Slider[0].min = 75;
+      .appendTo(confWrapper)
+      .on('input',
+          function () {
+            self.SliderCallback();
+          });
+    // this.Slider[0].min = 75;
 
-    var minLabel = $('<div>')
-            .appendTo(confWrapper)
-            .html('0%')
-            .css({ 'float': 'left' });
+    $('<div>')
+      .appendTo(confWrapper)
+      .html('0%')
+      .css({ 'float': 'left' });
 
-    var maxLabel = $('<div>')
-            .appendTo(confWrapper)
-            .html('100%')
-            .css({ 'float': 'right' });
+    $('<div>')
+      .appendTo(confWrapper)
+      .html('100%')
+      .css({ 'float': 'right' });
 
-    var classContainer =
-            $('<p>').appendTo(layerControl);
+    var classContainer = $('<p>')
+      .appendTo(layerControl);
     for (var i = 0; i < this.Classes.length; ++i) {
       this.MakeClassButton(classContainer, i);
     }
@@ -574,7 +572,6 @@
     var annot = data.annotation;
     for (var i = 0; i < annot.elements.length; ++i) {
       var element = annot.elements[i];
-      var obj = {};
 
       if (element.type === 'rectangle') {
         setObj.widths.push(element.width);
@@ -634,7 +631,6 @@
 
     // zoom in
     var viewer = this.Layer.GetViewer();
-    var cam = viewer.GetCamera();
     viewer.ZoomTarget = 500;
 
         // TODO: abstract the highlighting to clean it up.
@@ -687,11 +683,10 @@
     this.Layer.EventuallyDraw();
   };
 
-    // Move labeled rects in detections to classes.
-    // Called before annotations are saved to
+  // Move labeled rects in detections to classes.
+  // Called before annotations are saved to
   GroundTruth.prototype.SplitDetections = function () {
-    var detections = this.Classes[0].widget.Shape;
-        // Build an object to make indexing classes easier.
+    // Build an object to make indexing classes easier.
     var shapes = {};
     for (var i = 0; i < this.Classes.length; ++i) {
       shapes[this.Classes[i].label] = this.Classes[i];
@@ -711,7 +706,7 @@
       }
     }
 
-    // Now keep the new rectsets and dispose of the old.
+    // Now keep the new rect sets and dispose of the old.
     for (i = 0; i < this.Classes.length; ++i) {
       this.Classes[i].widget.Shape = this.Classes[i].newRectSet;
       delete this.Classes[i].newRectSet;

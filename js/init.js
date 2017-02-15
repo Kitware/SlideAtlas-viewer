@@ -3,13 +3,9 @@ window.SA = window.SA || {};
 (function () {
   'use strict';
 
-  var ROOT_DIV;
   SA.imageProgram;
-  var textProgram;
   SA.polyProgram;
   SA.squarePositionBuffer; // eslint-disable-line no-undef
-  var mvMatrix = mat4.create();
-  var pMatrix = mat4.create();
   SA.squareOutlinePositionBuffer;
   SA.tileVertexPositionBuffer;
   SA.tileVertexTextureCoordBuffer;
@@ -26,7 +22,7 @@ window.SA = window.SA || {};
     var h = tileSource.height;
     var cache = new SA.Cache();
     cache.TileSource = tileSource;
-        // Make an id for the image so it can be reused.
+    // Make an id for the image so it can be reused.
     var image = {levels: tileSource.maxLevel + 1,
       dimensions: [w, h],
       bounds: [0, w - 1, 0, h - 1],
@@ -43,9 +39,9 @@ window.SA = window.SA || {};
     return cache;
   };
 
-    // TODO: Clean up dependancy on notes.
-    // Girder make a viewer record from a tile source so the rest of slide
-    // atlas works.
+  // TODO: Clean up dependency on notes.
+  // Girder make a viewer record from a tile source so the rest of slide
+  // atlas works.
   SA.TileSourceToViewerRecord = function (tileSource) {
     var w = tileSource.width;
     var h = tileSource.height;
@@ -116,7 +112,7 @@ window.SA = window.SA || {};
     return note;
   };
 
-    // Firefox does not set which for mouse move events.
+  // Firefox does not set which for mouse move events.
   SA.FirefoxWhich = function (event) {
     event.which = event.buttons;
     if (event.which === 2) {
@@ -129,15 +125,6 @@ window.SA = window.SA || {};
   SA.Debug = function (msg) {
     console.log(msg);
   };
-
-    // for debugging
-  function MOVE_TO (x, y) {
-    if (SA.display) {
-      SA.display.Viewers[0].MainView.Camera.SetFocalPoint([x, y]);
-      SA.display.Viewers[0].MainView.Camera.ComputeMatrix();
-      SA.display.Draw();
-    }
-  }
 
   SA.ZERO_PAD = function (i, n) {
     var s = '0000000000' + i.toFixed();
@@ -198,8 +185,7 @@ window.SA = window.SA || {};
 
     // Now we have the session (if the id was passed in).
   SA.Run2 = function () {
-    var self = SA;
-        // Get the root note.
+    // Get the root note.
     if (SA.ViewId === '' || SA.ViewId === 'None') {
       delete SA.ViewId;
     }
@@ -207,10 +193,10 @@ window.SA = window.SA || {};
       delete SA.SessionId;
     }
 
-        // We need to get the view so we know how to initialize the app.
+    // We need to get the view so we know how to initialize the app.
     var rootNote = new SA.Note();
 
-        // Hack to create a new presenation.
+    // Hack to create a new presenation.
     if (SA.ViewId === 'presentation') {
       var title = window.prompt('Please enter the presentation title.',
                                       'SlideShow');
@@ -229,39 +215,39 @@ window.SA = window.SA || {};
         SA.Debug('Missing view id');
         return;
       }
-            // Sort of a hack that we rely on main getting called after SA
-            // method returns and other variables of SA are initialize.
+      // Sort of a hack that we rely on main getting called after SA
+      // method returns and other variables of SA are initialize.
       rootNote.LoadViewId(SA.ViewId,
                             function () { Main(rootNote); });
     }
   };
 
-    // Stack editing stuff (should not be in the global class).
-    // It used to be in the event manager.  Skipping the focus stuff.
-    // TODO:
-    // Modifier could be handled better with keypress events.
+  // Stack editing stuff (should not be in the global class).
+  // It used to be in the event manager.  Skipping the focus stuff.
+  // TODO:
+  // Modifier could be handled better with keypress events.
   SA.HandleKeyDownStack = function (event) {
     if (SA.ContentEditableHasFocus) { return true; }
 
     if (event.keyCode === 16) {
-            // Shift key modifier.
+      // Shift key modifier.
       SA.ShiftKeyPressed = true;
-            // Do not forward modifier keys events to objects that consume keypresses.
+      // Do not forward modifier keys events to objects that consume keypresses.
       return true;
     }
     if (event.keyCode === 17) {
-            // Control key modifier.
+      // Control key modifier.
       SA.ControlKeyPressed = true;
       return true;
     }
 
-        // Handle undo and redo (cntrl-z, cntrl-y)
+    // Handle undo and redo (cntrl-z, cntrl-y)
     if (SA.ControlKeyPressed && event.keyCode === 90) {
-            // Function in recordWidget.
+      // Function in recordWidget.
       SA.recorderWidget.UndoState();
       return false;
     } else if (SA.ControlKeyPressed && event.keyCode === 89) {
-            // Function in recordWidget.
+      // Function in recordWidget.
       SA.recorderWidget.RedoState();
       return false;
     }
@@ -277,7 +263,7 @@ window.SA = window.SA || {};
   SA.HandleKeyUpStack = function (event) {
     if (SA.ContentEditableHasFocus) { return true; }
 
-        // For debugging deformable alignment in stacks.
+    // For debugging deformable alignment in stacks.
     if (event.keyCode === 90) { // z = 90
       if (event.shiftKey) {
         SA.DeformableAlignViewers(false);
@@ -539,38 +525,11 @@ window.SA = window.SA || {};
     return '';
   };
 
-    // function GetViewId () {
-    //    if (typeof(SA.ViewId) !== "undefined") {
-    //        return SA.ViewId;
-    //    }
-    //    if ( ! SA.notesWidget && ! SA.notesWidget.RootNote) {
-    //        return SA.notesWidget.RootNote._id;
-    //    }
-    //    SA.Debug("Could not find view id");
-    //    return "";
-    // }
-
-    // WebGL Initialization
-
-  function doesBrowserSupportWebGL (canvas) {
-    var gl;
-    try {
-            // gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-      gl = canvas.getContext('webgl');
-    } catch (e) {
-    }
-    if (!gl) {
-            // SA.Debug("Could not initialise WebGL, sorry :-(");
-      return null;
-    }
-    return gl;
-  }
-
   SA.initWebGL = function (view) {
-        // if (view.imageProgram) { return; }
-        // Defined in HTML
-        // initShaderPrograms(view.gl);
-        // initOutlineBuffers(view.gl);
+    // if (view.imageProgram) { return; }
+    // Defined in HTML
+    // initShaderPrograms(view.gl);
+    // initOutlineBuffers(view.gl);
     initImageTileBuffers(view);
   };
 
@@ -633,7 +592,6 @@ window.SA = window.SA || {};
     gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
     vTextureCoord = aTextureCoord;
   }
-*/
 
   function initShaderPrograms (view, gl) {
     // Test threshold value for alpha.
@@ -736,6 +694,7 @@ window.SA = window.SA || {};
     //    = gl.getUniformLocation(textProgram, "uSampler");
     // textProgram.colorUniform = gl.getUniformLocation(textProgram, "uColor");
   }
+*/
 
   SA.createWebGlProgram = function (fragmentShaderString, vertexShaderString, gl) {
     var fragmentShader = getShader(gl, gl.FRAGMENT_SHADER, fragmentShaderString);
@@ -760,9 +719,9 @@ window.SA = window.SA || {};
 
     return program;
   };
-
+  /*
   function initOutlineBuffers (gl) {
-        // Outline Square
+    // Outline Square
     var vertices = [
       0.0, 0.0, 0.0,
       0.0, 1.0, 0.0,
@@ -775,7 +734,7 @@ window.SA = window.SA || {};
     SA.squareOutlinePositionBuffer.itemSize = 3;
     SA.squareOutlinePositionBuffer.numItems = 5;
 
-        // Filled square
+    // Filled square
     SA.squarePositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, SA.squarePositionBuffer);
     vertices = [
@@ -788,8 +747,8 @@ window.SA = window.SA || {};
     SA.squarePositionBuffer.itemSize = 3;
     SA.squarePositionBuffer.numItems = 4;
   }
-
-    // ==============================================================================
+  */
+  // ==============================================================================
 
   function initImageTileBuffers (view) {
     if (view.tileVertexTextureCoordinateBuffer) { return; }
@@ -798,7 +757,7 @@ window.SA = window.SA || {};
     var vertexPositionData = [];
     var textureCoordData = [];
 
-        // Make 4 points
+    // Make 4 points
     textureCoordData.push(0.0);
     textureCoordData.push(0.0);
     vertexPositionData.push(0.0);
@@ -879,20 +838,22 @@ window.SA = window.SA || {};
   }
 
   // ----------------------------------------------------------
-  // Log to trackdown iPad bug.  Console does not log until
+  // Log to track down iPad bug.  Console does not log until
   // debugger is running.  Bug does not occur when debugger
   // is running.
 
   var LOGGING = false;
   var DEBUG_LOG = [];
 
-  function StartLogging (message) {
-    if (LOGGING) return;
+  function StartLogging (message) { // eslint-disable-line no-unused-vars
+    if (LOGGING) {
+      return;
+    }
     LOGGING = true;
-        // alert("Error: Check log");
+    // alert("Error: Check log");
   }
 
-  function LogMessage (message) {
+  function LogMessage (message) { // eslint-disable-line no-unused-vars
     if (LOGGING) {
       DEBUG_LOG.push(message);
     }
@@ -904,27 +865,14 @@ window.SA = window.SA || {};
   // As I abstract viewer features, these variables and functions
   // should migrate into objects and other files.
 
-  var CANVAS;
+  // ==============================================================================
 
-  var CONFERENCE_WIDGET;
-
-    // ==============================================================================
-
-    // hack to avoid an undefined error (until we unify annotation stuff).
-  function ShowAnnotationEditMenu (x, y) {
-  }
-
-    // TODO:  Get rid of this function.
+  // TODO:  Get rid of this function.
   function handleResize () {
     $('window').trigger('resize');
   }
 
-    // The event manager detects single right click and double right click.
-    // This gets galled on the single.
-  function ShowPropertiesMenu (x, y) {} // This used to show the view edit.
-    // I am getting rid of the right click feature now.
-
-    // TODO: Move these out of the global SLideAtlas object.
+  // TODO: Move these out of the global SLideAtlas object.
   function handleKeyDown (event) {
     return SA.HandleKeyDownStack(event);
   }
@@ -933,14 +881,14 @@ window.SA = window.SA || {};
   }
 
   SA.cancelContextMenu = function (e) {
-        // alert("Try to cancel context menu");
+    // alert("Try to cancel context menu");
     if (e && e.stopPropagation) {
       e.stopPropagation();
     }
     return false;
   };
 
-    // Call back from NotesWidget.
+  // Call back from NotesWidget.
   function NotesModified () {
     if (SA.Edit && SA.SaveButton) {
       SA.SaveButton.attr('src', SA.ImagePathUrl + 'save.png');
@@ -953,9 +901,9 @@ window.SA = window.SA || {};
     }
   }
 
-    // This function gets called when the save button is pressed.
+  // This function gets called when the save button is pressed.
   function SaveCallback () {
-        // TODO: This is no longer called by a button, so change its name.
+    // TODO: This is no longer called by a button, so change its name.
     SA.notesWidget.SaveCallback(
             function () {
               // finished
@@ -1077,13 +1025,10 @@ window.SA = window.SA || {};
             // TODO: See if we can get rid of this, or combine it with
             // the view browser.
       SA.InitSlideSelector(SA.MainDiv); // What is this?
-      var viewMenu1 = new SA.ViewEditMenu(SA.display.Viewers[0],
-                                                SA.display.Viewers[1]);
-      var viewMenu2 = new SA.ViewEditMenu(SA.display.Viewers[1],
-                                                SA.display.Viewers[0]);
-      var viewer1 = SA.display.Viewers[0];
-      var viewer2 = SA.display.Viewers[1];
-
+      SA.viewMenu1 = new SA.ViewEditMenu(SA.display.Viewers[0],
+                                         SA.display.Viewers[1]);
+      SA.viewMenu2 = new SA.ViewEditMenu(SA.display.Viewers[1],
+                                         SA.display.Viewers[0]);
       SA.display.UpdateGui();
 
             // ==============================

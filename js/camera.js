@@ -130,38 +130,34 @@ window.SAM = window.SAM || {};
     return [xNew, yNew];
   };
 
-    // dx, dy are in view coordinates [-0.5,0.5].
-    // The camera matrix converts world to view.
+  // dx, dy are in view coordinates [-0.5,0.5].
+  // The camera matrix converts world to view.
   Camera.prototype.HandleTranslate = function (dx, dy) {
-        // Convert view vector to world vector.
-        // We could invert the matrix to get the transform, but this is easier for now.....
+    // Convert view vector to world vector.
+    // We could invert the matrix to get the transform, but this is easier for now.....
     var s = Math.sin(this.Roll);
     var c = Math.cos(this.Roll);
-    var x = this.FocalPoint[0];
-    var y = this.FocalPoint[1];
-    var z = 10;
     var w = this.GetWidth();
-    var h = this.GetHeight();
 
     if (this.Mirror) {
       dy = -dy;
     }
 
-        // Scale to world.
+    // Scale to world.
     dx = dx * w;
     dy = dy * w;
-        // Rotate
+    // Rotate
     var rx = dx * c + dy * s;
     var ry = dy * c - dx * s;
 
     this.Translate(rx, ry, 0.0);
   };
 
-    // x,y are in display coordiantes (origin at the center).
-    // dx,dy are in the same coordinates system (scale).
-    // Scale does not matter because we only care about rotation.
+  // x,y are in display coordiantes (origin at the center).
+  // dx,dy are in the same coordinates system (scale).
+  // Scale does not matter because we only care about rotation.
   Camera.prototype.HandleRoll = function (x, y, dx, dy) {
-        // Avoid divide by zero / singularity
+    // Avoid divide by zero / singularity
     if (x === 0 && y === 0) {
       return;
     }

@@ -92,7 +92,9 @@
       while (true) {
         var gridLevelDim = [Math.ceil(xDim / 256), Math.ceil(yDim / 256)];
         this.Levels += 1;
-        if (gridLevelDim[0] === 1 && gridLevelDim[1] === 1) return;
+        if (gridLevelDim[0] === 1 && gridLevelDim[1] === 1) {
+          return;
+        }
         xDim = xDim / 2;
         yDim = yDim / 2;
       }
@@ -136,24 +138,6 @@
       return name;
     };
   };
-
-  SA.IIPSource = function () {
-    // Higher levels are higher resolution.
-    // x, y, slide are integer indexes of tiles in the grid.
-    this.getTileUrl = function (level, x, y, z) {
-        // The number if tiles in a row for this level grid.
-      var xDim = Math.ceil(this.ImageWidth /
-                             (this.TileSize << (this.NumLevels - z - 1)));
-      var idx = y * xDim + x;
-      var imageSrc = this.Prefix + (z + 2) + ',' + idx;
-    };
-
-    this.ImageWidth = 0;
-    this.TileSize = 256;
-    this.NumLevels = 0;
-  };
-
-// ==============================================================================
 
 // ==============================================================================
 
@@ -642,7 +626,6 @@
       bounds[3] = Math.min(bounds[3], this.Image.bounds[3]);
     }
 
-    var id;
     var idList = [];
     var dim = 1 << level;
     var bds = [];
@@ -659,6 +642,7 @@
     // current indexing scheme.
 
     /*
+    var id;
     for (var y = bds[2]; y <= bds[3]; ++y) {
       for (var x = bds[0]; x <= bds[1]; ++x) {
         id = x | (y << level);

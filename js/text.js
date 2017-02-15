@@ -66,10 +66,6 @@
 
   // All text object use the same texture map.
 
-  function TextError () {
-    alert('Could not load font');
-  }
-
   function Text () {
     this.Color = [0.5, 1.0, 1.0];
     this.Size = 12; // Height in pixels
@@ -190,14 +186,14 @@
       var strArray = this.String.split('\n');
       var height = this.Size * LINE_SPACING * strArray.length;
       var width = 0;
-            // Hack: use a global viewer because I do not have the viewer.
-            // Maybe it should be passed in as an argument, or store the context
-            // as an instance variable.
+      // Hack: use a global viewer because I do not have the viewer.
+      // Maybe it should be passed in as an argument, or store the context
+      // as an instance variable.
       var ctx = view.Context2d;
       ctx.save();
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.font = this.Size + 'pt Calibri';
-            // Compute the width of the text box.
+      // Compute the width of the text box.
       for (i = 0; i < strArray.length; ++i) {
         var lineWidth = ctx.measureText(strArray[i]).width;
         if (lineWidth > width) { width = lineWidth; }
@@ -206,12 +202,11 @@
       ctx.restore();
       return;
     }
-        // Create a textured quad for each letter.
+    // Create a textured quad for each letter.
     var vertexPositionData = [];
     var textureCoordData = [];
     var cellData = [];
         // 128 for power of 2, but 98 to top of characters.
-    var top = 98.0 / 128.0; // Top texture coordinate value
     var charLeft = 0;
     var charTop = 0;
     var ptId = 0;
@@ -224,22 +219,22 @@
         charTop += this.Size;
       } else {
         var port = ASCII_LOOKUP[idx];
-                // Convert to texture coordinate values.
+        // Convert to texture coordinate values.
         var tLeft = port[0] / 1024.0;
         var tRight = (port[0] + port[2]) / 1024.0;
         var tBottom = port[1] / 512.0;
         var tTop = (port[1] + port[3]) / 512.0;
-                // To place vertices
+        // To place vertices
         var charRight = charLeft + port[2] * this.Size / 98.0;
         var charBottom = charTop + port[3] * this.Size / 98.0;
 
-                // Accumulate bounds;
+        // Accumulate bounds;
         if (this.PixelBounds[0] > charLeft) { this.PixelBounds[0] = charLeft; }
         if (this.PixelBounds[1] < charRight) { this.PixelBounds[1] = charRight; }
         if (this.PixelBounds[2] > charTop) { this.PixelBounds[2] = charTop; }
         if (this.PixelBounds[3] < charBottom) { this.PixelBounds[3] = charBottom; }
 
-                // Make 4 points, We could share points.
+        // Make 4 points, We could share points.
         textureCoordData.push(tLeft);
         textureCoordData.push(tBottom);
         vertexPositionData.push(charLeft);
@@ -266,7 +261,7 @@
 
         charLeft = charRight;
 
-                // Now create the cell.
+        // Now create the cell.
         cellData.push(0 + ptId);
         cellData.push(1 + ptId);
         cellData.push(2 + ptId);
@@ -298,9 +293,7 @@
   };
 
   Text.prototype.HandleMouseMove = function (event, dx, dy) {
-        // convert the position to screen pixel coordinates.
-    var viewer = event.CurrentViewer;
-
+    // convert the position to screen pixel coordinates.
     return false;
   };
 

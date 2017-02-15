@@ -522,21 +522,19 @@
 
     // aspect ratio does something even with no arguments.
     if (args.length > 0) {
-        // generic method call. Give jquery ui access to all this objects methods.
+      // generic method call. Give jquery ui access to all this objects methods.
       if (typeof (this[args[0]]) === 'function') {
-            // first list item is the method name,
-            // the rest are arguments to the method.
+        // first list item is the method name,
+        // the rest are arguments to the method.
         return this[args[0]].apply(this, Array.prototype.slice.call(args, 1));
       }
-        // Handle the legacy behavior.
-        // One argument: an object (like jqueryUI).
+      // Handle the legacy behavior.
+      // One argument: an object (like jqueryUI).
       args = args[0];
     } else {
-        // looks like aspect processing wiht no args ...  Cannot just return?
+      // looks like aspect processing with no args ...  Cannot just return?
       args = {};
     }
-
-    var self = this;
 
     if (args.position) {
       this.Position = args.position;
@@ -546,7 +544,7 @@
     // AspectRatio is a boolean.
     if (args.aspectRatio !== undefined) {
       if (args.apsectRatio === '') {
-            // Actively remove the aspect ratio.
+        // Actively remove the aspect ratio.
         delete this.AspectRatio;
         this.Div.removeAttr('sa-aspect-ratio');
       } else {
@@ -555,7 +553,7 @@
         this.Div.attr('sa-aspect-ratio', args.aspectRatio);
       }
     } else {
-        // try and get a saved aspect ratio.
+      // try and get a saved aspect ratio.
       this.AspectRatio = this.Div.attr('sa-aspect-ratio');
     }
 
@@ -564,8 +562,8 @@
         this.EditableOn();
       } else {
         this.EditableOff();
-            // hack hack hack (for view browser).
-            // Trying to make slide thumbnails completly passive.
+        // hack hack hack (for view browser).
+        // Trying to make slide thumbnails completly passive.
         this.Div.attr('contenteditable', 'false')
                 .addClass('sa-noselect');
         this.Div.find('div').attr('contenteditable', 'false')
@@ -1426,8 +1424,6 @@
   };
 
   saQuestion.prototype.AddAnswerTo = function (parent, answerList, text, checked) {
-    var self = this;
-
     // Make a new answer box;
     var answerDiv = $('<div>')
         .appendTo(parent)
@@ -2441,58 +2437,15 @@
     return this;
   };
 
-// ==============================================================================
-// A common dialog class for all sa objects.
-// Abstraction of text dialog for rectangles.
-// Internal helper.
-  function saGetDialog (domElement, showCallback, applyCallback) {
-    if (!domElement.saDialog) {
-      var helper = new SAM.Dialog(function () { saDialogApplyCallback(domElement); });
-      if (!helper.ShowCallbacks) { helper.ShowCallbacks = []; }
-      if (!helper.ApplyCallbacks) { helper.ApplyCallbacks = []; }
-      saAddButton(domElement, SA.ImagePathUrl + 'Menu.jpg', 'properties',
-                    function () { saDialogShowCallback(domElement); });
-      domElement.saDialog = helper;
-    }
-    // I assume that the users will add variables to the dialog.
-    if (showCallback) { domElement.saDialog.ShowCallbacks.push(showCallback); }
-    if (applyCallback) { domElement.saDialog.ApplyCallbacks.push(applyCallback); }
-    return domElement.saDialog;
-  }
+  // ==============================================================================
+  // This is legacy and not used anymore.
+  // A common parent for all sa buttons (for this element).
+  // Handle showing and hiding buttons.  Internal helper.
 
-// Remove the dialog.
-// Incomplete. I need to remove the dialog button.
-  var saDialogDelete = function (element) {
-    if (!element.saDialog) { return; }
-    element.saDialog.Dialog.Body.empty;
-    delete element.saDialog;
-    // element.saDelete.ButtonsDiv.remove();
-  };
+  // Just for enabling and disabling the edit buttons
+  // cmd: "enable" or "disable"
 
-  var saDialogShowCallback = function (element) {
-    var callbacks = element.saDialog.ShowCallbacks;
-    for (var i = 0; i < callbacks.length; ++i) {
-      (callbacks[i])(element);
-    }
-    element.saDialog.Show(true);
-  };
-
-  var saDialogApplyCallback = function (element) {
-    var callbacks = element.saDialog.ApplyCallbacks;
-    for (var i = 0; i < callbacks.length; ++i) {
-      (callbacks[i])(element);
-    }
-  };
-
-// ==============================================================================
-// This is legacy and not used anymore.
-// A common parent for all sa buttons (for this element).
-// Handle showing and hiding buttons.  Internal helper.
-
-// Just for enabling and disabling the edit buttons
-// cmd: "enable" or "disable"
-
-// Only one set of buttons are visible at a time.
+  // Only one set of buttons are visible at a time.
   var SA_BUTTONS_VISIBLE = null;
 
   jQuery.prototype.saButtons = function (cmd) {
@@ -2930,9 +2883,6 @@
 
   function saResizeCallback () {
     var height = window.innerHeight;
-    var width = window.innerWidth;
-    var top = 0;
-    var left = 0;
     var items = $('.sa-full-height');
     for (var i = 0; i < items.length; ++i) {
       var item = items[i];
@@ -3011,8 +2961,8 @@
     this.ShiftY = 0;
 
     // Setup events to pan and zoom the presentation window.
-    var self = this;
-    /* this.Div.on(
+    /* var self = this;
+    this.Div.on(
         'mousedown.presentation',
         function (e) {
             return self.HandleMouseDown(e);
@@ -3728,8 +3678,6 @@
 
     // update
     this.SetWidth(this.Width + (this.AnimationTarget - this.Width) * k);
-
-    var self = this;
   };
 
 // Open and close the panel

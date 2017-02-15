@@ -9,56 +9,49 @@ window.SA = window.SA || {};
 
 // GetViewer(idx);
 
-// Create and repond to the dual / single view toggle button.
+// Create and respond to the dual / single view toggle button.
 // How the window is derived between viewer1 and viewer1.
 // Default: viewer1 uses all available space.
 
 (function () {
   'use strict';
 
-    // TODO: Get rid of these gloabal variable.
+  // TODO: Get rid of these global variable.
   SA.VIEWERS = [];
-  SA.VIEWER1;
-  SA.VIEWER2;
 
   function DualViewWidget (parent) {
     var self = this;
     this.Viewers = []; // It would be nice to get rid of this.
     this.ViewerDivs = [];
 
-        // Rather than getting the current note from the NotesWidget, keep a
-        // reference here.  SlideShow can have multiple "displays".
-        // We might consider keep a reference in the dua
+    // Rather than getting the current note from the NotesWidget, keep a
+    // reference here.  SlideShow can have multiple "displays".
+    // We might consider keep a reference in the dua
     this.saNote = null;
     this.saNoteStartIndex = 0;
 
     this.Parent = parent;
     parent.addClass('sa-dual-viewer');
-        // I need relative position but should not modify parent.
+    // I need relative position but should not modify parent.
     this.TopDiv = $('<div>')
-            .appendTo(parent)
-            .css({'position': 'relative',
-              'width': '100%',
-              'height': '100%'});
-
-        // This parent used to be CANVAS.
-    var width = parent.innerWidth();
-    var height = parent.innerHeight();
-    var halfWidth = width / 2;
+      .appendTo(parent)
+      .css({'position': 'relative',
+        'width': '100%',
+        'height': '100%'});
 
     for (var i = 0; i < 2; ++i) {
       var viewerDiv = $('<div>')
-                .appendTo(this.TopDiv)
-                .css({'position': 'absolulute',
-                  'top': '0px'})
-                .saViewer({overview: true, zoomWidget: true})
-                .addClass('sa-view-canvas-div');
+        .appendTo(this.TopDiv)
+        .css({'position': 'absolulute',
+          'top': '0px'})
+        .saViewer({overview: true, zoomWidget: true})
+        .addClass('sa-view-canvas-div');
 
       this.ViewerDivs[i] = viewerDiv;
       this.Viewers[i] = viewerDiv[0].saViewer;
-            // TODO: Get rid of this.
-            // I beleive the note should sets this, and we do not need to do it
-            // here..
+      // TODO: Get rid of this.
+      // I believe the note should sets this, and we do not need to do it
+      // here..
       this.Viewers[i].RecordIndex = i;
     }
 
@@ -69,49 +62,50 @@ window.SA = window.SA || {};
 
     this.DualView = false;
     this.Viewer1Fraction = 1.0;
-        // It would be nice to integrate all animation in a flexible utility.
+    // It would be nice to integrate all animation in a flexible utility.
     this.AnimationLastTime = 0;
     this.AnimationDuration = 0;
     this.AnimationTarget = 0;
 
-        // DualViewer is the navigation widgets temporary home.
-        // SlideShow can have multiple nagivation widgets so it is no
-        // longer a singlton.
-        // This is for moving through notes, session views and stacks.
-        // It is not exactly related to dual viewer. It is sort of a child
-        // of the dual viewer.
+    // DualViewer is the navigation widgets temporary home.
+    // SlideShow can have multiple navigation widgets so it is no
+    // longer a singleton.
+    // This is for moving through notes, session views and stacks.
+    // It is not exactly related to dual viewer. It is sort of a child
+    // of the dual viewer.
     this.NavigationWidget = new SA.NavigationWidget(this.TopDiv, this);
 
     if (!SAM.MOBILE_DEVICE) { // || SAM.MOBILE_DEVICE === 'iPad') {
             // Todo: Make the button become more opaque when pressed.
       $('<img>')
-                .appendTo(this.ViewerDivs[0])
-                .css({'position': 'absolute',
-                  'right': '0px',
-                  'top': '0px'})
-                .addClass('sa-view-dualview-div')
-                .attr('id', 'dualWidgetLeft')
-                .attr('src', SA.ImagePathUrl + 'dualArrowLeft2.png')
-                .click(function () { self.ToggleDualView(); })
-                .attr('draggable', 'false')
-                .on('dragstart', function () {
-                  return false;
-                });
+        .appendTo(this.ViewerDivs[0])
+        .css({'position': 'absolute',
+          'right': '0px',
+          'top': '0px'})
+        .addClass('sa-view-dualview-div')
+        .attr('id', 'dualWidgetLeft')
+        .attr('src', SA.ImagePathUrl + 'dualArrowLeft2.png')
+        .click(function () { self.ToggleDualView(); })
+        .attr('draggable', 'false')
+        .on('dragstart', function () {
+          return false;
+        });
 
-      $('<img>').appendTo(this.TopDiv)
-                .appendTo(this.ViewerDivs[1])
-                .css({'position': 'absolute',
-                  'left': '0px',
-                  'top': '0px'})
-                .hide()
-                .addClass('sa-view-dualview-img')
-                .attr('id', 'dualWidgetRight')
-                .attr('src', SA.ImagePathUrl + 'dualArrowRight2.png')
-                .click(function () { self.ToggleDualView(); })
-                .attr('draggable', 'false')
-                .on('dragstart', function () {
-                  return false;
-                });
+      $('<img>')
+        .appendTo(this.TopDiv)
+        .appendTo(this.ViewerDivs[1])
+        .css({'position': 'absolute',
+          'left': '0px',
+          'top': '0px'})
+        .hide()
+        .addClass('sa-view-dualview-img')
+        .attr('id', 'dualWidgetRight')
+        .attr('src', SA.ImagePathUrl + 'dualArrowRight2.png')
+        .click(function () { self.ToggleDualView(); })
+        .attr('draggable', 'false')
+        .on('dragstart', function () {
+          return false;
+        });
     } else {
       this.NavigationWidget.SetVisibility(false);
     }
@@ -123,16 +117,16 @@ window.SA = window.SA || {};
     }
   };
 
-    // Abstracting saViewer  for viewer and dualViewWidget.
-    // Save viewer state in a note.
+  // Abstracting saViewer  for viewer and dualViewWidget.
+  // Save viewer state in a note.
   DualViewWidget.prototype.Record = function (note, startViewIdx) {
     if (startViewIdx) {
       note.StartIndex = startViewIdx;
     }
     startViewIdx = startViewIdx || 0;
-        // TODO: Deal with multiple  windows consistently.
-        // Now num viewRecords indicates the number of views in the display,
-        // but not for stacks.  We have this start index which implies stack behavior.
+    // TODO: Deal with multiple  windows consistently.
+    // Now num viewRecords indicates the number of views in the display,
+    // but not for stacks.  We have this start index which implies stack behavior.
     if (note.Type !== 'Stack') {
       if (!this.DualView && note.ViewerRecords.length > 1) {
         note.ViewerRecords = [note.ViewerRecords[0]];
@@ -151,12 +145,12 @@ window.SA = window.SA || {};
     }
   };
 
-    // Abstracting the saViewer class to support dual viewers and stacks.
+  // Abstracting the saViewer class to support dual viewers and stacks.
   DualViewWidget.prototype.ProcessArguments = function (args) {
     if (args.note) {
-            // TODO: DO we need both?
+      // TODO: DO we need both?
       this.SetNote(args.note, args.viewIndex);
-            // NOTE: TempId is legacy
+      // NOTE: TempId is legacy
       this.Parent.attr('sa-note-id', args.note.Id || args.note.TempId);
     }
 
@@ -165,8 +159,8 @@ window.SA = window.SA || {};
       var h = args.tileSource.height;
       var cache = new SA.Cache();
       cache.TileSource = args.tileSource;
-            // Use the note tmp id as an image id so the viewer can index the
-            // cache.
+      // Use the note tmp id as an image id so the viewer can index the
+      // cache.
       var note = new SA.Note();
       var image = {levels: args.maxLevel + 1,
         dimensions: [w, h],
@@ -205,9 +199,9 @@ window.SA = window.SA || {};
       if (args.drawWidget !== undefined) {
         viewer.SetAnnotationWidgetVisibility(args.drawWidget);
       }
-            // The way I handle the viewer edit menu is messy.
-            // TODO: Find a more elegant way to add tabs.
-            // Maybe the way we handle the anntation tab shouodl be our pattern.
+      // The way I handle the viewer edit menu is messy.
+      // TODO: Find a more elegant way to add tabs.
+      // Maybe the way we handle the anntation tab shouodl be our pattern.
       if (args.menu !== undefined) {
         if (!viewer.Menu) {
           viewer.Menu = new SA.ViewEditMenu(viewer, null);
@@ -225,8 +219,8 @@ window.SA = window.SA || {};
   };
 
   DualViewWidget.prototype.RecordAnnotations = function () {
-        // Agressively record annotations.  User still needs to hit the
-        // save button.
+    // Aggressively record annotations.  User still needs to hit the
+    // save button.
     if (SA.Edit && this.saNote) {
       this.saNote.RecordAnnotations(this);
     }
@@ -364,26 +358,26 @@ window.SA = window.SA || {};
       self.SynchronizeViews(1, note);
     });
 
-        // First view is set by viewer record camera.
-        // Second is set relative to the first.
+    // First view is set by viewer record camera.
+    // Second is set relative to the first.
     this.SynchronizeViews(0, note);
   };
 
-    // Display Note
-    // Set the state of the WebGL viewer from this notes ViewerRecords.
-    // Lock camera is for when the user note updates and we only want to
-    // update the annotations.
+  // Display Note
+  // Set the state of the WebGL viewer from this notes ViewerRecords.
+  // Lock camera is for when the user note updates and we only want to
+  // update the annotations.
   DualViewWidget.prototype.DisplayNote = function (note, lockCamera) {
     var numViewers = this.GetNumberOfViewers();
     if (numViewers === 0) { return; }
     if (note.Type === 'Stack') {
-            // Stack display needs to keep both viewers up to date.
+      // Stack display needs to keep both viewers up to date.
       numViewers = 2;
     }
 
-        // We could have more than two in the future.
+    // We could have more than two in the future.
     if (note.Type !== 'Stack') {
-            // I want the single view (when set by the user) to persist for rthe stack.
+      // I want the single view (when set by the user) to persist for rthe stack.
       numViewers = note.ViewerRecords.length;
       this.SetNumberOfViewers(numViewers);
     }
@@ -394,17 +388,17 @@ window.SA = window.SA || {};
 
       if (i + idx < note.ViewerRecords.length) {
         viewer.SetViewerRecord(note.ViewerRecords[idx + i], lockCamera);
-                // This is for synchroninzing changes in the viewer back to the note.
+        // This is for synchronizing changes in the viewer back to the note.
         viewer.RecordIndex = i;
       }
     }
   };
 
-    // User notes are load on demand and will show up after the root note.
-    // When we add the user note annotations, We cannot reset the camera.
+  // User notes are load on demand and will show up after the root note.
+  // When we add the user note annotations, We cannot reset the camera.
   DualViewWidget.prototype.UpdateUserNotes = function () {
-        // Wwhere do we record annotations before wiping the viewer
-        // annotations out?
+    // Where do we record annotations before wiping the viewer
+    // annotations out?
     var note = this.saNote;
     this.DisplayNote(note, true);
   };
@@ -440,7 +434,7 @@ window.SA = window.SA || {};
     return note;
   };
 
-    // API for ViewerSet
+  // API for ViewerSet
   DualViewWidget.prototype.GetNumberOfViewers = function () {
     if (this.DualView) {
       return 2;
@@ -449,12 +443,12 @@ window.SA = window.SA || {};
     return 1;
   };
 
-    // API for ViewerSet
+  // API for ViewerSet
   DualViewWidget.prototype.GetViewer = function (idx) {
     return this.Viewers[idx];
   };
 
-    // Called programmatically. No animation.
+  // Called programmatically. No animation.
   DualViewWidget.prototype.SetNumberOfViewers = function (numViews) {
     this.DualView = (numViews > 1);
 
@@ -611,9 +605,9 @@ window.SA = window.SA || {};
       this.Viewers[1].Show();
     }
 
-        // This looks problematic.
-        // TODO: Try to get rid of it.
-        // $(window).trigger('resize');
+    // This looks problematic.
+    // TODO: Try to get rid of it.
+    // $(window).trigger('resize');
   };
 
   DualViewWidget.prototype.AnnotationWidgetOn = function () {
@@ -777,7 +771,6 @@ window.SA = window.SA || {};
     var note = this.saNote;
 
     var trans = note.ViewerRecords[note.StartIndex + 1].Transform;
-    var sigma = this.Viewers[0].GetCamera().Height / 2;
 
     for (var i = 0; i < widgets0.length; ++i) {
       var w0 = widgets0[i];
@@ -805,7 +798,7 @@ window.SA = window.SA || {};
           var w1 = widgets1[j];
           if (w1.Polyline) {
             var polyline1 = w1.Polyline;
-                        // get the center and area.
+            // get the center and area.
             var center0b = trans.ForwardTransform(center0, size); // sigma);
 
             var center1 = [(polyline1.Bounds[0] + polyline1.Bounds[1]) * 0.5,
@@ -823,7 +816,7 @@ window.SA = window.SA || {};
         }
 
         if (bestIdx === -1) {
-                    // Should not happen
+          // Should not happen
           console.log('+++ No candidates: Widget' + i);
         } else if (bestMatch < tolerance) {
           bestPolyline.Polyline.OutlineColor =
@@ -838,10 +831,10 @@ window.SA = window.SA || {};
     this.EventuallyRender();
   };
 
-    // For debugging called from console.
-    // Resets the colors of the poly lines lin viewer 2 so we can see what
-    // has changed when we run MatchPolylines
-    // color is an array [1,1,1]
+  // For debugging called from console.
+  // Resets the colors of the poly lines lin viewer 2 so we can see what
+  // has changed when we run MatchPolylines
+  // color is an array [1,1,1]
   DualViewWidget.prototype.SetPolylineColor = function (color) {
     var widgets1 = this.Viewers[1].GetAnnotationLayer().GetWidgets();
 

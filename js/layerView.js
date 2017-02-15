@@ -26,11 +26,11 @@
     }
   };
 
-    // Initialize the gui / dom
+  // Initialize the gui / dom
   LayerView.prototype.Initialize = function (parent, label) {
     var self = this;
 
-        // The wrapper div that controls a single layer.
+    // The wrapper div that controls a single layer.
     var layerControl = $('<div>')
             .appendTo(parent)
             .css({
@@ -39,7 +39,7 @@
               'height': '65px'
             });
 
-        // the sub-div that holds the direct toggle and the label.
+    // the sub-div that holds the direct toggle and the label.
     var toggleWrapper = $('<div>')
             .appendTo(layerControl)
             .css({
@@ -57,7 +57,8 @@
                 })
             .prop('checked', true);
 
-    var layerLabel = $('<div>')
+    // layerLabel
+    $('<div>')
             .appendTo(toggleWrapper)
             .html(label);
 
@@ -79,12 +80,14 @@
                 });
         // this.Slider[0].min = 75;
 
-    var minLabel = $('<div>')
+    // minLabel
+    $('<div>')
             .appendTo(confWrapper)
             .html('0%')
             .css({ 'float': 'left' });
 
-    var maxLabel = $('<div>')
+    // maxLabel
+    $('<div>')
             .appendTo(confWrapper)
             .html('100%')
             .css({ 'float': 'right' });
