@@ -45,7 +45,7 @@
 // Question: Interactive
 
 // Edit questions/
-// Convert text to an saElement.
+// Convert text to an SaElement.
 // Option to hide with answers.
 // Interactive question.
 // Shuffle questions as note Text. No shuffle when answers are off.
@@ -71,7 +71,7 @@
   jQuery.prototype.saElement = function (arg1) { // 'arguments' handles extras.
     for (var i = 0; i < this.length; ++i) {
       if (!this[i].saElement) {
-        var helper = new saElement($(this[i]));
+        var helper = new SaElement($(this[i]));
             // Add the helper as an instance variable to the dom object.
         this[i].saElement = helper;
         $(this[i]).addClass('sa-element');
@@ -82,7 +82,7 @@
   };
 
 // TODO: Rename Edit
-  function saElement (div) {
+  function SaElement (div) {
     var self = this;
 
     this.Position = 'absolute';
@@ -153,7 +153,7 @@
   }
 
 // This changes the border to active color.
-  saElement.prototype.ActiveOn = function () {
+  SaElement.prototype.ActiveOn = function () {
     var self = this;
     if (!this.Interactive) { return true; }
     if (!this.SavedBorder) {
@@ -181,7 +181,7 @@
     }
   };
 
-  saElement.prototype.ActiveOff = function () {
+  SaElement.prototype.ActiveOff = function () {
     if (!this.Interactive) { return true; }
     if (this.SavedBorder) {
       this.Div[0].style.border = this.SavedBorder;
@@ -190,7 +190,7 @@
     this.ButtonDiv.remove();
   };
 
-  saElement.prototype.InitializeDialog = function () {
+  SaElement.prototype.InitializeDialog = function () {
     var self = this;
     this.Dialog = new SAM.Dialog(function () { self.DialogApplyCallback(); });
     this.Dialog.Title.text('Properties');
@@ -360,7 +360,7 @@
         .spectrum({showAlpha: true});
   };
 
-  saElement.prototype.AddAccordionTab = function (title, open, apply) {
+  SaElement.prototype.AddAccordionTab = function (title, open, apply) {
     if (open) {
       this.DialogInitializeFunctions.push(open);
     }
@@ -409,11 +409,11 @@
     return panel;
   };
 
-  saElement.prototype.HideAccordionTab = function (title) {
+  SaElement.prototype.HideAccordionTab = function (title) {
     this.Div[0].saElement.Dialog.Body.children('[title=Quiz]').hide();
   };
 
-  saElement.prototype.OpenDialog = function (callback) {
+  SaElement.prototype.OpenDialog = function (callback) {
     if (!this.DialogInitialized) {
         // Give 'subclasses' a chance to initialize their tabs.
       for (var i = 0; i < this.DialogInitializeFunctions.length; ++i) {
@@ -426,7 +426,7 @@
     this.Dialog.Show(true);
   };
 
-  saElement.prototype.DialogInitialize = function () {
+  SaElement.prototype.DialogInitialize = function () {
     // TODO: Does this work when 'border' is used?
     var str = this.Div[0].style.borderWidth;
     if (str !== '') {
@@ -472,7 +472,7 @@
     }
   };
 
-  saElement.prototype.DialogApplyCallback = function () {
+  SaElement.prototype.DialogApplyCallback = function () {
     // Giv 'subclasses' a chance to apply parameters in their tabs.
     for (var i = 0; i < this.DialogApplyFunctions.length; ++i) {
       (this.DialogApplyFunctions[i])(this.Dialog);
@@ -486,7 +486,7 @@
     }
   };
 
-  saElement.prototype.DialogApply = function () {
+  SaElement.prototype.DialogApply = function () {
     // ActiveOff was setting border back after dialog changed it.
     delete this.SavedBorder;
     var width;
@@ -517,7 +517,7 @@
     }
   };
 
-  saElement.prototype.ProcessArguments = function (args) {
+  SaElement.prototype.ProcessArguments = function (args) {
     // No superclass
 
     // aspect ratio does something even with no arguments.
@@ -592,13 +592,13 @@
     this.ConvertToPercentages();
   };
 
-  saElement.prototype.SetClickCallback = function (callback) {
+  SaElement.prototype.SetClickCallback = function (callback) {
     this.ClickCallback = callback;
     this.Clickable = true;
   };
 
 // Not the best function name.  Editable => draggable, expandable and deletable.
-  saElement.prototype.EditableOn = function () {
+  SaElement.prototype.EditableOn = function () {
     this.Editable = true;
     this.Clickable = true;
     // I cannot get jqueryUI draggable to work.  Use my own events.
@@ -622,7 +622,7 @@
     }
   };
 
-  saElement.prototype.EditableOff = function () {
+  SaElement.prototype.EditableOff = function () {
     this.Editable = false;
     this.Div.css({'cursor': 'auto'});
     // TODO: Remove wheel event.
@@ -633,7 +633,7 @@
     this.ButtonDiv.remove();
   };
 
-  saElement.prototype.HandleMouseDown = function (event) {
+  SaElement.prototype.HandleMouseDown = function (event) {
     if (!this.Interactive) { return true; }
     if (event.which === 1) {
         // Hack tp allow content editable to work with text editor.
@@ -677,13 +677,13 @@
 
 // raise to the top of the draw order.
 // Note: it will not override z-index
-  saElement.prototype.RaiseToTop = function () {
+  SaElement.prototype.RaiseToTop = function () {
     var parent = this.Div.parent();
     this.Div.detach();
     this.Div.appendTo(parent);
   };
 
-  saElement.prototype.HandleMouseMoveCursor = function (event) {
+  SaElement.prototype.HandleMouseMoveCursor = function (event) {
     if (!this.Interactive) { return true; }
     SA.FirefoxWhich(event);
     if (event.which === 0) {
@@ -735,7 +735,7 @@
     return true;
   };
 
-  saElement.prototype.HandleMouseMove = function (event) {
+  SaElement.prototype.HandleMouseMove = function (event) {
     SA.FirefoxWhich(event);
     if (event.which === 1) {
         // Wait for the click duration to start dragging.
@@ -901,7 +901,7 @@
     return true;
   };
 
-  saElement.prototype.HandleMouseUp = function (event) {
+  SaElement.prototype.HandleMouseUp = function (event) {
     // mouse up is not conditional on edit because it
     // is also used tio trigger click callback.
     $('body').off('mouseup.element');
@@ -927,7 +927,7 @@
     return false;
   };
 
-  saElement.prototype.HandleMouseWheel = function (event) {
+  SaElement.prototype.HandleMouseWheel = function (event) {
     var width = this.Div.width();
     var height = this.Div.height();
     var dWidth = 0;
@@ -972,7 +972,7 @@
   };
 
 // Change left, top, widht and height to percentages.
-  saElement.prototype.ConvertToPercentages = function () {
+  SaElement.prototype.ConvertToPercentages = function () {
     // I had issues with previous slide shows that had images with no width
     // set. Of course it won't scale right but they will still show up.
     // NOTE: this.Div.width() also misbehaves when the div is not visible.
@@ -1016,7 +1016,7 @@
     for (var i = 0; i < this.length; ++i) {
       var dom = this[i];
       if (!dom.saRectangle) {
-        dom.saRectangle = new saRectangle($(dom));
+        dom.saRectangle = new SaRectangle($(dom));
       }
       dom.saRectangle.ProcessArguments(arguments);
     }
@@ -1024,7 +1024,7 @@
     return this;
   };
 
-  function saRectangle (div) {
+  function SaRectangle (div) {
     var self = this;
     this.Div = div;
     var element = div[0].saElement;
@@ -1099,7 +1099,7 @@
         .spectrum({showAlpha: true});
   }
 
-  saRectangle.prototype.ProcessArguments = function (args) {
+  SaRectangle.prototype.ProcessArguments = function (args) {
     if (args.length === 0) { return; }
 
     // Superclass
@@ -1113,7 +1113,7 @@
     }
   };
 
-  saRectangle.prototype.DialogInitialize = function () {
+  SaRectangle.prototype.DialogInitialize = function () {
     var color = this.Div[0].style.background;
     if (color === '') {
       color = this.Div[0].style.backgroundColor;
@@ -1154,7 +1154,7 @@
     SA.Debug('parse error: ' + color);
   };
 
-  saRectangle.prototype.DialogApply = function () {
+  SaRectangle.prototype.DialogApply = function () {
     if (!this.BackgroundCheck.is(':checked')) {
       this.Div.css('background', '');
       return;
@@ -1178,7 +1178,7 @@
     for (var i = 0; i < this.length; ++i) {
       var dom = this[i];
       if (!dom.saText) {
-        dom.saText = new saText($(dom));
+        dom.saText = new SaText($(dom));
       }
       dom.saText.ProcessArguments(arguments);
     }
@@ -1186,7 +1186,7 @@
     return this;
   };
 
-  function saText (div) {
+  function SaText (div) {
     var self = this;
     this.Div = div;
     var element = div[0].saElement;
@@ -1261,7 +1261,7 @@
             .keypress(function (event) { return event.keyCode !== 13; });
   }
 
-  saText.prototype.ProcessArguments = function (args) {
+  SaText.prototype.ProcessArguments = function (args) {
     if (args.length === 0) { return; }
 
     // Superclass
@@ -1275,7 +1275,7 @@
     }
   };
 
-  saText.prototype.DialogPaddingInitialize = function () {
+  SaText.prototype.DialogPaddingInitialize = function () {
     var txt;
 
     txt = this.Div[0].style.paddingLeft;
@@ -1295,7 +1295,7 @@
     this.PaddingBottom.val(8 * parseFloat(txt)); // window 800 pixels high
   };
 
-  saText.prototype.DialogPaddingApply = function () {
+  SaText.prototype.DialogPaddingApply = function () {
     this.Div[0].style.paddingLeft = (this.PaddingLeft.val() / 8) + '%';
     this.Div[0].style.paddingTop = (this.PaddingTop.val() / 8) + '%';
     this.Div[0].style.paddingRight = (this.PaddingRight.val() / 8) + '%';
@@ -1311,7 +1311,7 @@
     for (var i = 0; i < this.length; ++i) {
       if (!this[i].saQuestion) {
             // Add the helper as an instance variable to the dom object.
-        this[i].saQuestion = new saQuestion($(this[i]));
+        this[i].saQuestion = new SaQuestion($(this[i]));
         this[i].saElement.HideAccordionTab('Quiz');
       }
       this[i].saQuestion.ProcessArguments(arguments);
@@ -1320,7 +1320,7 @@
     return this;
   };
 
-  function saQuestion (div) {
+  function SaQuestion (div) {
     var self = this;
     this.Div = div;
     this.Div.addClass('sa-question');
@@ -1338,7 +1338,7 @@
 
 // Meant to be acll externally.
 // Assumes multiple choice for now.
-  saQuestion.prototype.SetQuestionText = function (text) {
+  SaQuestion.prototype.SetQuestionText = function (text) {
     var question = this.Div.find('.sa-q');
     if (question.length === 0) {
       question = $('<div>').addClass('sa-q').appendTo(this.Div);
@@ -1346,7 +1346,7 @@
     question.text(text);
     this.Div.attr('type', 'multiple-choice');
   };
-  saQuestion.prototype.AddAnswerText = function (text, correct) {
+  SaQuestion.prototype.AddAnswerText = function (text, correct) {
     var answerText = text;
     // get rid of bullets
     if (text[0] === '-') {
@@ -1368,7 +1368,7 @@
     }
   };
 
-  saQuestion.prototype.ProcessArguments = function (args) {
+  SaQuestion.prototype.ProcessArguments = function (args) {
     if (args.length === 0) { return; }
 
     // Superclass
@@ -1382,7 +1382,7 @@
     }
   };
 
-  saQuestion.prototype.SetMode = function (mode) {
+  SaQuestion.prototype.SetMode = function (mode) {
     // Clear wrong answers selected by user.
     this.Div.find('.sa-answer').css({'color': '#000'});
     if (mode === 'answer-show') {
@@ -1423,7 +1423,7 @@
     }
   };
 
-  saQuestion.prototype.AddAnswerTo = function (parent, answerList, text, checked) {
+  SaQuestion.prototype.AddAnswerTo = function (parent, answerList, text, checked) {
     // Make a new answer box;
     var answerDiv = $('<div>')
         .appendTo(parent)
@@ -1465,7 +1465,7 @@
     return answerObj;
   };
 
-  saQuestion.prototype.DialogInitialize = function () {
+  SaQuestion.prototype.DialogInitialize = function () {
     var self = this;
     // Create/recreate the question dialog panel.
     var panel = this.QuestionPanel;
@@ -1564,7 +1564,7 @@
     this.AddBlankMultipleChoiceAnswer();
   };
 
-  saQuestion.prototype.AddBlankMultipleChoiceAnswer = function () {
+  SaQuestion.prototype.AddBlankMultipleChoiceAnswer = function () {
     var self = this;
     var answerObj = this.AddAnswerTo(this.MultipleChoiceDiv,
                                    this.MultipleChoiceAnswers);
@@ -1574,7 +1574,7 @@
                        });
   };
 
-  saQuestion.prototype.DialogApply = function () {
+  SaQuestion.prototype.DialogApply = function () {
     this.Div.find('.sa-q').remove();
     this.Div.find('ol').remove();
     this.Div.find('.sa-short-answer').remove();
@@ -1660,7 +1660,7 @@
   jQuery.prototype.saTextEditor = function (args) {
     for (var i = 0; i < this.length; ++i) {
       if (!this[i].saTextEditor) {
-        var textEditor = new saTextEditor($(this[i]), args);
+        var textEditor = new SaTextEditor($(this[i]), args);
             // Add the viewer as an instance variable to the dom object.
         this[i].saTextEditor = textEditor;
             // TODO: Hide any dialog tabs?
@@ -1676,7 +1676,7 @@
 // They propagate to parents. i.e. space causes a slide to advance.
 // SA.ContentEditableHasFocus = false;
 
-  function saTextEditor (div) {
+  function SaTextEditor (div) {
     var self = this;
     this.Div = div;
     this.Div.addClass('sa-text-editor');
@@ -1780,7 +1780,7 @@
                    function () { document.execCommand('subscript', false, null); });
   }
 
-  saTextEditor.prototype.EditingOn = function () {
+  SaTextEditor.prototype.EditingOn = function () {
     // Keep text editors from stepping on eachothers events.
     // Only one text editor can edit at a time.
     // I could look if body has the binding 'mousedown.textEditor', but the
@@ -1833,7 +1833,7 @@
     SA.ContentEditableHasFocus = true;
   };
 
-  saTextEditor.prototype.EditingOff = function () {
+  SaTextEditor.prototype.EditingOff = function () {
     delete $('body')[0].saTextEditing;
     $('body').off('mousedown.textEditor');
 
@@ -1881,7 +1881,7 @@
     SA.ContentEditableHasFocus = false;
   };
 
-  saTextEditor.prototype.AddButton = function (src, tooltip, callback, prepend) {
+  SaTextEditor.prototype.AddButton = function (src, tooltip, callback, prepend) {
     var buttonsDiv = this.EditButtonDiv;
 
     var button = $('<img>')
@@ -1905,7 +1905,7 @@
     return button;
   };
 
-  saTextEditor.prototype.ProcessArguments = function (args) {
+  SaTextEditor.prototype.ProcessArguments = function (args) {
     args = args || {dialog: true};
     this.Div[0].saText.ProcessArguments(args);
 
@@ -1917,7 +1917,7 @@
     }
   };
 
-  saTextEditor.prototype.DialogInitialize = function () {
+  SaTextEditor.prototype.DialogInitialize = function () {
     var str;
 
     // iniitalize the values.
@@ -1944,7 +1944,7 @@
     this.LineHeight.val(lineHeight);
   };
 
-  saTextEditor.prototype.DialogApply = function () {
+  SaTextEditor.prototype.DialogApply = function () {
     // this.Div.css({'padding'      : '1%',
     //              'border-radius': '3px'});
 
@@ -1975,11 +1975,11 @@
     this.FontColor.spectrum('set', color);
   };
 
-  saTextEditor.prototype.Delete = function () {
+  SaTextEditor.prototype.Delete = function () {
     this.Div.remove();
   };
 
-  saTextEditor.prototype.InsertUrlLink = function () {
+  SaTextEditor.prototype.InsertUrlLink = function () {
     var self = this;
     var sel = window.getSelection();
     // This call will clear the selected text if it is not in this editor.
@@ -2055,7 +2055,7 @@
     this.UrlDialog.Show(true);
   };
 
-  saTextEditor.prototype.InsertUrlLinkAccept = function () {
+  SaTextEditor.prototype.InsertUrlLinkAccept = function () {
     var sel = window.getSelection();
     var range = this.UrlDialog.SelectionRange;
     if (!range) {
@@ -2094,7 +2094,7 @@
 // This does not work yet.!!!!!!!!!!!!!!!
 // Returns the jquery object selected.  If a partial object is selected,
 // the dom is split up into fragments.
-  saTextEditor.prototype.GetSelection = function () {
+  SaTextEditor.prototype.GetSelection = function () {
     var sel = window.getSelection();
     var range;
     var parent = null;
@@ -2140,7 +2140,7 @@
   };
 
 // Set in position in pixels
-  saTextEditor.prototype.SetPositionPixel = function (x, y) {
+  SaTextEditor.prototype.SetPositionPixel = function (x, y) {
     if (this.Percentage) {
       x = 100 * x / this.Div.parent().width();
       y = 100 * y / this.Div.parent().height();
@@ -2153,7 +2153,7 @@
   };
 
 // ==============================================================================
-// a "subclass" of saElement.
+// a "subclass" of SaElement.
 // Click expands the element.
 // TODO:
 // Do not expand images larger than their native resolution (double maybe?)
@@ -2167,7 +2167,7 @@
     this.addClass('sa-light-box');
     for (var i = 0; i < this.length; ++i) {
       if (!this[i].saLightBox) {
-        var helper = new saLightBox($(this[i]));
+        var helper = new SaLightBox($(this[i]));
             // Add the helper as an instance variable to the dom object.
         this[i].saLightBox = helper;
       }
@@ -2177,7 +2177,7 @@
     return this;
   };
 
-  function saLightBox (div) {
+  function SaLightBox (div) {
     var self = this;
     div[0].saElement.SetClickCallback(function () { self.Expand(true); });
 
@@ -2208,7 +2208,7 @@
     }
   }
 
-  saLightBox.prototype.ProcessArguments = function (args) {
+  SaLightBox.prototype.ProcessArguments = function (args) {
     if (args.length === 0) { return; }
 
     // Superclass
@@ -2260,7 +2260,7 @@
 
 // I cannot put this directly as a callback because it
 // overwrites the viewer resize method.
-  saLightBox.prototype.UpdateSize = function () {
+  SaLightBox.prototype.UpdateSize = function () {
     if (!this.Expanded) { return; }
 
     var self = this;
@@ -2305,7 +2305,7 @@
       'height': height});
   };
 
-  saLightBox.prototype.Expand = function (flag, animate) {
+  SaLightBox.prototype.Expand = function (flag, animate) {
     if (!this.Interactive) { return; }
     if (flag === this.Expanded) { return; }
     var self = this;
@@ -2465,13 +2465,13 @@
   function saGetButtonsDiv (domElement) {
     if (!domElement.saButtons) {
         // Edit buttons.
-      var helper = new saButtons($(domElement));
+      var helper = new SaButtons($(domElement));
       domElement.saButtons = helper;
     }
     return domElement.saButtons.ButtonsDiv;
   }
 
-  function saButtons (div) {
+  function SaButtons (div) {
     this.Enabled = true;
     this.Div = div;
     this.TimerId = -1;
@@ -2498,14 +2498,14 @@
         .mouseleave(function () { self.HideButtons(); });
   }
 
-  saButtons.prototype.PlaceButtons = function () {
+  SaButtons.prototype.PlaceButtons = function () {
     var pos = this.Div.position();
     this.ButtonsDiv
         .css({'left': (pos.left + 10) + 'px',
           'top': (pos.top - 20) + 'px'});
   };
 
-  saButtons.prototype.ShowButtons = function (level) {
+  SaButtons.prototype.ShowButtons = function (level) {
     if (this.TimerId >= 0) {
       clearTimeout(this.TimerId);
       this.TimerId = -1;
@@ -2530,7 +2530,7 @@
     }
   };
 
-  saButtons.prototype.HideButtons = function () {
+  SaButtons.prototype.HideButtons = function () {
     if (this.TimerId < 0) {
       var self = this;
       this.TimerId =
@@ -2939,7 +2939,7 @@
     for (var i = 0; i < this.length; ++i) {
       var item = this[i];
       if (!item.saPresentation) {
-        item.saPresentation = new saPresentation($(item), args);
+        item.saPresentation = new SaPresentation($(item), args);
         item.onresize =
                 function () {
                   this.saPresentation.Resize();
@@ -2953,7 +2953,7 @@
     return this;
   };
 
-  function saPresentation (div, args) {
+  function SaPresentation (div, args) {
     this.Div = div;
     this.AspectRatio = args.aspectRatio;
     this.Zoom = 1.0;
@@ -2979,7 +2979,7 @@
         */
   }
 
-  saPresentation.prototype.Resize = function () {
+  SaPresentation.prototype.Resize = function () {
     var ar = this.AspectRatio;
     var parent = this.Div.parent();
     var pWidth = parent.innerWidth();
@@ -3006,7 +3006,7 @@
       'width': width + 'px'});
   };
 
-  saPresentation.prototype.HandleMouseDown = function (event) {
+  SaPresentation.prototype.HandleMouseDown = function (event) {
     var self = this;
     // For tap/click rather than drag.
     this.ClickStart = Date.now();
@@ -3039,7 +3039,7 @@
 
 // TODO: rethink offset/zoom.  Scale from the middle. Offset should
 // be in percentages maybe
-  saPresentation.prototype.HandleMouseWheel = function (event) {
+  SaPresentation.prototype.HandleMouseWheel = function (event) {
     var tmp = 0;
     if (event.deltaY) {
       tmp = event.deltaY;
@@ -3061,7 +3061,7 @@
     return false;
   };
 
-  saPresentation.prototype.HandleMouseMove = function (event) {
+  SaPresentation.prototype.HandleMouseMove = function (event) {
     // Wait for the click duration to start dragging.
     if (Date.now() - this.ClickStart < 200) {
       return true;
@@ -3081,7 +3081,7 @@
     return true;
   };
 
-  saPresentation.prototype.HandleMouseUp = function (event) {
+  SaPresentation.prototype.HandleMouseUp = function (event) {
     $('body').off('mouseup.presentation');
     if (event.which === 1) {
       $('body').off('mousemove.presentation');
@@ -3160,7 +3160,7 @@
     this.addClass('sa-draggable');
     for (var i = 0; i < this.length; ++i) {
       if (!this[i].saDraggable) {
-        var helper = new saDraggable($(this[i]));
+        var helper = new SaDraggable($(this[i]));
             // Add the helper as an instance variable to the dom object.
         this[i].saDraggable = helper;
       }
@@ -3170,7 +3170,7 @@
     return this;
   };
 
-  function saDraggable (div) {
+  function SaDraggable (div) {
     this.XStops = null;
     this.YStops = null;
     this.Percentage = true;
@@ -3218,11 +3218,11 @@
         });
   }
 
-  saDraggable.prototype.ProcessArguments = function (args) {
+  SaDraggable.prototype.ProcessArguments = function (args) {
     if (args.grid) {
         // The grid is not shared.
-      this.XStops = new saStops(args.grid[0]);
-      this.YStops = new saStops(args.grid[1]);
+      this.XStops = new SaStops(args.grid[0]);
+      this.YStops = new SaStops(args.grid[1]);
     }
 
     // generic method call. Give jquery ui access to all this objects methods.
@@ -3234,7 +3234,7 @@
   };
 
 // (dx, dy) drag vector in pixels.
-  saDraggable.prototype.Drag = function (dx, dy) {
+  SaDraggable.prototype.Drag = function (dx, dy) {
     var pos = this.Div.position();
     var x = pos.left;
     var y = pos.top;
@@ -3265,7 +3265,7 @@
     this.Div[0].saButtons.PlaceButtons();
   };
 
-  function saStops (divisions) {
+  function SaStops (divisions) {
     // How far do we hve to pass a stop before the item snaps to the mouse.
     this.Threshold = 25;
     // Current Stop
@@ -3284,7 +3284,7 @@
     this.Last = 0;
   }
 
-  saStops.prototype.Start = function (last, size) {
+  SaStops.prototype.Start = function (last, size) {
     this.Stopped = false;
     this.Delta = 0;
     this.Last = last;
@@ -3302,7 +3302,7 @@
 //   size: width of window
 //   last: The current position of the item.
 //   delta: The distance the mouse has moved.
-  saStops.prototype.Drag = function (delta) {
+  SaStops.prototype.Drag = function (delta) {
     // Put a compensation factor so item follows mouse.
     this.Target += delta;
     delta = delta + 3 * (this.Target - this.Last) / this.Gap;
@@ -3351,7 +3351,7 @@
     return stop;
   };
 
-  saStops.prototype.GetStop = function (last, next) {
+  SaStops.prototype.GetStop = function (last, next) {
     // Put the stops at integer values.
     var last2 = last * this.Divisions / this.Size;
     var next2 = next * this.Divisions / this.Size;
@@ -3379,7 +3379,7 @@
     this.addClass('sa-full-window-option');
     for (var i = 0; i < this.length; ++i) {
       if (!this[i].saFullWindowOption) {
-        var helper = new saFullWindowOption($(this[i]));
+        var helper = new SaFullWindowOption($(this[i]));
             // Add the helper as an instance variable to the dom object.
         this[i].saFullWindowOption = helper;
       }
@@ -3391,7 +3391,7 @@
     return this;
   };
 
-  function saFullWindowOption (div) {
+  function SaFullWindowOption (div) {
     var self = this;
     this.FullWindowOptionButton = $('<img>')
         .appendTo(div)
@@ -3429,7 +3429,7 @@
   }
 
 // TODO: Turn off other editing options: drag, delete, resize.
-  saFullWindowOption.prototype.SetFullWindow = function (div, flag) {
+  SaFullWindowOption.prototype.SetFullWindow = function (div, flag) {
     if (flag) {
         // TODO: Put this in a call back.
       saButtonsDisable(div[0]);
@@ -3470,14 +3470,14 @@
       var domItem = this[i];
       if (!domItem.saDeletable) {
         // for closure (save element)
-        domItem.saDeletable = new saDeletable(domItem);
+        domItem.saDeletable = new SaDeletable(domItem);
       }
     }
     return this;
   };
 
   // check dom
-  function saDeletable (domItem) {
+  function SaDeletable (domItem) {
     this.Button = saAddButton(
         domItem, SA.ImagePathUrl + 'remove.png', 'delete',
         function () {
@@ -3737,13 +3737,13 @@
     var item = this[0];
 
     if (!item.saMenuButton) {
-      item.saMenuButton = new saMenuButton(args, this);
+      item.saMenuButton = new SaMenuButton(args, this);
     }
 
     return this;
   };
 
-  function saMenuButton (args, menuButton) {
+  function SaMenuButton (args, menuButton) {
     this.InsertMenuTimer = 0;
     this.InsertMenu = $('<ul>')
         .appendTo(menuButton)
@@ -3782,7 +3782,7 @@
         function () { self.EventuallyHideInsertMenu(); });
   }
 
-  saMenuButton.prototype.AddMenuItem = function (label, callback) {
+  SaMenuButton.prototype.AddMenuItem = function (label, callback) {
     var self = this;
 
     this[label] = $('<li>')
@@ -3796,7 +3796,7 @@
         });
   };
 
-  saMenuButton.prototype.ShowInsertMenu = function () {
+  SaMenuButton.prototype.ShowInsertMenu = function () {
     if (this.InsertMenuTimer) {
       clearTimeout(this.InsertMenuTimer);
       this.InsertMenuTimer = 0;
@@ -3804,7 +3804,7 @@
     this.InsertMenu.show();
   };
 
-  saMenuButton.prototype.EventuallyHideInsertMenu = function () {
+  SaMenuButton.prototype.EventuallyHideInsertMenu = function () {
     if (this.InsertMenuTimer) {
       clearTimeout(this.InsertMenuTimer);
       this.InsertMenuTimer = 0;
