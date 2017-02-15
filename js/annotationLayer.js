@@ -844,12 +844,6 @@
           widget = new SA.StackSectionWidget(this);
         }
         break;
-      case 'sections':
-        if (window.SA) {
-          // HACK.....
-          widget = new SA.SectionsWidget(this, SA.VIEWER1);
-        }
-        break;
       case 'rect':
         widget = new SAM.RectWidget(this, false);
         break;
@@ -943,7 +937,6 @@
     }
 
     // Still used on mobile devices?
-    var viewport = this.GetViewport();
     this.LastTouches = this.Touches;
     this.Touches = [];
     for (var i = 0; i < e.targetTouches.length; ++i) {
@@ -1465,8 +1458,6 @@
     var scale = Math.sqrt(upOut[0] * upOut[0] + upOut[1] * upOut[1]);
     // compute the height.
     camOut.SetHeight(camIn.GetHeight() * scale);
-    // Compute the rotation. upOut = [Sin,cos];
-    var angle = Math.atan2(upOut[1], upOut[0]);
     camOut.Roll = camIn.Roll;// - angle;
     camOut.ComputeMatrix();
   };
@@ -1485,8 +1476,6 @@
     var scale = Math.sqrt(upOut[0] * upOut[0] + upOut[1] * upOut[1]);
     // compute the height.
     camOut.SetHeight(camIn.GetHeight() * scale);
-    // Compute the rotation. upOut = [Sin,cos];
-    var angle = Math.atan2(upOut[1], upOut[0]);
     camOut.Roll = camIn.Roll;// - angle;
     camOut.ComputeMatrix();
   };

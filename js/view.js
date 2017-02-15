@@ -249,8 +249,6 @@
 
       // The camera maps the world coordinate system to (-1->1, -1->1).
       var cam = this.Camera;
-      var aspectRatio = cam.ViewportWidth / cam.ViewportHeight;
-
       var h = 1.0 / cam.Matrix[15];
       ctx.transform(cam.Matrix[0] * h, cam.Matrix[1] * h,
                           cam.Matrix[4] * h, cam.Matrix[5] * h,

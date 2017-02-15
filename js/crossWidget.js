@@ -16,8 +16,6 @@
       return;
     }
     this.Viewer = viewer;
-    var cam = viewer.MainView.Camera;
-    var viewport = viewer.MainView.Viewport;
     this.Shape = new SAM.CrossHairs();
     this.Viewer.AddWidget(this);
     this.Viewer.AddShape(this.Shape);
@@ -95,10 +93,7 @@
   };
 
   CrossWidget.prototype.CheckActive = function (event) {
-    var x = event.offsetX;
-    var y = event.offsetY;
-
-        // change dx and dy to vector from center of CROSS.
+    // change dx and dy to vector from center of CROSS.
     if (this.FixedSize) {
       alert('Fixed size not implemented');
       return;
@@ -107,7 +102,7 @@
     var dx = event.worldX - this.Shape.Origin[0];
     var dy = event.worldY - this.Shape.Origin[1];
 
-        // We need to scale to pixels
+    // We need to scale to pixels
     var cam = this.Viewer.GetCamera();
     var viewport = this.Viewer.GetViewport();
     var k = viewport[3] / cam.Height;

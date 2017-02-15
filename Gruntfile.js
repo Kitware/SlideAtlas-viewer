@@ -64,7 +64,6 @@ module.exports = function (grunt) {
           'js/loader.js',
           'js/camera.js',
           'js/cutout.js',
-          'js/seedContour.js',
           'js/tile.js',
           'js/cache.js',
           'js/section.js',
@@ -72,7 +71,6 @@ module.exports = function (grunt) {
           'js/viewer.js',
           'js/pairTransformation.js',
           'js/stackSectionWidget.js',
-          'js/sectionsWidget.js',
           'js/layerView.js',
           'js/heatMap.js',
           'js/overlayView.js'

@@ -3,13 +3,9 @@ window.SA = window.SA || {};
 (function () {
   'use strict';
 
-  var ROOT_DIV;
   SA.imageProgram;
-  var textProgram;
   SA.polyProgram;
   SA.squarePositionBuffer; // eslint-disable-line no-undef
-  var mvMatrix = mat4.create();
-  var pMatrix = mat4.create();
   SA.squareOutlinePositionBuffer;
   SA.tileVertexPositionBuffer;
   SA.tileVertexTextureCoordBuffer;
@@ -129,15 +125,6 @@ window.SA = window.SA || {};
   SA.Debug = function (msg) {
     console.log(msg);
   };
-
-  // for debugging
-  function MOVE_TO (x, y) {
-    if (SA.display) {
-      SA.display.Viewers[0].MainView.Camera.SetFocalPoint([x, y]);
-      SA.display.Viewers[0].MainView.Camera.ComputeMatrix();
-      SA.display.Draw();
-    }
-  }
 
   SA.ZERO_PAD = function (i, n) {
     var s = '0000000000' + i.toFixed();
@@ -538,33 +525,6 @@ window.SA = window.SA || {};
     return '';
   };
 
-  // function GetViewId () {
-  //    if (typeof(SA.ViewId) !== "undefined") {
-  //        return SA.ViewId;
-  //    }
-  //    if ( ! SA.notesWidget && ! SA.notesWidget.RootNote) {
-  //        return SA.notesWidget.RootNote._id;
-  //    }
-  //    SA.Debug("Could not find view id");
-  //    return "";
-  // }
-
-  // WebGL Initialization
-
-  function doesBrowserSupportWebGL (canvas) {
-    var gl;
-    try {
-      // gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-      gl = canvas.getContext('webgl');
-    } catch (e) {
-    }
-    if (!gl) {
-            // SA.Debug("Could not initialise WebGL, sorry :-(");
-      return null;
-    }
-    return gl;
-  }
-
   SA.initWebGL = function (view) {
     // if (view.imageProgram) { return; }
     // Defined in HTML
@@ -632,7 +592,6 @@ window.SA = window.SA || {};
     gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
     vTextureCoord = aTextureCoord;
   }
-*/
 
   function initShaderPrograms (view, gl) {
     // Test threshold value for alpha.
@@ -735,6 +694,7 @@ window.SA = window.SA || {};
     //    = gl.getUniformLocation(textProgram, "uSampler");
     // textProgram.colorUniform = gl.getUniformLocation(textProgram, "uColor");
   }
+*/
 
   SA.createWebGlProgram = function (fragmentShaderString, vertexShaderString, gl) {
     var fragmentShader = getShader(gl, gl.FRAGMENT_SHADER, fragmentShaderString);
@@ -759,7 +719,7 @@ window.SA = window.SA || {};
 
     return program;
   };
-
+  /*
   function initOutlineBuffers (gl) {
     // Outline Square
     var vertices = [
@@ -787,8 +747,8 @@ window.SA = window.SA || {};
     SA.squarePositionBuffer.itemSize = 3;
     SA.squarePositionBuffer.numItems = 4;
   }
-
-    // ==============================================================================
+  */
+  // ==============================================================================
 
   function initImageTileBuffers (view) {
     if (view.tileVertexTextureCoordinateBuffer) { return; }
@@ -797,7 +757,7 @@ window.SA = window.SA || {};
     var vertexPositionData = [];
     var textureCoordData = [];
 
-        // Make 4 points
+    // Make 4 points
     textureCoordData.push(0.0);
     textureCoordData.push(0.0);
     vertexPositionData.push(0.0);
@@ -885,7 +845,7 @@ window.SA = window.SA || {};
   var LOGGING = false;
   var DEBUG_LOG = [];
 
-  function StartLogging (message) {
+  function StartLogging (message) { // eslint-disable-line no-unused-vars
     if (LOGGING) {
       return;
     }
@@ -893,7 +853,7 @@ window.SA = window.SA || {};
     // alert("Error: Check log");
   }
 
-  function LogMessage (message) {
+  function LogMessage (message) { // eslint-disable-line no-unused-vars
     if (LOGGING) {
       DEBUG_LOG.push(message);
     }
@@ -905,25 +865,12 @@ window.SA = window.SA || {};
   // As I abstract viewer features, these variables and functions
   // should migrate into objects and other files.
 
-  var CANVAS;
+  // ==============================================================================
 
-  var CONFERENCE_WIDGET;
-
-    // ==============================================================================
-
-  // hack to avoid an undefined error (until we unify annotation stuff).
-  function ShowAnnotationEditMenu (x, y) {
-  }
-
-    // TODO:  Get rid of this function.
+  // TODO:  Get rid of this function.
   function handleResize () {
     $('window').trigger('resize');
   }
-
-  // The event manager detects single right click and double right click.
-  // This gets galled on the single.
-  function ShowPropertiesMenu (x, y) {} // This used to show the view edit.
-  // I am getting rid of the right click feature now.
 
   // TODO: Move these out of the global SLideAtlas object.
   function handleKeyDown (event) {
@@ -1078,13 +1025,10 @@ window.SA = window.SA || {};
             // TODO: See if we can get rid of this, or combine it with
             // the view browser.
       SA.InitSlideSelector(SA.MainDiv); // What is this?
-      var viewMenu1 = new SA.ViewEditMenu(SA.display.Viewers[0],
-                                                SA.display.Viewers[1]);
-      var viewMenu2 = new SA.ViewEditMenu(SA.display.Viewers[1],
-                                                SA.display.Viewers[0]);
-      var viewer1 = SA.display.Viewers[0];
-      var viewer2 = SA.display.Viewers[1];
-
+      SA.viewMenu1 = new SA.ViewEditMenu(SA.display.Viewers[0],
+                                         SA.display.Viewers[1]);
+      SA.viewMenu2 = new SA.ViewEditMenu(SA.display.Viewers[1],
+                                         SA.display.Viewers[0]);
       SA.display.UpdateGui();
 
             // ==============================

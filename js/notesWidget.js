@@ -350,9 +350,6 @@
                              self.ChangeBulletSize('0.9em');
                            });
 
-        // this.AddEditButton(SA.ImagePathUrl+"parse.png", "parse",
-        //                   function() {self.ParseText();});
-        // TODO: Get selected text to see if we can convert it into a question.
     this.AddEditButton(SA.ImagePathUrl + 'question.png', 'add question',
                            function () {
                              self.AddQuestion();
@@ -677,13 +674,6 @@
     this.EditButtons.push(button);
   };
 
-  TextEditor.prototype.ParseText = function () {
-    var text = this.TextEntry.text();
-    // Remove empty lines.
-    // Not developing this further because .text() does not contain
-    // new lines.
-  };
-
   TextEditor.prototype.AddQuestion = function () {
     var bar = $('<div>')
             .css({'position': 'relative',
@@ -750,7 +740,6 @@
     // execCommand fontSize does change bullet size.
     // This is a work around.
   TextEditor.prototype.ChangeBulletSize = function (sizeString) {
-    var sel = window.getSelection();
     // This call will clear the selected text if it is not in this editor.
     var range = SA.GetSelectionRange(this.TextEntry);
     range = range || SA.MakeSelectionRange(this.TextEntry);
@@ -871,11 +860,6 @@
     }
     this.UpdateNote();
   };
-
-  // This global variable is an attempt to enumerate generated
-  // names for links.  The flaw is it always starts over when page is
-  // loaded. It does not detect links from previous edits.
-  var LINKS_WITH_NO_NAME = 0;
 
   // TODO: Untangle view links from the note.
   TextEditor.prototype.InsertCameraLink = function () {

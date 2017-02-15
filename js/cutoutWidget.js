@@ -86,7 +86,6 @@
     var center = [(this.DragBounds[0] + this.DragBounds[1]) * 0.5,
       (this.DragBounds[2] + this.DragBounds[3]) * 0.5];
     var cam = view.Camera;
-    var viewport = view.Viewport;
 
     if (view.gl) {
       alert('webGL cutout not supported');
@@ -194,9 +193,6 @@
   };
 
   CutoutWidget.prototype.HandleMouseMove = function (event) {
-    var x = event.offsetX;
-    var y = event.offsetY;
-
     if (event.which === 0) {
       this.CheckActive(event);
       return;

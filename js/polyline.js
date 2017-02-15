@@ -406,7 +406,6 @@
   };
 
   // GLOBAL To Position the orientation of the edge.
-  var EDGE_COUNT = 0;
   var EDGE_ANGLE = (2 * Math.PI) * 0 / 24;
   var EDGE_OFFSET = 0; // In screen pixels.
   var EDGE_ROOT = 'edge';
@@ -471,7 +470,6 @@
           setTimeout(
             function () {
               ++count;
-              EDGE_COUNT = count;
               remaining += step;
               self.RecursiveSampleEdge(
                 i0, i1, remaining, step, count,

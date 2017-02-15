@@ -120,8 +120,6 @@
     view.Context2d.transform(matrix0, matrix1, matrix4, matrix5, x, y);
 
     view.Context2d.lineWidth = 1;
-    var path = true;
-
     var cIdx = 0;
     x = 0;
     y = 0;

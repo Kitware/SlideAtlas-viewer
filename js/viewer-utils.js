@@ -2437,58 +2437,15 @@
     return this;
   };
 
-// ==============================================================================
-// A common dialog class for all sa objects.
-// Abstraction of text dialog for rectangles.
-// Internal helper.
-  function saGetDialog (domElement, showCallback, applyCallback) {
-    if (!domElement.saDialog) {
-      var helper = new SAM.Dialog(function () { saDialogApplyCallback(domElement); });
-      if (!helper.ShowCallbacks) { helper.ShowCallbacks = []; }
-      if (!helper.ApplyCallbacks) { helper.ApplyCallbacks = []; }
-      saAddButton(domElement, SA.ImagePathUrl + 'Menu.jpg', 'properties',
-                    function () { saDialogShowCallback(domElement); });
-      domElement.saDialog = helper;
-    }
-    // I assume that the users will add variables to the dialog.
-    if (showCallback) { domElement.saDialog.ShowCallbacks.push(showCallback); }
-    if (applyCallback) { domElement.saDialog.ApplyCallbacks.push(applyCallback); }
-    return domElement.saDialog;
-  }
+  // ==============================================================================
+  // This is legacy and not used anymore.
+  // A common parent for all sa buttons (for this element).
+  // Handle showing and hiding buttons.  Internal helper.
 
-  // Remove the dialog.
-  // Incomplete. I need to remove the dialog button.
-  var saDialogDelete = function (element) {
-    if (!element.saDialog) { return; }
-    element.saDialog.Dialog.Body.empty;
-    delete element.saDialog;
-    // element.saDelete.ButtonsDiv.remove();
-  };
+  // Just for enabling and disabling the edit buttons
+  // cmd: "enable" or "disable"
 
-  var saDialogShowCallback = function (element) {
-    var callbacks = element.saDialog.ShowCallbacks;
-    for (var i = 0; i < callbacks.length; ++i) {
-      (callbacks[i])(element);
-    }
-    element.saDialog.Show(true);
-  };
-
-  var saDialogApplyCallback = function (element) {
-    var callbacks = element.saDialog.ApplyCallbacks;
-    for (var i = 0; i < callbacks.length; ++i) {
-      (callbacks[i])(element);
-    }
-  };
-
-// ==============================================================================
-// This is legacy and not used anymore.
-// A common parent for all sa buttons (for this element).
-// Handle showing and hiding buttons.  Internal helper.
-
-// Just for enabling and disabling the edit buttons
-// cmd: "enable" or "disable"
-
-// Only one set of buttons are visible at a time.
+  // Only one set of buttons are visible at a time.
   var SA_BUTTONS_VISIBLE = null;
 
   jQuery.prototype.saButtons = function (cmd) {
@@ -2926,9 +2883,6 @@
 
   function saResizeCallback () {
     var height = window.innerHeight;
-    var width = window.innerWidth;
-    var top = 0;
-    var left = 0;
     var items = $('.sa-full-height');
     for (var i = 0; i < items.length; ++i) {
       var item = items[i];

@@ -359,12 +359,12 @@
         */
   };
 
-    // This is a helper method to start preloading tiles for an up coming view.
+  // This is a helper method to start preloading tiles for an up coming view.
   ViewerRecord.prototype.LoadTiles = function (viewport) {
     var cache = SA.FindCache(this.Image);
-        // TODO:  I do not like the fact that we are keeping a serialized
-        // version of the camera in the record object.  It should be a real
-        // camera that is serialized when it is saved.
+    // TODO:  I do not like the fact that we are keeping a serialized
+    // version of the camera in the record object.  It should be a real
+    // camera that is serialized when it is saved.
     var cam = new SAM.Camera();
     cam.Load(this.Camera);
     cam.SetViewport(viewport);
@@ -377,31 +377,14 @@
     }
   };
 
-  function GetTrackingData () {
-    $.ajax({
-      type: 'get',
-      url: '/webgl-viewer/gettrackingdata',
-      success: function (data, status) {
-        if (status === 'success') {
-          LoadTrackingCallback(data);
-        } else { SA.Debug('ajax failed - get tracking data'); }
-      },
-      error: function () { SA.Debug('AJAX - error() : gettrackingdata'); }
-    });
-  }
-
-  function LoadTrackingCallback (data) {
-    alert(data);
-  }
-
-    // legacy
+  // legacy
   SA.RecordState = function () {
     if (SA.RECORDER_WIDGET) {
       SA.RECORDER_WIDGET.RecordState();
     }
   };
 
-    // display is a set of viewers (like DualViewWidet)
+  // display is a set of viewers (like DualViewWidet)
   var RecorderWidget = function (display) {
     if (!SA.RECORDER_WIDGET) {
       SA.RECORDER_WIDGET = this;

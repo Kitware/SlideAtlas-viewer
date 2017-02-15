@@ -207,7 +207,6 @@
     var textureCoordData = [];
     var cellData = [];
         // 128 for power of 2, but 98 to top of characters.
-    var top = 98.0 / 128.0; // Top texture coordinate value
     var charLeft = 0;
     var charTop = 0;
     var ptId = 0;

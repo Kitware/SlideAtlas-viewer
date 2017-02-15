@@ -580,7 +580,6 @@
           c.Threshold = threshold;
           c.SetPoints(xContour);
           c.RemoveDuplicatePoints(2);
-          var area = c.GetArea();
           contours.push(c);
         }
 
@@ -591,7 +590,6 @@
           c.Threshold = threshold;
           c.SetPoints(yContour);
           c.RemoveDuplicatePoints(2);
-          area = c.GetArea();
           contours.push(c);
         }
       }

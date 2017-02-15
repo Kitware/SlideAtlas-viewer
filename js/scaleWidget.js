@@ -1,14 +1,8 @@
 (function () {
   'use strict';
 
-  var NEW = 0;
   var WAITING = 3; // The normal (resting) state.
   var ACTIVE = 4; // Mouse is over the widget and it is receiving events.
-  var PROPERTIES_DIALOG = 5; // Properties dialog is up
-
-  var DRAG = 6;
-  var DRAG_LEFT = 7;
-  var DRAG_RIGHT = 8;
 
   // view argument is the main view (needed to get the spacing...)
   // Viewer coordinates.

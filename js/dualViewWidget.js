@@ -39,11 +39,6 @@ window.SA = window.SA || {};
         'width': '100%',
         'height': '100%'});
 
-        // This parent used to be CANVAS.
-    var width = parent.innerWidth();
-    var height = parent.innerHeight();
-    var halfWidth = width / 2;
-
     for (var i = 0; i < 2; ++i) {
       var viewerDiv = $('<div>')
         .appendTo(this.TopDiv)
@@ -776,7 +771,6 @@ window.SA = window.SA || {};
     var note = this.saNote;
 
     var trans = note.ViewerRecords[note.StartIndex + 1].Transform;
-    var sigma = this.Viewers[0].GetCamera().Height / 2;
 
     for (var i = 0; i < widgets0.length; ++i) {
       var w0 = widgets0[i];

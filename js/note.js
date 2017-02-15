@@ -6,15 +6,14 @@
 (function () {
   'use strict';
 
-    // Note load states.
+  // Note load states.
   var INVALID = 0; // just an id
   var REQUESTED = 1;    // Load request and waiting for the callback
   var SYNCHRONIZED = 2; // Same as database
-  var MODIFIED = 3;     // Client version is more recent than database.
 
-    // Globals
-    // The client creates the real and permanent id, so this works even if
-    // the note has not been added to the database.
+  // Globals
+  // The client creates the real and permanent id, so this works even if
+  // the note has not been added to the database.
   SA.GetNoteFromId = function (id) {
     for (var i = 0; i < SA.Notes.length; ++i) {
       var note = SA.Notes[i];

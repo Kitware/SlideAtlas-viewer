@@ -686,7 +686,6 @@
   // Move labeled rects in detections to classes.
   // Called before annotations are saved to
   GroundTruth.prototype.SplitDetections = function () {
-    var detections = this.Classes[0].widget.Shape;
     // Build an object to make indexing classes easier.
     var shapes = {};
     for (var i = 0; i < this.Classes.length; ++i) {

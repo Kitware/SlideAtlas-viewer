@@ -409,8 +409,6 @@
     }
 
     if (this.State === DRAG) {
-      var viewport = this.Layer.GetViewport();
-      var cam = this.Layer.GetCamera;
       dx = x - this.OriginViewer[0];
       dy = y - this.OriginViewer[1];
       // Change units from pixels to world.
@@ -428,9 +426,6 @@
     if (!this.Visibility) {
       return true;
     }
-
-    var x = event.offsetX;
-    var y = event.offsetY;
 
     if (this.State === ACTIVE) {
       if (this.NormalizedActiveDistance < 0.5) {
@@ -499,8 +494,6 @@
       return false;
     }
 
-    var x = event.offsetX;
-    var y = event.offsetY;
     var dx, dy;
         // change dx and dy to vector from center of circle.
     if (this.FixedSize) {

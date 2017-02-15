@@ -114,8 +114,8 @@
   };
 
   StackSectionWidget.prototype.ComputeViewUpperRight = function (view) {
-        // Compute the upper right corner in view coordinates.
-        // This is used by the SectionsWidget holds this section.
+    // Compute the upper right corner in view coordinates.
+    // This is used by the SectionsWidget holds this section.
     var bds = this.GetBounds();
     var p0 = view.Camera.ConvertPointWorldToViewer(bds[0], bds[2]);
     var p1 = view.Camera.ConvertPointWorldToViewer(bds[0], bds[3]);

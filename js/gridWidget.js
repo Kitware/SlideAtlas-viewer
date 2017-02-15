@@ -1,7 +1,6 @@
 (function () {
   'use strict';
 
-  var NEW = 0;
   var WAITING = 3; // The normal (resting) state.
   var ACTIVE = 4; // Mouse is over the widget and it is receiving events.
   var PROPERTIES_DIALOG = 5; // Properties dialog is up
@@ -11,7 +10,6 @@
   var DRAG_RIGHT = 8;
   var DRAG_TOP = 9;
   var DRAG_BOTTOM = 10;
-  var ROTATE = 11;
   // Worry about corners later.
 
   function Grid () {
@@ -29,10 +27,6 @@
   }
 
   Grid.prototype = new SAM.Shape();
-
-  Grid.prototype.destructor = function () {
-    // Get rid of the buffers?
-  };
 
   Grid.prototype.UpdateBuffers = function (view) {
     // TODO: Having a single poly line for a shape is to simple.

@@ -22,7 +22,6 @@
     // Not active.
   var WAITING = 2;
     // Waiting but receiving events.  The circle handle is active.
-  var DRAGGING = 3; // Mouse is down and a vertex is following the mouse.
   var ACTIVE = 5;
     // Dialog is active.
   var PROPERTIES_DIALOG = 6;
@@ -74,7 +73,6 @@
 
     this.Layer = layer;
     this.Popup = new SAM.WidgetPopup(this);
-    var cam = layer.GetCamera();
 
     this.Layer.AddWidget(this);
 
@@ -860,7 +858,7 @@
     if (this.Polyline.Closed === false) {
       return false;
     }
-    var x, y;
+    var x;
     var max = this.Polyline.GetNumberOfPoints() - 1;
     var xPos = 0;
     var xNeg = 0;
