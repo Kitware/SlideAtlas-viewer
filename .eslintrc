@@ -13,8 +13,5 @@
         "girder": true,
         "SA": true,
         "SAM": true
-    },
-    "rules": {
-        "new-cap": 0
     }
 }
