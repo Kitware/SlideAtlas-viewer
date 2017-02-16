@@ -37,6 +37,7 @@
     "test": "eslint .",
     "preversion": "npm install && npm run-script build && npm test",
     "version": "git checkout -B bump-version",
-    "postversion": "git push origin bump-version --tags"
+    "postversion": "git push origin bump-version --tags",
+    "prepublish": "rm -rf dist/* && npm run-script build"
   }
 }
