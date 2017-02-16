@@ -22,6 +22,14 @@ To build the full distributable web code, then run:
 
 `npm run build`
 
+This will cause the following files to be built under the `dist` directory:
+* `sa.max.js`, with the concatenated relevant SlideAtlas Javascript files 
+* `sa.min.js`, with the minified relevant SlideAtlas Javascript files
+* `sa-lib.js`, with the concatenated third-party libraries
+* `sa-all.max.js`, with the concatenation of `sa-lib.js` and `sa.max.js`
+* `sa-all.min.js`, with the concatenation of `sa-lib.js` and `sa.min.js`
+* `sa.css`, with the concatenated relevant SlideAtlas CSS files
+
 ## Testing
 To run style checks, run:
 
