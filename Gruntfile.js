@@ -82,9 +82,6 @@ module.exports = function (grunt) {
     pkg: grunt.file.readJSON('package.json'),
 
     concat: {
-      options: {
-        banner: '/*SlideAtlas*/'
-      },
       base: {
         src: jsSrcFiles,
         dest: 'dist/sa.max.js'
@@ -94,6 +91,11 @@ module.exports = function (grunt) {
         dest: 'dist/sa-lib.js'
       },
       maxBundle: {
+        options: {
+          // Using "$.getScript" to load a JS file will cause it to be eval'd.
+          // This allows the source to still show up in the debugger.
+          footer: '//# sourceURL=sa-all.max.js'
+        },
         src: [
           'dist/sa-lib.js',
           'dist/sa.max.js'
@@ -101,6 +103,9 @@ module.exports = function (grunt) {
         dest: 'dist/sa-all.max.js'
       },
       minBundle: {
+        options: {
+          footer: '//# sourceURL=sa-all.min.js'
+        },
         src: [
           'dist/sa-lib.js',
           'dist/sa.min.js'
@@ -119,7 +124,6 @@ module.exports = function (grunt) {
       }
     },
     uglify: {
-      options: {},
       base: {
         src: jsSrcFiles,
         dest: 'dist/sa.min.js'
