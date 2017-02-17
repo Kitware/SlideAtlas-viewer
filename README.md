@@ -126,3 +126,32 @@ on installation, but to get started quickly:
 
     and see [the Flycheck documentation](http://flycheck.readthedocs.io/en/latest/user/error-list.html) for more
     information on usage.
+
+### Automatic Code Rebuilding
+To automatically rebuild the `dist/sa.max.js`, `dist/sa-all.max.js`, and `dist/sa.css` whenever one of the constituent
+Javascript (excluding libraries) or CSS files is modified, run:
+
+  `npm run watch`
+
+### Automatic Code Reloading
+To automatically reload a web browser whenever one of the constituent Javascript (excluding libraries) or CSS files is
+modified:
+  * Directly source the `dist/sa.max.js` and `dist/sa.css` files in your HTML page
+
+  * Enable LiveReload for the page by either:
+    * Adding the script tag
+
+      `<script src="//localhost:35729/livereload.js"></script>`
+
+      before the closing `</body>` tag of your HTML page
+    * Installing the [LiveReload browser extension](http://livereload.com/extensions/).
+
+  * Run
+
+    `npm run watch`
+
+    and then load your HTML page in a local browser.
+
+ Note, Javascript changes will cause the page to refresh, whereas CSS changes will cause an in-place update.
+
+ The `examples/viewer.html` file is already set up to support automatic reloading.

@@ -128,18 +128,43 @@ module.exports = function (grunt) {
         src: jsSrcFiles,
         dest: 'dist/sa.min.js'
       }
+    },
+    watch: {
+      maxBundle: {
+        files: jsSrcFiles,
+        tasks: [
+          'concat:base',
+          'concat:maxBundle'
+        ]
+      },
+      css: {
+        files: cssSrcFiles,
+        tasks: [
+          'concat:css'
+        ]
+      },
+      livereload: {
+        options: {
+          livereload: 35729
+        },
+        files: [
+          'dist/sa.max.js',
+          'dist/sa.css'
+        ]
+      }
     }
   });
 
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-watch');
 
   grunt.registerTask('default', [
-    'concat:base',
-    'uglify:base',
     'concat:lib',
+    'concat:base',
     'concat:maxBundle',
+    'uglify:base',
     'concat:minBundle',
     'concat:css',
     'copy:images'
