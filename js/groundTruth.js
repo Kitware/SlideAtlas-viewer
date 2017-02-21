@@ -527,7 +527,7 @@
 
         var self = this;
         // This gives an array of {_id:"....",annotation:{name:"...."},itemId:"...."}
-        girder.restRequest({
+        girder.rest.restRequest({
             path:   "annotation?itemId="+itemId,
             method: "GET",
             data:   JSON.stringify(data)
@@ -543,7 +543,7 @@
         // var annotId = "572be29d3f24e53573aa8e91";
     var self = this;
     if (window.girder) {
-      girder.restRequest({
+      girder.rest.restRequest({
         path: 'annotation/' + classObj.annotation_id,
         method: 'GET',
         contentType: 'application/json'
@@ -724,7 +724,7 @@
       annotation = this.Classes[0].annotation;
       annotation.elements = this.RectSetToGirderElements(this.Classes[0].widget);
       SA.PushProgress();
-      girder.restRequest({
+      girder.rest.restRequest({
         path: 'annotation/' + this.Classes[0].annotation_id,
         method: 'PUT',
         data: JSON.stringify(annotation),
@@ -736,7 +736,7 @@
         annotation.elements = this.RectSetToGirderElements(widget);
         SA.PushProgress();
                 // not sure about this id
-        girder.restRequest({
+        girder.rest.restRequest({
           path: 'annotation/' + this.Classes[i].annotation_id,
           method: 'PUT',
           data: JSON.stringify(annotation),

@@ -95,7 +95,7 @@
         // Make a new annotation in the database.
     var self = this;
     if (window.girder) { // Conditional is for testing in slide atlas.
-      girder.restRequest({
+      girder.rest.restRequest({
         path: 'annotation?itemId=' + this.ImageItemId,
         method: 'POST',
         contentType: 'application/json',
@@ -123,7 +123,7 @@
 
     var self = this;
         // This gives an array of {_id:"....",annotation:{name:"...."},itemId:"...."}
-    girder.restRequest({
+    girder.rest.restRequest({
       path: 'annotation?itemId=' + itemId,
       method: 'GET',
       data: JSON.stringify(data)
@@ -137,7 +137,7 @@
   GirderWidget.prototype.LoadAnnotationItem = function (annotId) {
     // var annotId = "572be29d3f24e53573aa8e91";
     var self = this;
-    girder.restRequest({
+    girder.rest.restRequest({
       path: 'annotation/' + annotId,
       method: 'GET',
       contentType: 'application/json'
@@ -281,7 +281,7 @@
     annotObj.Data.annotation.elements = this.RecordAnnotation();
     if (window.girder) {
             // Save in the database
-      girder.restRequest({
+      girder.rest.restRequest({
         path: 'annotation/' + annotObj.Data._id,
         method: 'PUT',
         data: JSON.stringify(annotObj.Data.annotation),
@@ -309,7 +309,7 @@
         annotObj.Circle.remove();
         if (window.girder) {
           // Remove the annotation from the database.
-          girder.restRequest({
+          girder.rest.restRequest({
             path: 'annotation/' + annotObj.Data._id,
             method: 'DELETE',
             contentType: 'application/json'
