@@ -1265,7 +1265,7 @@
       'sortdir': 1};
 
     // This gives an array of {_id:"....",annotation:{name:"...."},itemId:"...."}
-    girder.restRequest({
+    girder.rest.restRequest({
       type: 'get',
       url: 'annotation',
       data: JSON.stringify(data),
@@ -1278,7 +1278,7 @@
     });
 
     var annotationId = '572be29d3f24e53573aa8e91';
-    girder.restRequest({
+    girder.rest.restRequest({
       path: 'annotation/' + annotationId,    // note that you don't need
       // api/v1
       method: 'GET',                          // data will be put in the
@@ -1300,7 +1300,7 @@
         'center': [5000, 5000, 0],
         'radius': 2000}]
     };
-    girder.restRequest({
+    girder.rest.restRequest({
       type: 'post',
       url: 'annotation',
       data: JSON.stringify(data),
@@ -1319,7 +1319,7 @@
         'closed': true,
         'fillColor': 'rgba(0, 255, 0, 1)'} ]
     };
-    girder.restRequest({
+    girder.rest.restRequest({
       type: 'put',
       url: 'annotation/' + annotId,
       data: JSON.stringify(data),
