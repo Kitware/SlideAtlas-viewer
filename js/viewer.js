@@ -41,6 +41,7 @@
         // I am moving the eventually render feature into viewers.
     this.Drawing = false;
     this.RenderPending = false;
+    this.Rotatable = true;
 
     this.HistoryFlag = false;
     this.MinPixelSize = 0.5;
@@ -242,6 +243,15 @@
             new SA.AnnotationWidget(annotationLayer1, this);
   }
 
+  Viewer.prototype.SetRotatable = function (flag) {
+    this.Rotatable = flag;
+    if (flag) {
+      this.RotateIcon.show();
+    } else {
+      this.RotateIcon.hide();
+    }
+  };
+
     // Try to remove all global references to this viewer.
   Viewer.prototype.Delete = function () {
     this.Div.remove();
@@ -299,6 +309,10 @@
     if (args.drawWidget !== undefined) {
       this.SetAnnotationWidgetVisibility(args.drawWidget);
     }
+    if (args.rotatable !== undefined) {
+      this.SetRotatable(args.rotatable);
+    }
+
         // The way I handle the viewer edit menu is messy.
         // TODO: Find a more elegant way to add tabs.
         // Maybe the way we handle the anntation tab shouodl be our pattern.
@@ -462,10 +476,12 @@
 
     // These should be in an overview widget class.
   Viewer.prototype.RollEnter = function (e) {
+    if (!this.Rotatable) { return; }
     this.RotateIconHover = true;
     this.RotateIcon.addClass('sa-active');
   };
   Viewer.prototype.RollLeave = function (e) {
+    if (!this.Rotatable) { return; }
     this.RotateIconHover = false;
     if (!this.RotateIconDrag) {
       this.RotateIcon.removeClass('sa-active');
@@ -473,6 +489,7 @@
   };
   Viewer.prototype.RollDown = function (e) {
     if (!this.OverView) { return; }
+    if (!this.Rotatable) { return; }
     this.RotateIconDrag = true;
         // Find the center of the overview window.
     var w = this.OverView.CanvasDiv;
@@ -487,6 +504,7 @@
   Viewer.prototype.RollMove = function (e) {
     if (!this.OverView) { return; }
     if (!this.RotateIconDrag) { return; }
+    if (!this.Rotatable) { return; }
     if (e.which !== 1) {
             // We must have missed the mouse up event.
       this.RotateIconDrag = false;
@@ -1508,7 +1526,7 @@
       this.HandleTouchPinch(this);
       return;
     }
-    if (this.Touches.length === 3) {
+    if (this.Rotatable && this.Touches.length === 3) {
       this.HandleTouchRotate(this);
       return;
     }
@@ -1559,6 +1577,7 @@
 
   Viewer.prototype.HandleTouchRotate = function (event) {
     if (!this.InteractionEnabled) { return true; }
+    if (!this.Rotatable) { return true; }
     var numTouches = this.Touches.length;
     if (this.LastTouches.length !== numTouches || numTouches !== 3) {
             // Sanity check.
@@ -1868,7 +1887,7 @@
         // Choose what interaction will be performed.
     if (event.which === 1) {
       if (event.ctrlKey) {
-        this.InteractionState = INTERACTION_ROTATE;
+        if (this.Rotatable) { this.InteractionState = INTERACTION_ROTATE; }
       } else if (event.altKey) {
         this.InteractionState = INTERACTION_ZOOM;
       } else {
@@ -1876,7 +1895,7 @@
       }
       return false;
     }
-    if (event.which === 2) {
+    if (event.which === 2 && this.Rotatble) {
       this.InteractionState = INTERACTION_ROTATE;
       return false;
     }
@@ -1902,7 +1921,7 @@
     this.FireFoxWhich = 0;
     this.RecordMouseUp(event);
 
-    if (this.RotateIconDrag) {
+    if (this.Rotatable && this.RotateIconDrag) {
       this.RollUp(event);
       return false;
     }
@@ -1935,7 +1954,7 @@
 
         // I think we need to deal with the move here because the mouse can
         // exit the icon and the events are lost.
-    if (this.RotateIconDrag) {
+    if (this.Rotatable && this.RotateIconDrag) {
       this.RollMove(event);
       return false;
     }
@@ -2433,7 +2452,7 @@
     if (p < 60) {
       this.RotateIcon.hide();
     } else {
-      this.RotateIcon.show();
+      if (this.Rotatable) { this.RotateIcon.show(); }
     }
 
     this.UpdateSize();

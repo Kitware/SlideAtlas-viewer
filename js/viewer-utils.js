@@ -2729,6 +2729,10 @@
 // viewerIndex of the note defaults to 0.
 // Note: hideCopyright will turn off when a new note is loaded.
   jQuery.prototype.saViewer = function (args) {
+    return SAViewer(this, args);
+  };
+// Non jquery api
+  var SAViewer = function (element, args) {
     // default
     args = args || {};
     if (typeof (args) === 'object') {
@@ -2741,22 +2745,21 @@
       if (args.note === null) {
             // It has not been loaded yet.  Get if from the server.
         args.note = new SA.Note();
-        var self = this;
         args.note.LoadViewId(
                 args.viewId,
                 function () {
-                  saViewerSetup(self, arguments);
+                  saViewerSetup(arguments);
                 });
-        return this;
+        return element;
       }
     }
 
     // User can call a viewer method through thie jquery api.
     // Pass on the return value if it has one.
     if (arguments.length === 0) {
-      return saViewerSetup(this, [args]) || this;
+      return saViewerSetup([element, args]) || element;
     }
-    return saViewerSetup(this, arguments) || this;
+    return saViewerSetup(arguments) || element;
   };
 
 // I am struggling for an API to choose between single view and dual view.
@@ -2769,13 +2772,15 @@
 // flag in html. I could have an attribute "dual", but I think I like to
 // change the class from sa-viewer to sa-dual-viewer better.
 // TODO: Make the argument calls not dependant on order.
-  function saViewerSetup (self, args) {
+  function saViewerSetup (args) {
     // TODO: Think about making this viewer specific rather than a global.
 
-    // legacy api: params encoded in first arguement object.
+    var self = args[0];
+
+    // legacy api: params encoded in second arguement object.
     var params;
-    if (typeof (args[0]) === 'object') {
-      params = args[0];
+    if (typeof (args[1]) === 'object') {
+      params = args[1];
     }
 
     if (params && params.prefixUrl) {
@@ -2788,7 +2793,7 @@
         .on('resize.sa', saResizeCallback);
 
     for (var i = 0; i < self.length; ++i) {
-      if (args[0] === 'destroy') {
+      if (args[1] === 'destroy') {
         $(self[i]).removeClass('sa-resize');
             // This should not cause a problem.
             // Only one resize element should be using this element.
@@ -2831,10 +2836,10 @@
         // generic method call. Give jquery ui access to all this objects methods.
         // jquery puts the query results as the first argument.
       var viewer = self[i].saViewer;
-      if (viewer && typeof (viewer[args[0]]) === 'function') {
+      if (viewer && typeof (viewer[args[1]]) === 'function') {
             // first list item is the method name,
             // the rest are arguments to the method.
-        return viewer[args[0]].apply(viewer, Array.prototype.slice.call(args, 1));
+        return viewer[args[1]].apply(viewer, Array.prototype.slice.call(args, 2));
       }
 
       if (params) {
@@ -2905,13 +2910,19 @@
 
 // Args: not used
   jQuery.prototype.saFullHeight = function (args) {
-    this.css({'top': '0px'});
-    this.addClass('sa-full-height');
-    for (var i = 0; i < this.length; ++i) {
-        // I want to put the resize event on "this[i]",
+    return SAFullHeight(this, args);
+  };
+// ==============================================================================
+// Non jquery api
+// Add resize callbacks that make a jquery element fit the windows height.
+  var SAFullHeight = function (element, args) {
+    element.css({'top': '0px'});
+    element.addClass('sa-full-height');
+    for (var i = 0; i < element.length; ++i) {
+        // I want to put the resize event on "element[i]",
         // but, I am afraid it might not get trigerend always, or
         // setting the height would cause recursive calls to resize.
-      this[i].saFullHeight = args;
+      element[i].saFullHeight = args;
     }
 
     $(window)
@@ -2919,7 +2930,7 @@
         .on('resize.sa', saResizeCallback)
         .trigger('resize');
 
-    return this;
+    return element;
   };
 
 // ==============================================================================
@@ -3861,4 +3872,6 @@
   };
 
   SA.ResizePanel = ResizePanel;
+  SA.SAFullHeight = SAFullHeight;
+  SA.SAViewer = SAViewer;
 })();

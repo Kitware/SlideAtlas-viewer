@@ -71,6 +71,7 @@
     this.Heights[outIdx] = height;
     this.Labels[outIdx] = '';
     this.Confidences[outIdx] = 1.0;
+    return this.Widths.length - 1;
   };
 
   RectSet.prototype.DeleteRectangle = function (index) {
