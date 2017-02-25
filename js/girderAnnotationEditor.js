@@ -80,19 +80,6 @@
       classObj.annotation_id = data[0]['_id'];
       self.RequestAnnotationFromId(classObj);
     });
-
-    // var data = {limit: 1,
-    //            offset: 0,
-    //            name: classObj.label};
-    // This gives an array of {_id:"....",annotation:{name:"...."},itemId:"...."}
-    // girder.rest.restRequest({
-    //  path:   'annotation?itemId='+this.ItemId,
-    //  method: 'GET',
-    //  data:   JSON.stringify(data)
-    // }).done(function(data) {
-    //  classObj.annotation_id = data[0]['_id'];
-    //  self.RequestAnnotationFromId(classObj);
-    // });
   };
 
   GirderAnnotationEditor.prototype.RequestAnnotationFromId = function (classObj) {
@@ -175,8 +162,11 @@
     } else if (this.Classes.length > 0) {
       // Look to previous annotations for a size/
       var classObj = this.Classes[this.ActiveClassIndex];
-      if (classObj.widget && classObj.widget.Heights.length > 0) {
-        size = classObj.widget.Heights[0];
+      if (classObj.widget) {
+        var rectSet = classObj.widget.Shape;
+        if (rectSet.Heights.length > 0) {
+          size = rectSet.Heights[0];
+        }
       }
     }
     // Constrain the size to be visible.
@@ -226,12 +216,13 @@
   // Highlight on hover.
   GirderAnnotationEditor.prototype.HandleMouseMove = function (event) {
     if (event.which !== 0) { return true; }
+    var confThresh = this.GetConfidenceThreshold();
     var cam = this.Layer.GetCamera();
     var pt = cam.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
     var best;
     for (var i = 0; i < this.Classes.length; ++i) {
       if (this.Classes[i].widget) {
-        var tmp = this.Classes[i].widget.Hash.Get(pt);
+        var tmp = this.Classes[i].widget.Hash.Get(pt, confThresh);
         if (tmp) {
           if (!best || tmp.dist < best.dist) {
             tmp.classObj = this.Classes[i];
@@ -243,16 +234,60 @@
 
     if (best) {
       this.SetHighlightedRect(best.classObj, best.index);
+    } else {
+      this.SetHighlightedRect({}, -1);
     }
 
     return true;
+  };
+
+  // Make the annotation larger and smaller with the mouse wheel.
+  GirderAnnotationEditor.prototype.HandleMouseWheel = function (event) {
+    var rectIdx = this.HighlightedRect.idx;
+    if (rectIdx == -1) {
+      return true;
+    }
+
+    // A rectangle is highlighted
+    var rectWidget = this.HighlightedRect.widget;
+    var rectSet = rectWidget.Shape;
+
+    // Lets try changing the center to the mouse position too.
+    //var cam = this.Layer.GetCamera();
+    //var pt = cam.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
+    //rectSet.Centers[rectIdx << 1] = pt[0];
+    //rectSet.Centers[(rectIdx << 1) + 1] = pt[1];
+
+    // We want to accumulate the target, but not the duration.
+    var tmp = 0;
+    if (event.deltaY) {
+      tmp = event.deltaY;
+    } else if (event.wheelDelta) {
+      tmp = event.wheelDelta;
+    }
+    // Wheel event seems to be in increments of 3.
+    // depreciated mousewheel had increments of 120....
+    // Initial delta cause another bug.
+    // Lets restrict to one zoom step per event.
+    if (tmp > 0) {
+      rectSet.Widths[rectIdx] /= 0.9;
+      rectSet.Heights[rectIdx] /= 0.9;
+      this.SquareSize = rectSet.Heights[rectIdx];
+    } else if (tmp < 0) {
+      rectSet.Widths[rectIdx] *= 0.9;
+      rectSet.Heights[rectIdx] *= 0.9;
+      this.SquareSize = rectSet.Heights[rectIdx];
+    }
+    // Ignore rebuilding the hash for now.
+    this.Layer.EventuallyDraw();
+    return false;
   };
 
   // Stepping through the detection sequence.
   // -1 is none
   GirderAnnotationEditor.prototype.SetIteratorIndex = function (idx) {
     // Highlight the current
-    this.SetHighlightedRect(this.Classes[0], idx);
+    this.SetHighlightedRect(this.IteratorClass, idx);
     this.IteratorIndex = idx;
     // Animate to put this rec in the middle of the view.
     this.UpdateActiveView();
@@ -275,7 +310,7 @@
 
     if (this.InteractionState === ITERATING && idx === -1) {
       // Unset => go back to the default current rect.
-      widget = this.Classes[0].widget;
+      widget = this.IteratorClass.widget;
       idx = this.IteratorIndex;
     }
 
@@ -294,13 +329,19 @@
   // iterating.  Mouse click changes the class label and advances.  The
   // keydown determines the label.
   GirderAnnotationEditor.prototype.HandleKeyDown = function (event) {
-    // Always active now.
-    if (this.InteractionState === ITERATING) {
-      if (this.ActionState !== KEY_UP) {
+    var rectIdx = this.HighlightedRect.idx;
+    var rectSet;
+    if (rectIdx > -1) {
+      // A rectangle is highlighted
+      var rectWidget = this.HighlightedRect.widget;
+      rectSet = rectWidget.Shape;
+      // Up and down arrows make the annotation large and smaller.
+      // Ignore rebuilding the hash for now.
+      if (event.keyCode === 38) { // Up arrow
         return false;
       }
-      if (event.keyCode > 48 && event.keyCode < 48 + this.Classes.length) {
-        this.ActionState = KEY_DOWN;
+      if (event.keyCode === 40) { // Down arrow
+        return false;
       }
     }
     var valid = this.SetActiveClassIndex(event.keyCode - 48);
@@ -357,9 +398,26 @@
         this.Layer.EventuallyDraw();
         // Automatically move to the next, to save clicks.
         if (this.InteractionState === ITERATING &&
-                    rectWidget === this.Classes[0].widget && rectIdx === this.IteratorIndex) {
+                    rectWidget === this.IteratorClass.widget && rectIdx === this.IteratorIndex) {
           setTimeout(function () { self.ChangeCurrent(1); }, 300);
         }
+        return false;
+      }
+
+      // Up and down arrows make the annotation large and smaller.
+      // Ignore rebuilding the hash for now.
+      if (event.keyCode === 38) { // Up arrow
+        rectSet.Widths[rectIdx] /= 0.8;
+        rectSet.Heights[rectIdx] /= 0.8;
+        this.SquareSize = rectSet.Widths[rectIdx];
+        this.Layer.EventuallyDraw();
+        return false;
+      }
+      if (event.keyCode === 40) { // Down arrow
+        rectSet.Widths[rectIdx] *= 0.8;
+        rectSet.Heights[rectIdx] *= 0.8;
+        this.SquareSize = rectSet.Widths[rectIdx];
+        this.Layer.EventuallyDraw();
         return false;
       }
 
@@ -373,7 +431,7 @@
         rectWidget.Hash.Build(rectWidget.Shape, bds);
         // Deleted rect was in the detection set while iterating
         if (this.InteractionState === ITERATING &&
-                    rectWidget === this.Classes[0].widget) {
+                    rectWidget === this.IteratorClass.widget) {
           // If we deleted a rect before the current, ...
           if (rectIdx < this.IteratorIndex) {
             this.SetIteratorIndex(this.IteratorIndex - 1);
@@ -393,7 +451,7 @@
 
     // Forward and backward.
     if (this.InteractionState === ITERATING) {
-      rectSet = this.Classes[0].widget.Shape;
+      rectSet = this.IteratorClass.widget.Shape;
       var index = this.IteratorIndex;
       if (event.keyCode === 40) {
         // down cursor key
@@ -424,11 +482,11 @@
 
   // Animate to the new current rect.
   GirderAnnotationEditor.prototype.UpdateActiveView = function () {
-    if (this.Classes[0].widget === undefined) {
+    if (this.IteratorClass.widget === undefined) {
       return true;
     }
 
-    var rectSet = this.Classes[0].widget.Shape;
+    var rectSet = this.IteratorClass.widget.Shape;
 
     // Change the index / confidence label.
     var idx = this.IteratorIndex;
@@ -437,9 +495,9 @@
       return;
     } else {
       this.ActiveLabel.text(idx.toString() + ' of ' +
-                                  rectSet.Labels.length.toString() + ', ' +
-                                  rectSet.Confidences[idx].toPrecision(2) +
-                                  ', ' + rectSet.Labels[idx]);
+                            rectSet.Labels.length.toString() + ', ' +
+                            rectSet.Confidences[idx].toPrecision(2) +
+                            ', ' + rectSet.Labels[idx]);
     }
 
     var viewer = this.Layer.GetViewer();
@@ -453,10 +511,10 @@
 
   // Forward = 1, backward = -1
   GirderAnnotationEditor.prototype.ChangeCurrent = function (direction) {
-    if (this.Classes[0].widget === undefined) {
+    if (this.IteratorClass.widget === undefined) {
       return true;
     }
-    var rectSet = this.Classes[0].widget.Shape;
+    var rectSet = this.IteratorClass.widget.Shape;
     var index = this.IteratorIndex;
 
     // loop to skip rects below the threshold
@@ -497,10 +555,12 @@
                 dx < rectSize / 2 && dy < rectSize / 2) {
         rectSet.Labels[rectIdx] = classLabel;
         rectSet.SetCenter(rectIdx, pt);
+        // Assume 100% confidence when the user sets the class.
+        rectSet.Confidences[rectIdx] = 1.0;
         this.Layer.EventuallyDraw();
         // Advance if user clicked on the one iterating rectangle
         if (this.InteractionState === ITERATING &&
-                    rectWidget === this.Classes[0].widget && rectIdx === this.IteratorIndex) {
+                    rectWidget === this.IteratorClass.widget && rectIdx === this.IteratorIndex) {
           var self = this;
           // If a key is being used as amodified, stop advaning twice.
           // SHould we advance on the mouse up or key up?
@@ -560,12 +620,6 @@
       .attr('contenteditable', 'false')
       .text('');
 
-    var sizeContainer = $('<p>')
-      .appendTo(layerControl);
-    this.SizeLabel = $('<label>')
-      .appendTo(sizeContainer)
-      .text('Size:  ');
-
     var buttonContainer = $('<p>')
       .appendTo(layerControl);
     this.StartStopButton = $('<button>')
@@ -597,13 +651,18 @@
           function () {
             self.SliderCallback();
           });
-    // this.Slider[0].min = 75;
 
     $('<div>')
       .appendTo(confWrapper)
       .html('0%')
       .css({ 'float': 'left' });
-
+    $('<div>')
+      .appendTo(confWrapper)
+      .html('Confidence')
+      .css({ 'float': 'right',
+             'position': 'relative',
+             'left': '-50%',
+             'text-align': 'left'});
     $('<div>')
       .appendTo(confWrapper)
       .html('100%')
@@ -634,18 +693,18 @@
     }
   };
 
-  GirderAnnotationEditor.prototype.CheckCallback = function () {
-    //    var checked = this.CheckBox.prop('checked');
-    //    for (var i = 0; i < this.Layers.length; ++i) {
-    //        this.Layers[i].SetVisibility(checked);
-    //        this.Layers[i].EventuallyDraw();
-    //    }
+  GirderAnnotationEditor.prototype.GetConfidenceThreshold = function () {
+    return parseInt(this.Slider.val()) / 100.0;
   };
 
   GirderAnnotationEditor.prototype.SliderCallback = function () {
-    //    for (var i = 0; i < this.Layers.length; ++i) {
-    //        this.UpdateLayer(this.Layers[i]);
-    //    }
+    var visValue = this.GetConfidenceThreshold();
+    for (var i = 0; i < this.Classes.length; ++i) {
+      if (this.Classes[i].widget) {
+        this.Classes[i].widget.SetThreshold(visValue);
+      }
+    }
+    this.Layer.EventuallyDraw();    
   };
 
   GirderAnnotationEditor.prototype.Start = function () {
@@ -659,10 +718,10 @@
     var viewer = this.Layer.GetViewer();
     viewer.ZoomTarget = 500;
 
-    // TODO: abstract the highlighting to clean it up.
+    this.IteratorClass = this.Classes[this.ActiveClassIndex];
     this.SetIteratorIndex(0);
-    // if (this.Classes[0].widget) {
-    //    this.Classes[0].widget.Shape.ActiveIndex = 0;
+    // if (this.IteratorClass.widget) {
+    //    this.IteratorClass.widget.Shape.ActiveIndex = 0;
     //    this.UpdateActiveView();
     // }
 
@@ -672,13 +731,14 @@
             .prop('title', 'Stop sorting detections')
             .on('click', function () { self.Stop(); });
   };
+
   GirderAnnotationEditor.prototype.Stop = function () {
     var self = this;
     // this.Layer.DeactivateWidget(this);
     this.InteractiveState = WAITING;
     this.SetIteratorIndex(-1);
-    // if (this.Classes[0].widget) {
-    //    this.Classes[0].widget.Shape.ActiveIndex = -1;
+    // if (this.IteratorClass.widget) {
+    //    this.IteratorClass.widget.Shape.ActiveIndex = -1;
     // }
     this.StartStopButton
             .text('Start')
@@ -688,7 +748,7 @@
   };
 
   // Move labeled rects in detections to classes.
-  // Called before annotations are saved to
+  // Called before annotations are saved to the database
   GirderAnnotationEditor.prototype.SplitDetections = function () {
     // Build an object to make indexing classes easier.
     var shapes = {};
@@ -706,7 +766,7 @@
         var label = inRectSet.Labels[inIdx];
         var outRectSet = shapes[label].newRectSet;
         outRectSet.CopyRectangle(inRectSet, inIdx,
-                                         outRectSet.GetLength());
+                                 outRectSet.GetLength());
       }
     }
 
@@ -720,26 +780,16 @@
   };
 
   GirderAnnotationEditor.prototype.Save = function () {
-    this.Classes[0].widget.Deactivate();
     this.SplitDetections();
     var annotation;
+
     if (window.girder) {
       // Save in the database
-      annotation = this.Classes[0].annotation;
-      annotation.elements = this.RectSetToGirderElements(this.Classes[0].widget);
-      SA.PushProgress();
-      girder.rest.restRequest({
-        path: 'annotation/' + this.Classes[0].annotation_id,
-        method: 'PUT',
-        data: JSON.stringify(annotation),
-        contentType: 'application/json'
-      }).done(function () { SA.PopProgress(); });
       for (var i = 0; i < this.Classes.length; ++i) {
         var widget = this.Classes[i].widget;
         annotation = this.Classes[i].annotation;
         annotation.elements = this.RectSetToGirderElements(widget);
         SA.PushProgress();
-        // not sure about this id
         girder.rest.restRequest({
           path: 'annotation/' + this.Classes[i].annotation_id,
           method: 'PUT',
@@ -835,17 +885,18 @@
   };
 
   SpatialHash.prototype.Add = function (center, w, h, idx) {
-    x = center[0] - w/2;
+    var x,y;
+    x = center[0] - (w / 2);
     var col1 = Math.floor((x - this.Origin[0]) / this.BinSize);
     col1 = Math.max(Math.min(col1, this.XDim - 1), 0);
-    x = center[0] + w/2;
+    x = center[0] + (w / 2);
     var col2 = Math.floor((x - this.Origin[0]) / this.BinSize);
     col2 = Math.max(Math.min(col2, this.XDim - 1), 0);
 
-    y = center[1] - h/2;
+    y = center[1] - (h / 2);
     var row1 = Math.floor((y - this.Origin[1]) / this.BinSize);
     row1 = Math.max(Math.min(row1, this.YDim - 1), 0);
-    y = center[1] + h/2;
+    y = center[1] + (h / 2);
     var row2 = Math.floor((y - this.Origin[1]) / this.BinSize);
     row2 = Math.max(Math.min(row2, this.YDim - 1), 0);
 
@@ -870,7 +921,7 @@
 
   // Returns the index of the best rect for the point selected..
   // Returns -1 if there are no rects containing the point.
-  SpatialHash.prototype.Get = function (pt) {
+  SpatialHash.prototype.Get = function (pt, confThresh) {
     // Find binds touching this square.
     // Transform bounds to grid indexes  (keep in range).
     var x = Math.max(Math.min(
@@ -884,18 +935,19 @@
     var best;
     for (var i = 0; i < bin.length; ++i) {
       var rectIdx = bin[i];
+      var conf = this.RectSet.Confidences[rectIdx];
       var w = this.RectSet.Widths[rectIdx];
       var h = this.RectSet.Heights[rectIdx];
       var cx = this.RectSet.Centers[rectIdx << 1];
       var cy = this.RectSet.Centers[(rectIdx << 1) + 1];
-      var dx = Math.abs(x - pt[0]);
-      var dy = Math.abs(y - pt[1]);
-      if (dx < w / 2 && dy < y / 2) {
+      var dx = Math.abs(cx - pt[0]);
+      var dy = Math.abs(cy - pt[1]);
+      if (dx < w / 2 && dy < h / 2 && confThresh < conf) {
         var dist = Math.max(dx, dy);
         if (!best || dist <= best.dist) {
           best = {dist: dist,
                   index: rectIdx,
-                  center: [cx,cy],
+                  center: [cx, cy],
                   width: w,
                   height: h};
         }
