@@ -794,7 +794,14 @@
     }
   };
 
-    // Some widgets need access to the viewer.
+  // Allow the layer to receive keyboard events.
+  // TODO: If we have not bound out own events, forward focus to the viewer.
+  AnnotationLayer.prototype.Focus = function () {
+    var can = this.LayerDiv.CanvasDiv;
+    can.focus();
+  };
+
+  // Some widgets need access to the viewer.
   AnnotationLayer.prototype.GetViewer = function () {
     return this.Viewer || SA.VIEWER1;
   };

@@ -115,7 +115,7 @@
     this.RecordIndex = 0; // Only used for drawing correlations.
 
     var can = this.MainView.CanvasDiv;
-        // So we can programatically set the keyboard focus
+    // So we can programatically set the keyboard focus
     can.attr('tabindex', '1');
     can.on(
             'mousedown.viewer',
@@ -125,9 +125,9 @@
     can.on(
             'mousemove.viewer',
          function (event) {
-                // So key events go the the right viewer.
+           // So key events go the the right viewer.
            this.focus();
-                // Firefox does not set which for mouse move events.
+           // Firefox does not set which for mouse move events.
            SA.FirefoxWhich(event);
            return self.HandleMouseMove(event);
          });
@@ -243,6 +243,12 @@
             new SA.AnnotationWidget(annotationLayer1, this);
   }
 
+  // Allow the viewer to receive keyboard events.
+  Viewer.prototype.Focus = function () {
+    var can = this.MainView.CanvasDiv;
+    can.focus();
+  };
+
   Viewer.prototype.SetRotatable = function (flag) {
     this.Rotatable = flag;
     if (flag) {
@@ -252,11 +258,11 @@
     }
   };
 
-    // Try to remove all global references to this viewer.
+  // Try to remove all global references to this viewer.
   Viewer.prototype.Delete = function () {
     this.Div.remove();
-        // Remove circular references too?
-        // This will probably affect all viewers.
+    // Remove circular references too?
+    // This will probably affect all viewers.
     $(document.body).off('mouseup.viewer');
     this.MainView.Delete();
     if (this.OverView) {
