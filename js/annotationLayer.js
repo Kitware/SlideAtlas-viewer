@@ -1030,7 +1030,7 @@
     if (this.ActiveWidget && this.ActiveWidget.HandleTouchPan) {
       return this.ActiveWidget.HandleTouchPan(event);
     }
-    return !this.ActiveWidget;
+    return true;
   };
 
   AnnotationLayer.prototype.HandleTouchPinch = function (event) {
@@ -1040,7 +1040,7 @@
     if (this.ActiveWidget && this.ActiveWidget.HandleTouchPinch) {
       return this.ActiveWidget.HandleTouchPinch(event);
     }
-    return !this.ActiveWidget;
+    return true;
   };
 
   AnnotationLayer.prototype.HandleTouchEnd = function (event) {
@@ -1050,7 +1050,7 @@
     if (this.ActiveWidget && this.ActiveWidget.HandleTouchEnd) {
       return this.ActiveWidget.HandleTouchEnd(event);
     }
-    return !this.ActiveWidget;
+    return true;
   };
 
   AnnotationLayer.prototype.SetMousePositionFromEvent = function (event) {
@@ -1103,7 +1103,7 @@
     if (this.ActiveWidget && this.ActiveWidget.HandleDoubleClick) {
       return this.ActiveWidget.HandleDoubleClick(event);
     }
-    return !this.ActiveWidget;
+    return true;
   };
 
   AnnotationLayer.prototype.HandleClick = function (event) {

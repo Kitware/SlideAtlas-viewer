@@ -993,7 +993,7 @@
       var cy = this.RectSet.Centers[(rectIdx << 1) + 1];
       var dx = Math.abs(cx - pt[0]);
       var dy = Math.abs(cy - pt[1]);
-      if (dx < w / 2 && dy < h / 2 && confThresh < conf) {
+      if (dx < w / 2 && dy < h / 2 && confThresh <= conf) {
         var dist = Math.max(dx, dy);
         if (!best || dist <= best.dist) {
           best = {dist: dist,

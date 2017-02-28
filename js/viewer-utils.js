@@ -2908,6 +2908,55 @@
     }
   }
 
+  // ==============================================================================
+  // Non jquery api
+  // Give any div the option to go fullscreen. This returns a jquery
+  // reference to the full screen button so the user can position in.
+  // The user can even choose their own image for the button.
+  // TODO: callbacks for start and stop full screen.
+  var SAFullScreenButton = function (parent) {
+    var fullScreenButton = $('<img>')
+        .appendTo(parent)
+        .prop('title', 'full screen')
+        .attr('src', SA.ImagePathUrl + 'fullScreen32.png')
+        .css({'position': 'absolute',
+          'top': '2px',
+          'left': '2px',
+          'z-index': '100'});
+    // Attach variables to the dom button
+    var self = fullScreenButton[0];
+    fullScreenButton.click(function () {
+      // varible 'this' is probably the same as 'self' here.
+      self.saved_height = parent.css('height');
+      parent.css({'height':'100%'});
+      $(self).hide();
+      $(window).trigger('resize');
+      var elem = parent[0];
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+      } else if (elem.mozRequestFullScreen) {
+        elem.mozRequestFullScreen();
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      }
+    });
+
+    // detect when we leave full screen.
+    parent.bind(
+        'webkitfullscreenchange mozfullscreenchange fullscreenchange',
+        function (e) {
+          var state = document.fullScreen || document.mozFullScreen ||
+                document.webkitIsFullScreen;
+          if (!state) {
+            $(self).show();
+            parent.css({'height':self.saved_height});
+          }
+        });
+    return fullScreenButton;
+  };
+
 // Args: not used
   jQuery.prototype.saFullHeight = function (args) {
     return SAFullHeight(this, args);
@@ -3874,4 +3923,5 @@
   SA.ResizePanel = ResizePanel;
   SA.SAFullHeight = SAFullHeight;
   SA.SAViewer = SAViewer;
+  SA.SAFullScreenButton = SAFullScreenButton;
 })();
