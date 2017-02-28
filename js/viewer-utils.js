@@ -1,3 +1,4 @@
+
 // ==============================================================================
 // saElement: borders, shadow, drag and resize
 // saRectangle: BackgroundColor / gradient.
@@ -2918,11 +2919,13 @@
     var fullScreenButton = $('<img>')
         .appendTo(parent)
         .prop('title', 'full screen')
+        .addClass('sa-view-button')
         .attr('src', SA.ImagePathUrl + 'fullScreen32.png')
         .css({'position': 'absolute',
-          'top': '2px',
-          'left': '2px',
-          'z-index': '100'});
+              'height':'24px',
+              'top': '2px',
+              'left': '2px',
+              'z-index': '100'});
     // Attach variables to the dom button
     var self = fullScreenButton[0];
     fullScreenButton.click(function () {
@@ -2952,6 +2955,7 @@
           if (!state) {
             $(self).show();
             parent.css({'height':self.saved_height});
+            $(window).trigger('resize');
           }
         });
     return fullScreenButton;
