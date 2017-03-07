@@ -2382,7 +2382,8 @@
     if (!this.InteractionEnabled) { return true; }
 
     // Let the annotation layers have first dibs on processing the event.
-    for (var i = 0; i < this.Layers.length; ++i) {
+    var i;
+    for (i = 0; i < this.Layers.length; ++i) {
       var layer = this.Layers[i];
       if (layer.HandleKeyUp && !layer.HandleKeyUp(event)) {
         return false;
@@ -2391,7 +2392,7 @@
 
     // Key events are not going first to layers like mouse events.
     // Give layers a change to process them.
-    for (var i = 0; i < this.Layers.length; ++i) {
+    for (i = 0; i < this.Layers.length; ++i) {
       if (this.Layers[i].HandleKeyUp && !this.Layers[i].HandleKeyUp(event)) {
         return false;
       }

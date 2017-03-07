@@ -659,11 +659,11 @@
     // Scale widget is unique. Deal with it separately so it is not
     // saved with the notes.
     this.ScaleWidget = new SAM.ScaleWidget(this);
-  };
+  }
 
   // Annotation layers ussualy let the viewer receive the events, and the
   // forward them to this layer.  Whey they handle the events separately, I
-  // could never get the key and scroll events to stop propagation 
+  // could never get the key and scroll events to stop propagation
   // (like "preventDefault"). This method is not used, but I am leaving it
   // because the layer can be created without a viewer.
   AnnotationLayer.prototype.BindEvents = function () {

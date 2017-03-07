@@ -1,6 +1,3 @@
-
-
-
 // ==============================================================================
 // saElement: borders, shadow, drag and resize
 // saRectangle: BackgroundColor / gradient.
@@ -2922,14 +2919,15 @@
     var openCloseIcon = $('<img>')
       .appendTo(labelDiv)
       .attr('src', SA.ImagePathUrl + 'plus.png');
-    var label = $('<span>')
+    var labelSpan = $('<span>')
       .appendTo(labelDiv)
       .css({'padding-left': '5px'})
       .text(label);
     var contents = $('<div>')
       .appendTo(parent)
-      .css({'display': 'block',
-            'padding-left':'17px'})
+      .css({
+        'display': 'block',
+        'padding-left': '17px'})
       .hide();
     var open = false;
     // Hack?  Still trying to combine objects with jquery api.
@@ -2953,9 +2951,9 @@
       openCloseIcon.attr('src', SA.ImagePathUrl + 'plus.png');
     };
     contents[0].getLabel = function () {
-      return label;
+      return labelSpan;
     };
-    openCloseIcon.click(function() {
+    openCloseIcon.click(function () {
       if (open) {
         contents[0].close();
       } else {
@@ -2977,9 +2975,10 @@
         .prop('title', 'full screen')
         .addClass('sa-view-button')
         .attr('src', SA.ImagePathUrl + 'fullScreen32.png')
-        .css({'position': 'absolute',
-              'height':'24px',
-              'z-index': '100'});
+        .css({
+          'position': 'absolute',
+          'height': '24px',
+          'z-index': '100'});
     // Attach variables to the dom button
     var self = fullScreenButton[0];
     fullScreenButton.click(function () {
@@ -2996,9 +2995,9 @@
       } else if (elem.webkitRequestFullscreen) {
         elem.webkitRequestFullscreen();
       }
-      //var h = screen.height;
-      //parent.css({'height':h+'px'});
-      parent.css({'height':'100%'});
+      // var h = screen.height;
+      // parent.css({'height':h+'px'});
+      parent.css({'height': '100%'});
       $(window).trigger('resize');
     });
 
@@ -3010,7 +3009,7 @@
                 document.webkitIsFullScreen;
           if (!state) {
             $(self).show();
-            parent.css({'height':self.saved_height});
+            parent.css({'height': self.saved_height});
             $(window).trigger('resize');
           }
         });

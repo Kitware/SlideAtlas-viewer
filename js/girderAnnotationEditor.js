@@ -43,8 +43,9 @@
     var numClasses = classNames.length;
     this.Classes = [];
     for (var i = 0; i < numClasses; ++i) {
-      var classObj = {label: classNames[i],
-                      index:i};
+      var classObj = {
+        label: classNames[i],
+        index: i};
       this.Classes.push(classObj);
       // assign colors to the labels
       // detections will be yellow
@@ -53,7 +54,7 @@
         classObj.color = '#FFFF00';
       } else if (i === 1) { // Second (false positive) is red
         classObj.color = '#FF0000';
-      } else if (i == 2) { // last (true positive) is green
+      } else if (i === 2) { // last (true positive) is green
         classObj.color = '#00FF00';
       } else {
         // the rest will range from purple to cyan
@@ -66,12 +67,12 @@
 
   GirderAnnotationEditor.prototype.RequestAnnotationFromName = function (classObj) {
     if (!window.girder) {
-      window.alert("Could not find girder client");
+      window.alert('Could not find girder client');
       return;
     }
     var self = this;
     girder.rest.restRequest({
-      path: 'annotation?itemId='+this.ItemId+'&name='+classObj.label+'&limit=1',
+      path: 'annotation?itemId=' + this.ItemId + '&name=' + classObj.label + '&limit=1',
       method: 'GET'
     }).done(function (data) {
       if (data.length > 0) {
@@ -80,8 +81,9 @@
         self.RequestAnnotationFromId(classObj);
       } else {
         // Annotation does not exist yet.  Make it.
-        var annot = {'elements': [],
-                     'annot.name':  classObj.label};
+        var annot = {
+          'elements': [],
+          'annot.name': classObj.label};
         // Make a new annotation in the database.
         girder.rest.restRequest({
           path: 'annotation?itemId=' + self.ItemId,
@@ -91,7 +93,7 @@
         }).done(function (retAnnot) {
           // This has the girder id.
           classObj.annotation_id = retAnnot['_id'];
-          self.LoadAnnotation(retAnnot, classObj);          
+          self.LoadAnnotation(retAnnot, classObj);
         });
       }
     });
@@ -99,7 +101,7 @@
 
   GirderAnnotationEditor.prototype.RequestAnnotationFromId = function (classObj) {
     if (!window.girder) {
-      window.alert("Could not find girder client");
+      window.alert('Could not find girder client');
       return;
     }
     var self = this;
@@ -168,8 +170,8 @@
   // Use the last size, or one from the active widgets.
   // Limit by sensible sizes for the viewer.
   GirderAnnotationEditor.prototype.GetSquareSize = function () {
-    //if (localStorage.GirderAnnotationEditorDefaults) {
-    //  var defaults = JSON.parse(localStorage.GirderAnnotationEditorDefaults);
+    // if (localStorage.GirderAnnotationEditorDefaults) {
+    //   var defaults = JSON.parse(localStorage.GirderAnnotationEditorDefaults);
     var size = 64;
     if (this.SquareSize) {
       // Default to the last size applied
@@ -268,7 +270,7 @@
       return true;
     }
     var rectIdx = this.HighlightedRect.idx;
-    if (rectIdx == -1) {
+    if (rectIdx === -1) {
       return true;
     }
 
@@ -351,11 +353,8 @@
   // keydown determines the label.
   GirderAnnotationEditor.prototype.HandleKeyDown = function (event) {
     var rectIdx = this.HighlightedRect.idx;
-    var rectSet;
     if (rectIdx > -1) {
       // A rectangle is highlighted
-      var rectWidget = this.HighlightedRect.widget;
-      rectSet = rectWidget.Shape;
       // Up and down arrows make the annotation large and smaller.
       // Ignore rebuilding the hash for now.
       if (event.keyCode === 38) { // Up arrow
@@ -617,7 +616,7 @@
     if (classIdx >= 0 && classIdx < this.Classes.length) {
       rectWidget = this.Classes[classIdx].widget;
       rectSet = rectWidget.Shape;
-      var rectIdx = rectSet.AddRectangle(pt, rectSize, rectSize);
+      rectIdx = rectSet.AddRectangle(pt, rectSize, rectSize);
       rectSet.Labels[rectIdx] = classLabel;
       // incrementally update the hash here.
       rectWidget.Hash.Add(pt, rectSize, rectSize, rectIdx);
@@ -698,10 +697,11 @@
     $('<div>')
       .appendTo(confWrapper)
       .html('Confidence')
-      .css({ 'float': 'right',
-             'position': 'relative',
-             'left': '-50%',
-             'text-align': 'left'});
+      .css({
+        'float': 'right',
+        'position': 'relative',
+        'left': '-50%',
+        'text-align': 'left'});
     $('<div>')
       .appendTo(confWrapper)
       .html('100%')
@@ -714,70 +714,70 @@
     }
 
     // Instructions
-    var instructions = $('<h4>')
+    $('<h4>')
       .appendTo(parent)
-      .text("Instructions");
+      .text('Instructions');
     var instructionsUL = $('<ul>')
       .appendTo(parent);
     var browsingLI = $('<li>')
       .appendTo(instructionsUL)
-      .text("Browsing");
+      .text('Browsing');
     var browsingUL = $('<ul>')
       .appendTo(browsingLI);
     $('<li>')
       .appendTo(browsingUL)
-      .text("Arrow keys: pan screen");
+      .text('Arrow keys: pan screen');
     $('<li>')
       .appendTo(browsingUL)
-      .text("0-9 keys: change class");
+      .text('0-9 keys: change class');
     $('<li>')
       .appendTo(browsingUL)
-      .text("Left mouse click: new square");
+      .text('Left mouse click: new square');
     $('<li>')
       .appendTo(browsingUL)
-      .text("Left mouse drag: pan");
+      .text('Left mouse drag: pan');
     $('<li>')
       .appendTo(browsingUL)
-      .text("Scroll wheel: zoom");
+      .text('Scroll wheel: zoom');
     $('<li>')
       .appendTo(browsingUL)
-      .text("Mouse hover: select square");
+      .text('Mouse hover: select square');
 
     var selectedLI = $('<li>')
       .appendTo(instructionsUL)
-      .text("Selected");
+      .text('Selected');
     var selectedUL = $('<ul>')
       .appendTo(selectedLI);
     $('<li>')
       .appendTo(selectedUL)
-      .text("Delete key: delete square");
+      .text('Delete key: delete square');
     $('<li>')
       .appendTo(selectedUL)
-      .text("Up arrow key: bigger square");
+      .text('Up arrow key: bigger square');
     $('<li>')
       .appendTo(selectedUL)
-      .text("Down arrow key: smaller square");
+      .text('Down arrow key: smaller square');
     $('<li>')
       .appendTo(selectedUL)
-      .text("Left mouse click: recenter square");
+      .text('Left mouse click: recenter square');
     $('<li>')
       .appendTo(selectedUL)
-      .text("0-9 keys: set square's class");
+      .text('0-9 keys: set square\'s class');
 
     var iteratingLI = $('<li>')
       .appendTo(instructionsUL)
-      .text("Iterating");
+      .text('Iterating');
     var iteratingUL = $('<ul>')
       .appendTo(iteratingLI);
     $('<li>')
       .appendTo(iteratingUL)
-      .text("Right arrow key: advance to next square");
+      .text('Right arrow key: advance to next square');
     $('<li>')
       .appendTo(iteratingUL)
-      .text("Left arrow key: back to previos square");
+      .text('Left arrow key: back to previos square');
     $('<li>')
       .appendTo(iteratingUL)
-      .text("0-9 keys: set current or selected square's class");
+      .text('0-9 keys: set current or selected square\'s class');
   };
 
   GirderAnnotationEditor.prototype.MakeClassButton = function (classContainer, index) {
@@ -816,7 +816,7 @@
   };
 
   GirderAnnotationEditor.prototype.CheckIteratorVisibility = function () {
-    if ( ! this.IteratorClass || index < 0) {
+    if (!this.IteratorClass || index < 0) {
       return;
     }
     // In case the first is not visible.
@@ -845,7 +845,7 @@
     viewer.ZoomTarget = 500;
     this.IteratorClass = this.Classes[this.ActiveClassIndex];
     if (this.IteratorClass.widget.Shape.GetLength() < 1) {
-      window.alert("No annotations in " + this.IteratorClass.label);
+      window.alert('No annotations in ' + this.IteratorClass.label);
       this.IteratorClass = undefined;
       return;
     }
@@ -866,7 +866,7 @@
     } else {
       // Not interating yet:  Start action
       this.Start();
-    }       
+    }
   };
 
   // Move labeled rects in detections to classes.
@@ -1008,7 +1008,7 @@
   };
 
   SpatialHash.prototype.Add = function (center, w, h, idx) {
-    var x,y;
+    var x, y;
     x = center[0] - (w / 2);
     var col1 = Math.floor((x - this.Origin[0]) / this.BinSize);
     col1 = Math.max(Math.min(col1, this.XDim - 1), 0);
@@ -1068,11 +1068,12 @@
       if (dx < w / 2 && dy < h / 2 && confThresh <= conf) {
         var dist = Math.max(dx, dy);
         if (!best || dist <= best.dist) {
-          best = {dist: dist,
-                  index: rectIdx,
-                  center: [cx, cy],
-                  width: w,
-                  height: h};
+          best = {
+            dist: dist,
+            index: rectIdx,
+            center: [cx, cy],
+            width: w,
+            height: h};
         }
       }
     }
