@@ -11,22 +11,74 @@
 (function () {
   'use strict';
 
+  // Replace Layer
+  function GalleryView (parent, itemId, classObj) {
+    this.ItemId = itemId;
+    this.ClassObj = classObj;
+    // Create a label for a name.
+    this.Label = $('<div>')
+      .appendTo(parent)
+      .text(classObj.label);
+    // Create a div for the gallery
+    this.Gallery = $('<div>')
+      .appendTo(parent)
+      .css({
+        'border': '1px solid #CCC',
+        'width': '100%'});
+    this.Label ........
+
+
+
+    var rectSet = classObj.widget.Shape;
+    for (var i = 0; i < rectSet.Widths.length; ++i) {
+      this.MakeTileView(rectSet, i);
+    }
+
+    
+
+
+  };
+
+  GalleryView.prototype.MakeTileView = function (rectSet, idx) {
+    var cx = rectSet.Centers[i << 2];
+    var cy = rectSet.Centers[(i << 2) + 1];
+    var h = rectSet.Heights[i];
+    var w = rectSet.Widths[i];
+    $('<img>')
+      .appendTo(this.Gallery)
+      .addClass("img-view")
+      .css({'padding':'3px',
+            'height':'64px',
+            'float':'left'})
+      .attr("src", "/api/v1/file/"+itemId+"/download");
+  };
+
+
+
+  //============================================================================
+  // making the widget always active.
+  // Two states
+  var WAITING = 0;
+  var ITERATING = 1;
+
   // action states
   var KEY_UP = 0;
   var KEY_DOWN = 1;
   var KEY_USED_ADVANCE = 2;
   var KEY_USED_NO_ADVANCE = 3;
 
-  function GirderAnnotationEditor (parent, layer, itemId, classes) {
+  function GirderAnnotationGalleryView (parent, layer, itemId, classes) {
     this.ActiveClassIndex = 0;
     this.Layer = layer;
     this.ItemId = itemId;
     this.CreateClasses(classes);
 
+    this.InteractionState = WAITING;
+
     // Combined key click action.
     this.ActionState = KEY_UP;
 
-    this.InitializeGui(parent, 'GirderAnnotationEditor');
+    this.InitializeGui(parent, 'GirderAnnotationGalleryView');
 
     this.Layer.AddWidget(this);
     // Mode: stepping through ( and processing events).
@@ -39,7 +91,7 @@
     this.SetActiveClassIndex(0);
   }
 
-  GirderAnnotationEditor.prototype.CreateClasses = function (classNames) {
+  GirderAnnotationGalleryView.prototype.CreateClasses = function (classNames) {
     var numClasses = classNames.length;
     this.Classes = [];
     for (var i = 0; i < numClasses; ++i) {
@@ -64,56 +116,34 @@
     }
   };
 
-  GirderAnnotationEditor.prototype.RequestAnnotationFromName = function (classObj) {
-    if (!window.girder) {
-      window.alert("Could not find girder client");
-      return;
-    }
+  GirderAnnotationGalleryView.prototype.RequestAnnotationFromName = function (classObj) {
     var self = this;
     girder.rest.restRequest({
       path: 'annotation?itemId='+this.ItemId+'&name='+classObj.label+'&limit=1',
       method: 'GET'
     }).done(function (data) {
-      if (data.length > 0) {
-        // The annotation exists.  Reuest it.
-        classObj.annotation_id = data[0]['_id'];
-        self.RequestAnnotationFromId(classObj);
-      } else {
-        // Annotation does not exist yet.  Make it.
-        var annot = {'elements': [],
-                     'annot.name':  classObj.label};
-        // Make a new annotation in the database.
-        girder.rest.restRequest({
-          path: 'annotation?itemId=' + self.ItemId,
-          method: 'POST',
-          contentType: 'application/json',
-          data: JSON.stringify(annot)
-        }).done(function (retAnnot) {
-          // This has the girder id.
-          classObj.annotation_id = retAnnot['_id'];
-          self.LoadAnnotation(retAnnot, classObj);          
-        });
-      }
+      classObj.annotation_id = data[0]['_id'];
+      self.RequestAnnotationFromId(classObj);
     });
   };
 
-  GirderAnnotationEditor.prototype.RequestAnnotationFromId = function (classObj) {
-    if (!window.girder) {
-      window.alert("Could not find girder client");
-      return;
-    }
+  GirderAnnotationGalleryView.prototype.RequestAnnotationFromId = function (classObj) {
     var self = this;
-    girder.rest.restRequest({
-      path: 'annotation/' + classObj.annotation_id,
-      method: 'GET',
-      contentType: 'application/json'
-    }).done(function (data) {
-      self.LoadAnnotation(data, classObj);
-    });
+    if (window.girder) {
+      girder.rest.restRequest({
+        path: 'annotation/' + classObj.annotation_id,
+        method: 'GET',
+        contentType: 'application/json'
+      }).done(function (data) {
+        self.LoadAnnotation(data, classObj);
+      });
+    } else {
+      alert('No girder');
+    }
   };
 
   // TODO: Share this code (to parse girder data) with girderWidget.
-  GirderAnnotationEditor.prototype.LoadAnnotation = function (data, classObj) {
+  GirderAnnotationGalleryView.prototype.LoadAnnotation = function (data, classObj) {
     // Used for saving the annotation back to girder.
     classObj.annotation = data.annotation;
 
@@ -167,9 +197,9 @@
 
   // Use the last size, or one from the active widgets.
   // Limit by sensible sizes for the viewer.
-  GirderAnnotationEditor.prototype.GetSquareSize = function () {
-    //if (localStorage.GirderAnnotationEditorDefaults) {
-    //  var defaults = JSON.parse(localStorage.GirderAnnotationEditorDefaults);
+  GirderAnnotationGalleryView.prototype.GetSquareSize = function () {
+    //if (localStorage.GirderAnnotationGalleryViewDefaults) {
+    //  var defaults = JSON.parse(localStorage.GirderAnnotationGalleryViewDefaults);
     var size = 64;
     if (this.SquareSize) {
       // Default to the last size applied
@@ -202,7 +232,7 @@
   };
 
   // Returns true if it was a valid class index.
-  GirderAnnotationEditor.prototype.SetActiveClassIndex = function (idx) {
+  GirderAnnotationGalleryView.prototype.SetActiveClassIndex = function (idx) {
     if (idx < 0 || idx >= this.Classes.length) {
       return false;
     }
@@ -219,12 +249,12 @@
     return false;
   };
 
-  GirderAnnotationEditor.prototype.GetActive = function () {
+  GirderAnnotationGalleryView.prototype.GetActive = function () {
     // return this.IteratorIndex > -1;
     return true;
   };
 
-  GirderAnnotationEditor.prototype.Draw = function (view) {
+  GirderAnnotationGalleryView.prototype.Draw = function (view) {
     for (var i = 0; i < this.Classes.length; ++i) {
       if (this.Classes[i].widget) {
         this.Classes[i].widget.Draw(view);
@@ -233,7 +263,7 @@
   };
 
   // Highlight on hover.
-  GirderAnnotationEditor.prototype.HandleMouseMove = function (event) {
+  GirderAnnotationGalleryView.prototype.HandleMouseMove = function (event) {
     if (event.which !== 0) { return true; }
     var confThresh = this.GetConfidenceThreshold();
     var cam = this.Layer.GetCamera();
@@ -261,12 +291,7 @@
   };
 
   // Make the annotation larger and smaller with the mouse wheel.
-  GirderAnnotationEditor.prototype.HandleMouseWheel = function (event) {
-    if (!this.IteratorClass) {
-      // I acutally do not link useing the scroll wheel to resize the
-      // anntoations. Restrict this feature to interating for now.
-      return true;
-    }
+  GirderAnnotationGalleryView.prototype.HandleMouseWheel = function (event) {
     var rectIdx = this.HighlightedRect.idx;
     if (rectIdx == -1) {
       return true;
@@ -275,6 +300,12 @@
     // A rectangle is highlighted
     var rectWidget = this.HighlightedRect.widget;
     var rectSet = rectWidget.Shape;
+
+    // Lets try changing the center to the mouse position too.
+    //var cam = this.Layer.GetCamera();
+    //var pt = cam.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
+    //rectSet.Centers[rectIdx << 1] = pt[0];
+    //rectSet.Centers[(rectIdx << 1) + 1] = pt[1];
 
     // We want to accumulate the target, but not the duration.
     var tmp = 0;
@@ -303,20 +334,18 @@
 
   // Stepping through the detection sequence.
   // -1 is none
-  GirderAnnotationEditor.prototype.SetIteratorIndex = function (idx) {
+  GirderAnnotationGalleryView.prototype.SetIteratorIndex = function (idx) {
     // Highlight the current
     this.SetHighlightedRect(this.IteratorClass, idx);
     this.IteratorIndex = idx;
-    if (idx === -1) {
-      this.IteratorClass = undefined;
-    }
+    this.IteratorClass = undefined;
     // Animate to put this rec in the middle of the view.
     this.UpdateActiveView();
   };
 
   // The highlighted rect (sometimes the same as the
   // iteration index / rect).
-  GirderAnnotationEditor.prototype.SetHighlightedRect = function (classObj, idx) {
+  GirderAnnotationGalleryView.prototype.SetHighlightedRect = function (classObj, idx) {
     var widget = classObj.widget;
     // No change,  just return.
     if (this.HighlightedRect && this.HighlightedRect.idx === idx && this.HighlightedRect.widget === widget) {
@@ -329,7 +358,7 @@
       this.HighlightedRect.idx = -1;
     }
 
-    if (this.IteratorClass && idx === -1) {
+    if (this.InteractionState === ITERATING && idx === -1) {
       // Unset => go back to the default current rect.
       widget = this.IteratorClass.widget;
       idx = this.IteratorIndex;
@@ -340,7 +369,7 @@
       widget.Shape.ActiveIndex = idx;
       this.HighlightedRect = {widget: widget, idx: idx};
       // A selected rect has to respond to keys that change its label.
-      this.Layer.GetViewer().Focus();
+      this.Layer.LayerDiv.focus();
     }
     this.Layer.EventuallyDraw();
   };
@@ -349,7 +378,7 @@
   // mouse click is handled before the keyup.  This is only necesary when
   // iterating.  Mouse click changes the class label and advances.  The
   // keydown determines the label.
-  GirderAnnotationEditor.prototype.HandleKeyDown = function (event) {
+  GirderAnnotationGalleryView.prototype.HandleKeyDown = function (event) {
     var rectIdx = this.HighlightedRect.idx;
     var rectSet;
     if (rectIdx > -1) {
@@ -359,28 +388,15 @@
       // Up and down arrows make the annotation large and smaller.
       // Ignore rebuilding the hash for now.
       if (event.keyCode === 38) { // Up arrow
-        // Just keep the viewew from processing the mouse down.
-        // Our action is on mouse up.
         return false;
       }
       if (event.keyCode === 40) { // Down arrow
-        // Just keep the viewew from processing the mouse down.
-        // Our action is on mouse up.
         return false;
-      }
-    }
-    // This state keeps mouse up from advancing when key is down.
-    if (this.IteratorClass) {
-      if (this.ActionState !== KEY_UP) {
-        return false;
-      }
-      if (event.keyCode > 48 && event.keyCode < 48 + this.Classes.length) {
-        this.ActionState = KEY_DOWN;
       }
     }
     var valid = this.SetActiveClassIndex(event.keyCode - 48);
         // Keep the viewer from panning on the arrows when iterating.
-    if (valid || this.IteratorClass) {
+    if (valid || this.InteractionState === ITERATING) {
       return false;
     }
 
@@ -388,12 +404,12 @@
     return true;
   };
 
-  GirderAnnotationEditor.prototype.HandleKeyUp = function (event) {
+  GirderAnnotationGalleryView.prototype.HandleKeyUp = function (event) {
     var self = this;
 
     // Handle the complex decision to adavance or not.
     // If the key only modified a click, do not advance.
-    if (this.IteratorClass) {
+    if (this.InteractionState === ITERATING) {
       // Mouse click (with key modifier) was used to add an annotation
       // outside the sequence and no advancement is necessary.
       if (this.ActionState === KEY_USED_NO_ADVANCE) {
@@ -431,8 +447,8 @@
         rectSet.Labels[rectIdx] = classLabel;
         this.Layer.EventuallyDraw();
         // Automatically move to the next, to save clicks.
-        if (this.IteratorClass &&
-            rectWidget === this.IteratorClass.widget && rectIdx === this.IteratorIndex) {
+        if (this.InteractionState === ITERATING &&
+                    rectWidget === this.IteratorClass.widget && rectIdx === this.IteratorIndex) {
           setTimeout(function () { self.ChangeCurrent(1); }, 300);
         }
         return false;
@@ -441,15 +457,15 @@
       // Up and down arrows make the annotation large and smaller.
       // Ignore rebuilding the hash for now.
       if (event.keyCode === 38) { // Up arrow
-        rectSet.Widths[rectIdx] /= 0.9;
-        rectSet.Heights[rectIdx] /= 0.9;
+        rectSet.Widths[rectIdx] /= 0.8;
+        rectSet.Heights[rectIdx] /= 0.8;
         this.SquareSize = rectSet.Widths[rectIdx];
         this.Layer.EventuallyDraw();
         return false;
       }
       if (event.keyCode === 40) { // Down arrow
-        rectSet.Widths[rectIdx] *= 0.9;
-        rectSet.Heights[rectIdx] *= 0.9;
+        rectSet.Widths[rectIdx] *= 0.8;
+        rectSet.Heights[rectIdx] *= 0.8;
         this.SquareSize = rectSet.Widths[rectIdx];
         this.Layer.EventuallyDraw();
         return false;
@@ -464,8 +480,8 @@
         var bds = this.Layer.GetViewer().GetOverViewBounds();
         rectWidget.Hash.Build(rectWidget.Shape, bds);
         // Deleted rect was in the detection set while iterating
-        if (this.IteratorClass &&
-            rectWidget === this.IteratorClass.widget) {
+        if (this.InteractionState === ITERATING &&
+                    rectWidget === this.IteratorClass.widget) {
           // If we deleted a rect before the current, ...
           if (rectIdx < this.IteratorIndex) {
             this.SetIteratorIndex(this.IteratorIndex - 1);
@@ -484,7 +500,7 @@
     }
 
     // Forward and backward.
-    if (this.IteratorClass) {
+    if (this.InteractionState === ITERATING) {
       rectSet = this.IteratorClass.widget.Shape;
       var index = this.IteratorIndex;
       if (event.keyCode === 40) {
@@ -515,9 +531,8 @@
   };
 
   // Animate to the new current rect.
-  GirderAnnotationEditor.prototype.UpdateActiveView = function () {
-    if (this.IteratorClass === undefined ||
-        this.IteratorClass.widget === undefined) {
+  GirderAnnotationGalleryView.prototype.UpdateActiveView = function () {
+    if (this.IteratorClass.widget === undefined) {
       return true;
     }
 
@@ -546,7 +561,7 @@
   };
 
   // Forward = 1, backward = -1
-  GirderAnnotationEditor.prototype.ChangeCurrent = function (direction) {
+  GirderAnnotationGalleryView.prototype.ChangeCurrent = function (direction) {
     if (this.IteratorClass.widget === undefined) {
       return true;
     }
@@ -568,7 +583,7 @@
     }
   };
 
-  GirderAnnotationEditor.prototype.HandleClick = function (event) {
+  GirderAnnotationGalleryView.prototype.HandleClick = function (event) {
     if (event.which !== 1) {
       return true;
     }
@@ -596,8 +611,8 @@
         rectSet.Confidences[rectIdx] = 1.0;
         this.Layer.EventuallyDraw();
         // Advance if user clicked on the one iterating rectangle
-        if (this.IteratorClass &&
-            rectWidget === this.IteratorClass.widget && rectIdx === this.IteratorIndex) {
+        if (this.InteractionState === ITERATING &&
+                    rectWidget === this.IteratorClass.widget && rectIdx === this.IteratorIndex) {
           var self = this;
           // If a key is being used as amodified, stop advaning twice.
           // SHould we advance on the mouse up or key up?
@@ -621,8 +636,6 @@
       rectSet.Labels[rectIdx] = classLabel;
       // incrementally update the hash here.
       rectWidget.Hash.Add(pt, rectSize, rectSize, rectIdx);
-      // Make the new rect active so it will resize with events.
-      this.SetHighlightedRect(this.Classes[classIdx], rectIdx);
       this.Layer.EventuallyDraw();
       // Keep the key up (if a key is pressed) from advancing
       if (this.ActionState === KEY_DOWN) {
@@ -634,7 +647,7 @@
     return false;
   };
 
-  GirderAnnotationEditor.prototype.CheckActive = function (event) {
+  GirderAnnotationGalleryView.prototype.CheckActive = function (event) {
     // return this.GetActive();
     // Changing to alwasy acive so annotations can be changed and added
     // in the waiting state.
@@ -642,7 +655,7 @@
   };
 
   // Initialize the gui / dom
-  GirderAnnotationEditor.prototype.InitializeGui = function (parent, label) {
+  GirderAnnotationGalleryView.prototype.InitializeGui = function (parent, label) {
     var self = this;
 
     // The wrapper div that controls a single layer.
@@ -668,7 +681,7 @@
       .prop('title', 'Start sorting detections')
       // .button()
       .css({'width': '5em'})
-      .on('click', function () { self.StartStop(); });
+      .on('click', function () { self.Start(); });
     $('<button>')
       .appendTo(buttonContainer)
       .text('Save')
@@ -712,75 +725,9 @@
     for (var i = 0; i < this.Classes.length; ++i) {
       this.MakeClassButton(classContainer, i);
     }
-
-    // Instructions
-    var instructions = $('<h4>')
-      .appendTo(parent)
-      .text("Instructions");
-    var instructionsUL = $('<ul>')
-      .appendTo(parent);
-    var browsingLI = $('<li>')
-      .appendTo(instructionsUL)
-      .text("Browsing");
-    var browsingUL = $('<ul>')
-      .appendTo(browsingLI);
-    $('<li>')
-      .appendTo(browsingUL)
-      .text("Arrow keys: pan screen");
-    $('<li>')
-      .appendTo(browsingUL)
-      .text("0-9 keys: change class");
-    $('<li>')
-      .appendTo(browsingUL)
-      .text("Left mouse click: new square");
-    $('<li>')
-      .appendTo(browsingUL)
-      .text("Left mouse drag: pan");
-    $('<li>')
-      .appendTo(browsingUL)
-      .text("Scroll wheel: zoom");
-    $('<li>')
-      .appendTo(browsingUL)
-      .text("Mouse hover: select square");
-
-    var selectedLI = $('<li>')
-      .appendTo(instructionsUL)
-      .text("Selected");
-    var selectedUL = $('<ul>')
-      .appendTo(selectedLI);
-    $('<li>')
-      .appendTo(selectedUL)
-      .text("Delete key: delete square");
-    $('<li>')
-      .appendTo(selectedUL)
-      .text("Up arrow key: bigger square");
-    $('<li>')
-      .appendTo(selectedUL)
-      .text("Down arrow key: smaller square");
-    $('<li>')
-      .appendTo(selectedUL)
-      .text("Left mouse click: recenter square");
-    $('<li>')
-      .appendTo(selectedUL)
-      .text("0-9 keys: set square's class");
-
-    var iteratingLI = $('<li>')
-      .appendTo(instructionsUL)
-      .text("Iterating");
-    var iteratingUL = $('<ul>')
-      .appendTo(iteratingLI);
-    $('<li>')
-      .appendTo(iteratingUL)
-      .text("Right arrow key: advance to next square");
-    $('<li>')
-      .appendTo(iteratingUL)
-      .text("Left arrow key: back to previos square");
-    $('<li>')
-      .appendTo(iteratingUL)
-      .text("0-9 keys: set current or selected square's class");
   };
 
-  GirderAnnotationEditor.prototype.MakeClassButton = function (classContainer, index) {
+  GirderAnnotationGalleryView.prototype.MakeClassButton = function (classContainer, index) {
     var self = this;
     var classObj = this.Classes[index];
     classObj.gui = $('<div>')
@@ -790,7 +737,7 @@
             .click(function () { self.SetActiveClassIndex(index); });
   };
 
-  GirderAnnotationEditor.prototype.UpdateHash = function () {
+  GirderAnnotationGalleryView.prototype.UpdateHash = function () {
     var bds = this.Layer.GetViewer().GetOverViewBounds();
     for (var i = 0; i < this.Classes.length; ++i) {
       var widget = this.Classes[i].widget;
@@ -798,12 +745,12 @@
     }
   };
 
-  GirderAnnotationEditor.prototype.GetConfidenceThreshold = function () {
+  GirderAnnotationGalleryView.prototype.GetConfidenceThreshold = function () {
     return parseInt(this.Slider.val()) / 100.0;
   };
 
   // Confidence threshold slider.
-  GirderAnnotationEditor.prototype.SliderCallback = function () {
+  GirderAnnotationGalleryView.prototype.SliderCallback = function () {
     var visValue = this.GetConfidenceThreshold();
     for (var i = 0; i < this.Classes.length; ++i) {
       if (this.Classes[i].widget) {
@@ -815,7 +762,7 @@
     this.CheckIteratorVisibility();
   };
 
-  GirderAnnotationEditor.prototype.CheckIteratorVisibility = function () {
+  GirderAnnotationGalleryView.prototype.CheckIteratorVisibility = function () {
     if ( ! this.IteratorClass || index < 0) {
       return;
     }
@@ -823,55 +770,52 @@
     var rectSet = this.IteratorClass.widget.Shape;
     var index = this.IteratorIndex;
     var confThresh = this.GetConfidenceThreshold();
-    if (rectSet.Confidences[index] < confThresh) {
+    if (rectSet.Confidences[index] >= confThresh) {
       this.ChangeCurrent(1);
     }
   };
+  
+  GirderAnnotationGalleryView.prototype.Start = function () {
+    var self = this;
+    // Now always active
+    // this.Layer.ActivateWidget(this);
+    this.InteractionState = ITERATING;
+    this.Layer.LayerDiv.focus();
 
-  GirderAnnotationEditor.prototype.Stop = function () {
-    this.SetIteratorIndex(-1);
-    this.InteractorClass = undefined;
-    this.StartStopButton
-      .text('Start')
-      .css({'background-color': '#5F5'})
-      .prop('title', 'Start sorting detections');
-  };
-
-  // Start iterating over the selected class.
-  GirderAnnotationEditor.prototype.Start = function () {
-    this.Layer.GetViewer().Focus();
     // zoom in
     var viewer = this.Layer.GetViewer();
     viewer.ZoomTarget = 500;
+
     this.IteratorClass = this.Classes[this.ActiveClassIndex];
-    if (this.IteratorClass.widget.Shape.GetLength() < 1) {
-      window.alert("No annotations in " + this.IteratorClass.label);
-      this.IteratorClass = undefined;
-      return;
-    }
     this.SetIteratorIndex(0);
     // In case the first is not visible.
     this.CheckIteratorVisibility();
+
     this.StartStopButton
-      .text('Stop')
-      .css({'background-color': '#F55'})
-      .prop('title', 'Stop sorting detections');
+            .text('Stop')
+            .css({'background-color': '#F55'})
+            .prop('title', 'Stop sorting detections')
+            .on('click', function () { self.Stop(); });
   };
 
-  // Stop iterating.
-  GirderAnnotationEditor.prototype.StartStop = function () {
-    if (this.IteratorClass) {
-      // Currently interating: Stop action
-      this.Stop();
-    } else {
-      // Not interating yet:  Start action
-      this.Start();
-    }       
+  GirderAnnotationGalleryView.prototype.Stop = function () {
+    var self = this;
+    // this.Layer.DeactivateWidget(this);
+    this.InteractiveState = WAITING;
+    this.SetIteratorIndex(-1);
+    // if (this.IteratorClass.widget) {
+    //    this.IteratorClass.widget.Shape.ActiveIndex = -1;
+    // }
+    this.StartStopButton
+            .text('Start')
+            .css({'background-color': '#5F5'})
+            .prop('title', 'Start sorting detections')
+            .on('click', function () { self.Start(); });
   };
 
   // Move labeled rects in detections to classes.
   // Called before annotations are saved to the database
-  GirderAnnotationEditor.prototype.SplitDetections = function () {
+  GirderAnnotationGalleryView.prototype.SplitDetections = function () {
     // Build an object to make indexing classes easier.
     var shapes = {};
     for (var i = 0; i < this.Classes.length; ++i) {
@@ -880,7 +824,6 @@
       // Best way to deal with the shuffle.
       this.Classes[i].newRectSet = new SAM.RectSet();
       this.Classes[i].newRectSet.LabelColors = this.Classes[i].widget.Shape.LabelColors;
-      this.Classes[i].newRectSet.Threshold = this.Classes[i].widget.Shape.Threshold;
     }
 
     for (i = 0; i < this.Classes.length; ++i) {
@@ -902,7 +845,7 @@
     this.UpdateHash();
   };
 
-  GirderAnnotationEditor.prototype.Save = function () {
+  GirderAnnotationGalleryView.prototype.Save = function () {
     this.SplitDetections();
     var annotation;
 
@@ -926,7 +869,7 @@
 
   // Converts rectSetWidget into girder annotation elements.
   // returns an elements array.
-  GirderAnnotationEditor.prototype.RectSetToGirderElements = function (rectSetWidget) {
+  GirderAnnotationGalleryView.prototype.RectSetToGirderElements = function (rectSetWidget) {
     var returnElements = [];
 
     var widget = rectSetWidget.Serialize();
@@ -946,7 +889,7 @@
 
   // Now we are always active.  We have interaction state === ITERATING to
   // indicate cycling through annotations one by one.
-  GirderAnnotationEditor.prototype.SetActive = function (active) {
+  GirderAnnotationGalleryView.prototype.SetActive = function (active) {
     if (active === this.Active) {
       return;
     }
@@ -954,7 +897,7 @@
     this.Layer.EventuallyDraw();
   };
 
-  GirderAnnotationEditor.prototype.SetCursorColor = function (element, color) {
+  GirderAnnotationGalleryView.prototype.SetCursorColor = function (element, color) {
     // create off-screen canvas
     var cursor = document.createElement('canvas');
     var ctx = cursor.getContext('2d');
@@ -983,7 +926,7 @@
     element[0].style.cursor = 'url(' + cursor.toDataURL() + '), auto';
   };
 
-  SAM.GirderAnnotationEditor = GirderAnnotationEditor;
+  SAM.GirderAnnotationGalleryView = GirderAnnotationGalleryView;
 
   // 2d
   // I am extending the annotations from simple points to rectangles with
@@ -1065,7 +1008,7 @@
       var cy = this.RectSet.Centers[(rectIdx << 1) + 1];
       var dx = Math.abs(cx - pt[0]);
       var dy = Math.abs(cy - pt[1]);
-      if (dx < w / 2 && dy < h / 2 && confThresh <= conf) {
+      if (dx < w / 2 && dy < h / 2 && confThresh < conf) {
         var dist = Math.max(dx, dy);
         if (!best || dist <= best.dist) {
           best = {dist: dist,

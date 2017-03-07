@@ -1,4 +1,6 @@
 
+
+
 // ==============================================================================
 // saElement: borders, shadow, drag and resize
 // saRectangle: BackgroundColor / gradient.
@@ -2911,6 +2913,60 @@
 
   // ==============================================================================
   // Non jquery api
+  // Building block for an accordian viewer.
+  // TODO: open and close callbacks.
+  var saAccordianDiv = function (parent, label) {
+    var labelDiv = $('<div>')
+      .appendTo(parent)
+      .css({'display': 'block'});
+    var openCloseIcon = $('<img>')
+      .appendTo(labelDiv)
+      .attr('src', SA.ImagePathUrl + 'plus.png');
+    var label = $('<span>')
+      .appendTo(labelDiv)
+      .css({'padding-left': '5px'})
+      .text(label);
+    var contents = $('<div>')
+      .appendTo(parent)
+      .css({'display': 'block',
+            'padding-left':'17px'})
+      .hide();
+    var open = false;
+    // Hack?  Still trying to combine objects with jquery api.
+    // I want to return the jquery  reference, but also have methods.
+    // Attach methods to the dom object.
+    contents[0].open = function () {
+      open = true;
+      contents.slideDown();
+      openCloseIcon.attr('src', SA.ImagePathUrl + 'minus.png');
+      if (this.openCallback) {
+        this.openCallback();
+      }
+    };
+    contents[0].setOpenCallback = function (callback) {
+      this.openCallback = callback;
+    };
+
+    contents[0].close = function () {
+      open = false;
+      contents.slideUp();
+      openCloseIcon.attr('src', SA.ImagePathUrl + 'plus.png');
+    };
+    contents[0].getLabel = function () {
+      return label;
+    };
+    openCloseIcon.click(function() {
+      if (open) {
+        contents[0].close();
+      } else {
+        contents[0].open();
+      }
+    });
+    return contents;
+  };
+
+  // ==============================================================================
+  // Non jquery api
   // Give any div the option to go fullscreen. This returns a jquery
   // reference to the full screen button so the user can position in.
   // The user can even choose their own image for the button.
@@ -2923,17 +2979,13 @@
         .attr('src', SA.ImagePathUrl + 'fullScreen32.png')
         .css({'position': 'absolute',
               'height':'24px',
-              'top': '2px',
-              'left': '2px',
               'z-index': '100'});
     // Attach variables to the dom button
     var self = fullScreenButton[0];
     fullScreenButton.click(function () {
       // varible 'this' is probably the same as 'self' here.
       self.saved_height = parent.css('height');
-      parent.css({'height':'100%'});
       $(self).hide();
-      $(window).trigger('resize');
       var elem = parent[0];
       if (elem.requestFullscreen) {
         elem.requestFullscreen();
@@ -2944,6 +2996,10 @@
       } else if (elem.webkitRequestFullscreen) {
         elem.webkitRequestFullscreen();
       }
+      //var h = screen.height;
+      //parent.css({'height':h+'px'});
+      parent.css({'height':'100%'});
+      $(window).trigger('resize');
     });
 
     // detect when we leave full screen.
@@ -3928,4 +3984,5 @@
   SA.SAFullHeight = SAFullHeight;
   SA.SAViewer = SAViewer;
   SA.SAFullScreenButton = SAFullScreenButton;
+  SA.AccordianDiv = saAccordianDiv;
 })();

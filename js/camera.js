@@ -72,7 +72,7 @@ window.SAM = window.SAM || {};
     if (obj.Width) {
       this.Width = obj.Width;
     } else {
-      this.Width = this.Height * 1.62;
+      this.Width = this.Height * this.ViewportWidth / this.ViewportHeight;
     }
 
     // Width is computed from height and aspect.

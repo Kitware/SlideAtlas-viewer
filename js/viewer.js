@@ -240,7 +240,7 @@
     // Some widgets need access to the viewer.  rectSet and segment/contour
     annotationLayer1.Viewer = this;
     this.annotationWidget1 =
-            new SA.AnnotationWidget(annotationLayer1, this);
+      new SA.AnnotationWidget(annotationLayer1, this);
   }
 
   // Allow the viewer to receive keyboard events.
@@ -350,13 +350,13 @@
     this.UpdateSize();
   };
 
-    // Which is better calling Note.Apply, or viewer.SetNote?  I think this
-    // will  win.  The layer needs to have a load callback for vigilant threshold.
+  // Which is better calling Note.Apply, or viewer.SetNote?  I think this
+  // will  win.  The layer needs to have a load callback for vigilant threshold.
   Viewer.prototype.SetViewerRecord = function (viewerRecord, lockCamera) {
-        // If a widget is active, then just inactivate it.
-        // It would be nice to undo pencil strokes in the middle, but this feature will have to wait.
+    // If a widget is active, then just inactivate it.
+    // It would be nice to undo pencil strokes in the middle, but this feature will have to wait.
     if (this.ActiveWidget) {
-            // Hackish way to deactivate.
+      // Hackish way to deactivate.
       this.ActiveWidget.SetActive(false);
     }
 
@@ -381,11 +381,11 @@
         this.UpdateCamera();
       }
     } else {
-            // Just get rid of the annotations.
+      // Just get rid of the annotations.
       this.GetAnnotationLayer().Reset();
     }
 
-        // TODO: Get rid of this hack.
+    // TODO: Get rid of this hack.
     if (this.AnnotationWidget && viewerRecord.AnnotationVisibility !== undefined) {
       this.AnnotationWidget.SetVisibility(viewerRecord.AnnotationVisibility);
     }
@@ -393,20 +393,20 @@
     var annotationLayer = this.GetAnnotationLayer();
     if (annotationLayer) {
       annotationLayer.Reset();
-            // What about the other layers?
-            // Should we propagate the use of notes outside slide atlas?
-            // Probably not.  Use loading and serializing piecemeal as necessary.
+      // What about the other layers?
+      // Should we propagate the use of notes outside slide atlas?
+      // Probably not.  Use loading and serializing piecemeal as necessary.
       if (viewerRecord.Annotations) {
         annotationLayer.LoadAnnotations(viewerRecord.Annotations);
       }
-            // Load the annotations from the user note.
+      // Load the annotations from the user note.
       if (viewerRecord.UserNote) {
         var annotations = viewerRecord.UserNote.ViewerRecords[0].Annotations;
         annotationLayer.LoadAnnotations(annotations);
       }
     }
 
-        // fit the canvas to the div size.
+    // fit the canvas to the div size.
     this.UpdateSize();
   };
 
@@ -543,7 +543,6 @@
     if (!this.MainView) {
       return;
     }
-
     if (this.MainView.UpdateCanvasSize()) {
       this.EventuallyRender();
     }
@@ -1208,9 +1207,9 @@
       }
     }
 
-        // Here to trigger SA.FinishedLoadingCallbacks
+    // Here to trigger SA.FinishedLoadingCallbacks
     SA.LoadQueueUpdate();
-        // console.timeEnd("ViewerDraw");
+    // console.timeEnd("ViewerDraw");
     this.Drawing = false;
   };
 
@@ -2236,6 +2235,7 @@
            }
          );
       }
+
       return false;
     }
 
@@ -2367,6 +2367,10 @@
       if (!layer.HandleKeyDown(event)) {
         return false;
       }
+    }
+
+    if (event.keyCode === 27 && this.EscapeCallback) {
+      this.EscapeCallback();
     }
 
     return true;

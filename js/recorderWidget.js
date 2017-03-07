@@ -252,9 +252,9 @@
     }
   };
 
-    // I am not sure we need to serialize.
-    // The annotations are already in database form.
-    // Possibly we need to restrict which ivars get into the database.
+  // I am not sure we need to serialize.
+  // The annotations are already in database form.
+  // Possibly we need to restrict which ivars get into the database.
   ViewerRecord.prototype.Serialize = function () {
     var rec = {};
     rec.Image = this.Image._id;
@@ -276,87 +276,6 @@
     }
 
     return rec;
-  };
-
-    // TODO: Get rid of this in favor of Viewer::SetViewerRecord.
-  ViewerRecord.prototype.Apply = function (viewer, lockCamera) {
-    alert('ViewerRecord::Apply depricated.  Use Viewer.SetViewerRecord instead');
-        /*
-        // If a widget is active, then just inactivate it.
-        // It would be nice to undo pencil strokes in the middle, but this feature will have to wait.
-        if (viewer.ActiveWidget) {
-            // Hackish way to deactivate.
-            viewer.ActiveWidget.SetActive(false);
-        }
-
-        if (! lockCamera) {
-            viewer.Reset();
-            var cache = viewer.GetCache();
-            if ( ! cache || this.Image._id !== cache.Image._id) {
-                var newCache = SA.FindCache(this.Image);
-                viewer.SetCache(newCache);
-            }
-
-            viewer.SetOverViewBounds(this.OverviewBounds);
-
-            if (this.Camera !== undefined && this.Transform === undefined) {
-                var cameraRecord = this.Camera;
-                viewer.GetCamera().Load(cameraRecord);
-                if (viewer.OverView) {
-                    viewer.OverView.Camera.Roll = cameraRecord.Roll;
-                    viewer.OverView.Camera.ComputeMatrix();
-                }
-                viewer.UpdateZoomGui();
-            viewer.UpdateCamera();
-            }
-        } else {
-            // Just get rid of the annotations.
-            viewer.GetAnnotationLayer().Reset();
-        }
-
-        // TODO: Get rid of this hack.
-        if (viewer.AnnotationWidget && this.AnnotationVisibility !== undefined) {
-            viewer.AnnotationWidget.SetVisibility(this.AnnotationVisibility);
-        }
-
-        var annotationLayer = viewer.GetAnnotationLayer();
-        if (annotationLayer) {
-            annotationLayer.Reset();
-            // Load the primary annotations
-            if (this.Annotations !== undefined) {
-                var annotationLayer = viewer.GetAnnotationLayer();
-                if (annotationLayer) {
-                    // TODO: Fix this.  Keep actual widgets in the records / notes.
-                    // For now lets just do the easy thing and recreate all the
-                    // annotations.
-                    annotationLayer.Reset();
-                    for (var i = 0; i < this.Annotations.length; ++i) {
-                        var widget = annotationLayer.LoadWidget(this.Annotations[i]);
-                        if (! widget) {
-                            // Get rid of corrupt widgets that do not load properly
-                            this.Annotations.splice(i,1);
-                            --i;
-                        }
-                    }
-                }
-            }
-            // Load the annotations from the user note.
-            if (this.UserNote) {
-                var annotations = this.UserNote.ViewerRecords[0].Annotations;
-                for (var i = 0; i < annotations.length; ++i) {
-                    var widget = annotationLayer.LoadWidget(annotations[i]);
-                    if (! widget) {
-                        // Get rid of corrupt widgets that do not load properly
-                        annotations.splice(i,1);
-                        --i;
-                    }
-                }
-            }
-        }
-
-        // fit the canvas to the div size.
-        viewer.UpdateSize();
-        */
   };
 
   // This is a helper method to start preloading tiles for an up coming view.

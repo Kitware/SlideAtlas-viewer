@@ -330,10 +330,10 @@
       return false;
     }
 
-        // escape key (or space or enter) to turn off drawing
+    // escape key (or space or enter) to turn off drawing
     if (event.keyCode === 27 || event.keyCode === 32 || event.keyCode === 13) {
-            // Last resort.  ESC key always deactivates the widget.
-            // Deactivate.
+      // Last resort.  ESC key always deactivates the widget.
+      // Deactivate.
       this.Layer.DeactivateWidget(this);
       if (SAM.NotesWidget && !this.UserNoteFlag) { SAM.NotesWidget.MarkAsModified(); } // Hack
       if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
