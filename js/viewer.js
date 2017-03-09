@@ -290,7 +290,8 @@
         return this.Layers[i];
       }
     }
-    return null;
+
+    return this.NewAnnotationLayer();
   };
 
     // Abstracting saViewer  for viewer and dualViewWidget.
