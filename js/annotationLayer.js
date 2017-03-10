@@ -292,10 +292,10 @@
       if (color.substring(0, 1) === '#') {
         return color;
       } else if (color.substring(0, 3) === 'rgb') {
-        tmp = color.substring(4, color.length - 1).split(',');
-        color = [parseInt(tmp[0]) / 255,
-          parseInt(tmp[1]) / 255,
-          parseInt(tmp[2]) / 255];
+        var temp = color.substring(4, color.length - 1).split(',');
+        color = [parseInt(temp[0]) / 255,
+          parseInt(temp[1]) / 255,
+          parseInt(temp[2]) / 255];
       }
     }
     var hexDigits = '0123456789abcdef';

@@ -1700,6 +1700,7 @@
     var scale = 1;
     var s0 = 0;
     var s1 = 0;
+    var x, y;
     for (var i = 0; i < numTouches; ++i) {
       x = this.LastTouches[i][0] - this.LastMouseX;
       y = this.LastTouches[i][1] - this.LastMouseY;
@@ -1721,8 +1722,8 @@
     w0[0] = cam.FocalPoint[0] - w1[0];
     w0[1] = cam.FocalPoint[1] - w1[1];
         // This is the new focal point.
-    var x = w1[0] + w0[0] / scale;
-    var y = w1[1] + w0[1] / scale;
+    x = w1[0] + w0[0] / scale;
+    y = w1[1] + w0[1] / scale;
 
         // Remember the last motion to implement momentum.
     var momentumScale = (scale - 1) / dt;

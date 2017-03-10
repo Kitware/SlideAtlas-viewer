@@ -143,6 +143,7 @@
     var correlation;
     var c;
     var s;
+    var pt0, pt1;
     if (this.Correlations.length <= 1) {
       correlation = this.Correlations[0];
       this.DeltaRoll = correlation.GetRoll(idx1);
@@ -158,7 +159,6 @@
     }
 
     // Compute the average weighted correlation point for each image.
-    var pt0, pt1;
     var x, y;
     var sigma2 = sigma * sigma;
     var sumGauss = 0.0;
