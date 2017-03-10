@@ -1542,15 +1542,10 @@
 
     if (this.Touches.length === 1) {
       this.HandleTouchPan(this);
-      return;
-    }
-    if (this.Touches.length === 2) {
+    } else if (this.Touches.length === 2) {
       this.HandleTouchPinch(this);
-      return;
-    }
-    if (this.Rotatable && this.Touches.length === 3) {
+    } else if (this.Rotatable && this.Touches.length === 3) {
       this.HandleTouchRotate(this);
-      return;
     }
   };
 

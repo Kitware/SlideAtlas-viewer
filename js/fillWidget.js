@@ -203,8 +203,6 @@
         ptWorld = this.Viewer.ConvertPointViewerToWorld(x, y);
         this.Segmentation.AddNegative(ptWorld);
       }
-
-      return;
     }
   };
 
