@@ -1065,13 +1065,13 @@
   function NotesWidget (parent, display) {
     this.ModifiedCallback = null;
     this.LinkDiv;
-        // This is a hack.  I do not know when to save the camera.
-        // The save button will save the camera for the last note displayed.
-        // This may be different that the selected note because of camera links
-        // in text that do not change the text.
+    // This is a hack.  I do not know when to save the camera.
+    // The save button will save the camera for the last note displayed.
+    // This may be different that the selected note because of camera links
+    // in text that do not change the text.
     this.DisplayedNote = null;
 
-        // Popup div to display permalink.
+    // Popup div to display permalink.
     SA.LinkDiv =
             $('<div>')
             .appendTo('body')
@@ -1089,9 +1089,9 @@
             .hide()
             .mouseleave(function () { SA.LinkDiv.fadeOut(); });
 
-        // There is not option to show the link when SA.Edit is not on,
-        // so this really does nothing.  Editable is probably necessary
-        // for selection to copy.
+    // There is not option to show the link when SA.Edit is not on,
+    // so this really does nothing.  Editable is probably necessary
+    // for selection to copy.
     if (SA.Edit) {
       SA.LinkDiv.attr('contenteditable', 'true');
     }
@@ -1114,15 +1114,9 @@
             .on('dragstart', function () { return false; })
             .attr('id', 'NoteWindow');
 
-        // --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
-        // Keeps track of the current note.
-    this.NavigationWidget;
-
-        // For clearing selected GUI setting.
-    this.SelectedNote;
-
-        // GUI elements
+    // GUI elements
     this.TabbedWindow = new SA.TabbedDiv(this.Window);
     this.TextDiv = this.TabbedWindow.NewTabDiv('Text');
 
@@ -1133,9 +1127,9 @@
             .css({'padding-left': '0px'})
             .appendTo(this.LinksDiv);
 
-        // for (var i = 0; i < this.Display.GetNumberOfViewers(); ++i) {
-        //    this.Display.GetViewer(i).OnInteraction(function (){self.RecordView();});
-        // }
+    // for (var i = 0; i < this.Display.GetNumberOfViewers(); ++i) {
+    //    this.Display.GetViewer(i).OnInteraction(function (){self.RecordView();});
+    // }
 
     this.LinksDiv
             .css({'overflow': 'auto',
@@ -1144,9 +1138,9 @@
               'font-size': '18px'})
             .attr('id', 'NoteTree');
 
-        // no longer needed, but interesting: 'box-sizing': 'border-box'
+    // no longer needed, but interesting: 'box-sizing': 'border-box'
 
-        // This is the button for the links tab div.
+    // This is the button for the links tab div.
     if (SA.Edit) {
       this.AddViewButton = $('<button>')
                 .appendTo(this.LinksDiv)
@@ -1155,8 +1149,8 @@
                 .text('+ New View');
     }
 
-        // Show hidden content to non administrator.
-        // Do not show this unless not is interactive.
+    // Show hidden content to non administrator.
+    // Do not show this unless not is interactive.
     this.QuizButton = $('<div>')
             .appendTo(this.TextDiv)
             .addClass('editButton')
@@ -1170,7 +1164,7 @@
             .text('show')
             .hide();
 
-        // Now for the text tab:
+    // Now for the text tab:
     if (SA.Edit) {
             // TODO: Encapsulate this menu (used more than once)
       this.QuizDiv = $('<div>')
@@ -1228,9 +1222,9 @@
             });
   }
 
-    // TODO: THese methods do not belong in this class.
-    // Trying to save user notes quietly.
-    // Sort of hackish.
+  // TODO: THese methods do not belong in this class.
+  // Trying to save user notes quietly.
+  // Sort of hackish.
   NotesWidget.prototype.EventuallySaveUserNote = function () {
     if (this.UserNoteTimerId) {
       clearTimeout(this.UserNoteTimerId);
@@ -1247,7 +1241,7 @@
       this.SaveUserNote();
     }
   };
-    // Hackish.
+  // Hackish.
   NotesWidget.prototype.SaveUserNote = function () {
     this.UserNoteTimerId = false;
     var note = SA.notesWidget.GetCurrentNote();
@@ -1256,13 +1250,13 @@
     }
     var userNote = note.ViewerRecords[note.StartIndex].UserNote;
 
-        // TODO: Fix this hack.
-        // Make a method in display to record, the save them all.
+    // TODO: Fix this hack.
+    // Make a method in display to record, the save them all.
     if (SA && SA.display) {
-            // TODO: Fix: This will not work because previous widgets will
-            // be in both widgets, but new widgets will only be in one.
-            // I do not want to duplicate widgets in the note.
-            // for (var i = 0; i < SA.display,GetNumberOfViewers(); ++i) {
+      // TODO: Fix: This will not work because previous widgets will
+      // be in both widgets, but new widgets will only be in one.
+      // I do not want to duplicate widgets in the note.
+      // for (var i = 0; i < SA.display,GetNumberOfViewers(); ++i) {
       for (var i = 0; i < 1; ++i) {
         userNote.ViewerRecords[0].CopyAnnotations(SA.display.GetViewer(i), true);
       }
@@ -1274,7 +1268,7 @@
     }
   };
 
-    // Needed so administrators can create usernotes.
+  // Needed so administrators can create usernotes.
   NotesWidget.prototype.IsUserTextTabOpen = function () {
     if (this.TabbedWindow.GetCurrentDiv() === this.UserTextDiv) {
       return true;
@@ -1283,7 +1277,7 @@
   };
 
   NotesWidget.prototype.UpdateQuestionMode = function () {
-        // Set the question mode
+    // Set the question mode
     if (!this.RootNote) {
       return;
     }

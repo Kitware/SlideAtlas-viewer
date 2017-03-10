@@ -61,7 +61,7 @@
     this.TranslateTarget = [0.0, 0.0];
 
     this.MainView = new SA.TileView(this.Div, false);
-        // webgl for main view.
+    // webgl for main view.
     this.MainView.OutlineColor = [0, 0, 0];
     this.MainView.Camera.ZRange = [0, 1];
     this.MainView.Camera.ComputeMatrix();
