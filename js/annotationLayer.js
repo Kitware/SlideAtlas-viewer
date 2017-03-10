@@ -50,8 +50,8 @@
     return SAM.MOBILE_DEVICE;
   };
 
-    // Debugging ... not called in normal operation.
-    // Report the area for each polyline in the sequence.
+  // Debugging ... not called in normal operation.
+  // Report the area for each polyline in the sequence.
   SAM.areaSequence = function (r, g, b) {
     var pl = new SAM.Polyline();
     var vr = SA.RootNote.ViewerRecords;
@@ -73,13 +73,13 @@
       }
       areaSequence.push(area);
     }
-        // console.log(JSON.stringify(areaSequence));
+    // console.log(JSON.stringify(areaSequence));
     return areaSequence;
   };
 
-    // Debugging ... not called in normal operation.
-    // For manually moving annotations from individual slides to a stack.
-    // Remove all annotations that are not in the current view.
+  // Debugging ... not called in normal operation.
+  // For manually moving annotations from individual slides to a stack.
+  // Remove all annotations that are not in the current view.
   SAM.pruneAnnotations = function () {
     var c = SA.VIEWER1.GetCamera().FocalPoint;
     var w = SA.VIEWER1.GetCamera().GetWidth() / 2;
@@ -107,7 +107,7 @@
     return r;
   };
 
-    // Convert any color to an array [r,g,b] values 0->1
+  // Convert any color to an array [r,g,b] values 0->1
   SAM.ConvertColor = function (color) {
     if (typeof (color) === 'string' && color[0] !== '#') {
       if (color.slice(0, 5) === 'rgba(') {
@@ -118,7 +118,7 @@
         return color;
       }
 
-            // Deal with color names.
+      // Deal with color names.
       var colors = {
         'aliceblue': '#f0f8ff',
         'antiquewhite': '#faebd7',
@@ -268,7 +268,7 @@
       }
     }
 
-        // Deal with color in hex format i.e. #0000ff
+    // Deal with color in hex format i.e. #0000ff
     if (typeof (color) === 'string' && color.length === 7 && color[0] === '#') {
       var floatColor = [];
       var idx = 1;
@@ -278,11 +278,11 @@
       }
       return floatColor;
     }
-        // No other formats for now.
+    // No other formats for now.
     return color;
   };
 
-    // RGB [Float, Float, Float] to #RRGGBB string
+  // RGB [Float, Float, Float] to #RRGGBB string
   SAM.ConvertColorToHex = function (color) {
     if (typeof (color) === 'string') {
       if (color.slice(0, 5) === 'rgba(') {
@@ -314,7 +314,7 @@
     return str;
   };
 
-    // 0-f hex digit to int
+  // 0-f hex digit to int
   SAM.HexDigitToInt = function (hex) {
     if (hex === '1') {
       return 1.0;
@@ -351,7 +351,7 @@
   };
 
   SAM.ConvertColorNameToHex = function (color) {
-        // Deal with color names.
+    // Deal with color names.
     if (typeof (color) === 'string' && color[0] !== '#') {
       var colors = {
         'aliceblue': '#f0f8ff',
@@ -503,11 +503,11 @@
     return color;
   };
 
-    // length units = meters
+  // length units = meters
   window.SAM.DistanceToString = function (length) {
     var lengthStr = '';
     if (length < 0.001) {
-            // Latin-1 00B5 is micro sign
+      // Latin-1 00B5 is micro sign
       lengthStr += (length * 1e6).toFixed(2) + ' \xB5m';
     } else if (length < 0.01) {
       lengthStr += (length * 1e3).toFixed(2) + ' mm';
@@ -525,7 +525,7 @@
     var length = 0;
     lengthStr = lengthStr.trim(); // remove leading and trailing spaces.
     var len = lengthStr.length;
-        // Convert to microns
+    // Convert to microns
     if (lengthStr.substring(len - 2, len) === '\xB5m') {
       length = parseFloat(lengthStr.substring(0, len - 2)) / 1e6;
     } else if (lengthStr.substring(len - 2, len) === 'mm') {
@@ -541,7 +541,7 @@
     return length;
   };
 
-    // ConvertToMeters.
+  // ConvertToMeters.
   window.SAM.ConvertToMeters = function (distObj) {
     if (!distObj.units || distObj.units === 'Units') {
       return distObj.value;
@@ -620,8 +620,8 @@
     distObj.units = 'nm';
   };
 
-    // Pass in the viewer div.
-    // TODO: Pass the camera into the draw method.  It is shared here.
+  // Pass in the viewer div.
+  // TODO: Pass the camera into the draw method.  It is shared here.
   function AnnotationLayer (parent) {
     var self = this;
 
@@ -643,80 +643,87 @@
               self.UpdateSize();
             });
 
-        // Hack for debugging
+    // Hack for debugging
     SAM.DebugLayer = this;
 
-        // TODO: Abstract the view to a layer somehow.
+    // TODO: Abstract the view to a layer somehow.
     this.AnnotationView = new SAM.View(this.LayerDiv);
 
     this.AnnotationView.Canvas
-            .saOnResize(function () { self.UpdateCanvasSize(); });
+      .saOnResize(function () { self.UpdateCanvasSize(); });
 
     this.WidgetList = [];
     this.ActiveWidget = null;
 
     this.Visibility = true;
-        // Scale widget is unique. Deal with it separately so it is not
-        // saved with the notes.
+    // Scale widget is unique. Deal with it separately so it is not
+    // saved with the notes.
     this.ScaleWidget = new SAM.ScaleWidget(this);
-
-    var can = this.LayerDiv;
-    can.on(
-            'mousedown.viewer',
-            function (event) {
-              return self.HandleMouseDown(event);
-            });
-    can.on(
-            'mousemove.viewer',
-            function (event) {
-                // So key events go the the right viewer.
-              this.focus();
-                // Firefox does not set which for mouse move events.
-              SA.FirefoxWhich(event);
-              return self.HandleMouseMove(event);
-            });
-        // We need to detect the mouse up even if it happens outside the canvas,
-    $(document.body).on(
-            'mouseup.viewer',
-            function (event) {
-              self.HandleMouseUp(event);
-              return true;
-            });
-    can.on(
-            'wheel.viewer',
-            function (event) {
-              return self.HandleMouseWheel(event.originalEvent);
-            });
-
-        // I am delaying getting event manager out of receiving touch events.
-        // It has too many helper functions.
-    can.on(
-            'touchstart.viewer',
-            function (event) {
-              return self.HandleTouchStart(event.originalEvent);
-            });
-    can.on(
-            'touchmove.viewer',
-            function (event) {
-              return self.HandleTouchMove(event.originalEvent);
-            });
-    can.on(
-            'touchend.viewer',
-            function (event) {
-              self.HandleTouchEnd(event.originalEvent);
-              return true;
-            });
-
-        // necesary to respond to keyevents.
-    this.LayerDiv.attr('tabindex', '1');
-    can.on(
-            'keydown.viewer',
-            function (event) {
-              return self.HandleKeyDown(event);
-            });
   }
 
-    // Try to remove all global references to this viewer.
+  // Annotation layers ussualy let the viewer receive the events, and the
+  // forward them to this layer.  Whey they handle the events separately, I
+  // could never get the key and scroll events to stop propagation
+  // (like "preventDefault"). This method is not used, but I am leaving it
+  // because the layer can be created without a viewer.
+  AnnotationLayer.prototype.BindEvents = function () {
+    var can = this.LayerDiv;
+    can.on(
+      'mousedown.viewer',
+      function (event) {
+        return self.HandleMouseDown(event);
+      });
+    can.on(
+      'mousemove.viewer',
+      function (event) {
+        // So key events go the the right viewer.
+        this.focus();
+        // Firefox does not set which for mouse move events.
+        SA.FirefoxWhich(event);
+        return self.HandleMouseMove(event);
+      });
+    // We need to detect the mouse up even if it happens outside the canvas,
+    $(document.body).on(
+      'mouseup.viewer',
+      function (event) {
+        self.HandleMouseUp(event);
+        return true;
+      });
+    can.on(
+      'wheel.viewer',
+      function (event) {
+        return self.HandleMouseWheel(event.originalEvent);
+      });
+
+    // I am delaying getting event manager out of receiving touch events.
+    // It has too many helper functions.
+    can.on(
+      'touchstart.viewer',
+      function (event) {
+        return self.HandleTouchStart(event.originalEvent);
+      });
+    can.on(
+      'touchmove.viewer',
+      function (event) {
+        return self.HandleTouchMove(event.originalEvent);
+      });
+    can.on(
+      'touchend.viewer',
+      function (event) {
+        self.HandleTouchEnd(event.originalEvent);
+        return true;
+      });
+
+    // necesary to respond to keyevents.
+    this.LayerDiv.attr('tabindex', '1');
+    can.on(
+      'keydown.viewer',
+      function (event) {
+        return self.HandleKeyDown(event);
+      });
+  };
+
+  // Try to remove all global references to this viewer.
   AnnotationLayer.prototype.Delete = function () {
     this.AnnotationView.Delete();
   };
@@ -787,7 +794,14 @@
     }
   };
 
-    // Some widgets need access to the viewer.
+  // Allow the layer to receive keyboard events.
+  // TODO: If we have not bound out own events, forward focus to the viewer.
+  AnnotationLayer.prototype.Focus = function () {
+    var can = this.LayerDiv.CanvasDiv;
+    can.focus();
+  };
+
+  // Some widgets need access to the viewer.
   AnnotationLayer.prototype.GetViewer = function () {
     return this.Viewer || SA.VIEWER1;
   };
@@ -1016,7 +1030,7 @@
     if (this.ActiveWidget && this.ActiveWidget.HandleTouchPan) {
       return this.ActiveWidget.HandleTouchPan(event);
     }
-    return !this.ActiveWidget;
+    return true;
   };
 
   AnnotationLayer.prototype.HandleTouchPinch = function (event) {
@@ -1026,7 +1040,7 @@
     if (this.ActiveWidget && this.ActiveWidget.HandleTouchPinch) {
       return this.ActiveWidget.HandleTouchPinch(event);
     }
-    return !this.ActiveWidget;
+    return true;
   };
 
   AnnotationLayer.prototype.HandleTouchEnd = function (event) {
@@ -1036,7 +1050,7 @@
     if (this.ActiveWidget && this.ActiveWidget.HandleTouchEnd) {
       return this.ActiveWidget.HandleTouchEnd(event);
     }
-    return !this.ActiveWidget;
+    return true;
   };
 
   AnnotationLayer.prototype.SetMousePositionFromEvent = function (event) {
@@ -1089,7 +1103,7 @@
     if (this.ActiveWidget && this.ActiveWidget.HandleDoubleClick) {
       return this.ActiveWidget.HandleDoubleClick(event);
     }
-    return !this.ActiveWidget;
+    return true;
   };
 
   AnnotationLayer.prototype.HandleClick = function (event) {
@@ -1113,7 +1127,8 @@
     if (this.ActiveWidget && this.ActiveWidget.HandleMouseUp) {
       return this.ActiveWidget.HandleMouseUp(event);
     }
-    return !this.ActiveWidget;
+
+    return true;
   };
 
   AnnotationLayer.prototype.HandleMouseMove = function (event) {
@@ -1134,7 +1149,7 @@
       }
       // Wait to process a move until we know it will not
       // be a click.
-      return false;
+      return true;
     }
 
     // The event position is relative to the target which can be a tab on

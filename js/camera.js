@@ -8,9 +8,9 @@ window.SAM = window.SAM || {};
   'use strict';
 
   function Camera () {
-        // Better managmenet of layers and sub layers.
-        // Assign a range of the z buffer  for the view to use exclusively.
-        // The full range is -1->1.  -1 is in front.
+    // Better managmenet of layers and sub layers.
+    // Assign a range of the z buffer  for the view to use exclusively.
+    // The full range is -1->1.  -1 is in front.
     this.ZRange = [-1.0, 1.0];
     this.Roll = 0;
     this.Matrix = mat4.create();
@@ -18,18 +18,18 @@ window.SAM = window.SAM || {};
     this.Width = this.Height * 1.62;
     this.FocalPoint = [128.0 * 64.0, 128.0 * 64.0];
     this.ComputeMatrix();
-        // for drawing the view bounds.
+    // for drawing the view bounds.
     this.Points = [];
     this.Buffer = null;
     this.CreateBuffer();
     this.Mirror = false;
 
-        // Placeholders
+    // Placeholders
     this.ViewportWidth = 162;
     this.ViewportHeight = 100;
   }
 
-    // Spacing of pixels of the screen.
+  // Spacing of pixels of the screen.
   Camera.prototype.GetSpacing = function () {
     return this.GetHeight() / this.ViewportHeight;
   };
@@ -47,7 +47,7 @@ window.SAM = window.SAM || {};
 
   Camera.prototype.SetViewport = function (viewport) {
     if (10 * viewport[3] < viewport[2]) {
-            // alert("Unusual viewport " + viewport[3]);
+      // alert("Unusual viewport " + viewport[3]);
       return;
     }
     this.ViewportWidth = viewport[2];
@@ -72,22 +72,22 @@ window.SAM = window.SAM || {};
     if (obj.Width) {
       this.Width = obj.Width;
     } else {
-      this.Width = this.Height * 1.62;
+      this.Width = this.Height * this.ViewportWidth / this.ViewportHeight;
     }
 
-        // Width is computed from height and aspect.
+    // Width is computed from height and aspect.
     this.ComputeMatrix();
   };
 
-    // Roll is in Radians
-    // Rotation is in Degrees
+  // Roll is in Radians
+  // Rotation is in Degrees
   Camera.prototype.GetRotation = function () {
     return this.Roll * 180.0 / 3.1415926535;
   };
 
   Camera.prototype.GetFocalPoint = function () {
-        // Copy to avoid bugs because arrays are shared.
-        // These are nasty to find.
+    // Copy to avoid bugs because arrays are shared.
+    // These are nasty to find.
     return [this.FocalPoint[0], this.FocalPoint[1]];
   };
 
@@ -98,12 +98,12 @@ window.SAM = window.SAM || {};
     }
     this.FocalPoint[0] = fp[0];
     this.FocalPoint[1] = fp[1];
-        // Ignore z on purpose.
+    // Ignore z on purpose.
   };
 
   Camera.prototype.ConvertPointViewerToWorld = function (x, y) {
-        // Convert to world coordinate system
-        // Compute focal point from inverse overview camera.
+    // Convert to world coordinate system
+    // Compute focal point from inverse overview camera.
     x = x / this.ViewportWidth;
     y = y / this.ViewportHeight;
     x = (x * 2.0 - 1.0) * this.Matrix[15];
@@ -119,11 +119,11 @@ window.SAM = window.SAM || {};
   Camera.prototype.ConvertPointWorldToViewer = function (x, y) {
     var m = this.Matrix;
 
-        // Convert from world coordinate to view (-1->1);
+    // Convert from world coordinate to view (-1->1);
     var h = (x * m[3] + y * m[7] + m[15]);
     var xNew = (x * m[0] + y * m[4] + m[12]) / h;
     var yNew = (x * m[1] + y * m[5] + m[13]) / h;
-        // Convert from view to screen pixel coordinates.
+    // Convert from view to screen pixel coordinates.
     xNew = (1.0 + xNew) * 0.5 * this.ViewportWidth;
     yNew = (1.0 - yNew) * 0.5 * this.ViewportHeight;
 
@@ -161,15 +161,15 @@ window.SAM = window.SAM || {};
     if (x === 0 && y === 0) {
       return;
     }
-        // Orthogonal (counter clockwise) dot dVect.
+    // Orthogonal (counter clockwise) dot dVect.
     var dRoll = -y * dx + x * dy;
-        // Remove magnitude of location.
-        // Scale by R to get correct angle.
+    // Remove magnitude of location.
+    // Scale by R to get correct angle.
     dRoll = dRoll / (x * x + y * y);
     if (this.Mirror) {
       dRoll = -dRoll;
     }
-        // Keep roll in radians.
+    // Keep roll in radians.
     this.Roll += dRoll;
 
     this.ComputeMatrix();
@@ -180,11 +180,11 @@ window.SAM = window.SAM || {};
       console.log('Camera 2');
       return;
     }
-        // I will leave this as an exception.
-        // Everything else uses SetFocalPoint([x,y]);
+    // I will leave this as an exception.
+    // Everything else uses SetFocalPoint([x,y]);
     this.FocalPoint[0] += dx;
     this.FocalPoint[1] += dy;
-        // this.FocalPoint[2] += dz;
+    // this.FocalPoint[2] += dz;
     this.ComputeMatrix();
   };
 
@@ -198,7 +198,7 @@ window.SAM = window.SAM || {};
       return;
     }
     this.Height = height;
-        // Width tracks height.
+    // Width tracks height.
     this.Width = height * this.ViewportWidth / this.ViewportHeight;
   };
 
@@ -212,7 +212,7 @@ window.SAM = window.SAM || {};
       return;
     }
     this.Width = width;
-        // Width tracks height.
+    // Width tracks height.
     this.Height = width * this.ViewportHeight / this.ViewportWidth;
   };
 
@@ -220,7 +220,7 @@ window.SAM = window.SAM || {};
     this.Roll = roll;
   };
 
-    // Slide coordinates.
+  // Slide coordinates.
   Camera.prototype.GetBounds = function () {
     var width = this.GetWidth();
     var bds = new Array(4);
@@ -231,10 +231,10 @@ window.SAM = window.SAM || {};
     return bds;
   };
 
-    // Camera matrix transforms points into camera coordinate system
-    // X:(-1->1)
-    // Y:(-1->1) (-1 is bottom)
-    // Z:(-1->1) (-1 is front)
+  // Camera matrix transforms points into camera coordinate system
+  // X:(-1->1)
+  // Y:(-1->1) (-1 is bottom)
+  // Z:(-1->1) (-1 is front)
   Camera.prototype.ComputeMatrix = function () {
     var s = Math.sin(this.Roll);
     var c = Math.cos(this.Roll);
@@ -263,9 +263,9 @@ window.SAM = window.SAM || {};
     this.Matrix[15] = 0.5 * w;
   };
 
-    // Currenly assumes parallel projection and display z range = [-1,1].
-    // Also no rotation!
-    // a.k.a. This method does not work.
+  // Currenly assumes parallel projection and display z range = [-1,1].
+  // Also no rotation!
+  // a.k.a. This method does not work.
   Camera.prototype.DisplayToWorld = function (x, y, z) {
     var scale = this.Height / this.ViewportHeight;
     x = x - (0.5 * this.ViewportWidth);
@@ -296,7 +296,7 @@ window.SAM = window.SAM || {};
     }
   };
 
-    // Getting rid of this.
+  // Getting rid of this.
   Camera.prototype.UpdateBuffer = function () {
     this.Points = [];
     var cx = this.FocalPoint[0];
@@ -311,7 +311,7 @@ window.SAM = window.SAM || {};
     this.CreateBuffer();
   };
 
-    // Camera is already set.
+  // Camera is already set.
   Camera.prototype.Draw = function (overview, gl) {
     var overviewCam = overview.Camera;
     var viewport = overview.Viewport;
@@ -364,27 +364,27 @@ window.SAM = window.SAM || {};
             SA.squareOutlinePositionBuffer.numItems);
             */
     } else {
-            // Transform focal point from -1->1 to viewport
+      // Transform focal point from -1->1 to viewport
       newCx = (1.0 + newCx) * viewport[2] * 0.5;
       newCy = (1.0 - newCy) * viewport[3] * 0.5;
-            // Scale width and height from world to viewport.
+      // Scale width and height from world to viewport.
       rx = rx * viewport[3] / overviewCam.GetHeight();
       ry = ry * viewport[3] / overviewCam.GetHeight();
 
-            // The 2d canvas was left in world coordinates.
+      // The 2d canvas was left in world coordinates.
       var ctx = overview.Context2d;
-            /*
-              ctx.beginPath();
-              //ctx.strokeStyle="#E500E5";
-              ctx.rect(this.FocalPoint[0]-(0.5*width),this.FocalPoint[1]-(0.5*height),width,height);
-              //ctx.fillStyle="#E500E5";
-              //ctx.fillRect(this.FocalPoint[0]-(0.5*width),this.FocalPoint[1]-(0.5*height),width,height);
-              ctx.stroke();
-            */
+      /*
+        ctx.beginPath();
+        //ctx.strokeStyle="#E500E5";
+        ctx.rect(this.FocalPoint[0]-(0.5*width),this.FocalPoint[1]-(0.5*height),width,height);
+        //ctx.fillStyle="#E500E5";
+        //ctx.fillRect(this.FocalPoint[0]-(0.5*width),this.FocalPoint[1]-(0.5*height),width,height);
+        ctx.stroke();
+      */
       ctx.save();
-            // ctx.setTransform(1,0,0,1,0,0);
-            // Now that the while slide / overview canvas is rotating
-            // We have to rotate the rectangle.
+      // ctx.setTransform(1,0,0,1,0,0);
+      // Now that the while slide / overview canvas is rotating
+      // We have to rotate the rectangle.
       var c = Math.cos(this.Roll);
       var s = Math.sin(this.Roll);
       ctx.setTransform(c, -s, +s, c,

@@ -199,6 +199,9 @@ window.SA = window.SA || {};
       if (args.drawWidget !== undefined) {
         viewer.SetAnnotationWidgetVisibility(args.drawWidget);
       }
+      if (args.rotatable !== undefined) {
+        viewer.SetRotatable(args.rotatable);
+      }
       // The way I handle the viewer edit menu is messy.
       // TODO: Find a more elegant way to add tabs.
       // Maybe the way we handle the anntation tab shouodl be our pattern.

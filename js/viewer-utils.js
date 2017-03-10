@@ -2729,6 +2729,10 @@
 // viewerIndex of the note defaults to 0.
 // Note: hideCopyright will turn off when a new note is loaded.
   jQuery.prototype.saViewer = function (args) {
+    return SAViewer(this, args);
+  };
+// Non jquery api
+  var SAViewer = function (element, args) {
     // default
     args = args || {};
     if (typeof (args) === 'object') {
@@ -2741,22 +2745,21 @@
       if (args.note === null) {
             // It has not been loaded yet.  Get if from the server.
         args.note = new SA.Note();
-        var self = this;
         args.note.LoadViewId(
                 args.viewId,
                 function () {
-                  saViewerSetup(self, arguments);
+                  saViewerSetup(arguments);
                 });
-        return this;
+        return element;
       }
     }
 
     // User can call a viewer method through thie jquery api.
     // Pass on the return value if it has one.
     if (arguments.length === 0) {
-      return saViewerSetup(this, [args]) || this;
+      return saViewerSetup([element, args]) || element;
     }
-    return saViewerSetup(this, arguments) || this;
+    return saViewerSetup(arguments) || element;
   };
 
 // I am struggling for an API to choose between single view and dual view.
@@ -2769,13 +2772,15 @@
 // flag in html. I could have an attribute "dual", but I think I like to
 // change the class from sa-viewer to sa-dual-viewer better.
 // TODO: Make the argument calls not dependant on order.
-  function saViewerSetup (self, args) {
+  function saViewerSetup (args) {
     // TODO: Think about making this viewer specific rather than a global.
 
-    // legacy api: params encoded in first arguement object.
+    var self = args[0];
+
+    // legacy api: params encoded in second arguement object.
     var params;
-    if (typeof (args[0]) === 'object') {
-      params = args[0];
+    if (typeof (args[1]) === 'object') {
+      params = args[1];
     }
 
     if (params && params.prefixUrl) {
@@ -2788,7 +2793,7 @@
         .on('resize.sa', saResizeCallback);
 
     for (var i = 0; i < self.length; ++i) {
-      if (args[0] === 'destroy') {
+      if (args[1] === 'destroy') {
         $(self[i]).removeClass('sa-resize');
             // This should not cause a problem.
             // Only one resize element should be using this element.
@@ -2831,10 +2836,10 @@
         // generic method call. Give jquery ui access to all this objects methods.
         // jquery puts the query results as the first argument.
       var viewer = self[i].saViewer;
-      if (viewer && typeof (viewer[args[0]]) === 'function') {
+      if (viewer && typeof (viewer[args[1]]) === 'function') {
             // first list item is the method name,
             // the rest are arguments to the method.
-        return viewer[args[0]].apply(viewer, Array.prototype.slice.call(args, 1));
+        return viewer[args[1]].apply(viewer, Array.prototype.slice.call(args, 2));
       }
 
       if (params) {
@@ -2903,15 +2908,129 @@
     }
   }
 
+  // ==============================================================================
+  // Non jquery api
+  // Building block for an accordian viewer.
+  // TODO: open and close callbacks.
+  var saAccordianDiv = function (parent, label) {
+    var labelDiv = $('<div>')
+      .appendTo(parent)
+      .css({'display': 'block'});
+    var openCloseIcon = $('<img>')
+      .appendTo(labelDiv)
+      .attr('src', SA.ImagePathUrl + 'plus.png');
+    var labelSpan = $('<span>')
+      .appendTo(labelDiv)
+      .css({'padding-left': '5px'})
+      .text(label);
+    var contents = $('<div>')
+      .appendTo(parent)
+      .css({
+        'display': 'block',
+        'padding-left': '17px'})
+      .hide();
+    var open = false;
+    // Hack?  Still trying to combine objects with jquery api.
+    // I want to return the jquery  reference, but also have methods.
+    // Attach methods to the dom object.
+    contents[0].open = function () {
+      open = true;
+      contents.slideDown();
+      openCloseIcon.attr('src', SA.ImagePathUrl + 'minus.png');
+      if (this.openCallback) {
+        this.openCallback();
+      }
+    };
+    contents[0].setOpenCallback = function (callback) {
+      this.openCallback = callback;
+    };
+
+    contents[0].close = function () {
+      open = false;
+      contents.slideUp();
+      openCloseIcon.attr('src', SA.ImagePathUrl + 'plus.png');
+    };
+    contents[0].getLabel = function () {
+      return labelSpan;
+    };
+    openCloseIcon.click(function () {
+      if (open) {
+        contents[0].close();
+      } else {
+        contents[0].open();
+      }
+    });
+    return contents;
+  };
+
+  // ==============================================================================
+  // Non jquery api
+  // Give any div the option to go fullscreen. This returns a jquery
+  // reference to the full screen button so the user can position in.
+  // The user can even choose their own image for the button.
+  // TODO: callbacks for start and stop full screen.
+  var SAFullScreenButton = function (parent) {
+    var fullScreenButton = $('<img>')
+        .appendTo(parent)
+        .prop('title', 'full screen')
+        .addClass('sa-view-button')
+        .attr('src', SA.ImagePathUrl + 'fullScreen32.png')
+        .css({
+          'position': 'absolute',
+          'height': '24px',
+          'z-index': '100'});
+    // Attach variables to the dom button
+    var self = fullScreenButton[0];
+    fullScreenButton.click(function () {
+      // varible 'this' is probably the same as 'self' here.
+      self.saved_height = parent.css('height');
+      $(self).hide();
+      var elem = parent[0];
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+      } else if (elem.mozRequestFullScreen) {
+        elem.mozRequestFullScreen();
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      }
+      // var h = screen.height;
+      // parent.css({'height':h+'px'});
+      parent.css({'height': '100%'});
+      $(window).trigger('resize');
+    });
+
+    // detect when we leave full screen.
+    parent.bind(
+        'webkitfullscreenchange mozfullscreenchange fullscreenchange',
+        function (e) {
+          var state = document.fullScreen || document.mozFullScreen ||
+                document.webkitIsFullScreen;
+          if (!state) {
+            $(self).show();
+            parent.css({'height': self.saved_height});
+            $(window).trigger('resize');
+          }
+        });
+    return fullScreenButton;
+  };
+
 // Args: not used
   jQuery.prototype.saFullHeight = function (args) {
-    this.css({'top': '0px'});
-    this.addClass('sa-full-height');
-    for (var i = 0; i < this.length; ++i) {
-        // I want to put the resize event on "this[i]",
+    return SAFullHeight(this, args);
+  };
+// ==============================================================================
+// Non jquery api
+// Add resize callbacks that make a jquery element fit the windows height.
+  var SAFullHeight = function (element, args) {
+    element.css({'top': '0px'});
+    element.addClass('sa-full-height');
+    for (var i = 0; i < element.length; ++i) {
+        // I want to put the resize event on "element[i]",
         // but, I am afraid it might not get trigerend always, or
         // setting the height would cause recursive calls to resize.
-      this[i].saFullHeight = args;
+      element[i].saFullHeight = args;
     }
 
     $(window)
@@ -2919,7 +3038,7 @@
         .on('resize.sa', saResizeCallback)
         .trigger('resize');
 
-    return this;
+    return element;
   };
 
 // ==============================================================================
@@ -3861,4 +3980,8 @@
   };
 
   SA.ResizePanel = ResizePanel;
+  SA.SAFullHeight = SAFullHeight;
+  SA.SAViewer = SAViewer;
+  SA.SAFullScreenButton = SAFullScreenButton;
+  SA.AccordianDiv = saAccordianDiv;
 })();

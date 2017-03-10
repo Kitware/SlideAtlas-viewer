@@ -41,6 +41,7 @@
         // I am moving the eventually render feature into viewers.
     this.Drawing = false;
     this.RenderPending = false;
+    this.Rotatable = true;
 
     this.HistoryFlag = false;
     this.MinPixelSize = 0.5;
@@ -114,7 +115,7 @@
     this.RecordIndex = 0; // Only used for drawing correlations.
 
     var can = this.MainView.CanvasDiv;
-        // So we can programatically set the keyboard focus
+    // So we can programatically set the keyboard focus
     can.attr('tabindex', '1');
     can.on(
             'mousedown.viewer',
@@ -124,9 +125,9 @@
     can.on(
             'mousemove.viewer',
          function (event) {
-                // So key events go the the right viewer.
+           // So key events go the the right viewer.
            this.focus();
-                // Firefox does not set which for mouse move events.
+           // Firefox does not set which for mouse move events.
            SA.FirefoxWhich(event);
            return self.HandleMouseMove(event);
          });
@@ -167,7 +168,7 @@
     can.on(
             'keydown.viewer',
          function (event) {
-                // alert("keydown");
+           // alert("keydown");
            return self.HandleKeyDown(event);
          });
     can.on(
@@ -176,11 +177,11 @@
            return self.HandleKeyUp(event);
          });
 
-        // This did not work for double left click
-        // Go back to my original way of handling this.
-        // can.addEventListener("dblclick",
-      //                    function (event){self.HandleDoubleClick(event);},
-      //                    false);
+    // This did not work for double left click
+    // Go back to my original way of handling this.
+    // can.addEventListener("dblclick",
+    //                    function (event){self.HandleDoubleClick(event);},
+    //                    false);
 
     if (this.OverView) {
       can = this.OverView.CanvasDiv;
@@ -200,12 +201,12 @@
              function (e) {
                return self.HandleOverViewMouseMove(e);
              });
-            // I cannot get this to capture events.  The feature of resizing
-            //    the overview with the mouse wheel is not important anyway.
-            // can[0].addEventListener(
-            //    function (e){return self.HandleOverViewMouseWheel(e);},
-            //    "wheel",
-         //    false);
+      // I cannot get this to capture events.  The feature of resizing
+      //    the overview with the mouse wheel is not important anyway.
+      // can[0].addEventListener(
+      //    function (e){return self.HandleOverViewMouseWheel(e);},
+      //    "wheel",
+      //    false);
     }
 
     this.CopyrightWrapper = $('<div>')
@@ -239,14 +240,29 @@
     // Some widgets need access to the viewer.  rectSet and segment/contour
     annotationLayer1.Viewer = this;
     this.annotationWidget1 =
-            new SA.AnnotationWidget(annotationLayer1, this);
+      new SA.AnnotationWidget(annotationLayer1, this);
   }
 
-    // Try to remove all global references to this viewer.
+  // Allow the viewer to receive keyboard events.
+  Viewer.prototype.Focus = function () {
+    var can = this.MainView.CanvasDiv;
+    can.focus();
+  };
+
+  Viewer.prototype.SetRotatable = function (flag) {
+    this.Rotatable = flag;
+    if (flag) {
+      this.RotateIcon.show();
+    } else {
+      this.RotateIcon.hide();
+    }
+  };
+
+  // Try to remove all global references to this viewer.
   Viewer.prototype.Delete = function () {
     this.Div.remove();
-        // Remove circular references too?
-        // This will probably affect all viewers.
+    // Remove circular references too?
+    // This will probably affect all viewers.
     $(document.body).off('mouseup.viewer');
     this.MainView.Delete();
     if (this.OverView) {
@@ -262,19 +278,20 @@
     delete this.CopyrightWrapper;
   };
 
-    // Layers have a Draw(masterView) method.
+  // Layers have a Draw(masterView) method.
   Viewer.prototype.AddLayer = function (layer) {
     this.Layers.push(layer);
   };
 
-    // Hack to get the annotation layer
+  // Hack to get the annotation layer
   Viewer.prototype.GetAnnotationLayer = function () {
     for (var i = 0; i < this.Layers.length; ++i) {
       if (this.Layers[i] instanceof SAM.AnnotationLayer) {
         return this.Layers[i];
       }
     }
-    return null;
+
+    return this.NewAnnotationLayer();
   };
 
     // Abstracting saViewer  for viewer and dualViewWidget.
@@ -299,6 +316,10 @@
     if (args.drawWidget !== undefined) {
       this.SetAnnotationWidgetVisibility(args.drawWidget);
     }
+    if (args.rotatable !== undefined) {
+      this.SetRotatable(args.rotatable);
+    }
+
         // The way I handle the viewer edit menu is messy.
         // TODO: Find a more elegant way to add tabs.
         // Maybe the way we handle the anntation tab shouodl be our pattern.
@@ -330,13 +351,13 @@
     this.UpdateSize();
   };
 
-    // Which is better calling Note.Apply, or viewer.SetNote?  I think this
-    // will  win.  The layer needs to have a load callback for vigilant threshold.
+  // Which is better calling Note.Apply, or viewer.SetNote?  I think this
+  // will  win.  The layer needs to have a load callback for vigilant threshold.
   Viewer.prototype.SetViewerRecord = function (viewerRecord, lockCamera) {
-        // If a widget is active, then just inactivate it.
-        // It would be nice to undo pencil strokes in the middle, but this feature will have to wait.
+    // If a widget is active, then just inactivate it.
+    // It would be nice to undo pencil strokes in the middle, but this feature will have to wait.
     if (this.ActiveWidget) {
-            // Hackish way to deactivate.
+      // Hackish way to deactivate.
       this.ActiveWidget.SetActive(false);
     }
 
@@ -361,11 +382,11 @@
         this.UpdateCamera();
       }
     } else {
-            // Just get rid of the annotations.
+      // Just get rid of the annotations.
       this.GetAnnotationLayer().Reset();
     }
 
-        // TODO: Get rid of this hack.
+    // TODO: Get rid of this hack.
     if (this.AnnotationWidget && viewerRecord.AnnotationVisibility !== undefined) {
       this.AnnotationWidget.SetVisibility(viewerRecord.AnnotationVisibility);
     }
@@ -373,20 +394,20 @@
     var annotationLayer = this.GetAnnotationLayer();
     if (annotationLayer) {
       annotationLayer.Reset();
-            // What about the other layers?
-            // Should we propagate the use of notes outside slide atlas?
-            // Probably not.  Use loading and serializing piecemeal as necessary.
+      // What about the other layers?
+      // Should we propagate the use of notes outside slide atlas?
+      // Probably not.  Use loading and serializing piecemeal as necessary.
       if (viewerRecord.Annotations) {
         annotationLayer.LoadAnnotations(viewerRecord.Annotations);
       }
-            // Load the annotations from the user note.
+      // Load the annotations from the user note.
       if (viewerRecord.UserNote) {
         var annotations = viewerRecord.UserNote.ViewerRecords[0].Annotations;
         annotationLayer.LoadAnnotations(annotations);
       }
     }
 
-        // fit the canvas to the div size.
+    // fit the canvas to the div size.
     this.UpdateSize();
   };
 
@@ -462,10 +483,12 @@
 
     // These should be in an overview widget class.
   Viewer.prototype.RollEnter = function (e) {
+    if (!this.Rotatable) { return; }
     this.RotateIconHover = true;
     this.RotateIcon.addClass('sa-active');
   };
   Viewer.prototype.RollLeave = function (e) {
+    if (!this.Rotatable) { return; }
     this.RotateIconHover = false;
     if (!this.RotateIconDrag) {
       this.RotateIcon.removeClass('sa-active');
@@ -473,6 +496,7 @@
   };
   Viewer.prototype.RollDown = function (e) {
     if (!this.OverView) { return; }
+    if (!this.Rotatable) { return; }
     this.RotateIconDrag = true;
         // Find the center of the overview window.
     var w = this.OverView.CanvasDiv;
@@ -487,6 +511,7 @@
   Viewer.prototype.RollMove = function (e) {
     if (!this.OverView) { return; }
     if (!this.RotateIconDrag) { return; }
+    if (!this.Rotatable) { return; }
     if (e.which !== 1) {
             // We must have missed the mouse up event.
       this.RotateIconDrag = false;
@@ -519,7 +544,6 @@
     if (!this.MainView) {
       return;
     }
-
     if (this.MainView.UpdateCanvasSize()) {
       this.EventuallyRender();
     }
@@ -1184,9 +1208,9 @@
       }
     }
 
-        // Here to trigger SA.FinishedLoadingCallbacks
+    // Here to trigger SA.FinishedLoadingCallbacks
     SA.LoadQueueUpdate();
-        // console.timeEnd("ViewerDraw");
+    // console.timeEnd("ViewerDraw");
     this.Drawing = false;
   };
 
@@ -1435,6 +1459,14 @@
     this.HandleTouch(event, true);
     this.StartTouchTime = this.Time;
 
+    // Let the annotation layers have first dibs on processing the event.
+    for (var i = 0; i < this.Layers.length; ++i) {
+      var layer = this.Layers[i];
+      if (layer.HandleTouchStart && !layer.HandleTouchStart(event)) {
+        return false;
+      }
+    }
+
     SA.TriggerStartInteraction();
 
     this.MomentumX = 0.0;
@@ -1471,9 +1503,9 @@
     if (!this.HandleTouch(e, false)) { return; }
 
     if (SA.display && SA.display.NavigationWidget &&
-            SA.display.NavigationWidget.Visibility) {
-            // No slide interaction with the interface up.
-            // I had bad interaction with events going to browser.
+        SA.display.NavigationWidget.Visibility) {
+      // No slide interaction with the interface up.
+      // I had bad interaction with events going to browser.
       SA.display.NavigationWidget.ToggleVisibility();
     }
 
@@ -1484,8 +1516,16 @@
       SA.MOBILE_ANNOTATION_WIDGET.ToggleVisibility();
     }
 
-        // detect sweep
-        // Cross the screen in 1/2 second.
+    // Let the annotation layers have first dibs on processing the event.
+    for (var i = 0; i < this.Layers.length; ++i) {
+      var layer = this.Layers[i];
+      if (layer.HandleTouchMove && !layer.HandleTouchMove(event)) {
+        return false;
+      }
+    }
+
+    // detect sweep
+    // Cross the screen in 1/2 second.
     var viewerWidth = this.MainView.CanvasDiv.width();
     var dxdt = 1000 * (this.MouseX - this.LastMouseX) / ((this.Time - this.LastTime) * viewerWidth);
         // console.log(dxdt);
@@ -1508,38 +1548,47 @@
       this.HandleTouchPinch(this);
       return;
     }
-    if (this.Touches.length === 3) {
+    if (this.Rotatable && this.Touches.length === 3) {
       this.HandleTouchRotate(this);
       return;
     }
   };
 
-    // Only one touch
+  // Only one touch
   Viewer.prototype.HandleTouchPan = function (event) {
     if (!this.InteractionEnabled) { return true; }
     if (this.Touches.length !== 1 || this.LastTouches.length !== 1) {
-            // Sanity check.
+      // Sanity check.
       return;
     }
 
-        // I see an odd intermittent camera matrix problem
-        // on the iPad that looks like a thread safety issue.
+    // Let the annotation layers have first dibs on processing the event.
+    // TODO Either forward primary or secondary events.
+    for (var i = 0; i < this.Layers.length; ++i) {
+      var layer = this.Layers[i];
+      if (layer.HandleTouchPan && !layer.HandleTouchPan(event)) {
+        return false;
+      }
+    }
+
+    // I see an odd intermittent camera matrix problem
+    // on the iPad that looks like a thread safety issue.
     if (this.MomentumTimerId) {
       window.cancelAnimationFrame(this.MomentumTimerId);
       this.MomentumTimerId = 0;
     }
 
-        // Convert to world by inverting the camera matrix.
-        // I could simplify and just process the vector.
+    // Convert to world by inverting the camera matrix.
+    // I could simplify and just process the vector.
     var w0 = this.ConvertPointViewerToWorld(this.LastMouseX, this.LastMouseY);
     var w1 = this.ConvertPointViewerToWorld(this.MouseX, this.MouseY);
 
-        // This is the new focal point.
+    // This is the new focal point.
     var dx = w1[0] - w0[0];
     var dy = w1[1] - w0[1];
     var dt = event.Time - this.LastTime;
 
-        // Remember the last motion to implement momentum.
+    // Remember the last motion to implement momentum.
     var momentumX = dx / dt;
     var momentumY = dy / dt;
 
@@ -1559,6 +1608,7 @@
 
   Viewer.prototype.HandleTouchRotate = function (event) {
     if (!this.InteractionEnabled) { return true; }
+    if (!this.Rotatable) { return true; }
     var numTouches = this.Touches.length;
     if (this.LastTouches.length !== numTouches || numTouches !== 3) {
             // Sanity check.
@@ -1697,7 +1747,15 @@
   Viewer.prototype.HandleTouchEnd = function (event) {
     if (!this.InteractionEnabled) { return true; }
 
-        // Code from a conflict
+    // Let the annotation layers have first dibs on processing the event.
+    for (var i = 0; i < this.Layers.length; ++i) {
+      var layer = this.Layers[i];
+      if (layer.HandleTouchEnd && !layer.HandleTouchEnd(event)) {
+        return false;
+      }
+    }
+
+    // Code from a conflict
     var t = new Date().getTime();
     this.LastTime = this.Time;
     this.Time = t;
@@ -1713,8 +1771,8 @@
     if (event.targetTouches.length === 0 && SAM.MOBILE_DEVICE) {
       this.StartTouchTime = 0;
       if (t < 90) {
-                // We should not have a navigation widget on mobile
-                // devices. (maybe iPad?).
+        // We should not have a navigation widget on mobile
+        // devices. (maybe iPad?).
         if (SA.display && SA.display.NavigationWidget) {
           SA.display.NavigationWidget.ToggleVisibility();
         }
@@ -1727,16 +1785,16 @@
         this.ActiveWidget.HandleTouchEnd(event);
         return;
       }
-            // this.UpdateZoomGui();
+      // this.UpdateZoomGui();
       this.HandleMomentum();
     }
-        // end conflict
+    // end conflict
 
-        // this.UpdateZoomGui();
+    // this.UpdateZoomGui();
     this.HandleMomentum(event);
 
-        // Use this as a flag to indicate ongoing interation (sweep, next
-        // note .
+    // Use this as a flag to indicate ongoing interation (sweep, next
+    // note .
     this.StartTouchTime = 0;
   };
 
@@ -1853,22 +1911,30 @@
     this.RecordMouseDown(event);
 
     if (this.RotateIconDrag) {
-            // Problem with leaving the browser with mouse down.
-            // This is a mouse down outside the icon, so the mouse must
-            // have been let up and we did not get the event.
+      // Problem with leaving the browser with mouse down.
+      // This is a mouse down outside the icon, so the mouse must
+      // have been let up and we did not get the event.
       this.RotateIconDrag = false;
     }
 
     if (this.DoubleClick) {
-            // Without this, double click selects sub elementes.
+      // Without this, double click selects sub elementes.
       event.preventDefault();
       return this.HandleDoubleClick(event);
     }
 
-        // Choose what interaction will be performed.
+    // Let the annotation layers have first dibs on processing the event.
+    for (var i = 0; i < this.Layers.length; ++i) {
+      var layer = this.Layers[i];
+      if (layer.HandleMouseDown && !layer.HandleMouseDown(event)) {
+        return false;
+      }
+    }
+
+    // Choose what interaction will be performed.
     if (event.which === 1) {
       if (event.ctrlKey) {
-        this.InteractionState = INTERACTION_ROTATE;
+        if (this.Rotatable) { this.InteractionState = INTERACTION_ROTATE; }
       } else if (event.altKey) {
         this.InteractionState = INTERACTION_ZOOM;
       } else {
@@ -1876,7 +1942,7 @@
       }
       return false;
     }
-    if (event.which === 2) {
+    if (event.which === 2 && this.Rotatble) {
       this.InteractionState = INTERACTION_ROTATE;
       return false;
     }
@@ -1902,13 +1968,22 @@
     this.FireFoxWhich = 0;
     this.RecordMouseUp(event);
 
-    if (this.RotateIconDrag) {
+    if (this.Rotatable && this.RotateIconDrag) {
       this.RollUp(event);
       return false;
     }
 
+    // Let the annotation layers have first dibs on processing the event.
+    for (var i = 0; i < this.Layers.length; ++i) {
+      var layer = this.Layers[i];
+      if (layer.HandleMouseUp && !layer.HandleMouseUp(event)) {
+        this.InteractionState = INTERACTION_NONE;
+        return false;
+      }
+    }
+
     if (this.InteractionState === INTERACTION_OVERVIEW ||
-            this.InteractionState === INTERACTION_OVERVIEW_DRAG) {
+        this.InteractionState === INTERACTION_OVERVIEW_DRAG) {
       return this.HandleOverViewMouseUp(event);
     }
 
@@ -1925,23 +2000,31 @@
   Viewer.prototype.HandleMouseMove = function (event) {
     if (!this.InteractionEnabled) { return true; }
 
-        // The event position is relative to the target which can be a tab on
-        // top of the canvas.  Just skip these events.
+    // The event position is relative to the target which can be a tab on
+    // top of the canvas.  Just skip these events.
     if ($(event.target).width() !== $(event.currentTarget).width()) {
       return true;
     }
 
     if (!this.RecordMouseMove(event)) { return true; }
 
-        // I think we need to deal with the move here because the mouse can
-        // exit the icon and the events are lost.
-    if (this.RotateIconDrag) {
+    // I think we need to deal with the move here because the mouse can
+    // exit the icon and the events are lost.
+    if (this.Rotatable && this.RotateIconDrag) {
       this.RollMove(event);
       return false;
     }
 
+    // Let the annotation layers have first dibs on processing the event.
+    for (var i = 0; i < this.Layers.length; ++i) {
+      var layer = this.Layers[i];
+      if (layer.HandleMouseMove && !layer.HandleMouseMove(event)) {
+        return false;
+      }
+    }
+
     if (this.InteractionState === INTERACTION_OVERVIEW ||
-            this.InteractionState === INTERACTION_OVERVIEW_DRAG) {
+        this.InteractionState === INTERACTION_OVERVIEW_DRAG) {
       return this.HandleOverViewMouseMove(event);
     }
 
@@ -2008,31 +2091,39 @@
     if (!this.InteractionEnabled) { return true; }
 
     if (!event.offsetX) {
-            // for firefox
+      // for firefox
       event.offsetX = event.layerX;
       event.offsetY = event.layerY;
     }
 
-        // We want to accumulate the target, but not the duration.
+    // Let the annotation layers have first dibs on processing the event.
+    for (var i = 0; i < this.Layers.length; ++i) {
+      var layer = this.Layers[i];
+      if (layer.HandleMouseWheel && !layer.HandleMouseWheel(event)) {
+        return false;
+      }
+    }
+
+    // We want to accumulate the target, but not the duration.
     var tmp = 0;
     if (event.deltaY) {
       tmp = event.deltaY;
     } else if (event.wheelDelta) {
       tmp = event.wheelDelta;
     }
-        // Wheel event seems to be in increments of 3.
-        // depreciated mousewheel had increments of 120....
-        // Initial delta cause another bug.
-        // Lets restrict to one zoom step per event.
+    // Wheel event seems to be in increments of 3.
+    // depreciated mousewheel had increments of 120....
+    // Initial delta cause another bug.
+    // Lets restrict to one zoom step per event.
     if (tmp > 0) {
       this.ZoomTarget *= 1.1;
     } else if (tmp < 0) {
       this.ZoomTarget /= 1.1;
     }
 
-        // Compute translate target to keep position in the same place.
-        // this.TranslateTarget[0] = this.MainView.Camera.FocalPoint[0];
-        // this.TranslateTarget[1] = this.MainView.Camera.FocalPoint[1];
+    // Compute translate target to keep position in the same place.
+    // this.TranslateTarget[0] = this.MainView.Camera.FocalPoint[0];
+    // this.TranslateTarget[1] = this.MainView.Camera.FocalPoint[1];
     var position = this.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
     var factor = this.ZoomTarget / this.MainView.Camera.GetHeight();
     this.TranslateTarget[0] = position[0] -
@@ -2095,28 +2186,29 @@
   // Returns true if nothing was done with the event.
   Viewer.prototype.HandleKeyDown = function (event) {
     if (!this.InteractionEnabled) { return true; }
-        // Key events are not going first to layers like mouse events.
-        // Give layers a change to process them.
+
+    // Key events are not going first to layers like mouse events.
+    // Give layers a change to process them.
     for (var i = 0; i < this.Layers.length; ++i) {
       if (this.Layers[i].HandleKeyDown && !this.Layers[i].HandleKeyDown(event)) {
         return false;
       }
     }
 
-        // Linking polyline segmentations in a stack.
-        // if (event.keyCode === 81) {
-        //    SA.SegmentationSequenceLabel = prompt("Enter a segmentation label");
-        // }
-        // if (event.keyCode === 87 && SA.SegmentationSequenceLabel) {
-        //    var layer = this.GetAnnotationLayer();
-        //    //var note = SA.display.NavigationWidget.GetNote();
-        //    if (layer.ActiveWidget && layer.ActiveWidget.Type === "polyline") {
-        //        var widget = layer.ActiveWidget;
-        //        widget.InitializeText();
-        //        widget.Text.String = SA.SegmentationSequenceLabel;
-        //    }
-        //    SA.display.NavigationWidget.NextNote();
-        // }
+    // Linking polyline segmentations in a stack.
+    // if (event.keyCode === 81) {
+    //    SA.SegmentationSequenceLabel = prompt("Enter a segmentation label");
+    // }
+    // if (event.keyCode === 87 && SA.SegmentationSequenceLabel) {
+    //    var layer = this.GetAnnotationLayer();
+    //    //var note = SA.display.NavigationWidget.GetNote();
+    //    if (layer.ActiveWidget && layer.ActiveWidget.Type === "polyline") {
+    //        var widget = layer.ActiveWidget;
+    //        widget.InitializeText();
+    //        widget.Text.String = SA.SegmentationSequenceLabel;
+    //    }
+    //    SA.display.NavigationWidget.NextNote();
+    // }
 
     if (event.keyCode === 83 && event.ctrlKey) { // control -s to save.
       if (!SAVING_IMAGE) {
@@ -2144,6 +2236,7 @@
            }
          );
       }
+
       return false;
     }
 
@@ -2154,7 +2247,7 @@
       console.log('World: ' + wPt[0] + ', ' + wPt[1]);
     }
 
-  // Handle paste
+    // Handle paste
     if (event.keyCode === 86 && event.ctrlKey) {
       // control-v for paste
 
@@ -2209,7 +2302,7 @@
     var rx;
     var ry;
     if (event.keyCode === 38) {
-            // Up cursor key
+      // Up cursor key
       cam = this.GetCamera();
       c = Math.cos(cam.Roll);
       s = -Math.sin(cam.Roll);
@@ -2224,7 +2317,7 @@
       this.EventuallyRender(true);
       return false;
     } else if (event.keyCode === 40) {
-            // Down cursor key
+      // Down cursor key
       cam = this.GetCamera();
       c = Math.cos(cam.Roll);
       s = -Math.sin(cam.Roll);
@@ -2239,7 +2332,7 @@
       this.EventuallyRender(true);
       return false;
     } else if (event.keyCode === 37) {
-            // Left cursor key
+      // Left cursor key
       cam = this.GetCamera();
       c = Math.cos(cam.Roll);
       s = -Math.sin(cam.Roll);
@@ -2254,7 +2347,7 @@
       this.EventuallyRender(true);
       return false;
     } else if (event.keyCode === 39) {
-            // Right cursor key
+      // Right cursor key
       cam = this.GetCamera();
       c = Math.cos(cam.Roll);
       s = -Math.sin(cam.Roll);
@@ -2269,7 +2362,7 @@
       this.EventuallyRender(true);
       return false;
     }
-        // hack to get copy working
+    // hack to get copy working
     var layer = this.GetAnnotationLayer();
     if (layer) {
       if (!layer.HandleKeyDown(event)) {
@@ -2277,16 +2370,30 @@
       }
     }
 
+    if (event.keyCode === 27 && this.EscapeCallback) {
+      this.EscapeCallback();
+    }
+
     return true;
   };
 
-    // returns false if the event was "consumed" (browser convention).
-    // Returns true if nothing was done with the event.
+  // returns false if the event was "consumed" (browser convention).
+  // Returns true if nothing was done with the event.
   Viewer.prototype.HandleKeyUp = function (event) {
     if (!this.InteractionEnabled) { return true; }
-        // Key events are not going first to layers like mouse events.
-        // Give layers a change to process them.
-    for (var i = 0; i < this.Layers.length; ++i) {
+
+    // Let the annotation layers have first dibs on processing the event.
+    var i;
+    for (i = 0; i < this.Layers.length; ++i) {
+      var layer = this.Layers[i];
+      if (layer.HandleKeyUp && !layer.HandleKeyUp(event)) {
+        return false;
+      }
+    }
+
+    // Key events are not going first to layers like mouse events.
+    // Give layers a change to process them.
+    for (i = 0; i < this.Layers.length; ++i) {
       if (this.Layers[i].HandleKeyUp && !this.Layers[i].HandleKeyUp(event)) {
         return false;
       }
@@ -2294,7 +2401,7 @@
     return true;
   };
 
-    // Get the current scale factor between pixels and world units.
+  // Get the current scale factor between pixels and world units.
   Viewer.prototype.GetPixelsPerUnit = function () {
     return this.MainView.GetPixelsPerUnit();
   };
@@ -2303,7 +2410,7 @@
     return this.MainView.GetMetersPerUnit();
   };
 
-    // Covert a point from world coordiante system to viewer coordinate system (units pixels).
+  // Covert a point from world coordiante system to viewer coordinate system (units pixels).
   Viewer.prototype.ConvertPointWorldToViewer = function (x, y) {
     var cam = this.MainView.Camera;
     return cam.ConvertPointWorldToViewer(x, y);
@@ -2323,16 +2430,16 @@
     }
     var x = event.offsetX;
     var y = event.offsetY;
-        // Half height and width
+    // Half height and width
     var hw = this.OverViewport[2] / 2;
     var hh = this.OverViewport[3] / 2;
-        // Center of the overview.
+    // Center of the overview.
     var cx = this.OverViewport[0] + hw;
     var cy = this.OverViewport[1] + hh;
 
     x = x - cx;
     y = y - cy;
-        // Rotate into overview slide coordinates.
+    // Rotate into overview slide coordinates.
     var roll = this.MainView.Camera.Roll;
     var c = Math.cos(roll);
     var s = Math.sin(roll);
@@ -2346,23 +2453,23 @@
       this.OverViewActive = false;
       this.OverView.CanvasDiv.removeClass('sa-view-overview-canvas sa-active');
     }
-        // return this.OverViewActive;
+    // return this.OverViewActive;
   };
 
-    // Interaction events that change the main camera.
+  // Interaction events that change the main camera.
 
-    // Resize of overview window will be drag with left mouse.
-    // Reposition camera with left click (no drag).
-    // Removing drag camera in overview.
+  // Resize of overview window will be drag with left mouse.
+  // Reposition camera with left click (no drag).
+  // Removing drag camera in overview.
 
-    // TODO: Make the overview slide a widget.
+  // TODO: Make the overview slide a widget.
   Viewer.prototype.HandleOverViewMouseDown = function (event) {
     if (!this.InteractionEnabled) { return true; }
     if (this.RotateIconDrag) { return; }
 
     this.InteractionState = INTERACTION_OVERVIEW;
 
-        // Delay actions until we see if it is a drag or click.
+    // Delay actions until we see if it is a drag or click.
     this.OverviewEventX = event.pageX;
     this.OverviewEventY = event.pageY;
 
@@ -2377,8 +2484,8 @@
       return;
     }
 
-        // This target for animation is not implemented cleanly.
-        // This fixes a bug: OverView translated rotates camamera back to zero.
+    // This target for animation is not implemented cleanly.
+    // This fixes a bug: OverView translated rotates camamera back to zero.
     this.RollTarget = this.MainView.Camera.Roll;
 
     if (event.which === 1) {
@@ -2386,7 +2493,7 @@
       var y = event.offsetY;
       if (x === undefined) { x = event.layerX; }
       if (y === undefined) { y = event.layerY; }
-            // Transform to view's coordinate system.
+      // Transform to view's coordinate system.
       this.OverViewPlaceCamera(x, y);
     }
 
@@ -2405,7 +2512,7 @@
     var w;
     var p;
     if (this.InteractionState === INTERACTION_OVERVIEW) {
-            // Do not start dragging until the mouse has moved some distance.
+      // Do not start dragging until the mouse has moved some distance.
       if (Math.abs(event.pageX - this.OverviewEventX) > 5 ||
                 Math.abs(event.pageY - this.OverviewEventY) > 5) {
                 // Start dragging the overview window.
@@ -2417,14 +2524,14 @@
       return false;
     }
 
-        // This consumes events even when I return true. Why?
+    // This consumes events even when I return true. Why?
     if (this.InteractionState !== INTERACTION_OVERVIEW_DRAG) {
-            // Drag originated outside overview.
-            // Could be panning.
+      // Drag originated outside overview.
+      // Could be panning.
       return true;
     }
 
-        // Drag to change overview size
+    // Drag to change overview size
     w = this.GetViewport()[2];
     p = Math.max(w - event.pageX, event.pageY);
     var d = p / this.OverViewScaleLast;
@@ -2433,7 +2540,7 @@
     if (p < 60) {
       this.RotateIcon.hide();
     } else {
-      this.RotateIcon.show();
+      if (this.Rotatable) { this.RotateIcon.show(); }
     }
 
     this.UpdateSize();
@@ -2461,8 +2568,8 @@
     return true;
   };
 
-    // TODO: Get rid of this function.
-    // AnnotationWidget should not be here either.
+  // TODO: Get rid of this function.
+  // AnnotationWidget should not be here either.
   Viewer.prototype.SetAnnotationWidgetVisibility = function (vis) {
     if (this.Layers.length === 0) { return; }
     var layer = this.GetAnnotationLayer();
@@ -2500,8 +2607,8 @@
     }
   };
 
-    // ------------------------------------------------------
-    // Access methods for vigilant
+  // ------------------------------------------------------
+  // Access methods for vigilant
 
   Viewer.prototype.GetNumberOfLayers = function () {
     return this.Layers.length;
@@ -2514,13 +2621,13 @@
   };
 
   Viewer.prototype.NewAnnotationLayer = function () {
-        // Create an annotation layer by default.
+    // Create an annotation layer by default.
     var annotationLayer = new SAM.AnnotationLayer(this.Div);
     this.AddLayer(annotationLayer);
-        // TODO: Get rid of this.  master view is passed to draw.
-        // Hack so the scale widget can get the spacing.
+    // TODO: Get rid of this.  master view is passed to draw.
+    // Hack so the scale widget can get the spacing.
     annotationLayer.ScaleWidget.View = this.MainView;
-        // Hack only used for girder testing.
+    // Hack only used for girder testing.
     annotationLayer.Viewer = this;
     annotationLayer.UpdateSize();
 
@@ -2528,7 +2635,7 @@
   };
 
   Viewer.prototype.NewViewLayer = function () {
-        // Create an annotation layer by default.
+    // Create an annotation layer by default.
     var viewLayer = new SA.TileView(this.Div, false);
     this.AddLayer(viewLayer);
     viewLayer.UpdateSize();
@@ -2536,7 +2643,7 @@
     return viewLayer;
   };
 
-    // Get rid of this.
+  // Get rid of this.
   Viewer.prototype.ClearAnnotations = function () {
     var annotationLayer = this.GetAnnotationLayer();
     if (annotationLayer) {
@@ -2545,8 +2652,8 @@
     }
   };
 
-    // Get rid of this.
-    // Access methods for vigilant
+  // Get rid of this.
+  // Access methods for vigilant
   Viewer.prototype.AddAnnotation = function (obj) {
     var annotationLayer = this.GetAnnotationLayer();
     if (annotationLayer) {
@@ -2554,7 +2661,7 @@
       return annotationLayer.LoadWidget(obj);
     }
   };
-    // ------------------------------------------------------
+  // ------------------------------------------------------
 
   SA.Viewer = Viewer;
 })();

@@ -85,8 +85,8 @@
                 });
   }
 
-    // Create a new annotation item from the annotation layer.
-    // Save it in the database.  Add the annotation as a dot in the GUI.
+  // Create a new annotation item from the annotation layer.
+  // Save it in the database.  Add the annotation as a dot in the GUI.
   GirderWidget.prototype.NewAnnotationItem = function () {
     var annot = {'elements': []};
     annot.name = (this.AnnotationObjects.length).toString();
@@ -174,7 +174,7 @@
           'radius': widget.radius};
       }
       if (widget.type === 'text') {
-                // Will not keep scale feature..
+        // Will not keep scale feature..
         points = [widget.position, widget.offset];
         points[1][0] += widget.position[0];
         points[1][1] += widget.position[1];
@@ -280,7 +280,7 @@
     this.Highlight(annotObj);
     annotObj.Data.annotation.elements = this.RecordAnnotation();
     if (window.girder) {
-            // Save in the database
+      // Save in the database
       girder.rest.restRequest({
         path: 'annotation/' + annotObj.Data._id,
         method: 'PUT',
