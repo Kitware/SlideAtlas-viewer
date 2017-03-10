@@ -244,4 +244,3 @@
 
   SA.CutoutThumb = CutoutThumb;
 })();
-

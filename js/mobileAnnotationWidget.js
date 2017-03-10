@@ -119,4 +119,3 @@
 
   SA.MobileAnnotationWidget = MobileAnnotationWidget;
 })();
-

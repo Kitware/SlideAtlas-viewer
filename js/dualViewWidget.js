@@ -853,4 +853,3 @@ window.SA = window.SA || {};
 
   SA.DualViewWidget = DualViewWidget;
 })();
-

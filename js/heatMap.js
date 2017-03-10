@@ -156,4 +156,3 @@
 
   SA.HeatMap = HeatMap;
 })();
-

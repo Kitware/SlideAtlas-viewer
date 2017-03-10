@@ -107,4 +107,3 @@
 
   SAM.WidgetPopup = WidgetPopup;
 })();
-

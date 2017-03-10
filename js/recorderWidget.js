@@ -526,4 +526,3 @@
   SA.ViewerRecord = ViewerRecord;
   SA.RecorderWidget = RecorderWidget;
 })();
-

@@ -297,4 +297,3 @@
   SA.PairCorrelation = PairCorrelation;
   SA.PairTransformation = PairTransformation;
 })();
-

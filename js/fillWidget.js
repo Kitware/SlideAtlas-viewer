@@ -307,4 +307,3 @@
 
   SAM.FillWidget = FillWidget;
 })();
-
