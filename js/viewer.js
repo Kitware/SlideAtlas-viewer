@@ -56,7 +56,7 @@
         // Sometime I need to clean up the events for viewers.
     this.InteractionEnabled = true;
 
-    this.AnimateLast;
+    this.AnimateLast = null;
     this.AnimateDuration = 0.0;
     this.TranslateTarget = [0.0, 0.0];
 

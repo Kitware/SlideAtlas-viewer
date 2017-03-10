@@ -1064,7 +1064,6 @@
 
   function NotesWidget (parent, display) {
     this.ModifiedCallback = null;
-    this.LinkDiv;
     // This is a hack.  I do not know when to save the camera.
     // The save button will save the camera for the last note displayed.
     // This may be different that the selected note because of camera links

@@ -312,7 +312,6 @@
     var self = this;
     this.Display = display;
     this.RecordTimerId = 0;
-    this.Records;
 
     this.TimeLine = [];
     this.RedoStack = [];

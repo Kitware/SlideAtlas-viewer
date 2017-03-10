@@ -3,14 +3,6 @@ window.SA = window.SA || {};
 (function () {
   'use strict';
 
-  SA.imageProgram;
-  SA.polyProgram;
-  SA.squarePositionBuffer; // eslint-disable-line no-undef
-  SA.squareOutlinePositionBuffer;
-  SA.tileVertexPositionBuffer;
-  SA.tileVertexTextureCoordBuffer;
-  SA.tileCellBuffer;
-
   window.requestAnimationFrame =
         window.requestAnimationFrame ||
         window.mozRequestAnimationFrame ||
