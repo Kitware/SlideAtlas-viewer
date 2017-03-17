@@ -264,6 +264,7 @@
 
   // Make the annotation larger and smaller with the mouse wheel.
   GirderAnnotationEditor.prototype.HandleMouseWheel = function (event) {
+    return true;
     if (!this.IteratorClass) {
       // I acutally do not link useing the scroll wheel to resize the
       // anntoations. Restrict this feature to interating for now.

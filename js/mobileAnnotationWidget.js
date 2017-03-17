@@ -112,9 +112,6 @@
 // Toggle the tool gui.
   MobileAnnotationWidget.prototype.ToggleVisibility = function () {
     this.SetVisibility(!this.Visibility);
-    if (SA.FAVORITES_WIDGET) {
-      SA.FAVORITES_WIDGET.FavoritesBar.ShowHideFavorites();
-    }
   };
 
   SA.MobileAnnotationWidget = MobileAnnotationWidget;

@@ -1520,22 +1520,6 @@
       var thumb = SA.display.CreateThumbnailImage(110);
       src = thumb.src;
     }
-
-        // Save the favorite (note) in the admin database for this specific user.
-    $.ajax({
-      type: 'post',
-      url: '/webgl-viewer/saveusernote',
-      data: {'note': JSON.stringify(note.Serialize(true)),
-        'thumb': src,
-        'col': 'views',
-        'type': 'Favorite'}, // "favorites"
-      success: function (data, status) {
-        SA.FAVORITES_WIDGET.FavoritesBar.LoadFavorites();
-      },
-      error: function () {
-        SA.Debug('AJAX - error() : saveusernote 2');
-      }
-    });
   };
 
     // Randomize the order of the children

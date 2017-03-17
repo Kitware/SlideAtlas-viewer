@@ -15,7 +15,7 @@
   'use strict';
 
   window.SAM = window.SAM || {};
-  window.SAM.ImagePathUrl = '/webgl-viewer/static/';
+  window.SAM.ImagePathUrl = 'not set';
   window.SAM.MOBILE_DEVICE = false;
 
   SAM.detectMobile = function () {

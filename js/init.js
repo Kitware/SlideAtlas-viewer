@@ -17,19 +17,20 @@ window.SA = window.SA || {};
         window.webkitRequestAnimationFrame ||
         window.msRequestAnimationFrame;
 
+  // TODO: Merge this with cache.SetTileSource.
   SA.TileSourceToCache = function (tileSource) {
     var w = tileSource.width;
     var h = tileSource.height;
+    if (!tileSource.bounds) {
+      tileSource.bounds = [0, w - 1, 0, h - 1];
+    }
     var cache = new SA.Cache();
     cache.TileSource = tileSource;
     // Make an id for the image so it can be reused.
     var image = {levels: tileSource.maxLevel + 1,
       dimensions: [w, h],
-      bounds: [0, w - 1, 0, h - 1],
+      bounds: tileSource.bounds,
       _id: new ObjectId().toString()};
-    if (tileSource.bounds) {
-      image.bounds = tileSource.bounds;
-    }
 
     if (tileSource.filename) {
       image.filename = tileSource.filename;
@@ -45,19 +46,20 @@ window.SA = window.SA || {};
   SA.TileSourceToViewerRecord = function (tileSource) {
     var w = tileSource.width;
     var h = tileSource.height;
+    if (!tileSource.bounds) {
+      tileSource.bounds = [0, w - 1, 0, h - 1];
+    }
     var cache = SA.TileSourceToCache(tileSource);
-        // Make an id for the image so it can be reused.
+    // Make an id for the image so it can be reused.
     var image = cache.Image;
     var record = new SA.ViewerRecord();
     record.Image = image;
-    record.OverviewBounds = [0, w - 1, 0, h - 1];
-    if (tileSource.bounds) {
-      record.OverviewBounds = tileSource.bounds;
-    }
-    record.Camera = {FocalPoint: [(record.OverviewBounds[0] + record.OverviewBounds[1]) / 2,
-      (record.OverviewBounds[2] + record.OverviewBounds[3]) / 2],
-      Roll: 0,
-      Height: h};
+    record.OverviewBounds = tileSource.bounds;
+    var bds = tileSource.bounds;
+    record.Camera = {FocalPoint: [(bds[0] + bds[1]) / 2,
+                                  (bds[2] + bds[3]) / 2],
+                     Roll: 0,
+                     Height: bds[3]-bds[2]};
     return record;
   };
 
