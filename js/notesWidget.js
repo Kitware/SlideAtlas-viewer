@@ -869,6 +869,8 @@
       parentNote = SA.display.GetRootNote();
     }
 
+    // TODO: I think an icon as a default view link would look nicer.
+    var text = '(view)';
     // Create a new note to hold the view.
     // Put the new note at the end of the list.
     var childIdx = parentNote.Children.length;
@@ -879,8 +881,6 @@
     // Block subnotes and separate text.
     childNote.Type = 'View';
 
-        // TODO: I think an icon as a default view link would look nicer.
-    var text = '(view)';
     var range = SA.GetSelectionRange(this.TextEntry);
     if (!range) {
       range = SA.MakeSelectionRange(this.TextEntry);

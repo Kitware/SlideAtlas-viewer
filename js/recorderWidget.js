@@ -139,7 +139,7 @@
     }
 
     // TODO: Move this to note.js
-    this.UserNote.LoadState === 1; // REQUESTED
+    this.UserNote.LoadState = 1; // REQUESTED
 
     var self = this;
     $.ajax({

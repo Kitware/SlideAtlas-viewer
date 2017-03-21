@@ -816,14 +816,13 @@
   };
 
   GirderAnnotationEditor.prototype.CheckIteratorVisibility = function () {
-    if (!this.IteratorClass || index < 0) {
+    if (!this.IteratorClass || this.IteratorIndex < 0) {
       return;
     }
     // In case the first is not visible.
     var rectSet = this.IteratorClass.widget.Shape;
-    var index = this.IteratorIndex;
     var confThresh = this.GetConfidenceThreshold();
-    if (rectSet.Confidences[index] < confThresh) {
+    if (rectSet.Confidences[this.IteratorIndex] < confThresh) {
       this.ChangeCurrent(1);
     }
   };

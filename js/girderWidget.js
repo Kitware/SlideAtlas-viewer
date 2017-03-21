@@ -242,7 +242,7 @@
       if (widget.type === 'pencil') {
         for (i = 0; i < widget.shapes.length; ++i) {
           points = widget.shapes[i];
-                    // add the z coordinate
+          // add the z coordinate
           for (j = 0; j < points.length; ++j) {
             points[j][2] = 0;
           }
