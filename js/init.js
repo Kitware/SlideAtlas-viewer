@@ -35,6 +35,8 @@ window.SA = window.SA || {};
     if (tileSource.filename) {
       image.filename = tileSource.filename;
       image.label = tileSource.filename;
+    } else {
+      image.label = image._id;
     }
     cache.SetImageData(image);
     return cache;

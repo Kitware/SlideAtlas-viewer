@@ -1,4 +1,3 @@
-// individual rectangles do not scale.  This will handle thousands as one annotation.
 // No rotation for now. No direct interaction for now.
 // No properties dialog for now.
 // Only the world / slide conrdinate system supported.
@@ -18,6 +17,7 @@
     this.Heights = [];
     this.Labels = [];
     this.Confidences = [];
+    this.Visibilities = undefined;
     // Hack to hide rects below a specific confidence.
     this.Threshold = 0.0;
 
@@ -30,7 +30,7 @@
   };
 
   RectSet.prototype.GetCenter = function (idx) {
-    idx = idx * 2;
+    idx = idx << 1;
     return [this.Centers[idx], this.Centers[idx + 1]];
   };
 
@@ -40,15 +40,15 @@
     this.Centers[idx + 1] = pt[1];
   };
 
-    // Set the size (width,height) of all the rectangles.
+  // Set the size (width,height) of all the rectangles.
   RectSet.prototype.SetShape = function (shape) {
-    for (var i = 0; i < this.Widths.length; ++i) {
+    for (var i = 0; i < this.Widths.length; ++i){
       this.Widths[i] = shape[0];
       this.Heights[i] = shape[1];
     }
   };
 
-    // Helper for ground truth.
+  // Helper for ground truth.
   RectSet.prototype.CopyRectangle = function (source, inIdx, outIdx) {
     if (outIdx === undefined) {
       outIdx = this.Labels.length;
@@ -99,9 +99,9 @@
     // 2d Canvas -----------------------------------------------
     view.Context2d.save();
     // Identity.
-    view.Context2d.setTransform(1, 0, 0, 1, 0, 0);
+    view.Context2d.setTransform(1,0,0,1,0,0);
 
-        // only supported case: this.PositionCoordinateSystem === Shape.SLIDE
+    // only supported case: this.PositionCoordinateSystem == Shape.SLIDE
     var theta = view.Camera.Roll;
     var matrix0 = Math.cos(theta);
     var matrix1 = Math.sin(theta);
@@ -119,13 +119,13 @@
     x = view.Viewport[2] * (0.5 * (1.0 + x));
     y = view.Viewport[3] * (0.5 * (1.0 - y));
     view.Context2d.transform(matrix0, matrix1, matrix4, matrix5, x, y);
-
     view.Context2d.lineWidth = 1;
     var cIdx = 0;
-    x = 0;
-    y = 0;
+    var x = 0;
+    var y = 0;
     for (var i = 0; i < this.Widths.length; ++i) {
-      if (this.Confidences[i] >= this.Threshold) {
+      if ((!this.Visibilities || this.Visibilities[i]) && 
+          (this.Confidences[i] >= this.Threshold)) {
         var hw = this.Widths[i] / 2;
         var hh = this.Heights[i] / 2;
         x = this.Centers[cIdx++];
@@ -137,10 +137,10 @@
         } else if (this.Color) {
           view.Context2d.strokeStyle = this.Color;
         } else {
-                    // TODO: Put the scale into the canvas transform
-                    // Scalar to color map
-          var r = Math.floor(this.Confidences[i] * 255);
-          view.Context2d.strokeStyle = '#' + r.toString(16) + 'ff00';
+          // TODO: Put the scale into the canvas transform
+          // Scalar to color map
+          var r = Math.floor(this.Confidences[i]*255);
+          view.Context2d.strokeStyle = "#"+r.toString(16)+"ff00";
           view.Context2d.beginPath();
         }
         view.Context2d.moveTo((x - hw) * scale, (y - hh) * scale);
@@ -150,7 +150,7 @@
         view.Context2d.lineTo((x - hw) * scale, (y - hh) * scale);
         view.Context2d.stroke();
 
-        if (i === this.ActiveIndex) {
+        if (i == this.ActiveIndex) {
           // mark the rectangle
           view.Context2d.beginPath();
           view.Context2d.strokeStyle = '#00ffff';
@@ -186,10 +186,69 @@
       this.Layer.AddWidget(this);
     }
     this.Active = false;
-  }
+  };
 
   RectSetWidget.prototype.GetLength = function () {
     return this.Shape.Widths.length;
+  };
+
+  // note: this assumes rects are squares.
+  // I assume that the annotations are fixed and do not change after this
+  // is called.  This can be called multiple times 
+  // (when threshold or size changes).
+  // Remove overlapping annoations (visibility = false). 
+  // greedy: first supresses later)
+  RectSetWidget.prototype.ComputeVisibilities = function () {
+    var rectSet = this.Shape;
+    if (rectSet.Visibilities === undefined) {
+      rectSet.Visibilities = Array(rectSet.Confidences.length);
+      rectSet.Hash = new SAM.SpatialHash();
+      var bds = this.Layer.GetViewer().GetOverViewBounds();
+      rectSet.Hash.Build(rectSet, bds);
+    }
+    var visibilities = rectSet.Visibilities;
+    visibilities.fill(false);
+
+    for (var i = 0; i < visibilities.length; ++i) {
+      if (visibilities[i] === false && rectSet.Confidences[i] >= rectSet.Threshold) {
+        var width = rectSet.Widths[i];
+        var height = rectSet.Heights[i];
+        var center = rectSet.GetCenter(i);
+        // Get all the other rects overlapping this one.
+        var indexes = rectSet.Hash.GetOverlapping(center, width, height, 0.3);
+        var alone = true;
+        for (var j = 0; j < indexes.length; ++j) {
+          var rect2Idx = indexes[j];
+          if (rect2Idx !== i && visibilities[rect2Idx]) {
+            // found a visibile neighbor.
+            alone = false;
+          }
+        }
+        visibilities[i] = alone;
+      }
+    }
+  };
+
+  // Change the visiblities and colors to indicate change.
+  // This assume that the visibilities have been computed already.
+  // and hash has been built too.
+  RectSet.prototype.ChangeDetectionVisibilities = function (rectSet1, rectSet2,
+                                                            overlapThresh) {
+    var visibilities1 = rectSet1.Visibilities;
+    var visibilities2 = rectSet2.Visibilities;
+
+    for (var i=0; i < visibilities1.length; ++i) {
+      if (visibilities1[i]) {
+        var c = rectSet1.GetCenter(i);
+        var w = rectSet1.Widths[i];
+        var h = rectSet1.Widths[i];
+        var indexes = rectSet2.Hash.GetOverlapping(c, w, h, 0.3);
+        for (var j = 0; j < indexes.length; ++j) {
+          visibilities2[indexes[j]] = false;
+          visibilities1[i] = false;
+        }
+      }
+    }
   };
 
   // Sort by confidences
@@ -201,7 +260,7 @@
     if (lowToHigh) {
       reverse = -1;
     }
-    for (var i = 0; i < sortable.length; ++i) {
+    for (var i=0; i < sortable.length; ++i) {
       sortable[i] = {conf: reverse * this.Confidences[i], idx: i};
     }
     sortable.sort(function (a, b) {
@@ -218,20 +277,20 @@
     var newConfidences = new Array(this.Confidences.length);
     var newCenters = new Array(this.Centers.length);
     var newLabels = new Array(this.Centers.length);
-    for (i = 0; i < newConfidences.length; ++i) {
+    for (var i = 0; i < newConfidences.length; ++i) {
       var i2 = sortable[i].idx;
       newLabels[i] = this.Labels[i2];
       newConfidences[i] = this.Confidences[i2];
       i2 = i2 * 2;
-      newCenters[2 * i] = this.Centers[i2];
-      newCenters[2 * i + 1] = this.Centers[i2 + 1];
+      newCenters[2*i] = this.Centers[i2];
+      newCenters[2*i+1] = this.Centers[i2 + 1];
     }
     this.Centers = newCenters;
     this.Confidences = newConfidences;
     this.Labels = newLabels;
   };
 
-    // Threshold above is the only option for now.
+  // Threshold above is the only option for now.
   RectSetWidget.prototype.SetThreshold = function (threshold) {
     this.Shape.Threshold = threshold;
   };
@@ -243,9 +302,9 @@
   };
 
   RectSetWidget.prototype.Serialize = function () {
-    if (this.Shape === undefined) { return null; }
+    if(this.Shape === undefined){ return null; }
 
-    var obj = {type: 'rect_set'};
+    var obj = {type: "rect_set"};
     if (this.UserNoteFlag !== undefined) {
       obj.user_note_flag = this.UserNoteFlag;
     }
@@ -263,19 +322,19 @@
       obj.heights[i] = this.Shape.Heights[i];
       obj.confidences[i] = this.Shape.Confidences[i];
       obj.centers[i] = this.Shape.Centers[i];
-      obj.centers[i + num] = this.Shape.Centers[i + num];
+      obj.centers[i+num] = this.Shape.Centers[i + num];
       obj.labels[i] = this.Shape.Labels[i];
     }
     return obj;
   };
 
-    // Load a widget from a json object (origin MongoDB).
+  // Load a widget from a json object (origin MongoDB).
   RectSetWidget.prototype.Load = function (obj) {
     this.UserNoteFlag = obj.user_note_flag;
     if (obj.color) {
       this.Shape.Color = [parseFloat(obj.color[0]),
-        parseFloat(obj.color[1]),
-        parseFloat(obj.color[2])];
+                          parseFloat(obj.color[1]),
+                          parseFloat(obj.color[2])];
     }
     var num = obj.widths.length;
     this.Shape.Confidences = new Array(num);
@@ -290,37 +349,16 @@
       if (obj.labels) {
         this.Shape.Labels[i] = obj.labels[i];
       } else {
-        this.Shape.Labels[i] = '';
+        this.Shape.Labels[i] = "";
       }
       this.Shape.Centers[i] = parseFloat(obj.centers[i]);
-      this.Shape.Centers[i + num] = parseFloat(obj.centers[i + num]);
+      this.Shape.Centers[i+num] = parseFloat(obj.centers[i+num]);
     }
   };
 
   RectSetWidget.prototype.HandleDoubleClick = function (event) {
     return true;
   };
-
-    /*
-    RectSetWidget.prototype.HandleMouseDown = function(event) {
-        var index = this.Shape.ActiveIndex;
-        if (index < 0 || index >= this.Shape.Widths.length) {
-            return true;
-        }
-        if (event.which !== 1) {
-            return true;
-        }
-        // find the world location of the event.
-        var x = event.offsetX;
-        var y = event.offsetY;
-        var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
-        this.Shape.Centers[2*index] = pt[0];
-        this.Shape.Centers[2*index+1] = pt[1];
-        // Click to center and move to the next.
-        this.Shape.Labels[index] = "car";
-        this.ChangeActive(1);
-        return false;
-    } */
 
   RectSetWidget.prototype.HandleMouseUp = function (event) {
     return true;
@@ -350,7 +388,7 @@
     return this.Active;
   };
 
-    // Multiple active states. Active state is a bit confusing.
+  // Multiple active states. Active state is a bit confusing.
   RectSetWidget.prototype.GetActive = function () {
     return this.Active;
   };

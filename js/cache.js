@@ -640,7 +640,10 @@
       var node = this.Levels[0].Tiles[i];
       if (node !== null) {
         if (node.BranchTimeStamp < SA.PruneTimeTiles || node.BranchTimeStamp < SA.PruneTimeTextures) {
-          this.RecursivePruneTiles(node);
+          var count = this.RecursivePruneTiles(node);
+          if (count > 0) {
+            console.log("prune "+count+" from "+cache.Image.label);
+          }
         }
       }
     }
@@ -648,6 +651,7 @@
 
   Cache.prototype.RecursivePruneTiles = function (node) {
     var leaf = true;
+    var count = 0;
 
     for (var i = 0; i < 4; ++i) {
       var child = node.Children[i];
@@ -655,12 +659,13 @@
         leaf = false;
         if (child.BranchTimeStamp < SA.PruneTimeTiles ||
           child.BranchTimeStamp < SA.PruneTimeTextures) {
-          this.RecursivePruneTiles(child);
+          count += this.RecursivePruneTiles(child);
         }
       }
     }
     if (leaf && node.Parent !== null) { // Roots have null parents.  Do not prune roots.
       if (node.BranchTimeStamp < SA.PruneTimeTextures) {
+        // when using webgl, texture memery was a more limited resource.
         node.DeleteTexture();
       }
       if (node.BranchTimeStamp < SA.PruneTimeTiles) {
@@ -668,7 +673,7 @@
           SA.LoadQueueRemove(node);
         }
         var parent = node.Parent;
-      // nodes will always have parents because we do not steal roots.
+        // nodes will always have parents because we do not steal roots.
         if (parent.Children[0] === node) {
           parent.Children[0] = null;
         } else if (parent.Children[1] === node) {
@@ -681,8 +686,10 @@
         node.Parent = null;
         this.UpdateBranchTimeStamp(parent);
         node.destructor();
+        count += 1;
       }
     }
+    return count;
   };
 
   SA.Cache = Cache;
