@@ -568,4 +568,3 @@
 
   SA.StackSectionWidget = StackSectionWidget;
 })();
-

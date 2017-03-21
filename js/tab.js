@@ -91,4 +91,3 @@
     // Export the tab object.
   SA.Tab = Tab;
 })();
-

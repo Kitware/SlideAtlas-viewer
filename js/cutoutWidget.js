@@ -386,4 +386,3 @@
 
   SAM.CutoutWidget = CutoutWidget;
 })();
-

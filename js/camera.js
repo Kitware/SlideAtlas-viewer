@@ -401,4 +401,3 @@ window.SAM = window.SAM || {};
 
   SAM.Camera = Camera;
 })();
-

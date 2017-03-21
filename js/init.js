@@ -3,14 +3,6 @@ window.SA = window.SA || {};
 (function () {
   'use strict';
 
-  SA.imageProgram;
-  SA.polyProgram;
-  SA.squarePositionBuffer; // eslint-disable-line no-undef
-  SA.squareOutlinePositionBuffer;
-  SA.tileVertexPositionBuffer;
-  SA.tileVertexTextureCoordBuffer;
-  SA.tileCellBuffer;
-
   window.requestAnimationFrame =
         window.requestAnimationFrame ||
         window.mozRequestAnimationFrame ||
@@ -131,16 +123,16 @@ window.SA = window.SA || {};
     return s.slice(-n);
   };
 
-    // This file contains some global variables and misc procedures to
-    // initials shaders and some buffers we need and to render.
-    // Main function called by the default view.html template
-    // SA global will be set to this object.
+  // This file contains some global variables and misc procedures to
+  // initials shaders and some buffers we need and to render.
+  // Main function called by the default view.html template
+  // SA global will be set to this object.
 
-    // For managing progress with multiple ajax calls.
+  // For managing progress with multiple ajax calls.
   SA.ProgressCount = 0;
 
-    // How can we distribute the initialization of these?
-    // TODO: Many of these are not used anymore. Clean them up.
+  // How can we distribute the initialization of these?
+  // TODO: Many of these are not used anymore. Clean them up.
 
   SA.Caches = [];
 
@@ -158,10 +150,9 @@ window.SA = window.SA || {};
     }
   };
 
-    // Main function called by the default view.html template
-    // SA global will be set to this object.
+  // Main function called by the default view.html template
+  // SA global will be set to this object.
   SA.Run = function () {
-    SA.Running === true;
     var self = SA;
     if (SA.SessionId) {
       $.ajax({
@@ -170,7 +161,7 @@ window.SA = window.SA || {};
         success: function (data, status) {
           self.Session = data;
           self.HideAnnotations = data.hide;
-                    // TODO: fix this serialization.
+          // TODO: fix this serialization.
           self.Run2();
         },
         error: function () {

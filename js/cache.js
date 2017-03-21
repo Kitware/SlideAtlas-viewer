@@ -440,7 +440,6 @@
       qTile.LoadQueueAdd();
     }
     SA.LoadQueueUpdate();
-    return;
   };
 
 // ------ I think this method really belongs in the view! -----------
@@ -827,4 +826,3 @@
 
   SA.Cache = Cache;
 })();
-

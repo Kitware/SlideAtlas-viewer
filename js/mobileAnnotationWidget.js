@@ -61,7 +61,7 @@
     // Hard code only a single view for now.
     this.Layer = SA.VIEWERS[0].GetAnnotationLayer();
 
-    if (this.Layer.ActiveWidget !== undefined && widget) {
+    if (this.Layer.ActiveWidget !== undefined) {
       this.Layer.ActiveWidget.Deactivate();
     }
     var widget = new SAM.CircleWidget(this.Layer, false);
@@ -119,4 +119,3 @@
 
   SA.MobileAnnotationWidget = MobileAnnotationWidget;
 })();
-

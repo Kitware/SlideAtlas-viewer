@@ -133,4 +133,3 @@
 
   SA.FavoritesBar = FavoritesBar;
 })();
-

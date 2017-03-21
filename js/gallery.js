@@ -285,4 +285,3 @@
 
   SA.Gallery = Gallery;
 })();
-

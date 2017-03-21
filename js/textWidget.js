@@ -713,4 +713,3 @@
 
   SAM.TextWidget = TextWidget;
 })();
-

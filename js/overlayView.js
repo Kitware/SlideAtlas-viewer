@@ -178,4 +178,3 @@
 
   SA.OverlayView = OverlayView;
 })();
-
