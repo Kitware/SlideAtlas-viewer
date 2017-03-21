@@ -22,67 +22,67 @@
     var y = 70 + (idx * 6 * this.Radius);
     var self = this;
     this.Plus = $('<img>')
-            .appendTo(this.AnnotationLayer.GetCanvasDiv())
-            .attr('src', SA.ImagePathUrl + 'bluePlus.png')
-            .css({'position': 'absolute',
-              'left': (3 * this.Radius) + 'px',
-              'top': y + 'px',
-              'width': (2 * this.Radius) + 'px',
-              'height': (2 * this.Radius) + 'px',
-              'opacity': '0.6'})
-            .prop('title', 'Add Annotation')
-            .hover(function () { $(this).css({'opacity': '1'}); },
-                   function () { $(this).css({'opacity': '0.6'}); })
-            .click(function () { self.NewAnnotationItem(); });
+      .appendTo(this.AnnotationLayer.GetCanvasDiv())
+      .attr('src', SA.ImagePathUrl + 'bluePlus.png')
+      .css({'position': 'absolute',
+            'left': (3 * this.Radius) + 'px',
+            'top': y + 'px',
+            'width': (2 * this.Radius) + 'px',
+            'height': (2 * this.Radius) + 'px',
+            'opacity': '0.6'})
+      .prop('title', 'Add Annotation')
+      .hover(function () { $(this).css({'opacity': '1'}); },
+             function () { $(this).css({'opacity': '0.6'}); })
+      .click(function () { self.NewAnnotationItem(); });
 
     this.AnnotationObjects = [];
     this.Highlighted = undefined;
 
     this.MenuAnnotationObject = undefined;
     this.Menu = $('<div>')
-            .appendTo(this.AnnotationLayer.GetCanvasDiv())
-            .hide()
-            .mouseleave(function () { $(this).hide(); })
-            .css({'position': 'absolute',
-              'background-color': '#FFFFFF',
-              'border': '1px solid #666666',
-              'box-sizing': 'border-box',
-              'left': '-78px',
-              'width': '100px',
-              'padding': '0px 2px'});
+      .appendTo(this.AnnotationLayer.GetCanvasDiv())
+      .hide()
+      .mouseleave(function () { $(this).hide(); })
+      .css({'position': 'absolute',
+            'background-color': '#FFFFFF',
+            'border': '1px solid #666666',
+            'box-sizing': 'border-box',
+            'left': '-78px',
+            'width': '100px',
+            'padding': '0px 2px'});
 
     $('<button>')
-            .appendTo(this.Menu)
-            .text('Snap Shot')
-            .css({'margin': '2px 0px',
-              'width': '100%'})
-            .prop('title', 'Replace Annotation')
-            .click(
-                function () {
-                  self.SnapShotAnnotation(self.MenuAnnotationObject);
-                  self.Menu.hide();
-                });
+      .appendTo(this.Menu)
+      .text('Snap Shot')
+      .css({'margin': '2px 0px',
+            'width': '100%'})
+      .prop('title', 'Replace Annotation')
+      .click(
+        function () {
+          self.SnapShotAnnotation(self.MenuAnnotationObject);
+          self.Menu.hide();
+        });
     $('<button>')
-            .appendTo(this.Menu)
-            .text('Delete')
-            .css({'margin': '2px 0px',
-              'width': '100%'})
-            .click(
-                function () {
-                  self.DeleteAnnotation(self.MenuAnnotationObject);
-                  self.Menu.hide();
-                });
+      .appendTo(this.Menu)
+      .text('Delete')
+      .css({'margin': '2px 0px',
+            'width': '100%'})
+      .click(
+        function () {
+          self.DeleteAnnotation(self.MenuAnnotationObject);
+          self.Menu.hide();
+        });
     $('<button>')
-            .appendTo(this.Menu)
-            .text('Properties')
-            .css({'margin': '2px 0px',
-              'width': '100%'})
-            .click(
-                function () {
-                    // Not implemented yet.
-                    // self.ShowAnnotationPropertiesDialog(self.MenuAnnotationObject);
-                  self.Menu.hide();
-                });
+      .appendTo(this.Menu)
+      .text('Properties')
+      .css({'margin': '2px 0px',
+            'width': '100%'})
+      .click(
+        function () {
+          // Not implemented yet.
+          // self.ShowAnnotationPropertiesDialog(self.MenuAnnotationObject);
+          self.Menu.hide();
+        });
   }
 
   // Create a new annotation item from the annotation layer.
@@ -116,7 +116,8 @@
   GirderWidget.prototype.LoadGirderImageItem = function (itemId) {
         // var itemId = "564e42fe3f24e538e9a20eb9";
         // I think data is the wron place to pass these parameters.
-    var data = {'limit': 50,
+    var data = {
+      'limit': 50,
       'offset': 0,
       'sort': 'lowerName',
       'sortdir': 0};
@@ -156,7 +157,8 @@
 
     // record the view.
     var cam = this.AnnotationLayer.GetCamera();
-    var element = {'type': 'view',
+    var element = {
+      'type': 'view',
       'center': cam.GetFocalPoint(),
       'height': cam.GetHeight(),
       'width': cam.GetWidth(),
@@ -169,7 +171,8 @@
       var widget = this.AnnotationLayer.GetWidget(i).Serialize();
       if (widget.type === 'circle') {
         widget.origin[2] = 0; // z coordinate
-        element = {'type': 'circle',
+        element = {
+          'type': 'circle',
           'center': widget.origin,
           'radius': widget.radius};
       }
@@ -180,16 +183,19 @@
         points[1][1] += widget.position[1];
         points[0][2] = 0;
         points[1][2] = 0;
-        element = {'type': 'arrow',
+        element = {
+          'type': 'arrow',
           'lineWidth': 10,
           'fillColor': SAM.ConvertColorToHex(widget.color),
           'points': points};
-        element.label = {'value': widget.string,
+        element.label = {
+          'value': widget.string,
           'fontSize': widget.size,
           'color': SAM.ConvertColorToHex(widget.color)};
       }
       if (widget.type === 'grid') {
-        element = {'type': 'rectanglegrid',
+        element = {
+          'type': 'rectanglegrid',
           'center': widget.origin,
           'width': widget.bin_width * widget.dimensions[0],
           'height': widget.bin_height * widget.dimensions[1],
@@ -199,7 +205,8 @@
           'heightSubdivisions': widget.dimensions[1]};
       }
       if (widget.type === 'rect') {
-        element = {'type': 'rectangle',
+        element = {
+          'type': 'rectangle',
           'label': {'value': 'test'},
           'center': widget.origin,
           'height': widget.height,
@@ -209,7 +216,8 @@
       if (widget.type === 'rect_set') {
         var num = widget.widths.length;
         for (j = 0; j < num; ++j) {
-          element = {'type': 'rectangle',
+          element = {
+            'type': 'rectangle',
             'label': {'value': widget.labels[j]},
             'center': [widget.centers[2 * j], widget.centers[2 * j + 1], 0],
             'height': widget.heights[j],
@@ -225,7 +233,8 @@
         for (j = 0; j < widget.points.length; ++j) {
           widget.points[j][2] = 0;
         }
-        element = {'type': 'polyline',
+        element = {
+          'type': 'polyline',
           'closed': widget.closedloop,
           'points': widget.points};
       }
@@ -234,7 +243,8 @@
         for (j = 0; j < widget.points.length; ++j) {
           widget.points[j][2] = 0;
         }
-        element = {'type': 'polyline',
+        element = {
+          'type': 'polyline',
           'closed': true,
           'points': widget.points};
       }
@@ -242,11 +252,12 @@
       if (widget.type === 'pencil') {
         for (i = 0; i < widget.shapes.length; ++i) {
           points = widget.shapes[i];
-          // add the z coordinate
+          // Add the z coordinate.
           for (j = 0; j < points.length; ++j) {
             points[j][2] = 0;
           }
-          element = {'type': 'polyline',
+          element = {
+            'type': 'polyline',
             'closed': false,
             'points': points};
           // Hackish way to deal with multiple lines.
@@ -334,23 +345,24 @@
 
     var self = this;
     var circle = $('<div>')
-            .appendTo(this.AnnotationLayer.GetCanvasDiv())
-            .css({'position': 'absolute',
-              'left': (3 * this.Radius) + 'px',
-              'top': y + 'px',
-              'min-width': (2 * this.Radius) + 'px',
-              'min-height': (2 * this.Radius) + 'px',
-              'background-color': '#55BBFF',
-              'opacity': '0.6',
-              'border': '1px solid #666666',
-              'border-radius': this.Radius + 'px'})
-            .prop('title', 'Show Annotation')
-            .text(data.annotation.name)
-            .hide() // hide until animation is finished.
-            .hover(function () { $(this).css({'opacity': '1'}); },
-                   function () { $(this).css({'opacity': '0.6'}); });
+      .appendTo(this.AnnotationLayer.GetCanvasDiv())
+      .css({'position': 'absolute',
+            'left': (3 * this.Radius) + 'px',
+            'top': y + 'px',
+            'min-width': (2 * this.Radius) + 'px',
+            'min-height': (2 * this.Radius) + 'px',
+            'background-color': '#55BBFF',
+            'opacity': '0.6',
+            'border': '1px solid #666666',
+            'border-radius': this.Radius + 'px'})
+      .prop('title', 'Show Annotation')
+      .text(data.annotation.name)
+      .hide() // hide until animation is finished.
+      .hover(function () { $(this).css({'opacity': '1'}); },
+             function () { $(this).css({'opacity': '0.6'}); });
 
-    var annotObj = {Data: data,
+    var annotObj = {
+      Data: data,
       Circle: circle};
     this.AnnotationObjects.push(annotObj);
 
@@ -365,24 +377,24 @@
                 // Position and show the properties menu.
         var pos = $(this).position();
         self.Menu
-                    .css({'left': (5 + pos.left + 2 * self.Radius) + 'px',
-                      'top': (pos.top) + 'px'})
-                    .show();
+          .css({'left': (5 + pos.left + 2 * self.Radius) + 'px',
+                'top': (pos.top) + 'px'})
+          .show();
         return false;
       }
       return true;
     });
 
-        // Annotate the "add annotation" button down.
+    // Annotate the "add annotation" button down.
     this.Plus.animate({'top': (y + (6 * this.Radius)) + 'px'}, 400,
-                          function () { circle.show(); });
+                      function () { circle.show(); });
 
     return annotObj;
   };
 
-    // Make the circle button yellow (and turn off the previous.)
+  // Make the circle button yellow (and turn off the previous.)
   GirderWidget.prototype.Highlight = function (annotObj) {
-        // Highlight the circle for this annotaiton.
+    // Highlight the circle for this annotaiton.
     if (this.Highlighted) {
       this.Highlighted.Circle.css({'background-color': '#55BBFF'});
     }
@@ -392,14 +404,14 @@
     }
   };
 
-    // Move the annotation info to the layer widgets and draw.
+  // Move the annotation info to the layer widgets and draw.
   GirderWidget.prototype.DisplayAnnotation = function (annotObj) {
     this.AnnotationLayer.SetVisibility(true);
     this.Highlight(annotObj);
 
     this.AnnotationLayer.Reset();
 
-        // Put all the rectangles into one set.
+    // Put all the rectangles into one set.
     var setObj = {};
     setObj.type = 'rect_set';
     setObj.centers = [];
@@ -423,13 +435,13 @@
         } else {
           cam.Roll = 0;
         }
-                // Ignore width for now because it is determined by the
-                // viewport.
+        // Ignore width for now because it is determined by the
+        // viewport.
         cam.ComputeMatrix();
-                // How to handle forcing viewer to render?
-                // I could have a callback.
-                // I could also make a $('.sa-viewer').EventuallyRender();
-                // or $('.sa-viewer').saViewer('EventuallyRender');
+        // How to handle forcing viewer to render?
+        // I could have a callback.
+        // I could also make a $('.sa-viewer').EventuallyRender();
+        // or $('.sa-viewer').saViewer('EventuallyRender');
         if (this.AnnotationLayer.Viewer) {
           this.AnnotationLayer.Viewer.EventuallyRender();
         }
