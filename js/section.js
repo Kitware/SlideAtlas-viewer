@@ -89,7 +89,7 @@
   Section.prototype.Draw = function (view) {
     var finishedRendering = true;
     if (view.gl) {
-            // Draw tiles.
+      // Draw tiles.
       var program = view.ShaderProgram;
       var gl = view.gl;
       gl.viewport(view.Viewport[0], view.Viewport[1],
@@ -107,6 +107,12 @@
       var cache = this.Caches[i];
       // Select the tiles to render first.
       this.Tiles = cache.ChooseTiles(view.Camera, SLICE, view.Tiles);
+      // Trying to get rid of flashing by putting the clear closer to the draw.
+      if (this.Tiles.length > 1 && view.ClearPending) {
+        view.Clear();
+        view.ClearPending = undefined;
+      }
+
       // For the 2d viewer, the order the tiles are drawn is very important.
       // Low-resolution tiles have to be drawn first.  Make a new sorted array.
       // The problem is that unloaded tiles fall back to rendering parents.

@@ -398,7 +398,12 @@
     return false;
   };
 
-    // Returns false when it is finished doing its work.
+  // Returns false when it is finished doing its work.
+  PolylineWidget.prototype.HandleClick = function (event) {
+    this.HandleMouseUp(event);
+  };
+
+  // Returns false when it is finished doing its work.
   PolylineWidget.prototype.HandleMouseUp = function (event) {
         // Shop dialog with right click.  I could have a menu appear.
     if (event.which === 3) {

@@ -94,13 +94,14 @@
     // Change the length of the scale based on the camera.
   ScaleWidget.prototype.Update = function () {
     if (!this.View) { return; }
-        // Compute the number of screen pixels in a meter.
+    // Compute the number of screen pixels in a meter.
     var scale = Math.round(
-            this.View.GetPixelsPerUnit() / this.View.GetMetersPerUnit());
+      this.View.GetPixelsPerUnit() / this.View.GetMetersPerUnit());
     if (this.PixelsPerMeter === scale) {
       return;
     }
-        // Save the scale so we know when to regenerate.
+
+    // Save the scale so we know when to regenerate.
     this.PixelsPerMeter = scale;
     var target = 200; // pixels
     var e = 0;
@@ -111,7 +112,7 @@
       binLengthViewer = binLengthViewer / 10;
       --e;
     }
-        // Now compute the units from e.
+    // Now compute the units from e.
     this.Units = 'nm';
     var factor = 1e-9;
     if (e >= -6) {
@@ -134,23 +135,23 @@
       this.Units = 'km';
       factor = 1000;
     }
-        // Length is set to the viewer pixel length of a tick / unit.
+    // Length is set to the viewer pixel length of a tick / unit.
     this.Shape.BinLength = binLengthViewer;
-        // Now add bins to get close to the target length.
+    // Now add bins to get close to the target length.
     this.Shape.NumberOfBins = Math.floor(target / binLengthViewer);
-        // compute the length of entire scale bar (units: viewer pixels).
+    // compute the length of entire scale bar (units: viewer pixels).
     var scaleLengthViewer = binLengthViewer * this.Shape.NumberOfBins;
     var scaleLengthMeters = scaleLengthViewer / this.PixelsPerMeter;
-        // Compute the label.
-        // The round should not change the value, only get rid of numerical error.
+    // Compute the label.
+    // The round should not change the value, only get rid of numerical error.
     var labelNumber = Math.round(scaleLengthMeters / factor);
     this.Label = labelNumber.toString() + this.Units;
 
-        // Save the length of the scale bar in world units.
-        // World (highest res image) pixels default to 0.25e-6 meters.
+    // Save the length of the scale bar in world units.
+    // World (highest res image) pixels default to 0.25e-6 meters.
     this.LengthWorld = scaleLengthMeters * 4e6;
 
-        // Update the label text and position
+    // Update the label text and position
     this.Text.String = this.Label;
     this.Text.UpdateBuffers(this.Layer.AnnotationView);
     this.Text.Position = [this.Shape.Origin[0] + (scaleLengthViewer / 2),
@@ -163,7 +164,7 @@
     if (!this.View || !this.View.HasUnits()) {
       return;
     }
-        // Update the scale if zoom changed.
+    // Update the scale if zoom changed.
     this.Update();
     this.Shape.Draw(view);
     this.Text.Draw(view);

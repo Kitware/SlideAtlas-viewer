@@ -1952,6 +1952,14 @@
   Viewer.prototype.HandleDoubleClick = function (event) {
     if (!this.InteractionEnabled) { return true; }
 
+    // Let the annotation layers have first dibs on processing the event.
+    for (var i = 0; i < this.Layers.length; ++i) {
+      var layer = this.Layers[i];
+      if (layer.HandleDoubleClick && !layer.HandleDoubleClick(event)) {
+        return false;
+      }
+    }
+
     var mWorld = this.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
     if (event.which === 1) {
       this.AnimateZoomTo(0.5, mWorld);
