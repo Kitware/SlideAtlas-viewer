@@ -10,7 +10,7 @@
     this.Color = [Math.random(),Math.random(),Math.random()];
 
     this.Initialize(parent,label);
-    this.SetSize(80);
+    this.SetSizeScale(1.0);
 
     this.Changeflag = false;
   }
@@ -114,20 +114,20 @@
         self.ColorCallback();
       });
 
-    this.SizeInput = $('<input type="number">').appendTo(color_wrapper)
+    this.SizeScaleInput = $('<input type="number">').appendTo(color_wrapper)
       .css({'width':'100%'})
       .prop('title', "Change the size of the detections")
-      .on('change', function(){self.SizeCallback();});
+      .on('change', function(){self.SizeScaleCallback();});
   };
 
-  LayerView.prototype.SetSize = function (size) {
-    this.SizeInput.val(size.toString());
-    this.RectSize = size;
+  LayerView.prototype.SetSizeScale = function (sizeScale) {
+    this.SizeScaleInput.val((Math.round(sizeScale*100)).toString());
+    // not used this.RectSizeScale = sizeScale;
     // This might not be necessary. Change event might trigger it for us.
-    this.SizeCallback();
+    this.SizeScaleCallback();
   };
 
-  LayerView.prototype.SizeCallback = function () {
+  LayerView.prototype.SizeScaleCallback = function () {
     this.Color = SAM.ConvertColor(this.ColorInput.val());
     for (var i = 0; i < this.Layers.length; ++i) {
       this.UpdateLayer(this.Layers[i]);
@@ -174,15 +174,15 @@
     var checked = this.VisibilityCheckBox.prop('checked');
     layer.SetVisibility(checked);
     if (checked) {
-      var size = parseInt(this.SizeInput.val());
+      var sizeScale = parseInt(this.SizeScaleInput.val()/100);
       var vis_value = parseInt(this.Slider.val()) / 100.0;
       for (var w_index = 0; w_index < layer.WidgetList.length; w_index++){
         var widget = layer.WidgetList[w_index];
         widget.SetThreshold(vis_value);
         widget.Shape.SetOutlineColor(this.Color);
-        widget.Shape.SetShape([size,size]);
+        widget.Shape.SetScale(sizeScale);
+        widget.ComputeVisibilities();
       }
-      widget.ComputeVisibilities();
     }
     layer.EventuallyDraw();
   };

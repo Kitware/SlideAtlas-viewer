@@ -11,6 +11,7 @@
 
   // use shape api, bu this is simpler so do not subclass.
   function RectSet () {
+    this.Scale = 1.0;
     // a single array [x,y,x,y,x,y...]
     this.Centers = [];
     this.Widths = [];
@@ -45,6 +46,16 @@
     for (var i = 0; i < this.Widths.length; ++i){
       this.Widths[i] = shape[0];
       this.Heights[i] = shape[1];
+    }
+  };
+
+  // Set the size (width,height) of all the rectangles.
+  RectSet.prototype.SetScale = function (scale) {
+    var k = scale / this.Scale;
+    this.Scale = scale;
+    for (var i = 0; i < this.Widths.length; ++i){
+      this.Widths[i] *= k;
+      this.Heights[i] *= k;
     }
   };
 
