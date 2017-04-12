@@ -263,44 +263,9 @@
   };
 
   // Make the annotation larger and smaller with the mouse wheel.
+  // TODO: Remove this legacy function
   GirderAnnotationEditor.prototype.HandleMouseWheel = function (event) {
-    if (!this.IteratorClass) {
-      // I acutally do not link useing the scroll wheel to resize the
-      // anntoations. Restrict this feature to interating for now.
-      return true;
-    }
-    var rectIdx = this.HighlightedRect.idx;
-    if (rectIdx === -1) {
-      return true;
-    }
-
-    // A rectangle is highlighted
-    var rectWidget = this.HighlightedRect.widget;
-    var rectSet = rectWidget.Shape;
-
-    // We want to accumulate the target, but not the duration.
-    var tmp = 0;
-    if (event.deltaY) {
-      tmp = event.deltaY;
-    } else if (event.wheelDelta) {
-      tmp = event.wheelDelta;
-    }
-    // Wheel event seems to be in increments of 3.
-    // depreciated mousewheel had increments of 120....
-    // Initial delta cause another bug.
-    // Lets restrict to one zoom step per event.
-    if (tmp > 0) {
-      rectSet.Widths[rectIdx] /= 0.9;
-      rectSet.Heights[rectIdx] /= 0.9;
-      this.SquareSize = rectSet.Heights[rectIdx];
-    } else if (tmp < 0) {
-      rectSet.Widths[rectIdx] *= 0.9;
-      rectSet.Heights[rectIdx] *= 0.9;
-      this.SquareSize = rectSet.Heights[rectIdx];
-    }
-    // Ignore rebuilding the hash for now.
-    this.Layer.EventuallyDraw();
-    return false;
+    return true;
   };
 
   // Stepping through the detection sequence.
@@ -987,6 +952,9 @@
   // 2d
   // I am extending the annotations from simple points to rectangles with
   // different sizes.  Each item will be added to multiple bins.
+  // This serves two purposes.
+  // Given a point, find the (best) picked renctanlge.
+  // Given a rectangle find all rectangle that overlap
   function SpatialHash () {
     // Must be initialized before use.
   }
@@ -1041,7 +1009,7 @@
     }
   };
 
-  // Returns the index of the best rect for the point selected..
+  // Returns the index of the best rect for the point selected.
   // Returns -1 if there are no rects containing the point.
   SpatialHash.prototype.Get = function (pt, confThresh) {
     // Find binds touching this square.
@@ -1078,4 +1046,70 @@
     }
     return best;
   };
+
+  // For changed detection
+  // Returns a list of all rectangles that overlap the input rectangle by
+  // the specified threshold fraction.
+  SpatialHash.prototype.GetOverlapping = function (center, width, height,
+                                                   overlapThresh) {
+    var overlapping = [];
+    var hw1 = width / 2;
+    var hh1 = height / 2;
+    var cx1 = center[0];
+    var cy1 = center[1];
+
+    // Loop over bins touching the input rectangle
+    var x, y;
+    x = center[0] - hw1;
+    var col1 = Math.floor((x - this.Origin[0]) / this.BinSize);
+    col1 = Math.max(Math.min(col1, this.XDim - 1), 0);
+    x = center[0] + hw1;
+    var col2 = Math.floor((x - this.Origin[0]) / this.BinSize);
+    col2 = Math.max(Math.min(col2, this.XDim - 1), 0);
+
+    y = center[1] - hh1;
+    var row1 = Math.floor((y - this.Origin[1]) / this.BinSize);
+    row1 = Math.max(Math.min(row1, this.YDim - 1), 0);
+    y = center[1] + hh1;
+    var row2 = Math.floor((y - this.Origin[1]) / this.BinSize);
+    row2 = Math.max(Math.min(row2, this.YDim - 1), 0);
+
+    for (var r = row1; r <= row2; ++r) {
+      for (var c = col1; c <= col2; ++c) {
+        var bin = this.Grid[r][c];
+        // compare all the rectangles referenced by this bin
+        for (var i = 0; i < bin.length; ++i) {
+          var rectIdx = bin[i];
+          var hw2 = this.RectSet.Widths[rectIdx] / 2;
+          var hh2 = this.RectSet.Heights[rectIdx] / 2;
+          var cx2 = this.RectSet.Centers[rectIdx << 1];
+          var cy2 = this.RectSet.Centers[(rectIdx << 1) + 1];
+          // Compute the intersection.
+          var xMin = Math.max(cx1 - hw1, cx2 - hw2);
+          var xMax = Math.min(cx1 + hw1, cx2 + hw2);
+          var yMin = Math.max(cy1 - hh1, cy2 - hh2);
+          var yMax = Math.min(cy1 + hh1, cy2 + hh2);
+          var dx = Math.max(0, xMax - xMin);
+          var dy = Math.max(0, yMax - yMin);
+          var overlap = (0.5 * dx * dy) / ((hw1 * hh1) + (hw2 * hh2));
+          if (overlap > overlapThresh) {
+            var found = false;
+            // SHould be few overlapping.  Linear search should be fine.
+            for (var j = 0; j < overlapping.length && !found; ++j) {
+              if (overlapping[j] === rectIdx) {
+                found = true;
+              }
+            }
+            if (!found) {
+              overlapping.push(rectIdx);
+            }
+          }
+        }
+      }
+    }
+
+    return overlapping;
+  };
+
+  SAM.SpatialHash = SpatialHash;
 })();

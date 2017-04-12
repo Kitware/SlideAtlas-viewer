@@ -301,11 +301,11 @@
     note.ViewerRecords[viewIdx].CopyViewer(this);
   };
 
-    // TODO: Make the annotation layer optional.
-    // I am moving some of the saViewer code into this viewer object because
-    // I am trying to abstract the single viewer used for the HTML presentation
-    // note and the full dual view / stack note.
-    // TODO: Make an alternative path that does not require a note.
+  // TODO: Make the annotation layer optional.
+  // I am moving some of the saViewer code into this viewer object because
+  // I am trying to abstract the single viewer used for the HTML presentation
+  // note and the full dual view / stack note.
+  // TODO: Make an alternative path that does not require a note.
   Viewer.prototype.ProcessArguments = function (args) {
     if (args.overview !== undefined) {
       this.SetOverViewVisibility(args.overview);
@@ -320,9 +320,9 @@
       this.SetRotatable(args.rotatable);
     }
 
-        // The way I handle the viewer edit menu is messy.
-        // TODO: Find a more elegant way to add tabs.
-        // Maybe the way we handle the anntation tab shouodl be our pattern.
+    // The way I handle the viewer edit menu is messy.
+    // TODO: Find a more elegant way to add tabs.
+    // Maybe the way we handle the anntation tab shouodl be our pattern.
     if (args.menu !== undefined) {
       if (!this.Menu) {
         this.Menu = new SA.ViewEditMenu(this, null);
@@ -1947,6 +1947,14 @@
 
   Viewer.prototype.HandleDoubleClick = function (event) {
     if (!this.InteractionEnabled) { return true; }
+
+    // Let the annotation layers have first dibs on processing the event.
+    for (var i = 0; i < this.Layers.length; ++i) {
+      var layer = this.Layers[i];
+      if (layer.HandleDoubleClick && !layer.HandleDoubleClick(event)) {
+        return false;
+      }
+    }
 
     var mWorld = this.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
     if (event.which === 1) {

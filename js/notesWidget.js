@@ -1495,40 +1495,12 @@
   };
 
   NotesWidget.prototype.SaveBrownNote = function () {
-        // Create a new note.
+    // Create a new note.
     var note = new SA.Note();
     note.RecordView(this.Display);
 
-        // This is not used and will probably be taken out of the scheme,
+    // This is not used and will probably be taken out of the scheme,
     note.SetParent(this.GetCurrentNote());
-
-        // Make a thumbnail image to represent the favorite.
-        // Bug: canvas.getDataUrl() not supported in Safari on iPad.
-        // Fix: If on mobile, use the thumbnail for the entire slide.
-    var src;
-    if (SAM.detectMobile()) {
-      var image = this.Display.GetViewer(0).GetCache().Image;
-      src = '/thumb?db=' + image.database + '&img=' + image._id + '';
-    } else {
-      var thumb = SA.display.CreateThumbnailImage(110);
-      src = thumb.src;
-    }
-
-        // Save the favorite (note) in the admin database for this specific user.
-    $.ajax({
-      type: 'post',
-      url: '/webgl-viewer/saveusernote',
-      data: {'note': JSON.stringify(note.Serialize(true)),
-        'thumb': src,
-        'col': 'views',
-        'type': 'Favorite'}, // "favorites"
-      success: function (data, status) {
-        SA.FAVORITES_WIDGET.FavoritesBar.LoadFavorites();
-      },
-      error: function () {
-        SA.Debug('AJAX - error() : saveusernote 2');
-      }
-    });
   };
 
     // Randomize the order of the children

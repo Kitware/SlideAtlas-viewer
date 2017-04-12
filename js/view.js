@@ -221,9 +221,11 @@
   };
 
   View.prototype.Clear = function () {
+    this.Context2d.save();
     this.Context2d.setTransform(1, 0, 0, 1, 0, 0);
         // TODO: get width and height from the canvas.
     this.Context2d.clearRect(0, 0, this.Viewport[2], this.Viewport[3]);
+    this.Context2d.restore();
   };
 
   View.prototype.DrawHistory = function (windowHeight) {

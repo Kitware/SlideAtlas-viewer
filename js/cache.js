@@ -51,8 +51,8 @@
       }
     };
 
-        // Higher levels are higher resolution.
-        // x, y, slide are integer indexes of tiles in the grid.
+    // Higher levels are higher resolution.
+    // x, y, slide are integer indexes of tiles in the grid.
     this.getTileUrl = function (level, x, y, z) {
       var g = this.GridSize[level];
       if (x < 0 || x >= g[0] || y < 0 || y >= g[1]) {
@@ -69,6 +69,7 @@
     };
   };
 
+  // TODO: Fix this.
   SA.GirderSource = function () {
     this.height = 18432;
     this.width = 18432;
@@ -80,7 +81,7 @@
     };
   };
 
-    // Our subdivision of leaves is arbitrary.
+  // Our subdivision of leaves is arbitrary.
   SA.IIIFSource = function () {
     this.Prefix = 'http://ids.lib.harvard.edu/ids/view/Converter?id=834753&c=jpgnocap';
     this.TileSize = 256;
@@ -149,161 +150,6 @@
       }
     }
     var cache = new SA.Cache();
-
-    // Special case to link to IIIF? Harvard art..
-    // http://ids.lib.harvard.edu/ids/view/Converter?id=834753&c=jpgnocap&s=1&r=0&x=0&y=0&w=600&h=600
-
-    var tileSource;
-    if (image._id === '556e0ad63ed65909dbc2e383') {
-      tileSource = new SA.IIIFSource();
-      tileSource.Prefix = 'http://ids.lib.harvard.edu/ids/view/Converter?id=47174896';
-        // "width":2087,"height":2550,"scale_factors":[1,2,4,8,16,32],
-      tileSource.setDimensions(2087, 2550);
-      image.levels = tileSource.Levels;
-      image.dimensions = tileSource.Dimensions;
-      image.bounds = [0, image.dimensions[0] - 1, 0, image.dimensions[1] - 1];
-      cache.SetImageData(image);
-      cache.TileSource = tileSource;
-      return cache;
-    }
-
-    if (image._id === '556c89a83ed65909dbc2e317') {
-      tileSource = new SA.IIIFSource();
-      tileSource.Prefix = 'http://ids.lib.harvard.edu/ids/view/Converter?id=834753&c=jpgnocap';
-      tileSource.setDimensions(3890, 5787);
-      image.levels = tileSource.Levels;
-      image.dimensions = tileSource.Dimensions;
-      image.bounds = [0, image.dimensions[0] - 1, 0, image.dimensions[1] - 1];
-      cache.SetImageData(image);
-      cache.TileSource = tileSource;
-      return cache;
-    }
-
-    // Special case to link to gigamacro.
-    if (image._id === '555a1af93ed65909dbc2e19a') {
-      tileSource = new SA.GigamacroSource();
-      tileSource.Prefix = 'http://www.gigamacro.com/content/AMNH/unit_box_test2_05-01-2015/zoomify/';
-      tileSource.setDimensions(14316, 8459);
-      image.levels = tileSource.Levels;
-      image.dimensions = tileSource.Dimensions;
-      image.bounds = [0, image.dimensions[0] - 1, 0, image.dimensions[1] - 1];
-      cache.SetImageData(image);
-      cache.TileSource = tileSource;
-      return cache;
-    }
-    if (image._id === '555a5e163ed65909dbc2e19d') {
-      tileSource = new SA.GigamacroSource();
-      tileSource.Prefix = 'http://www.gigamacro.com/content/cmnh/redbug_bottom/zoomify/';
-      tileSource.setDimensions(64893, 40749);
-      image.levels = tileSource.Levels;
-      image.dimensions = tileSource.Dimensions;
-      image.bounds = [0, image.dimensions[0] - 1, 0, image.dimensions[1] - 1];
-      cache.SetImageData(image);
-      cache.TileSource = tileSource;
-      return cache;
-    }
-    if (image._id === '555b66483ed65909dbc2e1a0') {
-      tileSource = new SA.GigamacroSource();
-      tileSource.Prefix = 'http://www.gigamacro.com/content/cmnh/redbug_top/zoomify/';
-      tileSource.setDimensions(64893, 40749);
-      image.levels = tileSource.Levels;
-      image.dimensions = tileSource.Dimensions;
-      image.bounds = [0, image.dimensions[0] - 1, 0, image.dimensions[1] - 1];
-      cache.SetImageData(image);
-      cache.TileSource = tileSource;
-      return cache;
-    }
-    if (image._id === '555b664d3ed65909dbc2e1a3') {
-      tileSource = new SA.GigamacroSource();
-      tileSource.Prefix = 'http://www.gigamacro.com/content/AMNH/drawer_unit_box_test_05-01-2015_08-52-29_0000/zoomify/';
-      tileSource.setDimensions(11893, 7322);
-      image.levels = tileSource.Levels;
-      image.dimensions = tileSource.Dimensions;
-      image.bounds = [0, image.dimensions[0] - 1, 0, image.dimensions[1] - 1];
-      cache.SetImageData(image);
-      cache.TileSource = tileSource;
-      return cache;
-    }
-    if (image._id === '555b66523ed65909dbc2e1a6') {
-      tileSource = new SA.GigamacroSource();
-      tileSource.Prefix = 'http://www.gigamacro.com/content/AMNH/full_drawer_test_05-01-2015_09-04-17_0000/zoomify/';
-      tileSource.setDimensions(44245, 34013);
-      image.levels = tileSource.Levels;
-      image.dimensions = tileSource.Dimensions;
-      image.bounds = [0, image.dimensions[0] - 1, 0, image.dimensions[1] - 1];
-      cache.SetImageData(image);
-      cache.TileSource = tileSource;
-      return cache;
-    }
-    if (image._id === '555c93973ed65909dbc2e1b5') {
-      tileSource = new SA.GigamacroSource();
-      tileSource.Prefix = 'http://www.gigamacro.com/content/gigamacro/impasto_polarized/zoomify/';
-      tileSource.setDimensions(76551, 57364);
-      image.levels = tileSource.Levels;
-      image.dimensions = tileSource.Dimensions;
-      image.bounds = [0, image.dimensions[0] - 1, 0, image.dimensions[1] - 1];
-      cache.SetImageData(image);
-      cache.TileSource = tileSource;
-      return cache;
-    }
-    if (image._id === '555c93913ed65909dbc2e1b2') {
-      tileSource = new SA.GigamacroSource();
-      tileSource.Prefix = 'http://www.gigamacro.com/content/gigamacro/restoration_polaraized/zoomify/';
-      tileSource.setDimensions(55884, 55750);
-      image.levels = tileSource.Levels;
-      image.dimensions = tileSource.Dimensions;
-      image.bounds = [0, image.dimensions[0] - 1, 0, image.dimensions[1] - 1];
-      cache.SetImageData(image);
-      cache.TileSource = tileSource;
-      return cache;
-    }
-
-    if (image._id === '555f46503ed65909dbc2e1b8') {
-      tileSource = new SA.GigamacroSource();
-      tileSource.Prefix = 'http://www.gigamacro.com/content/gigamacro/eucalyptus_10-31-2010/zoomify/';
-      tileSource.setDimensions(38392, 45242);
-      image.levels = tileSource.Levels;
-      image.dimensions = tileSource.Dimensions;
-      image.bounds = [0, image.dimensions[0] - 1, 0, image.dimensions[1] - 1];
-      cache.SetImageData(image);
-      cache.TileSource = tileSource;
-      return cache;
-    }
-    if (image._id === '555f46553ed65909dbc2e1bb') {
-      tileSource = new SA.GigamacroSource();
-      tileSource.Prefix = 'http://www.gigamacro.com/content/Bunton/leaf_fossil_04-30-2015/zoomify/';
-      tileSource.setDimensions(22590, 10793);
-      image.levels = tileSource.Levels;
-      image.dimensions = tileSource.Dimensions;
-      image.bounds = [0, image.dimensions[0] - 1, 0, image.dimensions[1] - 1];
-      cache.SetImageData(image);
-      cache.TileSource = tileSource;
-      return cache;
-    }
-    if (image._id === '555f465a3ed65909dbc2e1be') {
-      tileSource = new SA.GigamacroSource();
-      tileSource.Prefix = 'http://www.gigamacro.com/content/formsandsurfaces/maiden_hair_fern_v1_7-6-2012/zoomify/';
-      tileSource.setDimensions(22092, 22025);
-      image.levels = tileSource.Levels;
-      image.dimensions = tileSource.Dimensions;
-      image.bounds = [0, image.dimensions[0] - 1, 0, image.dimensions[1] - 1];
-      cache.SetImageData(image);
-      cache.TileSource = tileSource;
-      return cache;
-    }
-    if (image._id === '555f46623ed65909dbc2e1c1') {
-      tileSource = new SA.GigamacroSource();
-      tileSource.Prefix = 'http://www.gigamacro.com/content/gigamacro/nancy_plants_7-28-2014/zoomify/';
-      tileSource.setDimensions(40687, 69306);
-      image.levels = tileSource.Levels;
-      image.dimensions = tileSource.Dimensions;
-      image.bounds = [0, image.dimensions[0] - 1, 0, image.dimensions[1] - 1];
-      cache.SetImageData(image);
-      cache.TileSource = tileSource;
-      return cache;
-    }
-    // It is really time to implement this in the database ...
-
     cache.SetImageData(image);
 
     return cache;
@@ -314,7 +160,7 @@
     this.Tiles = new Array(xGridDim * yGridDim);
     this.GridDims = [xGridDim, yGridDim];
   };
-// No bounds checking.
+  // No bounds checking.
   CacheLevel.prototype.SetTile = function (tile) {
     this.Tiles[tile.X + (tile.Y * this.GridDims[0])] = tile;
     return tile;
@@ -341,6 +187,7 @@
     return this.Image;
   };
 
+  // This is specific for slideAtlas images.
   Cache.prototype.SetImageData = function (image) {
     if (!image.TileSize) {
       image.TileSize = 256;
@@ -381,15 +228,23 @@
     }
   };
 
-  Cache.prototype.SetScene = function (scene) {
-    var image = {
-      TileSize: scene.tileSize,
-      levels: scene.numLevels,
-      dimensions: scene.dimensions,
-      bounds: [0, scene.dimensions[0], 0, scene.dimensions[1]]};
+  Cache.prototype.SetTileSource = function (source) {
+    var w = source.width;
+    var h = source.height;
+    this.TileSource = source;
+    // Make an id for the image so it can be reused.
+    var image = {levels: source.maxLevel + 1,
+      dimensions: [w, h],
+      bounds: [0, w - 1, 0, h - 1]};
+    if (source.bounds) {
+      image.bounds = source.bounds;
+    }
 
+    if (source.filename) {
+      image.filename = source.filename;
+      image.label = source.filename;
+    }
     this.SetImageData(image);
-    this.TileSource = scene;
   };
 
   Cache.prototype.GetLeafSpacing = function () {
@@ -435,9 +290,14 @@
     if (this.Image.dimensions === undefined) {
       return;
     }
-    for (var slice = 1; slice <= this.Image.dimensions[2]; ++slice) {
-      qTile = this.GetTile(slice, 0, 0);
+    if (this.Image.dimensions.length < 3) {
+      qTile = this.GetTile(0, 0, 0);
       qTile.LoadQueueAdd();
+    } else {
+      for (var slice = 1; slice <= this.Image.dimensions[2]; ++slice) {
+        qTile = this.GetTile(slice, 0, 0);
+        qTile.LoadQueueAdd();
+      }
     }
     SA.LoadQueueUpdate();
   };
@@ -771,15 +631,18 @@
     return tile;
   };
 
-// Find the oldest tile, remove it from the tree and return it to be recycled.
-// This also prunes texture maps.
-// SA.PruneTimeTiles and SA.PruneTimeTextures are compared with used time of tile.
+  // Find the oldest tile, remove it from the tree and return it to be recycled.
+  // This also prunes texture maps.
+  // SA.PruneTimeTiles and SA.PruneTimeTextures are compared with used time of tile.
   Cache.prototype.PruneTiles = function () {
     for (var i = 0; i < this.Levels[0].Tiles.length; ++i) {
       var node = this.Levels[0].Tiles[i];
       if (node !== null) {
         if (node.BranchTimeStamp < SA.PruneTimeTiles || node.BranchTimeStamp < SA.PruneTimeTextures) {
-          this.RecursivePruneTiles(node);
+          var count = this.RecursivePruneTiles(node);
+          if (count > 0) {
+            console.log('prune ' + count + ' from ' + this.Image.label);
+          }
         }
       }
     }
@@ -787,6 +650,7 @@
 
   Cache.prototype.RecursivePruneTiles = function (node) {
     var leaf = true;
+    var count = 0;
 
     for (var i = 0; i < 4; ++i) {
       var child = node.Children[i];
@@ -794,12 +658,13 @@
         leaf = false;
         if (child.BranchTimeStamp < SA.PruneTimeTiles ||
           child.BranchTimeStamp < SA.PruneTimeTextures) {
-          this.RecursivePruneTiles(child);
+          count += this.RecursivePruneTiles(child);
         }
       }
     }
     if (leaf && node.Parent !== null) { // Roots have null parents.  Do not prune roots.
       if (node.BranchTimeStamp < SA.PruneTimeTextures) {
+        // when using webgl, texture memery was a more limited resource.
         node.DeleteTexture();
       }
       if (node.BranchTimeStamp < SA.PruneTimeTiles) {
@@ -807,7 +672,7 @@
           SA.LoadQueueRemove(node);
         }
         var parent = node.Parent;
-      // nodes will always have parents because we do not steal roots.
+        // nodes will always have parents because we do not steal roots.
         if (parent.Children[0] === node) {
           parent.Children[0] = null;
         } else if (parent.Children[1] === node) {
@@ -820,8 +685,10 @@
         node.Parent = null;
         this.UpdateBranchTimeStamp(parent);
         node.destructor();
+        count += 1;
       }
     }
+    return count;
   };
 
   SA.Cache = Cache;

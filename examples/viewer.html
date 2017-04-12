@@ -8,14 +8,17 @@
       $(document).ready(function() {
         $('#viewer')
           .css({'width':'100%',
-                'height':'750px'})
-          .saViewer({
+                'height':'750px',
+                'position':'relative'});
+        SA.SAViewer($('#viewer'),
+          {
             zoomWidget: true,
             drawWidget: true,
             prefixUrl: '../dist/img/',
             tileSource: {
               height: 131072,
               width: 115074,
+              bounds: [0, 115073, 60000, 131072],
               tileSize: 256,
               minLevel: 0,
               maxLevel: 9,
@@ -42,6 +45,8 @@
               }
             }
           });
+        SA.SAFullScreenButton($('#viewer'))
+          .css({'position': 'absolute', 'left': '2px', 'top': '2px'});
       });
     </script>
     <title>SlideAtlas Viewer</title>
