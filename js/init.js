@@ -52,10 +52,10 @@ window.SA = window.SA || {};
     record.Image = image;
     record.OverviewBounds = tileSource.bounds;
     var bds = tileSource.bounds;
-    record.Camera = {FocalPoint: [(bds[0] + bds[1]) / 2,
-                                  (bds[2] + bds[3]) / 2],
-                     Roll: 0,
-                     Height: bds[3]-bds[2]};
+    record.Camera = {
+      FocalPoint: [(bds[0] + bds[1]) / 2, (bds[2] + bds[3]) / 2],
+      Roll: 0,
+      Height: bds[3] - bds[2]};
     return record;
   };
 

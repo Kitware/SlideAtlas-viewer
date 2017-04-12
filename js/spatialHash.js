@@ -6,9 +6,9 @@
 (function () {
   'use strict';
 
-  window.testChangeDetection = function() {
+  window.testChangeDetection = function () {
     var rectSet1 = [
-      {point1: [0.0, 0.0],   point2: [10.0, 5.0],  confidence: 0.2},
+      {point1: [0.0, 0.0], point2: [10.0, 5.0], confidence: 0.2},
       {point1: [100.0, 0.0], point2: [110.0, 5.0], confidence: 0.3},
       {point1: [200.0, 0.0], point2: [210.0, 5.0], confidence: 0.4},
       {point1: [300.0, 0.0], point2: [310.0, 5.0], confidence: 0.5},
@@ -17,7 +17,7 @@
       {point1: [300.0, 0.0], point2: [310.0, 5.0], confidence: 0.8}];
 
     var rectSet2 = [
-      {point1: [0.0, 0.0],   point2: [10.0, 5.0],  confidence: 0.2},
+      {point1: [0.0, 0.0], point2: [10.0, 5.0], confidence: 0.2},
       {point1: [100.0, 1.0], point2: [110.0, 6.0], confidence: 0.3},
       {point1: [200.0, 2.0], point2: [210.0, 7.0], confidence: 0.4},
       {point1: [300.0, 3.0], point2: [310.0, 8.0], confidence: 0.5},
@@ -25,7 +25,7 @@
       {point1: [300.0, 5.0], point2: [310.0, 10.0], confidence: 0.7},
       {point1: [300.0, 6.0], point2: [310.0, 11.0], confidence: 0.8}];
 
-    results = ChangeDetection(rectSet1, rectSet2, 0.5, 0.25);
+    var results = ChangeDetection(rectSet1, rectSet2, 0.5, 0.25);
     console.log(results);
   };
 
@@ -33,20 +33,20 @@
   //   x1 <= x2 and y1 <= y2
   // Returns {arivals: rectSet, departures: rectSet, unchanged: rectSet}
   // I just resuse the rects in the input sets.
-  var ChangeDetection = function (rectSet1, rectSet2, overlapThresh, confidenceThresh) { 
+  var ChangeDetection = function (rectSet1, rectSet2, overlapThresh, confidenceThresh) {
     var rectHash = new SpatialHash();
     rectHash.Build(rectSet2);
-    // Make a copy of the second rect set to keep trak of arrivals.
+    // Make a copy of the second rect set to keep track of arrivals.
     var copy2 = rectSet2.slice(0);
 
     var departures = [];
     var arrivals = [];
     var unchanged = [];
-    for (var i = 0; i < copy1.length; ++i) {
-      rect1 = rect11[i];
+    for (var i = 0; i < rectSet1.length; ++i) {
+      var rect1 = rectSet1[i];
       if (rect1.confidence > confidenceThresh) {
-        overlapping = rectHash.GetOverlapping(rect1, overlapThresh, confidenceThresh);
-        if (overlapping.length == 0) {
+        var overlapping = rectHash.GetOverlapping(rect1, overlapThresh, confidenceThresh);
+        if (overlapping.length === 0) {
           // Rect1 has no corresponding rect in rectSet2.
           departures.push(rect1);
         } else {
@@ -60,7 +60,7 @@
       }
     }
     // Now fill in the departures from the ones leftover.
-    for (var i = 0; i < copy2.length; ++i) {
+    for (i = 0; i < copy2.length; ++i) {
       if (copy2[i]) {
         arrivals.push(copy2[i]);
       }
@@ -77,7 +77,6 @@
 
   // rectSet is [{point1: [x1,y1], points: [x2,y2], confidence: c}, ...]
   //   x1 <= x2 and y1 <= y2
-
 
   function SpatialHash () {
     // Must be initialized before use.
@@ -126,7 +125,7 @@
       return undefined;
     }
     var rect = rectSet[0];
-    var bds =[rect.point1[0], rect.point1[1],rect.point2[0], rect.point2[1]];
+    var bds = [rect.point1[0], rect.point1[1], rect.point2[0], rect.point2[1]];
     for (var i = 1; i < rectSet.length; ++i) {
       rect = rectSet[i];
       bds[0] = Math.min(bds[0], rect.point1[0]);
@@ -196,12 +195,12 @@
   // Return a list of overlapping rect as:
   // {index; rectIdx, overlap: 0.5}
   // Only considers rectangles with confidence greater than confidenceThresh.
-  SpatialHash.prototype.GetOverlapping = function (rect1, 
+  SpatialHash.prototype.GetOverlapping = function (rect1,
                                                    overlapThreshold,
                                                    confidenceThresh) {
     var overlapping = [];
-    var width1 = rect1.point2[0]-rect1.point1[0];
-    var height1 = rect1.point2[1]-rect1.point1[1];
+    var width1 = rect1.point2[0] - rect1.point1[0];
+    var height1 = rect1.point2[1] - rect1.point1[1];
 
     // Loop over bins touching the input rectangle
     var x, y;
@@ -226,19 +225,20 @@
         for (var i = 0; i < bin.length; ++i) {
           var rect2Idx = bin[i];
           var rect2 = this.RectSet[rect2Idx];
-          if (rect.confidence > confidenceThreshold) {
-            var width2 = rect2.point2[0]-rect1.point1[0];
-            var height2 = rect2.point2[1]-rect1.point1[1];
+          if (rect1.confidence > confidenceThresh) {
+            var width2 = rect2.point2[0] - rect1.point1[0];
+            var height2 = rect2.point2[1] - rect1.point1[1];
             // Compute the intersection.
-            var xMin = Math.max(rect1.point1[0],rect2.point1[0]);
-            var xMax = Math.min(rect1.point2[0],rect2.point2[0]);
-            var yMin = Math.max(rect1.point1[1],rect2.point1[1]);
-            var yMax = Math.min(rect1.point2[1],rect2.point2[1]);
-            var dx = Math.max(0, xMax-xMin);
-            var dy = Math.max(0, yMax-yMin);
-            var overlap = (2.0*dx*dy) / ((width1*height1)+(width2*height2));
+            var xMin = Math.max(rect1.point1[0], rect2.point1[0]);
+            var xMax = Math.min(rect1.point2[0], rect2.point2[0]);
+            var yMin = Math.max(rect1.point1[1], rect2.point1[1]);
+            var yMax = Math.min(rect1.point2[1], rect2.point2[1]);
+            var dx = Math.max(0, xMax - xMin);
+            var dy = Math.max(0, yMax - yMin);
+            var overlap = (2.0 * dx * dy) /
+              ((width1 * height1) + (width2 * height2));
             if (overlap > overlapThreshold) {
-                overlapping.push({overlap: overlap, index: rect2Idx});
+              overlapping.push({overlap: overlap, index: rect2Idx});
             }
           }
         }

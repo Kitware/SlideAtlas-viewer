@@ -263,45 +263,9 @@
   };
 
   // Make the annotation larger and smaller with the mouse wheel.
+  // TODO: Remove this legacy function
   GirderAnnotationEditor.prototype.HandleMouseWheel = function (event) {
     return true;
-    if (!this.IteratorClass) {
-      // I acutally do not link useing the scroll wheel to resize the
-      // anntoations. Restrict this feature to interating for now.
-      return true;
-    }
-    var rectIdx = this.HighlightedRect.idx;
-    if (rectIdx === -1) {
-      return true;
-    }
-
-    // A rectangle is highlighted
-    var rectWidget = this.HighlightedRect.widget;
-    var rectSet = rectWidget.Shape;
-
-    // We want to accumulate the target, but not the duration.
-    var tmp = 0;
-    if (event.deltaY) {
-      tmp = event.deltaY;
-    } else if (event.wheelDelta) {
-      tmp = event.wheelDelta;
-    }
-    // Wheel event seems to be in increments of 3.
-    // depreciated mousewheel had increments of 120....
-    // Initial delta cause another bug.
-    // Lets restrict to one zoom step per event.
-    if (tmp > 0) {
-      rectSet.Widths[rectIdx] /= 0.9;
-      rectSet.Heights[rectIdx] /= 0.9;
-      this.SquareSize = rectSet.Heights[rectIdx];
-    } else if (tmp < 0) {
-      rectSet.Widths[rectIdx] *= 0.9;
-      rectSet.Heights[rectIdx] *= 0.9;
-      this.SquareSize = rectSet.Heights[rectIdx];
-    }
-    // Ignore rebuilding the hash for now.
-    this.Layer.EventuallyDraw();
-    return false;
   };
 
   // Stepping through the detection sequence.
@@ -1086,11 +1050,11 @@
   // For changed detection
   // Returns a list of all rectangles that overlap the input rectangle by
   // the specified threshold fraction.
-  SpatialHash.prototype.GetOverlapping = function (center, width, height, 
+  SpatialHash.prototype.GetOverlapping = function (center, width, height,
                                                    overlapThresh) {
     var overlapping = [];
-    var hw1 = width/2;
-    var hh1 = height/2;
+    var hw1 = width / 2;
+    var hh1 = height / 2;
     var cx1 = center[0];
     var cy1 = center[1];
 
@@ -1116,18 +1080,18 @@
         // compare all the rectangles referenced by this bin
         for (var i = 0; i < bin.length; ++i) {
           var rectIdx = bin[i];
-          var hw2 = this.RectSet.Widths[rectIdx]/2;
-          var hh2 = this.RectSet.Heights[rectIdx]/2;
+          var hw2 = this.RectSet.Widths[rectIdx] / 2;
+          var hh2 = this.RectSet.Heights[rectIdx] / 2;
           var cx2 = this.RectSet.Centers[rectIdx << 1];
           var cy2 = this.RectSet.Centers[(rectIdx << 1) + 1];
           // Compute the intersection.
-          var xMin = Math.max(cx1-hw1,cx2-hw2);
-          var xMax = Math.min(cx1+hw1,cx2+hw2);
-          var yMin = Math.max(cy1-hh1,cy2-hh2);
-          var yMax = Math.min(cy1+hh1,cy2+hh2);
-          var dx = Math.max(0, xMax-xMin);
-          var dy = Math.max(0, yMax-yMin);
-          var overlap = (0.5*dx*dy) / ((hw1*hh1)+(hw2*hh2));
+          var xMin = Math.max(cx1 - hw1, cx2 - hw2);
+          var xMax = Math.min(cx1 + hw1, cx2 + hw2);
+          var yMin = Math.max(cy1 - hh1, cy2 - hh2);
+          var yMax = Math.min(cy1 + hh1, cy2 + hh2);
+          var dx = Math.max(0, xMax - xMin);
+          var dy = Math.max(0, yMax - yMin);
+          var overlap = (0.5 * dx * dy) / ((hw1 * hh1) + (hw2 * hh2));
           if (overlap > overlapThresh) {
             var found = false;
             // SHould be few overlapping.  Linear search should be fine.

@@ -241,8 +241,8 @@
     }
 
     if (source.filename) {
-      image.filename = aource.filename;
-      image.label = aource.filename;
+      image.filename = source.filename;
+      image.label = source.filename;
     }
     this.SetImageData(image);
   };
@@ -631,9 +631,9 @@
     return tile;
   };
 
-// Find the oldest tile, remove it from the tree and return it to be recycled.
-// This also prunes texture maps.
-// SA.PruneTimeTiles and SA.PruneTimeTextures are compared with used time of tile.
+  // Find the oldest tile, remove it from the tree and return it to be recycled.
+  // This also prunes texture maps.
+  // SA.PruneTimeTiles and SA.PruneTimeTextures are compared with used time of tile.
   Cache.prototype.PruneTiles = function () {
     for (var i = 0; i < this.Levels[0].Tiles.length; ++i) {
       var node = this.Levels[0].Tiles[i];
@@ -641,7 +641,7 @@
         if (node.BranchTimeStamp < SA.PruneTimeTiles || node.BranchTimeStamp < SA.PruneTimeTextures) {
           var count = this.RecursivePruneTiles(node);
           if (count > 0) {
-            console.log("prune "+count+" from "+cache.Image.label);
+            console.log('prune ' + count + ' from ' + this.Image.label);
           }
         }
       }

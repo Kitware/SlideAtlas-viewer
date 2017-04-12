@@ -1,15 +1,15 @@
-//==============================================================================
+// ==============================================================================
 // A gui for that controls layers in multiple viewers.
 
 (function () {
-  "use strict";
+  'use strict';
 
   function LayerView (parent, label) {
     this.Layers = [];
     this.Label = label;
-    this.Color = [Math.random(),Math.random(),Math.random()];
+    this.Color = [Math.random(), Math.random(), Math.random()];
 
-    this.Initialize(parent,label);
+    this.Initialize(parent, label);
     this.SetSizeScale(1.0);
 
     this.Changeflag = false;
@@ -34,94 +34,97 @@
     var self = this;
 
     // The wrapper div that controls a single layer.
-    var layer_control = $('<div>')
+    var layerControl = $('<div>')
       .appendTo(parent)
-      .css({ 'border': '1px solid #CCC', 'width': '100%'});
+      .css({'border': '1px solid #CCC', 'width': '100%'});
 
-    var left_wrapper = $('<div>')
-      .appendTo(layer_control)
-      .css({ 'width': '80%',
-             'border-right': '1px solid #CCC', 
-             'width': '80%',
-             'height': '100%',
-             'display':'inline-block'});
+    var leftWrapper = $('<div>')
+      .appendTo(layerControl)
+      .css({
+        'width': '80%',
+        'border-right': '1px solid #CCC',
+        'height': '100%',
+        'display': 'inline-block'});
     // the sub-div that holds the direct toggle and the label.
-    var toggle_wrapper = $('<div>')
-      .appendTo(left_wrapper)
-      .css({ 'border-bottom': '1px solid #CCC', 
-             'width': '100%',
-             'float': 'top' });
+    var toggleWrapper = $('<div>')
+      .appendTo(leftWrapper)
+      .css({
+        'border-bottom': '1px solid #CCC',
+        'width': '100%',
+        'float': 'top' });
 
     this.VisibilityCheckBox = $('<input type="checkbox">')
-      .appendTo(toggle_wrapper)
-      .css({'display':'inline-block'})
+      .appendTo(toggleWrapper)
+      .css({'display': 'inline-block'})
       .on('change',
-          function(){
+          function () {
             self.VisibilityCheckCallback();
           })
       .prop('checked', true);
 
-    var layer_label = $('<div>')
-      .appendTo(toggle_wrapper)
-      .css({'display':'inline-block',
-            'margin-left':'1em'})
+    $('<div>')
+      .appendTo(toggleWrapper)
+      .css({
+        'display': 'inline-block',
+        'margin-left': '1em'})
       .html(label);
 
     this.ChangeCheckBox = $('<input type="checkbox">')
-      .appendTo(toggle_wrapper)
-      .css({'display':'inline-block',
-            'float':'right'})
+      .appendTo(toggleWrapper)
+      .css({
+        'display': 'inline-block',
+        'float': 'right'})
       .on('change',
-          function(){
+          function () {
             self.ChangeCheckCallback();
           })
       .prop('checked', false);
 
     // Wrapper for the confidence slider.
-    var conf_wrapper = $('<div>')
-      .appendTo(left_wrapper)
+    var confWrapper = $('<div>')
+      .appendTo(leftWrapper)
       .css({'width': '100%'});
 
     this.Slider = $('<input type="range" min="0" max="100">')
-      .appendTo(conf_wrapper)
+      .appendTo(confWrapper)
       .on('input',
-          function(){
+          function () {
             self.SliderCallback();
           });
-    //this.Slider[0].min = 75;
 
-    var min_label = $('<div>')
-      .appendTo(conf_wrapper)
-      .html("0%")
+    $('<div>')
+      .appendTo(confWrapper)
+      .html('0%')
       .css({ 'float': 'left' });
 
-    var max_label = $('<div>')
-      .appendTo(conf_wrapper)
-      .html("100%")
+    $('<div>')
+      .appendTo(confWrapper)
+      .html('100%')
       .css({ 'float': 'right' });
 
-    var color_wrapper = $('<div>')
-      .appendTo(layer_control)
-      .css({ 'padding':'5px',
-             'height': '100%',
-             'width':  '20%',
-             'display':'inline-block'});
+    var colorWrapper = $('<div>')
+      .appendTo(layerControl)
+      .css({
+        'padding': '5px',
+        'height': '100%',
+        'width': '20%',
+        'display': 'inline-block'});
     this.ColorInput = $('<input type="color">')
-      .appendTo(color_wrapper)
-      .css({'width':'100%'})
+      .appendTo(colorWrapper)
+      .css({'width': '100%'})
       .val(SAM.ConvertColorToHex(this.Color))
       .change(function () {
         self.ColorCallback();
       });
 
-    this.SizeScaleInput = $('<input type="number">').appendTo(color_wrapper)
-      .css({'width':'100%'})
-      .prop('title', "Change the size of the detections")
-      .on('change', function(){self.SizeScaleCallback();});
+    this.SizeScaleInput = $('<input type="number">').appendTo(colorWrapper)
+      .css({'width': '100%'})
+      .prop('title', 'Change the size of the detections')
+      .on('change', function () { self.SizeScaleCallback(); });
   };
 
   LayerView.prototype.SetSizeScale = function (sizeScale) {
-    this.SizeScaleInput.val((Math.round(sizeScale*100)).toString());
+    this.SizeScaleInput.val((Math.round(sizeScale * 100)).toString());
     // not used this.RectSizeScale = sizeScale;
     // This might not be necessary. Change event might trigger it for us.
     this.SizeScaleCallback();
@@ -159,8 +162,8 @@
       var set1 = this.Layers[0].WidgetList[0].Shape;
       var set2 = this.Layers[1].WidgetList[0].Shape;
       set1.ChangeDetectionVisibilities(set1, set2);
-      set1.SetOutlineColor("#FF0000");
-      set2.SetOutlineColor("#00FF00");
+      set1.SetOutlineColor('#FF0000');
+      set2.SetOutlineColor('#00FF00');
     }
   };
 
@@ -174,11 +177,11 @@
     var checked = this.VisibilityCheckBox.prop('checked');
     layer.SetVisibility(checked);
     if (checked) {
-      var sizeScale = parseInt(this.SizeScaleInput.val()/100);
-      var vis_value = parseInt(this.Slider.val()) / 100.0;
-      for (var w_index = 0; w_index < layer.WidgetList.length; w_index++){
-        var widget = layer.WidgetList[w_index];
-        widget.SetThreshold(vis_value);
+      var sizeScale = parseInt(this.SizeScaleInput.val() / 100);
+      var visValue = parseInt(this.Slider.val()) / 100.0;
+      for (var wIndex = 0; wIndex < layer.WidgetList.length; wIndex++) {
+        var widget = layer.WidgetList[wIndex];
+        widget.SetThreshold(visValue);
         widget.Shape.SetOutlineColor(this.Color);
         widget.Shape.SetScale(sizeScale);
         widget.ComputeVisibilities();
@@ -188,5 +191,4 @@
   };
 
   SA.LayerView = LayerView;
-
 })();
