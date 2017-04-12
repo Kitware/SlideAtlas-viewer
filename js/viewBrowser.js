@@ -375,4 +375,3 @@ window.SA = window.SA || {};
   SA.BrowserPanel = BrowserPanel;
   SA.ViewBrowser = ViewBrowser;
 })();
-

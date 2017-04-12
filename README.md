@@ -1,10 +1,10 @@
 # SlideAtlas-viewer
 
-[![Travis](https://img.shields.io/travis/SlideAtlas/SlideAtlas-viewer.svg?branch=master)](https://travis-ci.org/SlideAtlas/SlideAtlas-viewer)
+[![Travis](https://img.shields.io/travis/SlideAtlas/SlideAtlas-viewer/master.svg)](https://travis-ci.org/SlideAtlas/SlideAtlas-viewer)
 [![npm](https://img.shields.io/npm/v/slideatlas-viewer.svg)](https://www.npmjs.com/package/slideatlas-viewer)
 [![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/SlideAtlas/SlideAtlas-viewer/master/LICENSE)
-[![David](https://img.shields.io/david/SlideAtlas/SlideAtlas-viewer.svg)](https://github.com/SlideAtlas/SlideAtlas-viewer/blob/version-command/package.json)
-[![David](https://img.shields.io/david/dev/SlideAtlas/SlideAtlas-viewer.svg)](https://github.com/SlideAtlas/SlideAtlas-viewer/blob/version-command/package.json)
+[![David](https://img.shields.io/david/SlideAtlas/SlideAtlas-viewer.svg)](https://github.com/SlideAtlas/SlideAtlas-viewer/blob/master/package.json)
+[![David](https://img.shields.io/david/dev/SlideAtlas/SlideAtlas-viewer.svg)](https://github.com/SlideAtlas/SlideAtlas-viewer/blob/master/package.json)
 
 A multiresolution image viewer, optimized for whole slide images.
 
@@ -70,7 +70,7 @@ To generate a new release:
 
 ## Development Environment Tips
 ### Vim Style Checking
-To run style checks while editing in code Vim, check out [this tutorial](`http://usevim.com/2016/03/07/linting/`).
+To run style checks while editing in code Vim, check out [this tutorial](http://usevim.com/2016/03/07/linting/).
 
 ### Emacs Style Checking
 To run style checks with editing code in Emacs, use Flycheck.

@@ -240,7 +240,6 @@
       if (this.NoteDisplay) {
         this.NoteDisplay.html('' + current.StartIndex);
       }
-      return;
     }
   };
 
@@ -279,7 +278,6 @@
       if (this.NoteDisplay) {
         this.NoteDisplay.html('' + current.StartIndex);
       }
-      return;
     }
   };
 

@@ -287,4 +287,3 @@
 
   SA.AnnotationWidget = AnnotationWidget;
 })();
-

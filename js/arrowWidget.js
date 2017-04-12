@@ -288,4 +288,3 @@
 
   SAM.ArrowWidget = ArrowWidget;
 })();
-

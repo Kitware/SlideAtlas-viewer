@@ -242,7 +242,7 @@
       }
       if (defaults.LineWidth !== undefined) {
         this.Dialog.LineWidthInput.val(defaults.LineWidth);
-        this.Grid.LineWidth === defaults.LineWidth;
+        this.Grid.LineWidth = defaults.LineWidth;
       }
     }
 

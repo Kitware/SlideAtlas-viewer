@@ -14,10 +14,6 @@ window.SA = window.SA || {};
 (function () {
   'use strict';
 
-// All edit menus share a ViewBrowser.  Next to consider.  Share the
-// presentation browser panel.
-  SA.VIEW_BROWSER;
-
 // Other viewer is a hack for copy camera.
 // parent is for the view browser.
   function ViewEditMenu (viewer, otherViewer) {

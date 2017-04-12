@@ -56,12 +56,12 @@
         // Sometime I need to clean up the events for viewers.
     this.InteractionEnabled = true;
 
-    this.AnimateLast;
+    this.AnimateLast = null;
     this.AnimateDuration = 0.0;
     this.TranslateTarget = [0.0, 0.0];
 
     this.MainView = new SA.TileView(this.Div, false);
-        // webgl for main view.
+    // webgl for main view.
     this.MainView.OutlineColor = [0, 0, 0];
     this.MainView.Camera.ZRange = [0, 1];
     this.MainView.Camera.ComputeMatrix();
@@ -1542,15 +1542,10 @@
 
     if (this.Touches.length === 1) {
       this.HandleTouchPan(this);
-      return;
-    }
-    if (this.Touches.length === 2) {
+    } else if (this.Touches.length === 2) {
       this.HandleTouchPinch(this);
-      return;
-    }
-    if (this.Rotatable && this.Touches.length === 3) {
+    } else if (this.Rotatable && this.Touches.length === 3) {
       this.HandleTouchRotate(this);
-      return;
     }
   };
 
@@ -1705,6 +1700,7 @@
     var scale = 1;
     var s0 = 0;
     var s1 = 0;
+    var x, y;
     for (var i = 0; i < numTouches; ++i) {
       x = this.LastTouches[i][0] - this.LastMouseX;
       y = this.LastTouches[i][1] - this.LastMouseY;
@@ -1726,8 +1722,8 @@
     w0[0] = cam.FocalPoint[0] - w1[0];
     w0[1] = cam.FocalPoint[1] - w1[1];
         // This is the new focal point.
-    var x = w1[0] + w0[0] / scale;
-    var y = w1[1] + w0[1] / scale;
+    x = w1[0] + w0[0] / scale;
+    y = w1[1] + w0[1] / scale;
 
         // Remember the last motion to implement momentum.
     var momentumScale = (scale - 1) / dt;
@@ -2673,4 +2669,3 @@
 
   SA.Viewer = Viewer;
 })();
-

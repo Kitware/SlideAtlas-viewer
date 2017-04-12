@@ -29,9 +29,9 @@
   function ViewerRecord () {
     this.AnnotationVisibility = 0;
     this.Annotations = [];
-        // UserNotes are bound to image ids so the need to be stored in
-        // viewer records. They will always have one viewer record of the
-        // their own. They may have children links ....
+    // UserNotes are bound to image ids so the need to be stored in
+    // viewer records. They will always have one viewer record of the
+    // their own. They may have children links ....
     this.UserNote = null;
   }
 
@@ -46,9 +46,9 @@
     this.UserNote = source.UserNote;
   };
 
-    // I am still trying to figure out a good pattern for loading
-    // objects from mongo.
-    // Cast to a ViewerObject by setting its prototype does not work on IE
+  // I am still trying to figure out a good pattern for loading
+  // objects from mongo.
+  // Cast to a ViewerObject by setting its prototype does not work on IE
   ViewerRecord.prototype.Load = function (obj) {
     if (!obj.Image.units && obj.Image.filename) {
       var tmp = obj.Image.filename.split('.');
@@ -77,7 +77,7 @@
       this.Camera.Width = this.Camera.Height * 1.62;
     }
 
-        // Stuck with Overview because it is in the database.
+    // Stuck with Overview because it is in the database.
     if (!this.OverviewBounds) {
       this.OverviewBounds = this.Image.bounds;
     }
@@ -97,22 +97,22 @@
       this.Transform = t;
     }
 
-        // Anytime thie image changes, we have to set the user note.
+    // Anytime thie image changes, we have to set the user note.
     if (this.UserNote) {
-            // Will this ever happen?
-            // Should we save the old if it does?
-            // For now, let the caller worry about it.
+      // Will this ever happen?
+      // Should we save the old if it does?
+      // For now, let the caller worry about it.
       console.log('Loading over a user note');
     }
 
     if (!this.UserFlag) {
       if (!this.UserNote || this.UserNote.Parent !== this.Image._id) {
-                // This returns a note if it has already been loaded.
+        // This returns a note if it has already been loaded.
         this.UserNote = SA.GetUserNoteFromImageId(this.Image._id);
         if (!this.UserNote) {
           this.UserNote = new SA.Note();
           this.UserNote.Parent = this.Image._id;
-                    // Copy the camera.
+          // Copy the camera.
           var record = new SA.ViewerRecord();
           record.Camera = new SAM.Camera();
           record.Camera.DeepCopy(this.Camera);
@@ -122,14 +122,14 @@
           record.UserFlag = true;
           this.UserNote.ViewerRecords = [record];
           this.UserNote.Type = 'UserNote';
-                    // User notes slowing down stack loading.
-                    // Make them load on demand.
+          // User notes slowing down stack loading.
+          // Make them load on demand.
         }
       }
     }
   };
 
-    // Move to note.js
+  // Move to note.js
   ViewerRecord.prototype.RequestUserNote = function () {
     if (!this.UserNote) {
       return;
@@ -138,8 +138,8 @@
       return;
     }
 
-        // TODO: Move this to note.js
-    this.UserNote.LoadState === 1; // REQUESTED
+    // TODO: Move this to note.js
+    this.UserNote.LoadState = 1; // REQUESTED
 
     var self = this;
     $.ajax({
@@ -150,9 +150,9 @@
       error: function () {
         SA.Debug('AJAX - error() : getusernotes');
         if (self.UserNote) {
-                    // TODO: Do not add notes to the SA.Notes
-                    // array until they are loaded.  Figure out
-                    // why this ajax call is failing for HM stack.
+          // TODO: Do not add notes to the SA.Notes
+          // array until they are loaded.  Figure out
+          // why this ajax call is failing for HM stack.
           SA.DeleteNote(self.UserNote);
           delete self.UserNote;
         }
@@ -160,7 +160,7 @@
     });
   };
 
-    // Move to note.js
+  // Move to note.js
   ViewerRecord.prototype.LoadUserNote = function (data) {
     if (data.Notes.length === 0) {
       return;
@@ -169,7 +169,7 @@
     var userNote = this.UserNote;
     var noteData = data.Notes[0];
 
-        // This should not happen, but if it does, merge notes as best as possible.
+    // This should not happen, but if it does, merge notes as best as possible.
     if (data.Notes.length > 1) {
       SA.Debug('Warning: More than one user note for the same image..');
       for (var i = 1; i < data.Notes.length; ++i) {
@@ -181,9 +181,9 @@
                         data.Notes[i].ViewerRecords[0].Annotations);
       }
     }
-        // If in the rare case that the user note took a long time to load
-        // and user text or annotations were added while waiting, merge
-        // them.
+    // If in the rare case that the user note took a long time to load
+    // and user text or annotations were added while waiting, merge
+    // them.
     if (userNote.Text !== '') {
       noteData.Text = userNote.Text + '<br>' + noteData.Text;
     }
@@ -195,8 +195,8 @@
 
     userNote.Load(noteData);
 
-        // The new notes need to be displayed.
-        // I do not like that this is global. We could have callbacks????
+    // The new notes need to be displayed.
+    // I do not like that this is global. We could have callbacks????
     SA.UpdateUserNotes();
   };
 
@@ -216,7 +216,7 @@
     this.UserNote = SA.GetUserNoteFromImageId(this.Image._id);
     this.Camera = viewer.GetCamera().Serialize();
 
-        // TODO: get rid of this hack somehow. Generalize layers?
+    // TODO: get rid of this hack somehow. Generalize layers?
     var annotationLayer = viewer.Layers[0];
     if (!annotationLayer) { return; }
 
@@ -229,19 +229,19 @@
     }
   };
 
-    // For stacks.  A reduced version of copy view.
+  // For stacks.  A reduced version of copy view.
   ViewerRecord.prototype.CopyAnnotations = function (viewer, userNoteFlag) {
     this.Annotations = [];
-        // TODO: get rid of this hack somehow. Generalize layers?
+    // TODO: get rid of this hack somehow. Generalize layers?
     if (viewer.Layers.length === 0) { return; }
     var annotationLayer = viewer.Layers[0];
     if (!annotationLayer) { return; }
     var widgets = viewer.Layers[0].GetWidgets();
     for (var i = 0; i < widgets.length; ++i) {
       var widget = widgets[i];
-            // Keep user note annotations separate from other annotations
-            // if ((userNoteFlag && widget.UserNoteFlag)) ||
-            //    (!userNoteFlag && !widget.UserNoteFlag)){ // ! exclusive or.
+      // Keep user note annotations separate from other annotations
+      // if ((userNoteFlag && widget.UserNoteFlag)) ||
+      //    (!userNoteFlag && !widget.UserNoteFlag)){ // ! exclusive or.
       widget.UserNoteFlag = widget.UserNoteFlag || false;
       if (userNoteFlag === widget.UserNoteFlag) { // ! exclusive or.
         var o = widgets[i].Serialize();
@@ -312,15 +312,14 @@
     var self = this;
     this.Display = display;
     this.RecordTimerId = 0;
-    this.Records;
 
     this.TimeLine = [];
     this.RedoStack = [];
     this.Recording = true;
     this.RecordingName = '';
 
-        // The recording button indicates that recording is in
-        // progress and also acts to stop recording.
+    // The recording button indicates that recording is in
+    // progress and also acts to stop recording.
     this.RecordButton = $('<img>')
             .appendTo('body')
             .css({
@@ -334,8 +333,8 @@
             .hide()
             .click(function () { self.RecordingStop(); });
 
-        // Optional buttons.  Exposed for testing.
-        // Undo (control z) and redo (control y) keys work,
+    // Optional buttons.  Exposed for testing.
+    // Undo (control z) and redo (control y) keys work,
     this.UndoButton = $('<img>').appendTo('body')
             .css({
               'opacity': '0.5',
@@ -364,11 +363,11 @@
       this.UpdateGUI();
     }
 
-        // We have to start with one state (since we are recording states at the end of a move).
+    // We have to start with one state (since we are recording states at the end of a move).
     this.RecordState();
   };
 
-    // Should we name a recording?
+  // Should we name a recording?
   RecorderWidget.prototype.UpdateGUI = function () {
     if (this.Recording) {
       this.RecordButton.show();
@@ -377,12 +376,12 @@
     }
   };
 
-    // Should we name a recording?
+  // Should we name a recording?
   RecorderWidget.prototype.RecordingStart = function () {
     if (this.Recording) { return; }
     this.Recording = true;
-        // Generate a recording name as a placeholder.
-        // User should be prompted for a name when recording stops.
+    // Generate a recording name as a placeholder.
+    // User should be prompted for a name when recording stops.
     var d = new Date();
     this.RecordingName = 'Bev' + d.getTime();
     SA.setCookie('SlideAtlasRecording', this.RecordingName, 1);
@@ -397,38 +396,38 @@
     SA.setCookie('SlideAtlasRecording', 'false', 1);
     this.UpdateGUI();
 
-        // Prompt for a name and if the user want to keep the recording.
+    // Prompt for a name and if the user want to keep the recording.
   };
 
   RecorderWidget.prototype.RecordStateCallback = function () {
     if (this.Display.GetNumberOfViewers() === 0) { return; }
 
-        // Timer called this method.  Timer id is no longer valid.
+    // Timer called this method.  Timer id is no longer valid.
     this.RecordTimerId = 0;
-        // Redo is an option after undo, until we save a new state.
+    // Redo is an option after undo, until we save a new state.
     this.RedoStack = [];
 
-        // Create a new note.
+    // Create a new note.
     var note = new SA.Note();
     note.Type = 'Record';
-        // This will probably have to be passed the viewers.
+    // This will probably have to be passed the viewers.
     note.RecordView(this.Display);
 
-        // The note will want to know its context
-        // The stack viewer does not have  notes widget.
+    // The note will want to know its context
+    // The stack viewer does not have  notes widget.
     if (SA.display) {
       var parentNote = SA.display.GetNote();
       if (!parentNote || !parentNote.Id) {
-                //  Note is not loaded yet.
-                // Wait some more
+        //  Note is not loaded yet.
+        // Wait some more
         this.RecordState();
         return;
       }
-            // ParentId should be depreciated.
+      // ParentId should be depreciated.
       note.ParentId = parentNote.Id;
       note.SetParent(parentNote);
     }
-        // Save the note in the admin database for this specific user.
+    // Save the note in the admin database for this specific user.
     $.ajax({
       type: 'post',
       url: '/webgl-viewer/saveusernote',
@@ -439,20 +438,20 @@
         note.Id = data;
       },
       error: function () {
-                // SA.Debug( "AJAX - error() : saveusernote" );
+        // SA.Debug( "AJAX - error() : saveusernote" );
       }
     });
 
     this.TimeLine.push(note);
-        // Remove it from the serachable global list.
-        // "Delete" recorder notes.  Once saved, we never user
-        // them again. I do not think tileline will be an issue.
+    // Remove it from the serachable global list.
+    // "Delete" recorder notes.  Once saved, we never user
+    // them again. I do not think tileline will be an issue.
     SA.DeleteNote(note);
   };
 
-    // Create a snapshot of the current state and push it on the TIME_LINE stack.
-    // I still do not compress scroll wheel zoom, so I am putting a timer event
-    // to collapse recording to lest than oner per second.
+  // Create a snapshot of the current state and push it on the TIME_LINE stack.
+  // I still do not compress scroll wheel zoom, so I am putting a timer event
+  // to collapse recording to lest than oner per second.
   RecorderWidget.prototype.RecordState = function () {
     if (this.Display.GetNumberOfViewers() === 0) { return; }
         // Delete the previous pending record timer
@@ -482,36 +481,36 @@
     });
   };
 
-    // Create a snapshot of the current state and push it on the TIME_LINE stack.
-    // I still do not compress scroll wheel zoom, so I am putting a timer event
-    // to collapse recording to lest than oner per second.
+  // Create a snapshot of the current state and push it on the TIME_LINE stack.
+  // I still do not compress scroll wheel zoom, so I am putting a timer event
+  // to collapse recording to lest than oner per second.
   RecorderWidget.prototype.RecordState = function () {
-        // Delete the previous pending record timer
+    // Delete the previous pending record timer
     if (this.RecordTimerId) {
       clearTimeout(this.RecordTimerId);
       this.RecordTimerId = 0;
     }
-        // Start a record timer.
+    // Start a record timer.
     var self = this;
     this.RecordTimerId = setTimeout(function () { self.RecordStateCallback(); }, 1000);
   };
 
-    // Move the state back in time.
+  // Move the state back in time.
   RecorderWidget.prototype.UndoState = function () {
     if (this.TimeLine.length > 1) {
-            // We need at least 2 states to undo.  The last state gets removed,
-            // the second to last get applied.
+      // We need at least 2 states to undo.  The last state gets removed,
+      // the second to last get applied.
       var recordNote = this.TimeLine.pop();
       this.RedoStack.push(recordNote);
 
-            // Get the new end state
+      // Get the new end state
       recordNote = this.TimeLine[this.TimeLine.length - 1];
-            // Now change the page to the state at the end of the timeline.
+      // Now change the page to the state at the end of the timeline.
       SA.SetNote(recordNote);
     }
   };
 
-    // Move the state forward in time.
+  // Move the state forward in time.
   RecorderWidget.prototype.RedoState = function () {
     if (this.RedoState.length === 0) {
       return;
@@ -526,4 +525,3 @@
   SA.ViewerRecord = ViewerRecord;
   SA.RecorderWidget = RecorderWidget;
 })();
-

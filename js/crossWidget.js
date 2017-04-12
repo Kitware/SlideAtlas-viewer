@@ -149,4 +149,3 @@
 
   SAM.CrossWidget = CrossWidget;
 })();
-

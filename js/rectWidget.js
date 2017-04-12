@@ -516,8 +516,8 @@
         active = true;
       }
     } else { // Disk
-      if (d < (1.0 + this.Tolerance + lineWidth) && d > (this.Tolerance + lineWidth) ||
-                d < lineWidth) {
+      if ((d < (1.0 + this.Tolerance + lineWidth) && d > (this.Tolerance + lineWidth)) ||
+          (d < lineWidth)) {
         active = true;
       }
     }

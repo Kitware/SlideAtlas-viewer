@@ -2556,4 +2556,3 @@
   SA.ClipboardPanel = ClipboardPanel;
   SA.Presentation = Presentation;
 })();
-
