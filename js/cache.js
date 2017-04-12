@@ -291,7 +291,7 @@
       return;
     }
     if (this.Image.dimensions.length < 3) {
-      qTile = this.GetTile(slice, 0, 0);
+      qTile = this.GetTile(0, 0, 0);
       qTile.LoadQueueAdd();
     } else {
       for (var slice = 1; slice <= this.Image.dimensions[2]; ++slice) {

@@ -250,4 +250,3 @@
 
   window.SpatialHash = SpatialHash;
 })();
-
