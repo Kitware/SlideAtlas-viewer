@@ -17,6 +17,9 @@
     }
     this.Radius = 7;
     this.AnnotationLayer = layer;
+    document.addEventListener("contextmenu", function(e){
+      e.preventDefault();
+    }, false);
 
     var idx = 0;
     var y = 70 + (idx * 6 * this.Radius);
@@ -51,7 +54,8 @@
         'box-sizing': 'border-box',
         'left': '-78px',
         'width': '100px',
-        'padding': '0px 2px'});
+        'padding': '0px 2px',
+        'z-index': '10'});
 
     $('<button>')
       .appendTo(this.Menu)
@@ -84,8 +88,7 @@
         'width': '100%'})
       .click(
         function () {
-          // Not implemented yet.
-          // self.ShowAnnotationPropertiesDialog(self.MenuAnnotationObject);
+          self.ShowAnnotationPropertiesDialog(self.MenuAnnotationObject);
           self.Menu.hide();
         });
   }
@@ -94,10 +97,10 @@
   // Save it in the database.  Add the annotation as a dot in the GUI.
   GirderWidget.prototype.NewAnnotationItem = function () {
     var annot = {'elements': []};
-    annot.name = (this.AnnotationObjects.length).toString();
+    annot.name = prompt("Name", "Annotation");
     annot.elements = this.RecordAnnotation();
 
-        // Make a new annotation in the database.
+    // Make a new annotation in the database.
     var self = this;
     if (window.girder) { // Conditional is for testing in slide atlas.
       girder.rest.restRequest({
@@ -106,11 +109,11 @@
         contentType: 'application/json',
         data: JSON.stringify(annot)
       }).done(function (retAnnot) {
-                // This has the girder id.
+        // This has the girder id.
         self.Highlight(self.AddAnnotation(retAnnot));
       });
     } else {
-            // for debugging without girder.
+      // for debugging without girder.
       self.Highlight(self.AddAnnotation(
         {_id: 'ABC',
           annotation: annot,
@@ -161,6 +164,7 @@
     var points;
 
     // record the view.
+    /*
     var cam = this.AnnotationLayer.GetCamera();
     var element = {
       'type': 'view',
@@ -171,7 +175,8 @@
     element.center[2] = 0;
     returnElements.push(element);
     element = undefined;
-
+    */
+    var element = undefined;
     for (i = 0; i < this.AnnotationLayer.GetNumberOfWidgets(); ++i) {
       var widget = this.AnnotationLayer.GetWidget(i).Serialize();
       if (widget.type === 'circle') {
@@ -287,6 +292,21 @@
       }
     }
     return returnElements;
+  };
+
+  GirderWidget.prototype.ShowAnnotationPropertiesDialog = function (annotObj) {
+    this.Highlight(annotObj);
+    annotObj.name = prompt("Name", annotObj.name);
+    annotObj.Circle.text(annotObj.name);
+    if (window.girder) {
+      // Save in the database
+      girder.rest.restRequest({
+        path: 'annotation/' + annotObj.Data._id,
+        method: 'PUT',
+        data: JSON.stringify(annotObj.Data.annotation),
+        contentType: 'application/json'
+      });
+    }
   };
 
   // Replace an existing annotation with the current state of the

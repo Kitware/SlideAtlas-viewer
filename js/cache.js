@@ -69,21 +69,10 @@
     };
   };
 
-  // TODO: Fix this.
-  SA.GirderSource = function () {
-    this.height = 18432;
-    this.width = 18432;
-    this.tileSize = 256;
-    this.minLevel = 0;
-    this.maxLevel = 7;
-    this.getTileUrl = function (level, x, y) {
-      return 'http://lemon:8081/api/v1/item/564e42fe3f24e538e9a20eb9/tiles/zxy/' + level + '/' + x + '/' + y;
-    };
-  };
-
   // Our subdivision of leaves is arbitrary.
   SA.IIIFSource = function () {
     this.Prefix = 'http://ids.lib.harvard.edu/ids/view/Converter?id=834753&c=jpgnocap';
+    alert("Hard coded tile size");
     this.TileSize = 256;
 
     this.setDimensions = function (xDim, yDim) {
