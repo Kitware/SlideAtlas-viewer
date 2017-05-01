@@ -2,18 +2,19 @@
 // renaming this as Rect, other possible name is OrientedRectangle
 
 (function () {
-    // Depends on the CIRCLE widget
+  // Depends on the CIRCLE widget
   'use strict';
 
-  var NEW = 0;
-  var DRAWING = 1;
-  var DRAG_CENTER = 2;
-  var DRAG_CORNER = 3;
-  var DRAG = 4;
-  var WAITING = 5; // The normal (resting) state.
-  var ACTIVE = 6; // Mouse is over the widget and it is receiving events.
-  var PROPERTIES_DIALOG = 7; // Properties dialog is up
+  var WAITING = 0;     // Normal inactive resting state.
+  var NEW = 1;         // Newly created and waigint to be placed.
+  var ACTIVE = 2;      // Mouse is over the widget and it is receiving events.
+  var PROPERTIES_DIALOG = 3; // Properties dialog is up
+  var WHICH_DRAG;    // Bits
+  var DRAG_X = 1;
+  var DRAG_Y = 2;
+  var DRAG_CENTER = 4;
 
+  // Remember the last size to use for the next.
   var DEFAULT_WIDTH = -1;
   var DEFAULT_HEIGHT = -1;
 
@@ -31,7 +32,7 @@
   Rect.prototype = new SAM.Shape();
 
   Rect.prototype.destructor = function () {
-        // Get rid of the buffers?
+    // Get rid of the buffers?
   };
 
   Rect.prototype.UpdateBuffers = function (view) {
@@ -64,15 +65,15 @@
 
   function RectWidget (layer, newFlag) {
     this.Visibility = true;
-        // Keep track of annotation created by students without edit
-        // permission.
+    // Keep track of annotation created by students without edit
+    // permission.
     this.UserNoteFlag = !SA.Edit;
 
     var self = this;
     this.Dialog = new SAM.Dialog(function () { self.DialogApplyCallback(); });
-        // Customize dialog for a circle.
+    // Customize dialog for a circle.
     this.Dialog.Title.text('Rect Annotation Editor');
-        // Color
+    // Color
     this.Dialog.ColorDiv =
             $('<div>')
             .appendTo(this.Dialog.Body)
@@ -89,7 +90,7 @@
             .val('#30ff00')
             .css({'display': 'table-cell'});
 
-        // Line Width
+    // Line Width
     this.Dialog.LineWidthDiv =
             $('<div>')
             .appendTo(this.Dialog.Body)
@@ -106,7 +107,7 @@
             .css({'display': 'table-cell'})
             .keypress(function (event) { return event.keyCode !== 13; });
 
-        // Area
+    // Area
     this.Dialog.AreaDiv =
             $('<div>')
             .appendTo(this.Dialog.Body)
@@ -122,7 +123,7 @@
             .appendTo(this.Dialog.AreaDiv)
             .css({'display': 'table-cell'});
 
-        // Get default properties.
+    // Get default properties.
     if (localStorage.RectWidgetDefaults) {
       var defaults = JSON.parse(localStorage.RectWidgetDefaults);
       if (defaults.Color) {
@@ -143,9 +144,9 @@
       return;
     }
 
-        // Lets save the zoom level (sort of).
-        // Load will overwrite this for existing annotations.
-        // This will allow us to expand annotations into notes.
+    // Lets save the zoom level (sort of).
+    // Load will overwrite this for existing annotations.
+    // This will allow us to expand annotations into notes.
     this.CreationCamera = layer.GetCamera().Serialize();
 
     this.Layer = layer;
@@ -169,11 +170,13 @@
 
     this.Layer.AddWidget(this);
 
-        // Note: If the user clicks before the mouse is in the
-        // canvas, this will behave odd.
+    // Note: If the user clicks before the mouse is in the
+    // canvas, this will behave odd.
 
     if (newFlag) {
       this.State = NEW;
+      // Do not render mouse "cursor" unti it moves and we know its location.
+      this.Visibility = false;
       this.Layer.ActivateWidget(this);
       this.Layer.GetCanvasDiv().css({'cursor': 'crosshair'});
       return;
@@ -183,7 +186,7 @@
     this.State = WAITING;
   }
 
-    // Threshold above is the only option for now.
+  // Threshold above is the only option for now.
   RectWidget.prototype.SetThreshold = function (threshold) {
     if (this.confidence !== undefined) {
       this.Visibility = this.confidence >= threshold;
@@ -191,15 +194,16 @@
   };
 
   RectWidget.prototype.Draw = function (view) {
-    if (this.State !== NEW && this.Visibility) {
+    // shape follows the cursor
+    if (this.Visibility) {
       this.Shape.Draw(view);
     }
   };
 
   RectWidget.prototype.PasteCallback = function (data, mouseWorldPt) {
     this.Load(data);
-        // Place the widget over the mouse.
-        // This would be better as an argument.
+    // Place the widget over the mouse.
+    // This would be better as an argument.
     this.Shape.Origin = [mouseWorldPt[0], mouseWorldPt[1]];
     this.Layer.EventuallyDraw();
     if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
@@ -222,7 +226,7 @@
     return obj;
   };
 
-    // Load a widget from a json object (origin MongoDB).
+  // Load a widget from a json object (origin MongoDB).
   RectWidget.prototype.Load = function (obj) {
     this.UserNoteFlag = obj.user_note_flag;
     this.Shape.Origin[0] = parseFloat(obj.origin[0]);
@@ -251,7 +255,7 @@
     this.Shape.FixedSize = false;
     this.Shape.UpdateBuffers(this.Layer.AnnotationView);
 
-        // How zoomed in was the view when the annotation was created.
+    // How zoomed in was the view when the annotation was created.
     if (obj.creation_camera !== undefined) {
       this.CreationCamera = obj.CreationCamera;
     }
@@ -262,13 +266,13 @@
       return true;
     }
 
-        // The dialog consumes all key events.
+    // The dialog consumes all key events.
     if (this.State === PROPERTIES_DIALOG) {
       return false;
     }
 
-    if (this.State === DRAWING) {
-            // escape key (or space or enter) to turn off drawing
+    if (this.State === NEW) {
+      // escape key (or space or enter) to turn off drawing
       if (event.keyCode === 27 || event.keyCode === 32 || event.keyCode === 13) {
         this.Deactivate();
                 // this widget was temporary, All rects created have been copied.
@@ -277,11 +281,11 @@
       }
     }
 
-        // Copy
+    // Copy
     if (event.keyCode === 67 && event.ctrlKey) {
-            // control-c for copy
-            // The extra identifier is not needed for widgets, but will be
-            // needed if we have some other object on the clipboard.
+      // control-c for copy
+      // The extra identifier is not needed for widgets, but will be
+      // needed if we have some other object on the clipboard.
       var clip = {Type: 'RectWidget', Data: this.Serialize()};
       localStorage.ClipBoard = JSON.stringify(clip);
       return false;
@@ -291,10 +295,23 @@
   };
 
   RectWidget.prototype.HandleDoubleClick = function (event) {
-    this.Deactivate();
-        // this widget was temporary, All rects created have been copied.
-    this.RemoveFromLayer();
-    return false;
+    if (this.State === NEW) {
+      this.Deactivate();
+      // this widget was temporary, All rects created have been copied.
+      this.RemoveFromLayer();
+      return false;
+    }
+    if (this.State === ACTIVE) {
+      // Start adding again
+      // Duplicate this widget and keep on drawing.
+      var copy = new RectWidget(this.Layer, false);
+      copy.Load(this.Serialize());
+      this.State = WAITING;
+      if (window.SA) { SA.RecordState(); }
+
+      DEFAULT_WIDTH = this.Shape.Width;
+      DEFAULT_HEIGHT = this.Shape.Height;
+    }
   };
 
   RectWidget.prototype.HandleMouseDown = function (event) {
@@ -305,152 +322,98 @@
     if (event.which !== 1) {
       return false;
     }
-    if (this.State === DRAWING) {
-            // Switch from draging an "icon" around to resizing the rect.
-      this.State = DRAG_CORNER;
-      return false;
-    }
-    if (this.State === DRAG_CENTER) {
-            // We need the viewer position of the circle center to drag radius.
-      this.OriginViewer =
-                this.Layer.GetCamera().ConvertPointWorldToViewer(this.Shape.Origin[0],
-                                                                 this.Shape.Origin[1]);
-      this.State = DRAG_CORNER;
-    }
-    if (this.State === ACTIVE) {
-            // Determine behavior from active radius.
-      if (this.NormalizedActiveDistance < 0.5) {
-        this.State = DRAG;
-      } else {
-        this.OriginViewer =
-                    this.Layer.GetCamera().ConvertPointWorldToViewer(this.Shape.Origin[0],
-                                                                     this.Shape.Origin[1]);
-        this.State = DRAG;
-      }
-    }
-    return true;
+    return false;
   };
 
-    // returns false when it is finished doing its work.
+  RectWidget.prototype.HandleMouseMove = function (event) {
+    var x = event.offsetX;
+    var y = event.offsetY;
+
+    // Mouse moving with no button pressed:
+    if (event.which === 0) {
+      // This keeps the rectangle from being drawn in the wrong place
+      // before we get our first event.
+      if (this.State === NEW) {
+        WHICH_DRAG = DRAG_X + DRAG_Y;
+        // THis is ignored until the mouse is pressed.
+        this.Visibility = true;
+        // Center follows mouse.
+        this.Shape.Origin = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
+        this.Layer.EventuallyDraw();
+        return false;
+      } else if (this.State === ACTIVE) {
+        // HandleMouseMove will not be called if the widget is waiting.
+        // This turns the widget off when the mouse moves away.
+        this.SetActive(this.CheckActive(event));
+        return false;
+      }
+    }
+
+    // Is this really necesary?
+    if (!this.Visibility) {
+      return true;
+    }
+
+    if (event.which !== 1) { return false; }
+
+    var worldPt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
+    if (this.State === ACTIVE && WHICH_DRAG == DRAG_CENTER) {
+      // Drag the whole thing.
+      this.Shape.Origin = worldPt;
+    } else if (this.State === ACTIVE || this.State === NEW) {
+      // Drag a corner (or an edge)
+      if (WHICH_DRAG & DRAG_X) {
+        var dx = Math.abs(worldPt[0] - this.Shape.Origin[0]);
+        this.Shape.Width = 2 * dx;
+      }
+      if (WHICH_DRAG & DRAG_Y) {
+        var dy = Math.abs(worldPt[1] - this.Shape.Origin[1]);
+        this.Shape.Height = 2 * dy;
+      }
+    }
+
+    this.Shape.UpdateBuffers();
+    this.PlacePopup();
+    this.Layer.EventuallyDraw();
+    return false;
+  };
+
+  // returns false when it is finished doing its work.
   RectWidget.prototype.HandleMouseUp = function (event) {
     if (!this.Visibility) {
       return true;
     }
 
-    if (this.State === DRAG_CORNER) {
-      if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
-      if (SAM.NotesWidget && !this.UserNoteFlag) { SAM.NotesWidget.MarkAsModified(); } // Hack
-            // Duplicate this widget and keep on drawing.
-      var copy = new RectWidget(this.Layer, false);
-      copy.Load(this.Serialize());
-      this.State = DRAWING;
-      if (window.SA) { SA.RecordState(); }
-
-      DEFAULT_WIDTH = this.Shape.Width;
-      DEFAULT_HEIGHT = this.Shape.Height;
+    if (this.State === NEW) {
+      this.NewAddAndContinue();
     }
+    DEFAULT_WIDTH = this.Shape.Width;
+    DEFAULT_HEIGHT = this.Shape.Height;
   };
 
-  RectWidget.prototype.HandleMouseMove = function (event) {
+  // returns false when it is finished doing its work.
+  RectWidget.prototype.HandleClick = function (event) {
     if (!this.Visibility) {
       return true;
     }
 
-    var x = event.offsetX;
-    var y = event.offsetY;
-
-    if (event.which === 0) {
-            // This keeps the rectangle from being drawn in the wrong place
-            // before we get our first event.
-      if (this.State === NEW) {
-        this.State = DRAWING;
-      }
-      if (this.State === DRAWING) {
-                // Center follows mouse.
-        this.Shape.Origin = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
-        this.Layer.EventuallyDraw();
-        return false;
-      }
-      return true;
-    }
-
-    if (event.which !== 1) { return; }
-
-    var dx;
-    var dy;
-    if (this.State === DRAG_CORNER) {
-      // Center remains fixed, and a corner follows the mouse.
-      // This is an non standard interaction.  Usually one corner
-      // remains fixed and the second corner follows the mouse.
-      // Width Height Origin
-      var corner = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
-      dx = corner[0] - this.Shape.Origin[0];
-      dy = corner[1] - this.Shape.Origin[1];
-      // This keeps small movements during a click from change the
-      // size of the rect.
-      if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
-        return false;
-      }
-      // Rotate the drag vector in the the rectangles coordinate
-      // system.
-      var a = this.Shape.Orientation * Math.PI / 180.0;
-      var c = Math.cos(a);
-      var s = Math.sin(a);
-      var rx = dx * c - dy * s;
-      var ry = dy * c + dx * s;
-
-      // console.log("a: "+this.Shape.Orientation+", w: "+dx+","+dy+", r: "+rx+","+ry);
-
-      this.Shape.Width = Math.abs(2 * rx);
-      this.Shape.Height = Math.abs(2 * ry);
-      this.Shape.UpdateBuffers();
-      this.PlacePopup();
-      this.Layer.EventuallyDraw();
-      return false;
-    }
-
-    if (this.State === DRAG) {
-      dx = x - this.OriginViewer[0];
-      dy = y - this.OriginViewer[1];
-      // Change units from pixels to world.
-      this.Shape.UpdateBuffers(this.Layer.AnnotationView);
-      this.PlacePopup();
-      this.Layer.EventuallyDraw();
-    }
-
-    if (this.State === WAITING) {
-      this.CheckActive(event);
+    if (this.State === NEW) {
+      this.NewAddAndContinue();
     }
   };
 
-  RectWidget.prototype.HandleMouseWheel = function (event) {
-    if (!this.Visibility) {
-      return true;
-    }
-
-    if (this.State === ACTIVE) {
-      if (this.NormalizedActiveDistance < 0.5) {
-        var ratio = 1.05;
-        var direction = 1;
-        if (event.wheelDelta < 0) {
-          ratio = 0.95;
-          direction = -1;
-        }
-        if (event.shiftKey) {
-          this.Shape.Height = this.Shape.Height * ratio;
-        }
-        if (event.ctrlKey) {
-          this.Shape.Width = this.Shape.Width * ratio;
-        }
-        if (!event.shiftKey && !event.ctrlKey) {
-          this.Shape.Orientation = this.Shape.Orientation + 3 * direction;
-        }
-
-        this.Shape.UpdateBuffers(this.Layer.AnnotationView);
-        this.PlacePopup();
-        this.Layer.EventuallyDraw();
-      }
-    }
+  // Make the "new" rect permenant and add another "new" rectangle 
+  // so multiple rectangles can be added quickly.
+  RectWidget.prototype.NewAddAndContinue = function () {
+    // TODO: Ripout this usernote stuff and replace with modified callbacks.
+    if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
+    if (SAM.NotesWidget && !this.UserNoteFlag) { SAM.NotesWidget.MarkAsModified(); } // Hack
+    // Duplicate this widget and keep on drawing.
+    var copy = new RectWidget(this.Layer, true);
+    copy.Load(this.Serialize());
+    // The old one becomes inactive and the copy takes over.
+    this.State = WAITING;
+    if (window.SA) { SA.RecordState(); }
   };
 
   RectWidget.prototype.HandleTouchPan = function (event) {
@@ -462,7 +425,7 @@
                                                               this.Layer.LastMouseY);
     var w1 = this.Layer.GetCamera().ConvertPointViewerToWorld(event.offsetX, event.offsetY);
 
-        // This is the translation.
+    // This is the translation.
     var dx = w1[0] - w0[0];
     var dy = w1[1] - w0[1];
 
@@ -496,37 +459,52 @@
     }
 
     var dx, dy;
-        // change dx and dy to vector from center of circle.
+    // change dx and dy to vector from center of circle.
     if (this.FixedSize) {
-      dx = event.offsetX - this.Shape.Origin[0];
-      dy = event.offsetY - this.Shape.Origin[1];
+      dx = Math.abs(event.offsetX - this.Shape.Origin[0]);
+      dy = Math.abs(event.offsetY - this.Shape.Origin[1]);
     } else {
-      dx = event.worldX - this.Shape.Origin[0];
-      dy = event.worldY - this.Shape.Origin[1];
+      dx = Math.abs(event.worldX - this.Shape.Origin[0]);
+      dy = Math.abs(event.worldY - this.Shape.Origin[1]);
     }
 
-    var d = Math.sqrt(dx * dx + dy * dy) / (this.Shape.Width * 0.5);
-    var active = false;
-    var lineWidth = this.Shape.LineWidth / (this.Shape.Width * 0.5);
-    this.NormalizedActiveDistance = d;
+    // Tolerance
+    var tol = this.Shape.LineWidth + Math.min(this.Shape.Width, this.Shape.Height)/20.0;    
 
-    if (this.Shape.FillColor === undefined) { // Circle
-      if ((d < (1.0 + this.Tolerance + lineWidth) && d > (1.0 - this.Tolerance)) ||
-                d < (this.Tolerance + lineWidth)) {
-        active = true;
-      }
-    } else { // Disk
-      if ((d < (1.0 + this.Tolerance + lineWidth) && d > (this.Tolerance + lineWidth)) ||
-          (d < lineWidth)) {
-        active = true;
-      }
+    // TODO: Handle orientation
+    // Terminiate if outside bounds.
+    if (dx > tol + (this.Shape.Width / 2.0) ||
+        dy > tol + (this.Shape.Height / 2.0)) {
+      this.SetActive(false);
+      return false;
     }
 
-    this.SetActive(active);
-    return active;
+    // TODO: Handle overlapping widgets with a priority.
+    // TODO: center icon
+    // First see if we are over the center.
+    if (dx < tol && dy < tol) {
+      WHICH_DRAG = DRAG_CENTER;
+      this.SetActive(true);
+      return true;
+    }
+
+    WHICH_DRAG = 0;
+    if (Math.abs(dx - this.Shape.Width/2) < tol) {
+      WHICH_DRAG += DRAG_X;
+    }
+    if (Math.abs(dy - this.Shape.Height/2) < tol) {
+      WHICH_DRAG += DRAG_Y;
+    }
+
+    if (WHICH_DRAG == 0) {
+      this.SetActive(false);
+      return false;
+    }
+    this.SetActive(true);
+    return true;
   };
 
-    // Multiple active states. Active state is a bit confusing.
+  // Multiple active states. Active state is a bit confusing.
   RectWidget.prototype.GetActive = function () {
     if (this.State === WAITING) {
       return false;
@@ -553,8 +531,8 @@
     this.Layer.EventuallyDraw();
   };
 
-    // Setting to active always puts state into "active".
-    // It can move to other states and stay active.
+  // Setting to active always puts state into "active".
+  // It can move to other states and stay active.
   RectWidget.prototype.SetActive = function (flag) {
     if (!this.Visibility) {
       this.Visibility = true;
@@ -569,7 +547,7 @@
       this.Shape.Active = true;
       this.Layer.ActivateWidget(this);
       this.Layer.EventuallyDraw();
-            // Compute the location for the pop up and show it.
+      // Compute the location for the pop up and show it.
       this.PlacePopup();
     } else {
       this.Deactivate();
@@ -577,12 +555,12 @@
     this.Layer.EventuallyDraw();
   };
 
-    // This also shows the popup if it is not visible already.
+  // This also shows the popup if it is not visible already.
   RectWidget.prototype.PlacePopup = function () {
     if (!this.Visibility) {
       return;
     }
-        // Compute the location for the pop up and show it.
+    // Compute the location for the pop up and show it.
     var roll = this.Layer.GetCamera().Roll;
     var rad = this.Shape.Width * 0.5;
     var x = this.Shape.Origin[0] + 0.8 * rad * (Math.cos(roll) - Math.sin(roll));

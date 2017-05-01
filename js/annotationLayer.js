@@ -779,7 +779,7 @@
     if (this.ScaleWidget) {
       // Girder is not setting spacing correct.
       // But we still need the scale widget for the grid widget.
-      //this.ScaleWidget.Draw(this.AnnotationView);
+      // this.ScaleWidget.Draw(this.AnnotationView);
     }
   };
 

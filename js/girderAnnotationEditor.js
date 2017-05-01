@@ -17,7 +17,7 @@
   var KEY_USED_ADVANCE = 2;
   var KEY_USED_NO_ADVANCE = 3;
 
-  function GirderAnnotationEditor (parent, layer, itemId, classes) {
+  var GirderAnnotationEditor = function (parent, layer, itemId, classes) {
     this.ActiveClassIndex = 0;
     this.Layer = layer;
     this.ItemId = itemId;
@@ -83,7 +83,7 @@
         // Annotation does not exist yet.  Make it.
         var annot = {
           'elements': [],
-          'annot.name': classObj.label};
+          'name': classObj.label};
         // Make a new annotation in the database.
         girder.rest.restRequest({
           path: 'annotation?itemId=' + self.ItemId,
@@ -947,8 +947,6 @@
     element[0].style.cursor = 'url(' + cursor.toDataURL() + '), auto';
   };
 
-  SAM.GirderAnnotationEditor = GirderAnnotationEditor;
-
   // 2d
   // I am extending the annotations from simple points to rectangles with
   // different sizes.  Each item will be added to multiple bins.
@@ -1112,4 +1110,5 @@
   };
 
   SAM.SpatialHash = SpatialHash;
+  SAM.GirderAnnotationEditor = GirderAnnotationEditor;
 })();

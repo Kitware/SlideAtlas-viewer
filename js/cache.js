@@ -72,7 +72,7 @@
   // Our subdivision of leaves is arbitrary.
   SA.IIIFSource = function () {
     this.Prefix = 'http://ids.lib.harvard.edu/ids/view/Converter?id=834753&c=jpgnocap';
-    alert("Hard coded tile size");
+    alert('Hard coded tile size');
     this.TileSize = 256;
 
     this.setDimensions = function (xDim, yDim) {
