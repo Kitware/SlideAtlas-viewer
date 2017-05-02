@@ -24,6 +24,10 @@ window.SAM = window.SAM || {};
     this.CreateBuffer();
     this.Mirror = false;
 
+    // A transform from slide coordinates to section coordinates.
+    // this.SectionTransform = undefined;
+    // But we laready have section transform in section object.
+
     // Placeholders
     this.ViewportWidth = 162;
     this.ViewportHeight = 100;

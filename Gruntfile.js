@@ -34,9 +34,9 @@ var jsSrcFiles = [
   'js/scaleWidget.js',
   'js/imageAnnotation.js',
   'js/dialog.js',
-  'js/girderAnnotationEditor.js',
   'js/girderStackWidget.js',
   'js/girderWidget.js',
+  'js/girderAnnotationEditor.js',
   'js/view.js',
   // Core files
   'js/cookies.js',

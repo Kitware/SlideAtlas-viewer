@@ -7,8 +7,9 @@
   function TileView (parent, useWebGL) {
     SAM.View.call(this, parent, useWebGL);
 
-        // connectome : default section so we cen set cache
-    this.Section = new SA.Section();
+    // connectome : default section so we cen set cache
+    this.DefaultSection = new SA.Section();
+    this.Section = this.DefaultSection;
 
     this.Tiles = []; // Not really used
 
@@ -16,8 +17,8 @@
       this.gl = this.Canvas[0].getContext('webgl') || this.Canvas[0].getContext('experimental-webgl');
     }
     if (this.gl) {
-            // Probably need a canvas object that keep track of
-            // initialization (shared between layers).
+      // Probably need a canvas object that keep track of
+      // initialization (shared between layers).
       SA.initWebGL(this);
     } else {
       this.Context2d = this.Canvas[0].getContext('2d');
@@ -32,14 +33,22 @@
     return this.Section.GetLeafSpacing();
   };
 
-    // connectome
+  TileView.prototype.SetSection = function (section) {
+    this.Section = section;
+  };
+
   TileView.prototype.AddCache = function (cache) {
-    if (!cache) { return; }
+    if (cache === undefined) { return; }
+    if (this.Section === undefined) {
+      this.Section = this.DefaultSection;
+    }
     this.Section.Caches.push(cache);
   };
 
+  // Non connectome API, simple.
+  // Just use the default section.
   TileView.prototype.SetCache = function (cache) {
-        // connectome
+    this.Section = this.DefaultSection;
     if (!cache) {
       this.Section.Caches = [];
     } else {
@@ -48,12 +57,12 @@
   };
 
   TileView.prototype.GetCache = function () {
-        // connectome: This makes less sense with a section with many caches.
-        // TODO: try to get rid of this
+    // connectome: This makes less sense with a section with many caches.
+    // TODO: try to get rid of this
     return this.Section.Caches[0];
   };
 
-    // Not used at the moment
+  // Not used at the moment
   TileView.prototype.Draw = function (masterView) {
     if (masterView) {
       var cam = masterView.Camera;
@@ -72,23 +81,23 @@
       gl.clearColor(1.0, 1.0, 1.0, 1.0);
       gl.disable(gl.DEPTH_TEST);
       gl.enable(gl.BLEND);
-            // gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+      // gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
     }
 
     return this.DrawTiles();
   };
 
-    // I want only the annotation to create a mask image.
-    // Note: Tile in the list may not be loaded yet.
-    // Returns true if all the tiles to render were available.
-    // False implies that the user shoudl render again.
+  // I want only the annotation to create a mask image.
+  // Note: Tile in the list may not be loaded yet.
+  // Returns true if all the tiles to render were available.
+  // False implies that the user shoudl render again.
   TileView.prototype.DrawTiles = function () {
-        // Download view is not visible, but still needs to render tiles.
-        // This causes black/blank download images
-        // if ( ! this.CanvasDiv.is(':visible') ) {
-        //    return;
-        // }
-        // console.time("  ViewDraw");
+    // Download view is not visible, but still needs to render tiles.
+    // This causes black/blank download images
+    // if ( ! this.CanvasDiv.is(':visible') ) {
+    //    return;
+    // }
+    // console.time("  ViewDraw");
     if (this.gl) {
       return this.Section.Draw(this);
     } else {

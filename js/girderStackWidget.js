@@ -1,8 +1,15 @@
 // GUI to navigate a stack and manager views.
 // I will try to keep loading to "on demand" as much as possible.
-// Add bounds to the stack section
-// Add a transform to each section.
-// Load stack from json file.
+// Put a section transform in the camera.
+// Connect section bounds to camera section transform.
+// Restrict viewer to bounds of section.
+// Startup in the middle of the first bounds.
+
+// NOTE: Three different sections. 
+//   metaSection: loaded from the girder item metadata.
+//   stackSection: object internal to this class.
+//   saSection: Object slide atlas uses to manage sections.
+// TODO: Merge these in the future if possible.
 
 (function () {
   'use strict';
@@ -12,8 +19,9 @@
     // Stuff needs to be initialized on the first render.
     this.First = true;
     this.ApiRoot = apiRoot;
+    // List of stackSections
     this.Stack = [];
-    // Share caches.  Multiple section can be on a single slide.
+    // dictionary to share caches when multiple sections on one slide
     this.Caches = {};
     this.Display = display;
 
@@ -103,7 +111,7 @@
   GirderStackWidget.prototype.LoadFolder = function (folderId) {
     var self = this;
     this.Stack = [];
-    this.Caches = {};
+    this.SectionMap = {};
     // This just gets the number of items.
     // All we need to start is the number of images in the folder.
     // However, the folder may contain non image items (like this stack).
@@ -159,18 +167,27 @@
     }).done(function (resp) {
       for (var j = 0; j < resp.length; ++j) {
         var item = resp[j];
+        var stackSection;
         // TODO: Handle small images too.
         if (item.largeImage) {
           if (item.meta && item.meta.sections) {
-            var sections = item.meta.sections;
-            for (sIdx = 0; sIdx < sections.length; ++sIdx) {
-              // TODO: Better transformation abstraction
-              var section = {imageId: item._id, center: section[sIdx].origin};
-              self.Stack.push(section);
+            // Add all the sections listed in the meta data.
+            var metaSections = item.meta.sections;
+            for (var sIdx = 0; sIdx < metaSections.length; ++sIdx) {
+              var metaSection = metaSections[sIdx];
+              stackSection = {imageId: item._id, loaded: false};
+              if (metaSection.bounds) {
+                stackSection.bounds = metaSection.bounds;
+              }
+              if (metaSection.center) {
+                stackSection.center = metaSection.center;
+              }
+              self.Stack.push(stackSection);
             }
           } else {
-            var section = {imageId: resp[j]._id};
-            self.Stack.push(section);
+            // Just add a single section (the whole slide)
+            stackSection = {imageId: resp[j]._id, loaded: false};
+            self.Stack.push(stackSection);
           }
         }
       }
@@ -179,6 +196,8 @@
     });
   };
 
+  // Method to help share caches.
+  // TODO: Merge this with the method in cache.js to do the same.
   GirderStackWidget.prototype.GetCache = function (imageId) {
     var cache = this.Caches[imageId];
     if (!cache) {
@@ -189,6 +208,7 @@
   };
 
   // Does everything necessary to load the section into the viewer.
+  // Does nothing if the section is not loaded from the datbase yet.
   GirderStackWidget.prototype.SetSectionIndex = function (index) {
     if (index >= this.Stack.length) {
       index = this.Stack.length - 1;
@@ -200,36 +220,30 @@
       return;
     }
     this.SectionIndex = index;
-    var section = this.Stack[index];
-    var cache = this.GetCache(section.imageId);
-    // The image loader will render if it belongs to the current.
-    if (cache.Image) {
-      this.RenderSection(section);
-    }
+    this.RenderSection(this.Stack[index]);
   };
 
   // The section images must be loaded before this call.
-  GirderStackWidget.prototype.RenderSection = function (section) {
+  GirderStackWidget.prototype.RenderSection = function (stackSection) {
+    if (stackSection.SaSection === undefined) {
+      // The load call back will render if the section is current.
+      return;
+    }
     // Here display is just a viewer.
     // We can only initialize the slide when all the image ids are loaded
-    // and we now the length of the stack.  This will change with multiple
+    // and we know the length of the stack.  This will change with multiple
     // sections per image.
     if (this.First) {
       delete this.First;
       this.SliderDiv.slider('option', 'max', this.Stack.length - 1);
-      // Only reset the camer on the first render.
+      // Only reset the camere on the first render.
       this.Display.SetCamera(
-        [(section.bounds[0] + section.bounds[1]) / 2,
-          (section.bounds[2] + section.bounds[3]) / 2],
-        0, (section.bounds[3] - section.bounds[2]));
+        [(stackSection.bounds[0] + stackSection.bounds[2]) / 2,
+          (stackSection.bounds[1] + stackSection.bounds[3]) / 2],
+        0, (stackSection.bounds[3] - stackSection.bounds[1]));
     }
-    // How should I deal with section transformation?
-    // All elements are in slide coordinate system, 
-    // so the camera has to be in slide cooridates too. Too bad.
-    // We could transform the data (tiles and annotations) before
-    // rendering, into section coordinates.  Split the camera up into
-    // section and slide api's ......................................
-    this.Display.SetCache(this.GetCache(section.imageId));
+    // Let the SlideAtlas sections deal with the transformations
+    this.Display.SetSection(stackSection.SaSection);
     this.Display.EventuallyRender();
   };
 
@@ -295,11 +309,11 @@
     }
   };
 
-  GirderStackWidget.prototype.LoadSectionMetaData = function (section, callback) {
+  GirderStackWidget.prototype.LoadSectionMetaData = function (stackSection, callback) {
     var self = this;
 
     girder.rest.restRequest({
-      path: 'item/' + section.imageId + '/tiles',
+      path: 'item/' + stackSection.imageId + '/tiles',
       method: 'GET',
       contentType: 'application/json',
       error: function (error, status) {
@@ -310,15 +324,25 @@
         }
       }
     }).done(function (resp) {
-      if (!section.center) {
-        section.center = [resp.sizeX / 2.0, resp.sizeY / 2.0];
+      var w = resp.sizeX;
+      var h = resp.sizeY;
+      var tileSize = resp.tileWidth;
+      var levels = resp.levels;
+      // There can be multiple sections on a single slide.
+      // Each needs its own region.
+      // Set a default bounds to the whole slide.
+      if (stackSection.bounds === undefined) {
+        stackSection.bounds = [0, w - 1, 0, h - 1];
       }
-      var cache = self.GetCache(section.imageId);
-      if (!cache.Image) {
-        var w = resp.sizeX;
-        var h = resp.sizeY;
-        var tileSize = resp.tileWidth;
-        var levels = resp.levels;
+      // Set a default center to the middle of the bounds.
+      if (stackSection.center === undefined) {
+        var bds = stackSection.bounds;
+        stackSection.center = [(bds[0] + bds[2]) * 0.5,
+                          (bds[1] + bds[3]) * 0.5];
+      }
+      // Get / setup the cache.
+      var cache = self.GetCache(stackSection.imageId);
+      if (cache.Image === undefined) {
         var tileSource = {
           height: h,
           width: w,
@@ -326,25 +350,27 @@
           minLevel: 0,
           maxLevel: levels - 1,
           getTileUrl: function (level, x, y, z) {
-            return self.ApiRoot + '/item/' + section.imageId +
+            return self.ApiRoot + '/item/' + stackSection.imageId +
               '/tiles/zxy/' + level + '/' + x + '/' + y;
           }
         };
-        // For now each section is its own image.  In the future multiple
-        // sections can be in a single image and we will need to set the
-        // bounds to be a region.
-        section.bounds = [0, w - 1, 0, h - 1];
         cache.SetTileSource(tileSource);
-        // Get the lowest resolution tile.
+        // Request the lowest resolution tile from girder.
         cache.LoadRoots();
-        // If this is the current section, render it.
-        if (self.SectionIndex !== -1) {
-          var currentSection = self.Stack[self.SectionIndex];
-          if (section.imageId === currentSection.imageId) {
-            self.RenderSection(currentSection);
-          }
+      }
+      // Setup the slideAtlas section
+      var saSection = new SA.Section();
+      saSection.AddCache(cache);
+      stackSection.SaSection = saSection;
+
+      // If this is the current stackSection, render it.
+      if (self.SectionIndex !== -1) {
+        var currentSection = self.Stack[self.SectionIndex];
+        if (stackSection.imageId === currentSection.imageId) {
+          self.RenderSection(currentSection);
         }
       }
+
       // This serializes the requests. Starts loading the next after the
       // current is finished.
       if (callback) {
