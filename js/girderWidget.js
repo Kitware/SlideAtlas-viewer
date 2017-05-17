@@ -101,23 +101,23 @@
 
     // Hack to save sections meta data to girder items
     if (e.ctrlKey && window.girder) {
-      if (confirm("Save section meta data?")) {
+      if (confirm('Save section meta data?')) {
         var sections = [];
         for (var i = 0; i < annot.elements.length; ++i) {
           var rect = annot.elements[i];
-          if (rect.type == 'rectangle') {
+          if (rect.type === 'rectangle') {
             var x0 = rect.center[0] - rect.width / 2.0;
             var y0 = rect.center[1] - rect.height / 2.0;
             var x1 = x0 + rect.width;
             var y1 = y0 + rect.height;
-            sections.push({'bounds' : [x0,y0,x1,y1]});
+            sections.push({'bounds': [x0, y0, x1, y1]});
           }
         }
         girder.rest.restRequest({
           path: 'item/' + this.ImageItemId + '/metadata',
           method: 'PUT',
           contentType: 'application/json',
-          data: JSON.stringify({'sections' : sections})
+          data: JSON.stringify({'sections': sections})
         });
         return;
       }

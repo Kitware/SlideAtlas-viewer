@@ -357,7 +357,7 @@
     if (event.which !== 1) { return false; }
 
     var worldPt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
-    if (this.State === ACTIVE && WHICH_DRAG == DRAG_CENTER) {
+    if (this.State === ACTIVE && WHICH_DRAG === DRAG_CENTER) {
       // Drag the whole thing.
       this.Shape.Origin = worldPt;
     } else if (this.State === ACTIVE || this.State === NEW) {
@@ -402,7 +402,7 @@
     }
   };
 
-  // Make the "new" rect permenant and add another "new" rectangle 
+  // Make the "new" rect permenant and add another "new" rectangle
   // so multiple rectangles can be added quickly.
   RectWidget.prototype.NewAddAndContinue = function () {
     // TODO: Ripout this usernote stuff and replace with modified callbacks.
@@ -469,7 +469,8 @@
     }
 
     // Tolerance
-    var tol = this.Shape.LineWidth + Math.min(this.Shape.Width, this.Shape.Height)/20.0;    
+    var tol = this.Shape.LineWidth +
+      Math.min(this.Shape.Width, this.Shape.Height) / 20.0;
 
     // TODO: Handle orientation
     // Terminiate if outside bounds.
@@ -489,14 +490,14 @@
     }
 
     WHICH_DRAG = 0;
-    if (Math.abs(dx - this.Shape.Width/2) < tol) {
+    if (Math.abs(dx - this.Shape.Width / 2) < tol) {
       WHICH_DRAG += DRAG_X;
     }
-    if (Math.abs(dy - this.Shape.Height/2) < tol) {
+    if (Math.abs(dy - this.Shape.Height / 2) < tol) {
       WHICH_DRAG += DRAG_Y;
     }
 
-    if (WHICH_DRAG == 0) {
+    if (WHICH_DRAG === 0) {
       this.SetActive(false);
       return false;
     }

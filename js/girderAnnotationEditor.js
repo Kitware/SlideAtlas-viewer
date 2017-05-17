@@ -37,7 +37,7 @@
     // active class is highlighted in the gui.
     // It is the class used for clicks
     this.SetActiveClassIndex(0);
-  }
+  };
 
   GirderAnnotationEditor.prototype.CreateClasses = function (classNames) {
     var numClasses = classNames.length;

@@ -5,7 +5,7 @@
 // Restrict viewer to bounds of section.
 // Startup in the middle of the first bounds.
 
-// NOTE: Three different sections. 
+// NOTE: Three different sections.
 //   metaSection: loaded from the girder item metadata.
 //   stackSection: object internal to this class.
 //   saSection: Object slide atlas uses to manage sections.
@@ -337,8 +337,9 @@
       // Set a default center to the middle of the bounds.
       if (stackSection.center === undefined) {
         var bds = stackSection.bounds;
-        stackSection.center = [(bds[0] + bds[2]) * 0.5,
-                          (bds[1] + bds[3]) * 0.5];
+        stackSection.center = [
+          (bds[0] + bds[2]) * 0.5,
+          (bds[1] + bds[3]) * 0.5];
       }
       // Get / setup the cache.
       var cache = self.GetCache(stackSection.imageId);

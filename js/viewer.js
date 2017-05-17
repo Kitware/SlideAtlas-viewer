@@ -898,11 +898,11 @@
     if (section === null) {
       return;
     }
-    //this.MainView.Section = section;
-    //if (this.OverView) {
-    //  this.OverView.Section = section;
-    //}
-    //this.EventuallyRender(true);
+    // this.MainView.Section = section;
+    // if (this.OverView) {
+    //   this.OverView.Section = section;
+    // }
+    // this.EventuallyRender(true);
     this.SetCache(section.GetCache(0));
   };
 
