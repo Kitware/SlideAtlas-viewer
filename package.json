@@ -1,6 +1,6 @@
 {
   "name": "slideatlas-viewer",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "description": "A multiresolution image viewer, optimized for whole slide images.",
   "homepage": "https://slide-atlas.org/",
   "bugs": {
