@@ -14,7 +14,7 @@ window.SAM = window.SAM || {};
     this.ZRange = [-1.0, 1.0];
     this.Roll = 0;
     this.Matrix = mat4.create();
-    this.Height = 256.0 * 64.0;
+    this.Height = 16000;
     this.Width = this.Height * 1.62;
     this.FocalPoint = [128.0 * 64.0, 128.0 * 64.0];
     this.ComputeMatrix();
@@ -23,6 +23,10 @@ window.SAM = window.SAM || {};
     this.Buffer = null;
     this.CreateBuffer();
     this.Mirror = false;
+
+    // A transform from slide coordinates to section coordinates.
+    // this.SectionTransform = undefined;
+    // But we laready have section transform in section object.
 
     // Placeholders
     this.ViewportWidth = 162;

@@ -3,11 +3,11 @@
 (function () {
   'use strict';
 
-    // TODO: Fix
-    // Add stack option to Save large image GUI.
-    // SaveStackImages.
+  // TODO: Fix
+  // Add stack option to Save large image GUI.
+  // SaveStackImages.
 
-    // I think this can go away now that we have hover mode in text.
+  // I think this can go away now that we have hover mode in text.
 
   var SAVING_IMAGE = false;
   var INTERACTION_NONE = 0;
@@ -17,8 +17,8 @@
   var INTERACTION_OVERVIEW = 4;
   var INTERACTION_OVERVIEW_DRAG = 5;
 
-    // TODO: Can we get rid of args parameter now that we have ProcessArguments method?
-    // See the top of the file for description of args.
+  // TODO: Can we get rid of args parameter now that we have ProcessArguments method?
+  // See the top of the file for description of args.
   function Viewer (parent) {
     var self = this;
 
@@ -38,7 +38,7 @@
               self.UpdateSize();
             });
 
-        // I am moving the eventually render feature into viewers.
+    // I am moving the eventually render feature into viewers.
     this.Drawing = false;
     this.RenderPending = false;
     this.Rotatable = true;
@@ -46,14 +46,14 @@
     this.HistoryFlag = false;
     this.MinPixelSize = 0.5;
 
-        // Interaction state:
-        // What to do for mouse move or mouse up.
+    // Interaction state:
+    // What to do for mouse move or mouse up.
     this.InteractionState = INTERACTION_NONE;
-        // External callbacks
+    // External callbacks
     this.InteractionListeners = [];
-        // TODO: Get rid of this.  Remove bindings instead.
-        // This is a hack to turn off interaction.
-        // Sometime I need to clean up the events for viewers.
+    // TODO: Get rid of this.  Remove bindings instead.
+    // This is a hack to turn off interaction.
+    // Sometime I need to clean up the events for viewers.
     this.InteractionEnabled = true;
 
     this.AnimateLast = null;
@@ -898,11 +898,12 @@
     if (section === null) {
       return;
     }
-    this.MainView.Section = section;
-    if (this.OverView) {
-      this.OverView.Section = section;
-    }
-    this.EventuallyRender(true);
+    // this.MainView.Section = section;
+    // if (this.OverView) {
+    //   this.OverView.Section = section;
+    // }
+    // this.EventuallyRender(true);
+    this.SetCache(section.GetCache(0));
   };
 
     // Change the source / cache after a viewer has been created.
@@ -1150,27 +1151,27 @@
       SA.WaterMark = false;
     }
 
-        // I do not think this is actaully necessary.
-        // I was worried about threads, but javascript does not work that way.
+    // I do not think this is actually necessary.
+    // I was worried about threads, but javascript does not work that way.
     if (this.Drawing) { return; }
     this.Drawing = true;
 
-        // This just changes the camera based on the current time.
+    // This just changes the camera based on the current time.
     this.Animate();
 
-        // console.time("ViewerDraw");
+    // console.time("ViewerDraw");
 
-        // connectome
+    // connectome
     if (!this.MainView || !this.MainView.Section) {
       return;
     }
 
-        // Should the camera have the viewport in them?
-        // The do not currently hav a viewport.
+    // Should the camera have the viewport in them?
+    // The do not currently hav a viewport.
 
-        // If we are still waiting for tiles to load, schedule another render.
-        // This works fine, but results in many renders while waiting.
-        // TODO: Consider having the tile load callback scheduling the next render.
+    // If we are still waiting for tiles to load, schedule another render.
+    // This works fine, but results in many renders while waiting.
+    // TODO: Consider having the tile load callback scheduling the next render.
     if (!this.MainView.Draw()) {
       this.EventuallyRender();
     }
@@ -1179,16 +1180,16 @@
       this.Layers[i].Draw(this.MainView);
     }
 
-        // This is not used anymore
-        // However, I am thinking of resurecting it.  With many widgets,
-        // drawing becomes slow.
+    // This is not used anymore
+    // However, I am thinking of resurecting it.  With many widgets,
+    // drawing becomes slow.
     this.MainView.DrawShapes();
     if (this.OverView) {
       this.OverView.Draw();
       this.OverView.DrawOutline(true);
     }
 
-        // Draw a rectangle in the overview representing the camera's view.
+    // Draw a rectangle in the overview representing the camera's view.
     if (this.OverView) {
       this.MainView.Camera.Draw(this.OverView);
       if (this.HistoryFlag) {

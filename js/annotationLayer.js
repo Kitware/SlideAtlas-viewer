@@ -777,7 +777,9 @@
       this.WidgetList[i].Draw(this.AnnotationView);
     }
     if (this.ScaleWidget) {
-      this.ScaleWidget.Draw(this.AnnotationView);
+      // Girder is not setting spacing correct.
+      // But we still need the scale widget for the grid widget.
+      // this.ScaleWidget.Draw(this.AnnotationView);
     }
   };
 

@@ -1,7 +1,7 @@
 // ==============================================================================
 // Section Object
 // Leftover from Connectome.
-// Not needed anymore.
+// Sections were a montage of multiple images (transformed and cropped)
 
 (function () {
   'use strict';
@@ -18,6 +18,31 @@
     // For debugging stitching.
     this.Markers = [];
   }
+
+  Section.prototype.GetNumberOfCaches = function () {
+    return this.Caches.length;
+  };
+
+  Section.prototype.GetCache = function (idx) {
+    if (idx < 0 || idx >= this.Caches.length) {
+      return undefined;
+    }
+    return this.Caches[idx];
+  };
+
+  Section.prototype.SetCache = function (cache) {
+    if (cache === undefined) {
+      this.Caches = [];
+    } else {
+      this.Caches = [cache];
+    }
+  };
+
+  Section.prototype.AddCache = function (cache) {
+    if (cache) {
+      this.Caches.push(cache);
+    }
+  };
 
   // For limiting interaction.
   Section.prototype.GetBounds = function () {
@@ -129,13 +154,13 @@
             // Keep rendering until we have all the tiles.
             finishedRendering = false;
           }
-          if (tile.Parent) { // Queue up the parent.
-            // Note: Parents might be added multiple times by different siblings.
-            // Ok, lets render the whole tree (low res first) to
-            // cover cracks.  This is done in choose tiles.
-            // This is not needed for prgressive rendering then.
-            // tiles.push(tile.Parent);
-          }
+          // if (tile.Parent) { // Queue up the parent.
+          //   Note: Parents might be added multiple times by different siblings.
+          //   Ok, lets render the whole tree (low res first) to
+          //   cover cracks.  This is done in choose tiles.
+          //   This is not needed for prgressive rendering then.
+          //   tiles.push(tile.Parent);
+          // }
         }
         ++j;
       }

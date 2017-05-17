@@ -17,6 +17,9 @@
     }
     this.Radius = 7;
     this.AnnotationLayer = layer;
+    document.addEventListener('contextmenu', function (e) {
+      e.preventDefault();
+    }, false);
 
     var idx = 0;
     var y = 70 + (idx * 6 * this.Radius);
@@ -34,7 +37,7 @@
       .prop('title', 'Add Annotation')
       .hover(function () { $(this).css({'opacity': '1'}); },
              function () { $(this).css({'opacity': '0.6'}); })
-      .click(function () { self.NewAnnotationItem(); });
+      .click(function (e) { self.NewAnnotationItem(e); });
 
     this.AnnotationObjects = [];
     this.Highlighted = undefined;
@@ -51,7 +54,8 @@
         'box-sizing': 'border-box',
         'left': '-78px',
         'width': '100px',
-        'padding': '0px 2px'});
+        'padding': '0px 2px',
+        'z-index': '10'});
 
     $('<button>')
       .appendTo(this.Menu)
@@ -84,20 +88,46 @@
         'width': '100%'})
       .click(
         function () {
-          // Not implemented yet.
-          // self.ShowAnnotationPropertiesDialog(self.MenuAnnotationObject);
+          self.ShowAnnotationPropertiesDialog(self.MenuAnnotationObject);
           self.Menu.hide();
         });
   }
 
   // Create a new annotation item from the annotation layer.
   // Save it in the database.  Add the annotation as a dot in the GUI.
-  GirderWidget.prototype.NewAnnotationItem = function () {
+  GirderWidget.prototype.NewAnnotationItem = function (e) {
     var annot = {'elements': []};
-    annot.name = (this.AnnotationObjects.length).toString();
     annot.elements = this.RecordAnnotation();
 
-        // Make a new annotation in the database.
+    // Hack to save sections meta data to girder items
+    if (e.ctrlKey && window.girder) {
+      if (confirm('Save section meta data?')) {
+        var sections = [];
+        for (var i = 0; i < annot.elements.length; ++i) {
+          var rect = annot.elements[i];
+          if (rect.type === 'rectangle') {
+            var x0 = rect.center[0] - rect.width / 2.0;
+            var y0 = rect.center[1] - rect.height / 2.0;
+            var x1 = x0 + rect.width;
+            var y1 = y0 + rect.height;
+            sections.push({'bounds': [x0, y0, x1, y1]});
+          }
+        }
+        girder.rest.restRequest({
+          path: 'item/' + this.ImageItemId + '/metadata',
+          method: 'PUT',
+          contentType: 'application/json',
+          data: JSON.stringify({'sections': sections})
+        });
+        return;
+      }
+    }
+
+    annot.name = prompt('Name', 'Annotation');
+    if (!annot.name) {
+      return;
+    }
+    // Make a new annotation in the database.
     var self = this;
     if (window.girder) { // Conditional is for testing in slide atlas.
       girder.rest.restRequest({
@@ -106,11 +136,11 @@
         contentType: 'application/json',
         data: JSON.stringify(annot)
       }).done(function (retAnnot) {
-                // This has the girder id.
+        // This has the girder id.
         self.Highlight(self.AddAnnotation(retAnnot));
       });
     } else {
-            // for debugging without girder.
+      // for debugging without girder.
       self.Highlight(self.AddAnnotation(
         {_id: 'ABC',
           annotation: annot,
@@ -161,6 +191,7 @@
     var points;
 
     // record the view.
+    /*
     var cam = this.AnnotationLayer.GetCamera();
     var element = {
       'type': 'view',
@@ -171,7 +202,8 @@
     element.center[2] = 0;
     returnElements.push(element);
     element = undefined;
-
+    */
+    var element;
     for (i = 0; i < this.AnnotationLayer.GetNumberOfWidgets(); ++i) {
       var widget = this.AnnotationLayer.GetWidget(i).Serialize();
       if (widget.type === 'circle') {
@@ -287,6 +319,21 @@
       }
     }
     return returnElements;
+  };
+
+  GirderWidget.prototype.ShowAnnotationPropertiesDialog = function (annotObj) {
+    this.Highlight(annotObj);
+    annotObj.name = prompt('Name', annotObj.name);
+    annotObj.Circle.text(annotObj.name);
+    if (window.girder) {
+      // Save in the database
+      girder.rest.restRequest({
+        path: 'annotation/' + annotObj.Data._id,
+        method: 'PUT',
+        data: JSON.stringify(annotObj.Data.annotation),
+        contentType: 'application/json'
+      });
+    }
   };
 
   // Replace an existing annotation with the current state of the
