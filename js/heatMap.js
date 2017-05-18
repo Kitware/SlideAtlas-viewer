@@ -1,4 +1,3 @@
-// A Renderer - layer tht uses webGL to show an intensity immage maped to color-transparency.
 (function () {
   'use strict';
 
@@ -121,12 +120,12 @@
         var outCam = this.View.Camera;
         var imageObj = this.View.GetCache().Image;
         outCam.DeepCopy(inCam);
-        outCam.FocalPoint[0] =
-                    (outCam.FocalPoint[0] - imageObj.origin[0]) / imageObj.spacing[0];
-        outCam.FocalPoint[1] =
-                    (outCam.FocalPoint[1] - imageObj.origin[1]) / imageObj.spacing[1];
-        outCam.Width /= imageObj.spacing[0];
-        outCam.Height /= imageObj.spacing[1];
+        var fp = outCam.GetWorldFocalPoint();
+        outCam.SetWorldFocalPoint([
+          (fp[0] - imageObj.origin[0]) / imageObj.spacing[0],
+          (fp[1] - imageObj.origin[1]) / imageObj.spacing[1]]);
+        outCam.SetWidth(outCam.GetWidth() / imageObj.spacing[0]);
+        outCam.SetHeight(outCam.GetHeight() / imageObj.spacing[0]);
         outCam.ComputeMatrix();
         this.Camera.DeepCopy(outCam);
       }

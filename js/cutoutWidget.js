@@ -12,7 +12,7 @@
     this.Viewer = viewer;
     this.Layer = viewer.GetAnnotationLayer();
     var cam = this.Layer.GetCamera();
-    var fp = cam.GetFocalPoint();
+    var fp = cam.GetWorldFocalPoint();
 
     var rad = cam.Height / 4;
     this.Bounds = [fp[0] - rad, fp[0] + rad, fp[1] - rad, fp[1] + rad];
@@ -234,16 +234,14 @@
     // round rather the use floor and ceil.
   CutoutWidget.prototype.UpdateBounds = function (event) {
     var cache = this.Viewer.GetCache();
-    var tileSize = cache.Image.TileSize;
-    // this.Bounds[0] = Math.floor(this.DragBounds[0]/tileSize) * tileSize;
-    // this.Bounds[1] =  Math.ceil(this.DragBounds[1]/tileSize) * tileSize;
-    // this.Bounds[2] = Math.floor(this.DragBounds[2]/tileSize) * tileSize;
-    // this.Bounds[3] =  Math.ceil(this.DragBounds[3]/tileSize) * tileSize;
+    var tileWidth = cache.Image.TileWidth;
+    var tileHeight = cache.Image.TileHeight;
+
     var bds = [0, 0, 0, 0];
-    bds[0] = Math.round(this.DragBounds[0] / tileSize) * tileSize;
-    bds[1] = Math.round(this.DragBounds[1] / tileSize) * tileSize;
-    bds[2] = Math.round(this.DragBounds[2] / tileSize) * tileSize;
-    bds[3] = Math.round(this.DragBounds[3] / tileSize) * tileSize;
+    bds[0] = Math.round(this.DragBounds[0] / tileWidth) * tileWidth;
+    bds[1] = Math.round(this.DragBounds[1] / tileWidth) * tileWidth;
+    bds[2] = Math.round(this.DragBounds[2] / tileHeight) * tileHeight;
+    bds[3] = Math.round(this.DragBounds[3] / tileHeight) * tileHeight;
 
     // Keep the bounds in the image.
     // min and max could be inverted.

@@ -35,6 +35,9 @@
 
   TileView.prototype.SetSection = function (section) {
     this.Section = section;
+    // Hack
+    console.log('get rid of this debug hack');
+    this.DefaultSection = section;
   };
 
   TileView.prototype.AddCache = function (cache) {

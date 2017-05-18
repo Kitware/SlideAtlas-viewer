@@ -195,7 +195,7 @@
     var cam = this.AnnotationLayer.GetCamera();
     var element = {
       'type': 'view',
-      'center': cam.GetFocalPoint(),
+      'center': cam.GetWorldFocalPoint(),
       'height': cam.GetHeight(),
       'width': cam.GetWidth(),
       'rotation': cam.Roll};
@@ -482,12 +482,12 @@
       if (element.type === 'view') {
                 // Set the camera / view.
         var cam = this.AnnotationLayer.GetCamera();
-        cam.SetFocalPoint(element.center);
+        cam.SetWorldFocalPoint(element.center);
         cam.SetHeight(element.height);
         if (element.rotation) {
-          cam.Roll = element.rotation;
+          cam.SetWorldRoll(element.rotation);
         } else {
-          cam.Roll = 0;
+          cam.SetWorldRoll(0);
         }
         // Ignore width for now because it is determined by the
         // viewport.

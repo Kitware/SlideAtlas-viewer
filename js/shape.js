@@ -118,7 +118,7 @@
         view.gl.uniformMatrix4fv(program.pMatrixUniform, false, camMatrix);
       } else {
         // Use main views camera to convert world to view.
-        view.gl.uniformMatrix4fv(program.pMatrixUniform, false, view.Camera.Matrix);
+        view.gl.uniformMatrix4fv(program.pMatrixUniform, false, view.Camera.GetWorldMatrix());
       }
 
       // Fill color
@@ -186,7 +186,7 @@
           scale = view.Viewport[3] / view.Camera.GetHeight();
         }
         // First transform the origin-world to view.
-        m = view.Camera.Matrix;
+        m = view.Camera.GetCameraMatrix();
         x = (this.Origin[0] * m[0] + this.Origin[1] * m[4] + m[12]) / m[15];
         y = (this.Origin[0] * m[1] + this.Origin[1] * m[5] + m[13]) / m[15];
 

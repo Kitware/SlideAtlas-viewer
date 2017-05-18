@@ -81,7 +81,7 @@
   // For manually moving annotations from individual slides to a stack.
   // Remove all annotations that are not in the current view.
   SAM.pruneAnnotations = function () {
-    var c = SA.VIEWER1.GetCamera().FocalPoint;
+    var c = SA.VIEWER1.GetCamera().GetWorldFocalPoint();
     var w = SA.VIEWER1.GetCamera().GetWidth() / 2;
     var h = SA.VIEWER1.GetCamera().GetHeight() / 2;
     var v = [c[0] - w, c[0] + w, c[1] - h, c[1] + h];
@@ -625,6 +625,7 @@
   function AnnotationLayer (parent) {
     var self = this;
 
+    this.LoadCallbacks = [];
     this.LayerDiv = $('<div>')
             .appendTo(parent)
             .css({'position': 'absolute',
@@ -833,6 +834,11 @@
     if (this.LoadCallback) {
       (this.LoadCallback)();
     }
+    if (this.LoadCallbacks) {
+      for (var i = 0; i < this.LoadCallbacks.length; ++i) {
+        (this.LoadCallbacks[i])();
+      }
+    }
   };
 
     // Load a widget from a json object (origin MongoDB).
@@ -1019,10 +1025,6 @@
     if (this.Touches.length === 2) {
       return this.HandleTouchPinch(this);
     }
-    // if (this.Touches.length === 3) {
-    //    this.HandleTouchRotate(this);
-    //    return
-    // }
   };
 
   AnnotationLayer.prototype.HandleTouchPan = function (event) {
@@ -1463,8 +1465,8 @@
 
   // 1->2
   MatrixTransformation.prototype.ForwardTransformCamera = function (camIn, camOut) {
-    var fpIn = camIn.FocalPoint;
-    var fpOut = camOut.FocalPoint;
+    var fpIn = camIn.GetWorldFocalPoint();
+    var fpOut = camOut.GetWorldFocalPoint();
     var upIn = [fpIn[0] + 1, fpIn[1]];
 
     var pt = this.ForwardTransformPoint(fpIn);
@@ -1475,14 +1477,14 @@
     var scale = Math.sqrt(upOut[0] * upOut[0] + upOut[1] * upOut[1]);
     // compute the height.
     camOut.SetHeight(camIn.GetHeight() * scale);
-    camOut.Roll = camIn.Roll;// - angle;
+    camOut.SetWorldRoll(camIn.GetWorldRoll());
     camOut.ComputeMatrix();
   };
 
   // 2->1
   MatrixTransformation.prototype.ReverseTransformCamera = function (camIn, camOut) {
-    var fpIn = camIn.FocalPoint;
-    var fpOut = camOut.FocalPoint;
+    var fpIn = camIn.GetWorldFocalPoint();
+    var fpOut = camOut.GetWorldFocalPoint();
     var upIn = [fpIn[0] + 1, fpIn[1]];
 
     var pt = this.ReverseTransformPoint(fpIn);
@@ -1493,7 +1495,7 @@
     var scale = Math.sqrt(upOut[0] * upOut[0] + upOut[1] * upOut[1]);
     // compute the height.
     camOut.SetHeight(camIn.GetHeight() * scale);
-    camOut.Roll = camIn.Roll;// - angle;
+    camOut.SetWorldRoll(camIn.GetWorldRoll());
     camOut.ComputeMatrix();
   };
 

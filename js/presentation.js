@@ -794,7 +794,9 @@
             Roll: 0,
             Width: 1066},
           Database: '507f34a902e31010bcdb1366',
-          Image: {TileSize: 256,
+          Image: {
+            TileWidth: 256,
+            TileHeight: 256,
             _id: '55b4e5c03ed65909a84cd938',
             bounds: [0, 1020, 15, 1024],
             components: 3,
@@ -2445,7 +2447,8 @@
       var image = {img: imgObj._id,
         db: imgObj.database,
         levels: imgObj.levels,
-        tile_size: imgObj.TileSize,
+        tile_width: imgObj.TileWidth,
+        tile_height: imgObj.TileHeight,
         bounds: imgObj.bounds,
         label: imgObj.label};
       if (!image.bounds) {

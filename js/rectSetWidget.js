@@ -122,7 +122,7 @@
     var scale = view.Viewport[3] / view.Camera.GetHeight();
 
     // First transform the origin-world to view.
-    var m = view.Camera.Matrix;
+    var m = view.Camera.GetWorldMatrix();
     var x = m[12] / m[15];
     var y = m[13] / m[15];
 
@@ -220,6 +220,7 @@
     var visibilities = rectSet.Visibilities;
     visibilities.fill(false);
 
+    // Rectangles are reverse sorted by confidnece
     for (var i = 0; i < visibilities.length; ++i) {
       if (visibilities[i] === false && rectSet.Confidences[i] >= rectSet.Threshold) {
         var width = rectSet.Widths[i];
@@ -322,6 +323,9 @@
     if (this.Shape.Color) {
       obj.color = SAM.ConvertColor(this.Shape.Color);
     }
+    if (this.Label) {
+      obj.label = this.Label;
+    }
     var num = this.Shape.Widths.length;
     obj.confidences = new Array(num);
     obj.widths = new Array(num);
@@ -342,6 +346,9 @@
   // Load a widget from a json object (origin MongoDB).
   RectSetWidget.prototype.Load = function (obj) {
     this.UserNoteFlag = obj.user_note_flag;
+    if (obj.label) {
+      this.Label = obj.label;
+    }
     if (obj.color) {
       this.Shape.Color = [
         parseFloat(obj.color[0]),

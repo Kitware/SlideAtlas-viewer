@@ -66,10 +66,9 @@
     }
     var widget = new SAM.CircleWidget(this.Layer, false);
     var cam = this.Layer.GetCamera();
-    var x = cam.FocalPoint[0];
-    var y = cam.FocalPoint[1];
+    var fp = cam.GetWorldFocalPoint();
 
-    widget.Shape.Origin = [x, y];
+    widget.Shape.Origin = fp;
     widget.Shape.Radius = cam.Height / 4.0;
     widget.Shape.UpdateBuffers(this.Layer.AnnotationView);
     this.Layer.EventuallyDraw();
@@ -87,10 +86,8 @@
     this.Layer.SetVisibility(true);
     widget = new SAM.TextWidget(this.Layer, '');
     var cam = this.Layer.GetCamera();
-    var x = cam.FocalPoint[0];
-    var y = cam.FocalPoint[1];
-    widget.Text.Anchor[0] = x;
-    widget.Text.Anchor[1] = y;
+    var fp = cam.getWorldFocalPoint();
+    widget.Text.Anchor = fp;
     this.Layer.EventuallyDraw();
 
     this.Layer.ActivateWidget(widget);

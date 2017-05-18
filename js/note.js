@@ -868,11 +868,11 @@
       if (!this.ViewerRecords[i].Transform) {
         var cam0 = this.ViewerRecords[i - 1].Camera;
         var cam1 = this.ViewerRecords[i].Camera;
-        var dRoll = cam1.Roll - cam0.Roll;
+        var dRoll = cam1.GetWorldRoll() - cam0.GetWorldRoll();
         if (dRoll < 0.0) { dRoll += 2 * Math.PI; }
         var trans = new SA.PairTransformation();
-        trans.AddCorrelation(cam0.FocalPoint, cam1.FocalPoint, dRoll,
-                                     0.5 * (cam0.Height + cam1.Height));
+        trans.AddCorrelation(cam0.GetWorldFocalPoint(), cam1.GetWorldFocalPoint(), dRoll,
+                             0.5 * (cam0.Height + cam1.Height));
         this.ViewerRecords[i].Transform = trans;
       }
     }

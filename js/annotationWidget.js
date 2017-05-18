@@ -229,10 +229,10 @@
     var button = this.GridButton;
     var widget = this.ActivateButton(button, SAM.GridWidget);
     var cam = this.Layer.GetCamera();
-    var fp = cam.GetFocalPoint();
+    var fp = cam.GetWorldFocalPoint();
     // Square grid elements determined by height
     widget.Grid.Origin = [fp[0], fp[1], 0.0];
-    widget.Grid.Orientation = cam.GetRotation();
+    widget.Grid.Orientation = cam.GetWorldRotation();
     this.Layer.DeactivateWidget(widget);
   };
 

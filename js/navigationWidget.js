@@ -284,8 +284,8 @@
       var viewer1 = this.Display.GetViewer(1);
       var viewer0 = this.Display.GetViewer(0);
       var cam = viewer0.GetCamera();
-      var fp = cam.FocalPoint.slice();
-      var rot = cam.GetRotation();
+      var fp = cam.GetWorldFocalPoint();
+      var rot = cam.GetWorldRotation();
       var height = cam.GetHeight();
 
       this.Display.RecordAnnotations();
@@ -345,8 +345,8 @@
       var viewer0 = this.Display.GetViewer(0);
       var viewer1 = this.Display.GetViewer(1);
       var cam = viewer1.GetCamera();
-      var fp = cam.FocalPoint.slice();
-      var rot = cam.GetRotation();
+      var fp = cam.GetWorldFocalPoint();
+      var rot = cam.GetWorldRotation();
       var height = cam.GetHeight();
 
       this.Display.RecordAnnotations();

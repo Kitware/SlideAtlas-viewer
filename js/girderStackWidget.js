@@ -5,7 +5,13 @@
 // Restrict viewer to bounds of section.
 // Startup in the middle of the first bounds.
 
-// NOTE: Three different sections.
+// TODO: If we can, delay creating the saSection until the cache root is loaded.
+
+// TODO: Make sure that the annotation (stored in slide coordiantes) get
+// transformed to section coordinates before they are rendered.
+
+// NOTE: Three different sections. 
+
 //   metaSection: loaded from the girder item metadata.
 //   stackSection: object internal to this class.
 //   saSection: Object slide atlas uses to manage sections.
@@ -15,6 +21,10 @@
   'use strict';
 
   function GirderStackWidget (parent, display, apiRoot) {
+    // We need a common center to treat as the center for the stack.
+    // This is used to compute the transforms from the section centers.
+    this.VolumeCenter = undefined;
+
     this.SectionIndex = -1;
     // Stuff needs to be initialized on the first render.
     this.First = true;
@@ -175,18 +185,18 @@
             var metaSections = item.meta.sections;
             for (var sIdx = 0; sIdx < metaSections.length; ++sIdx) {
               var metaSection = metaSections[sIdx];
-              stackSection = {imageId: item._id, loaded: false};
-              if (metaSection.bounds) {
-                stackSection.bounds = metaSection.bounds;
-              }
+              stackSection = {imageId: item._id};
               if (metaSection.center) {
                 stackSection.center = metaSection.center;
+              }
+              if (metaSection.bounds) {
+                stackSection.bounds = metaSection.bounds;
               }
               self.Stack.push(stackSection);
             }
           } else {
             // Just add a single section (the whole slide)
-            stackSection = {imageId: resp[j]._id, loaded: false};
+            stackSection = {imageId: resp[j]._id};
             self.Stack.push(stackSection);
           }
         }
@@ -194,17 +204,6 @@
       // Serialize the bites.
       self.LoadFolderImageIds(folderId, offset + limit, limit, length);
     });
-  };
-
-  // Method to help share caches.
-  // TODO: Merge this with the method in cache.js to do the same.
-  GirderStackWidget.prototype.GetCache = function (imageId) {
-    var cache = this.Caches[imageId];
-    if (!cache) {
-      cache = new SA.Cache();
-      this.Caches[imageId] = cache;
-    }
-    return cache;
   };
 
   // Does everything necessary to load the section into the viewer.
@@ -226,7 +225,11 @@
   // The section images must be loaded before this call.
   GirderStackWidget.prototype.RenderSection = function (stackSection) {
     if (stackSection.SaSection === undefined) {
-      // The load call back will render if the section is current.
+      return;
+    }
+    var cache = this.Caches[stackSection.imageId];
+    if (cache === undefined || !cache.RootsLoaded) {
+      // The load callback will render if the section is current.
       return;
     }
     // Here display is just a viewer.
@@ -245,12 +248,6 @@
     // Let the SlideAtlas sections deal with the transformations
     this.Display.SetSection(stackSection.SaSection);
     this.Display.EventuallyRender();
-  };
-
-  GirderStackWidget.prototype.SectionLoaded = function (section) {
-    var cache = this.GetCache(section.imageId);
-    // The cache has an image iVar after it has been loaded.
-    return cache.Image;
   };
 
   // ============================================================================
@@ -273,7 +270,7 @@
     var startIdx = Math.max(this.SectionIndex, 0);
     // Multi0le section can have the same image id.
     var foundSection = this.Stack[startIdx];
-    if (this.SectionLoaded(foundSection)) {
+    if (foundSection.SaSection) {
       // already loaded
       foundSection = undefined;
     }
@@ -285,7 +282,7 @@
       var idx = startIdx + radius;
       if (idx >= 0 && idx < this.Stack.length) {
         foundSection = this.Stack[idx];
-        if (this.SectionLoaded(foundSection)) {
+        if (foundSection.SaSection) {
           // already loaded
           foundSection = undefined;
         }
@@ -294,7 +291,7 @@
       idx = startIdx - radius;
       if (!foundSection && idx >= 0 && idx < this.Stack.length) {
         foundSection = this.Stack[idx];
-        if (this.SectionLoaded(foundSection)) {
+        if (foundSection.SaSection) {
           // already loaded
           foundSection = undefined;
         }
@@ -304,14 +301,26 @@
 
     if (foundSection) {
       // Recursively call this method to throttle requests.
-      this.LoadSectionMetaData(foundSection,
-                               function () { self.LoadStackMetaData(); });
+      this.CreateSaSection(foundSection,
+                           function () { self.LoadStackMetaData(); });
     }
   };
 
-  GirderStackWidget.prototype.LoadSectionMetaData = function (stackSection, callback) {
-    var self = this;
+  // This gets called to create the saSection.  It may need to make a cache
+  // and get the image data from the server to do it.
+  GirderStackWidget.prototype.CreateSaSection = function (stackSection, callback) {
+    var cache = this.Caches[stackSection.imageId];
+    if (cache) {
+      // we have the cache already
+      this.CreateSaSectionFromCache(stackSection, cache);
+      if (callback) {
+        (callback)();
+      }
+      return;
+    }
 
+    // We need to request image data from the server to setup the cache.
+    var self = this;
     girder.rest.restRequest({
       path: 'item/' + stackSection.imageId + '/tiles',
       method: 'GET',
@@ -328,6 +337,7 @@
       var h = resp.sizeY;
       var tileSize = resp.tileWidth;
       var levels = resp.levels;
+
       // There can be multiple sections on a single slide.
       // Each needs its own region.
       // Set a default bounds to the whole slide.
@@ -370,7 +380,21 @@
         if (stackSection.imageId === currentSection.imageId) {
           self.RenderSection(currentSection);
         }
-      }
+      };
+      cache.SetTileSource(tileSource);
+      // Request the lowest resolution tile from girder.
+      cache.LoadRoots(
+        function () {
+          cache.RootsLoaded = true;
+          // If this is the current stackSection, render it.
+          if (self.SectionIndex !== -1) {
+            var currentSection = self.Stack[self.SectionIndex];
+            if (stackSection.imageId === currentSection.imageId) {
+              self.RenderSection(currentSection);
+            }
+          }
+        });
+      self.CreateSaSectionFromCache(stackSection, cache);
 
       // This serializes the requests. Starts loading the next after the
       // current is finished.
@@ -378,6 +402,42 @@
         (callback)();
       }
     });
+  };
+
+  GirderStackWidget.prototype.CreateSaSectionFromCache = function (stackSection, cache) {
+    // If the girder meta data did not set up the section defaults, do it
+    // here. The center is the first pass at the transformation.
+    var image = cache.GetImageData();
+    if (stackSection.bounds === undefined) {
+      stackSection.bounds = [0, image.dimensions[0] - 1, 0, image.dimensions[1] - 1];
+    }
+    // Set a default center to the middle of the bounds.
+    if (stackSection.center === undefined) {
+      var bds = stackSection.bounds;
+      stackSection.center = [(bds[0] + bds[2]) * 0.5,
+                             (bds[1] + bds[3]) * 0.5];
+    }
+
+    // Setup the slideAtlas section
+    var saSection = new SA.Section();
+    saSection.AddCache(cache);
+    stackSection.SaSection = saSection;
+    if (stackSection.bounds) {
+      var bds = stackSection.bounds;
+      saSection.Bounds = [bds[0], bds[2], bds[1], bds[3]];
+    }
+    if (stackSection.center) {
+      // Find the center of the whole slide.
+      // Pick an arbitrary global/world center.
+      if (this.VolumeCenter === undefined) {
+        this.VolumeCenter = stackSection.center;
+      }
+      // Transform the volume center to the slide center.
+      // Global/world to slide coordinat3e system.
+      saSection.SetTransform(1, 0, 0, 1,
+                             stackSection.center[0] - this.VolumeCenter[0],
+                             stackSection.center[1] - this.VolumeCenter[1]);
+    }
   };
 
   SAM.GirderStackWidget = GirderStackWidget;
