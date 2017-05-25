@@ -101,7 +101,7 @@
     var x = this.Position[0];
     var y = this.Position[1];
     if (this.PositionCoordinateSystem !== SAM.Shape.VIEWER) {
-      var m = view.Camera.Matrix;
+      var m = view.Camera.GetImageMatrix();
       x = (this.Position[0] * m[0] + this.Position[1] * m[4] + m[12]) / m[15];
       y = (this.Position[0] * m[1] + this.Position[1] * m[5] + m[13]) / m[15];
             // convert view to pixels (view coordinate system).

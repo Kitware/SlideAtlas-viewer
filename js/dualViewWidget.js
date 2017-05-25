@@ -168,7 +168,7 @@ window.SA = window.SA || {};
         _id: note.TempId};
       var record = new SA.ViewerRecord();
       record.Image = image;
-      record.OverviewBounds = [0, w - 1, 0, h - 1];
+      record.OverViewBounds = [0, w - 1, 0, h - 1];
       record.Camera = {FocalPoint: [w / 2, h / 2],
         Roll: 0,
         Height: h};

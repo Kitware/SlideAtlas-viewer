@@ -154,7 +154,7 @@
     var cam = layer.GetCamera();
     var viewport = layer.GetViewport();
     this.Shape = new Rect();
-    this.Shape.Orientation = cam.GetRotation();
+    this.Shape.Orientation = cam.GetImageRotation();
     this.Shape.Origin = [0, 0];
     this.Shape.OutlineColor = [0.0, 0.0, 0.0];
     this.Shape.SetOutlineColor(this.Dialog.ColorInput.val());

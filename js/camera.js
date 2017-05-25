@@ -9,7 +9,7 @@ window.SAM = window.SAM || {};
 
   function Camera () {
     // This transformation is from global/world to slide coordinate system
-    this.WorldToSlideTransform = [1,0,0,1,0,0];
+    this.WorldToImageTransform = [1,0,0,1,0,0];
 
     // Better managmenet of layers and sub layers.
     // Assign a range of the z buffer  for the view to use exclusively.
@@ -17,7 +17,7 @@ window.SAM = window.SAM || {};
     this.ZRange = [-1.0, 1.0];
     this.WorldRoll = 0;
     this.WorldMatrix = mat4.create();
-    this.SlideMatrix = mat4.create();
+    this.ImageMatrix = mat4.create();
     this.Height = 16000;
     this.Width = this.Height * 1.62;
     this.WorldFocalPoint = [128.0 * 64.0, 128.0 * 64.0];
@@ -34,8 +34,8 @@ window.SAM = window.SAM || {};
   }
 
   // This transformation is from global/world to slide coordinate system
-  Camera.prototype.SetWorldToSlideTransform = function (trans) {
-    this.WorldToSlideTransform = trans;
+  Camera.prototype.SetWorldToImageTransform = function (trans) {
+    this.WorldToImageTransform = trans;
     this.ComputeMatrix();
   };
 
@@ -99,8 +99,29 @@ window.SAM = window.SAM || {};
     return this.WorldRoll * 180.0 / 3.1415926535;
   };
 
+  Camera.prototype.GetImageRotation = function () {
+    return this.GetImageRoll() * 180.0 / 3.1415926535;
+  };
+
   Camera.prototype.GetWorldRoll = function () {
     return this.WorldRoll;
+  };
+
+  // Legacy: What a pain.
+  Camera.prototype.GetImageRoll = function () {
+    // Create a world up vector.
+    var x = Math.cos(this.WorldRoll);
+    var y = Math.sin(this.WorldRoll);
+    // Transform to image coordinate system.
+    var t = this.WorldToImageTransform;
+    var imx = (t[0] * x) + (t[2] * y);
+    var imy = (t[1] * x) + (t[3] * y);
+    // Now normalize.
+    var mag = Math.sqrt(imx * imx + imy * imy);
+    imx = imx / mag;
+    imy = imy / mag;
+    // Now convert back into radians.
+    return Math.atan2(imy, imx);
   };
 
   Camera.prototype.GetWorldFocalPoint = function () {
@@ -109,8 +130,8 @@ window.SAM = window.SAM || {};
     return [this.WorldFocalPoint[0], this.WorldFocalPoint[1]];
   };
 
-  Camera.prototype.GetSectionFocalPoint = function () {
-    return SAM.ApplyTransform(this.WorldToSlideTransform, this.WorldFocalPoint);
+  Camera.prototype.GetImageFocalPoint = function () {
+    return SAM.ApplyTransform(this.WorldToImageTransform, this.WorldFocalPoint);
   };
 
   // This is in global/world coordinate system.
@@ -124,14 +145,31 @@ window.SAM = window.SAM || {};
     // Ignore z on purpose.
   };
 
+  // View is in screen pixel coordinates.
+  Camera.prototype.ConvertPointViewerToImage = function (x, y) {
+    // Convert to world coordinate system
+    // Compute focal point from inverse overview camera.
+    var m = this.ImageMatrix;
+    x = x / this.ViewportWidth;
+    y = y / this.ViewportHeight;
+    x = (x * 2.0 - 1.0) * m[15];
+    y = (1.0 - y * 2.0) * m[15];
+    var det = m[0] * m[5] - m[1] * m[4];
+    var xNew = (x * m[5] - y * m[4] + m[4] * m[13] - m[5] * m[12]) / det;
+    var yNew = (y * m[0] - x * m[1] - m[0] * m[13] + m[1] * m[12]) / det;
+
+    return [xNew, yNew];
+  };
+
+  // View is in screen pixel coordinates.
   Camera.prototype.ConvertPointViewerToWorld = function (x, y) {
     // Convert to world coordinate system
     // Compute focal point from inverse overview camera.
+    var m = this.WorldMatrix;
     x = x / this.ViewportWidth;
     y = y / this.ViewportHeight;
-    x = (x * 2.0 - 1.0) * this.WorldMatrix[15];
-    y = (1.0 - y * 2.0) * this.WorldMatrix[15];
-    var m = this.WorldMatrix;
+    x = (x * 2.0 - 1.0) * m[15];
+    y = (1.0 - y * 2.0) * m[15];
     var det = m[0] * m[5] - m[1] * m[4];
     var xNew = (x * m[5] - y * m[4] + m[4] * m[13] - m[5] * m[12]) / det;
     var yNew = (y * m[0] - x * m[1] - m[0] * m[13] + m[1] * m[12]) / det;
@@ -243,18 +281,20 @@ window.SAM = window.SAM || {};
     this.WorldRoll = roll;
   };
 
-  // Slide coordinates.
-  Camera.prototype.GetSlideBounds = function () {
-    // To see where this is used and fix it.
-    alert("Roll not considered");
-    var fp = this.GetSlideFocalPoint();
-    var width = this.GetWidth();
-    var bds = new Array(4);
-    bds[0] = fp[0] - (width * 0.5);
-    bds[1] = bds[0] + width;
-    bds[2] = fp[1] - (this.Height * 0.5);
-    bds[3] = bds[2] + this.Height;
-    return bds;
+  // Image coordinates.
+  Camera.prototype.GetImageBounds = function () {
+    var w = this.GetWidth();
+    var h = this.GetHeight();
+
+    var pt = this.ConvertPointViewerToImage(0, 0);
+    var sBds = [pt[0], pt[0], pt[1], pt[1]];
+    pt = this.ConvertPointViewerToImage(w, h);
+    sBds[0] = Math.min(sBds[0], pt[0]);
+    sBds[1] = Math.max(sBds[1], pt[0]);
+    sBds[2] = Math.min(sBds[2], pt[1]);
+    sBds[3] = Math.max(sBds[3], pt[1]);
+
+    return sBds;
   };
 
   // World Matrix (world -> view)?
@@ -262,16 +302,16 @@ window.SAM = window.SAM || {};
     return this.WorldMatrix;
   };
 
-  // Slide Matrix (slide -> view)?
-  Camera.prototype.GetSlideMatrix = function () {
-    return this.SlideMatrix;
+  // Image Matrix (slide -> view)?
+  Camera.prototype.GetImageMatrix = function () {
+    return this.ImageMatrix;
   };
 
   // Camera matrix transforms points into camera coordinate system
   // X:(-1->1)
   // Y:(-1->1) (-1 is bottom)
   // Z:(-1->1) (-1 is front)
-  // Slide may not have a perfect matrix in the future We may support
+  // Image may not have a perfect matrix in the future We may support
   // nonlinear slide to world transformationss
   Camera.prototype.ComputeMatrix = function () {
     var fp = this.GetWorldFocalPoint();
@@ -302,35 +342,35 @@ window.SAM = window.SAM || {};
     this.WorldMatrix[14] = -z + (this.ZRange[1] + this.ZRange[0]) * 0.25 * w;
     this.WorldMatrix[15] = 0.5 * w;
 
-    // Now the SlideMatrix.  In the future slide to world transform will be
+    // Now the ImageMatrix.  In the future slide to world transform will be
     // more general so the matrix will not capture the entire
     // transformation.
-    var slideToWorld = SAM.InvertTransform(this.WorldToSlideTransform);
+    var slideToWorld = SAM.InvertTransform(this.WorldToImageTransform);
 
-    mat4.identity(this.SlideMatrix);
-    this.SlideMatrix[0] = this.WorldMatrix[0];
-    this.SlideMatrix[1] = this.WorldMatrix[1];
-    this.SlideMatrix[4] = this.WorldMatrix[4];
-    this.SlideMatrix[5] = this.WorldMatrix[5];
-    this.SlideMatrix[9] = this.WorldMatrix[9];
-    this.SlideMatrix[10] = this.WorldMatrix[10];
-    this.SlideMatrix[12] = this.WorldMatrix[12];
-    this.SlideMatrix[13] = this.WorldMatrix[13];
-    this.SlideMatrix[14] = this.WorldMatrix[14];
-    this.SlideMatrix[15] = this.WorldMatrix[15];
+    mat4.identity(this.ImageMatrix);
+    this.ImageMatrix[0] = this.WorldMatrix[0];
+    this.ImageMatrix[1] = this.WorldMatrix[1];
+    this.ImageMatrix[4] = this.WorldMatrix[4];
+    this.ImageMatrix[5] = this.WorldMatrix[5];
+    this.ImageMatrix[9] = this.WorldMatrix[9];
+    this.ImageMatrix[10] = this.WorldMatrix[10];
+    this.ImageMatrix[12] = this.WorldMatrix[12];
+    this.ImageMatrix[13] = this.WorldMatrix[13];
+    this.ImageMatrix[14] = this.WorldMatrix[14];
+    this.ImageMatrix[15] = this.WorldMatrix[15];
 
     // Concatenate the section mmatrix.
     
-    var m0 = this.SlideMatrix[0];
-    var m1 = this.SlideMatrix[1];
-    var m4 = this.SlideMatrix[4];
-    var m5 = this.SlideMatrix[5];
-    this.SlideMatrix[0] = (m0 * slideToWorld[0]) + (m4 * slideToWorld[1]);
-    this.SlideMatrix[1] = (m1 * slideToWorld[0]) + (m5 * slideToWorld[1]);
-    this.SlideMatrix[4] = (m0 * slideToWorld[2]) + (m4 * slideToWorld[3]);
-    this.SlideMatrix[5] = (m1 * slideToWorld[2]) + (m5 * slideToWorld[3]);
-    this.SlideMatrix[12] += (m0 * slideToWorld[4]) + (m4 * slideToWorld[5]);
-    this.SlideMatrix[13] += (m1 * slideToWorld[4]) + (m5 * slideToWorld[5]);
+    var m0 = this.ImageMatrix[0];
+    var m1 = this.ImageMatrix[1];
+    var m4 = this.ImageMatrix[4];
+    var m5 = this.ImageMatrix[5];
+    this.ImageMatrix[0] = (m0 * slideToWorld[0]) + (m4 * slideToWorld[1]);
+    this.ImageMatrix[1] = (m1 * slideToWorld[0]) + (m5 * slideToWorld[1]);
+    this.ImageMatrix[4] = (m0 * slideToWorld[2]) + (m4 * slideToWorld[3]);
+    this.ImageMatrix[5] = (m1 * slideToWorld[2]) + (m5 * slideToWorld[3]);
+    this.ImageMatrix[12] += (m0 * slideToWorld[4]) + (m4 * slideToWorld[5]);
+    this.ImageMatrix[13] += (m1 * slideToWorld[4]) + (m5 * slideToWorld[5]);
   };
 
   // Currenly assumes parallel projection and display z range = [-1,1].
@@ -472,22 +512,43 @@ window.SAM = window.SAM || {};
 
   SAM.Camera = Camera;
 
+  // Transform utilites.
   SAM.ApplyTransform = function (t, pt) {
     var x = (t[0] * pt[0]) + (t[2] * pt[1]) + t[4];
     var y = (t[1] * pt[0]) + (t[3] * pt[1]) + t[5];
     return [x,y];
   };
 
+  SAM.MultiplyTransforms = function (t1, t2) {
+    return [(t1[0] * t2[0]) + (t1[2] * t2[1]),
+            (t1[1] * t2[0]) + (t1[3] * t2[1]),
+            (t1[0] * t2[2]) + (t1[2] * t2[3]),
+            (t1[1] * t2[2]) + (t1[3] * t2[3]),
+            (t1[0] * t2[4]) + (t1[2] * t2[5]) + t1[4],
+            (t1[1] * t2[4]) + (t1[3] * t2[5]) + t1[5]];
+  };
+
+  SAM.InvertTransform = function (t) {
+    var p = (t[0] * t[3]) - (t[1] * t[2]);
+    var q = (t[2] * t[5]) - (t[3] * t[4]);
+    var s = (t[0] * t[5]) - (t[1] * t[4]);
+    var inv = [t[3]/p, -t[1]/p, -t[2]/p, t[0]/p, q/p, -s/p]
+    return inv;
+  };
+
+  /*
   SAM.InvertTransform = function (t) {
     var p = (t[0] * t[3]) + (t[1] * t[2]);
     var q = (t[0] * t[5]) + (t[1] * t[4]);
-    var inv = [(p + (t[1] * t[2])) / (p * t[0]),
-               -t[1] / p,
-               -(t[0] * t[2]) / (p * t[0]),
-               t[0] / p,
-               ((q * t[2]) - (p * t[4])) / (p * t[0]),
-               -q / p]
+    var inv = [
+      (p + (t[1] * t[2])) / (p * t[0]),
+      -t[1] / p,
+      -(t[0] * t[2]) / (p * t[0]),
+      t[0] / p,
+      ((q * t[2]) - (p * t[4])) / (p * t[0]),
+      -q / p]
     return inv;
   };
+  */
 
 })();

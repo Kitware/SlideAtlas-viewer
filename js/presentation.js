@@ -688,7 +688,7 @@
 // Callback from search.
   Presentation.prototype.AddImageCallback = function (image) {
     var record = new SA.ViewerRecord();
-    record.OverviewBounds = image.bounds;
+    record.OverViewBounds = image.bounds;
     record.Image = image;
     record.Camera = {FocalPoint: [(image.bounds[0] + image.bounds[1]) / 2,
       (image.bounds[2] + image.bounds[3]) / 2, 0],
@@ -808,7 +808,7 @@
             origin: [0, 0, 0],
             spacing: [1, 1, 1],
             NumberOfLevels: 3,
-            OverviewBounds: [0, 1020, 15, 1024]}
+            OverViewBounds: [0, 1020, 15, 1024]}
         });
       rootNote.ViewerRecords.push(record);
     }

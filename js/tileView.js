@@ -35,9 +35,11 @@
 
   TileView.prototype.SetSection = function (section) {
     this.Section = section;
-    // Hack
-    console.log('get rid of this debug hack');
-    this.DefaultSection = section;
+    if (section.Transform) {
+      this.GetCamera().SetWorldToImageTransform(section.Transform);
+    } else {
+      this.GetCamera().SetWorldToImageTransform([1, 0, 0, 1, 0, 0]);
+    }
   };
 
   TileView.prototype.AddCache = function (cache) {

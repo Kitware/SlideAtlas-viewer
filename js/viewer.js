@@ -369,7 +369,7 @@
         this.SetCache(newCache);
       }
 
-      this.SetOverViewBounds(viewerRecord.OverviewBounds);
+      this.SetOverViewBounds(viewerRecord.OverViewBounds);
 
       if (viewerRecord.Camera !== undefined && viewerRecord.Transform === undefined) {
         var cameraRecord = viewerRecord.Camera;
@@ -903,7 +903,7 @@
     //   this.OverView.Section = section;
     // }
     // this.EventuallyRender(true);
-    this.SetCache(section.GetCache(0));
+    //this.SetCache(section.GetCache(0));
     /* merged out
     this.MainView.SetSection(section);
     // Pass the sections bounds through its transform.
@@ -917,11 +917,40 @@
     }
     this.EventuallyRender(true);
     */
+
+    if (section.Bounds) {
+      this.SetOverViewBounds(section.Bounds);
+    }
+    if (section.Caches.length > 0) {
+      this.CopyrightWrapper
+        .html(section.Caches[0].Image.copyright);
+    }
+
+    this.MainView.SetSection(section);
+
+    if (this.OverView) {
+      this.OverView.SetSection(section);
+      var bds = section.Bounds;
+      if (bds) {
+        this.OverView.Camera.SetWorldFocalPoint([(bds[0] + bds[1]) / 2,
+                                                 (bds[2] + bds[3]) / 2]);
+        var height = (bds[3] - bds[2]);
+        // See if the view is constrained by the width.
+        var height2 = (bds[1] - bds[0]) * this.OverView.Viewport[3] / this.OverView.Viewport[2];
+        if (height2 > height) {
+          height = height2;
+        }
+        this.OverView.Camera.SetHeight(height);
+        this.OverView.Camera.ComputeMatrix();
+      }
+    }
+    // Change the overview to fit the new image dimensions.
+    this.UpdateSize();
   };
 
   // Change the source / cache after a viewer has been created.
   // TODO: clean this up. Should probably call set section.
-  // Overview bounds appear to be handled twice.
+  // OverView bounds appear to be handled twice.
   // Handle copyright for sections. (multple caches?)
   Viewer.prototype.SetCache = function (cache) {
     if (cache && cache.Image) {
@@ -1327,7 +1356,7 @@
     // Compute focal point from inverse overview camera.
     x = x / this.OverView.Viewport[2];
     y = y / this.OverView.Viewport[3];
-    var m = this.Overview.Camera.GetWorldMatrix();
+    var m = this.OverView.Camera.GetWorldMatrix();
     x = (x * 2.0 - 1.0) * m[15];
     y = (1.0 - y * 2.0) * m[15];
     var det = m[0] * m[5] - m[1] * m[4];
@@ -2479,8 +2508,8 @@
     this.InteractionState = INTERACTION_OVERVIEW;
 
     // Delay actions until we see if it is a drag or click.
-    this.OverviewEventX = event.pageX;
-    this.OverviewEventY = event.pageY;
+    this.OverViewEventX = event.pageX;
+    this.OverViewEventY = event.pageY;
 
     return false;
   };
@@ -2522,8 +2551,8 @@
     var p;
     if (this.InteractionState === INTERACTION_OVERVIEW) {
       // Do not start dragging until the mouse has moved some distance.
-      if (Math.abs(event.pageX - this.OverviewEventX) > 5 ||
-          Math.abs(event.pageY - this.OverviewEventY) > 5) {
+      if (Math.abs(event.pageX - this.OverViewEventX) > 5 ||
+          Math.abs(event.pageY - this.OverViewEventY) > 5) {
         // Start dragging the overview window.
         this.InteractionState = INTERACTION_OVERVIEW_DRAG;
         w = this.GetViewport()[2];

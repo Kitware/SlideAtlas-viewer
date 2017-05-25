@@ -49,8 +49,8 @@
   };
 
   // Set the tranform for cache 0.  Same api as html canvas transform.
-  // This tranform is applied before the camera.  It converts world/pixel/slide
-  // coordinates to section (pixel) coordinates
+  // This tranform is applied before the camera.  It converts world to image
+  // coordinates.
   Section.prototype.SetTransform = function (m00, m10, m01, m11, m02, m12) {
     this.Transform = [m00, m10, m01, m11, m02, m12];
   };
@@ -140,7 +140,7 @@
     //view.Camera.SetTransform(this.Transform);
     view.Camera.SectionTransform = this.Transform;
     view.Camera.ComputeMatrix();
-    var m = view.Camera.GetSlideMatrix();
+    var m = view.Camera.GetImageMatrix();
 
     if (view.gl) {
       // Draw tiles.

@@ -235,6 +235,12 @@
     if (source.bounds) {
       image.bounds = source.bounds;
     }
+    if (source.TileWidth) {
+      image.TileWidth = source.TileWidth;
+    }
+    if (source.TileHeight) {
+      image.TileHeight = source.TileHeight;
+    }
 
     if (source.filename) {
       image.filename = source.filename;
@@ -347,102 +353,7 @@
     // }
 
     // TODO: Have camera return world bounds and compute this stuff internally.
-
-    // Compute the world bounds of camera view.
-    var xMax = 0.0;
-    var yMax = 0.0;
-    var hw = camera.GetWidth() * 0.5;
-    var hh = camera.GetHeight() * 0.5;
-    var roll = camera.GetWorldRoll();
-    var s = Math.sin(roll);
-    var c = Math.cos(roll);
-    var rx, ry;
-    // Choose a camera corner and rotate. (Center of bounds in origin).
-    rx = hw * c + hh * s;
-    ry = hh * c - hw * s;
-    // Expand bounds.
-    if (xMax < rx) { xMax = rx; }
-    if (xMax < -rx) { xMax = -rx; }
-    if (yMax < ry) { yMax = ry; }
-    if (yMax < -ry) { yMax = -ry; }
-    // Now another corner (90 degrees away).
-    rx = hw * c - hh * s;
-    ry = -hh * c - hw * s;
-    // Expand bounds.
-    if (xMax < rx) { xMax = rx; }
-    if (xMax < -rx) { xMax = -rx; }
-    if (yMax < ry) { yMax = ry; }
-    if (yMax < -ry) { yMax = -ry; }
-
-    var bounds = [];
-    var fp = camera.GetSlideFocalPoint();
-    bounds[0] = fp[0] - xMax;
-    bounds[1] = fp[0] + xMax;
-    bounds[2] = fp[1] - yMax;
-    bounds[3] = fp[1] + yMax;
-
-    // Adjust bounds to compensate for warping.
-    if (this.Warp) {
-      // If this is too slow (occurs every render) we can estimate.
-      var iPt = this.WorldToImage([bounds[0], bounds[2]]);
-      if (!iPt) {
-        tiles.length = 0;
-        return tiles;
-      }
-      var iBounds = [iPt[0], iPt[0], iPt[1], iPt[1]];
-      iPt = this.WorldToImage([bounds[1], bounds[2]]);
-      if (!iPt) {
-        tiles.length = 0;
-        return tiles;
-      }
-      if (iBounds[0] > iPt[0]) {
-        iBounds[0] = iPt[0];
-      }
-      if (iBounds[1] < iPt[0]) {
-        iBounds[1] = iPt[0];
-      }
-      if (iBounds[2] > iPt[1]) {
-        iBounds[2] = iPt[1];
-      }
-      if (iBounds[3] < iPt[1]) {
-        iBounds[3] = iPt[1];
-      }
-      iPt = this.WorldToImage([bounds[0], bounds[3]]);
-      if (!iPt) {
-        tiles.length = 0;
-        return tiles;
-      }
-      if (iBounds[0] > iPt[0]) {
-        iBounds[0] = iPt[0];
-      }
-      if (iBounds[1] < iPt[0]) {
-        iBounds[1] = iPt[0];
-      }
-      if (iBounds[2] > iPt[1]) {
-        iBounds[2] = iPt[1];
-      }
-      if (iBounds[3] < iPt[1]) {
-        iBounds[3] = iPt[1];
-      }
-      iPt = this.WorldToImage([bounds[1], bounds[3]]);
-      if (!iPt) {
-        tiles.length = 0;
-        return tiles;
-      }
-      if (iBounds[0] > iPt[0]) {
-        iBounds[0] = iPt[0];
-      }
-      if (iBounds[1] < iPt[0]) {
-        iBounds[1] = iPt[0];
-      }
-      if (iBounds[2] > iPt[1]) {
-        iBounds[2] = iPt[1];
-      }
-      if (iBounds[3] < iPt[1]) {
-        iBounds[3] = iPt[1];
-      }
-      bounds = iBounds;
-    }
+    var bounds = camera.GetImageBounds();
 
     // Some logic for progressive rendering is in the loader:
     // Do not load a tile if its parent is not loaded.

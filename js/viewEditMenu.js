@@ -118,12 +118,12 @@ window.SA = window.SA || {};
         // If the user is authorized, the new bounds are automatically saved.
       if (SA.Edit) {
         $('<button>').appendTo(this.Tab.Panel)
-                .text('Save Overview Bounds')
+                .text('Save OverView Bounds')
                 .addClass('sa-view-edit-button')
                 .click(function () { self.SetViewBounds(); });
       } else {
         $('<button>').appendTo(this.Tab.Panel)
-                .text('Set Overview Bounds')
+                .text('Set OverView Bounds')
                 .addClass('sa-view-edit-button')
                 .click(function () { self.SetViewBounds(); });
       }
@@ -174,9 +174,9 @@ window.SA = window.SA || {};
     // Which view record?
     var viewerRecord = note.ViewerRecords[this.Viewer.RecordIndex];
 
-    viewerRecord.OverviewBounds = bounds;
+    viewerRecord.OverViewBounds = bounds;
     // Set the image bounds so the new bounds are used immediately.
-    viewerRecord.Image.bounds = viewerRecord.OverviewBounds;
+    viewerRecord.Image.bounds = viewerRecord.OverViewBounds;
     this.Viewer.OverView.Camera.SetWorldFocalPoint([(bounds[0] + bounds[1]) / 2,
       (bounds[2] + bounds[3]) / 2]);
     this.Viewer.OverView.Camera.SetHeight(bounds[3] - bounds[2]);
