@@ -191,10 +191,10 @@ GirderStackWidget.prototype.LoadFolderImageIds = function (folderId,
           for (var sIdx = 0; sIdx < metaSections.length; ++sIdx) {
             var metaSection = metaSections[sIdx];
             stackSection = {imageId: item._id};
+            if (metaSection.trans) {
+              stackSection.transform = meta.trans;
+            }
             if (metaSection.bounds) {
-              // The center is a placeholder for a transformation
-              stackSection.center = [0.5 * (metaSection.bounds[0] + metaSection.bounds[2]),
-                                     0.5 * (metaSection.bounds[1] + metaSection.bounds[3])];
               // These bounds are in image coordinate ssytem.
               stackSection.bounds = [metaSection.bounds[0],
                                      metaSection.bounds[2],
@@ -356,13 +356,6 @@ GirderStackWidget.prototype.LoadItem = function (resp, stackSection, callback) {
   if (stackSection.bounds === undefined) {
     stackSection.bounds = [0, w - 1, 0, h - 1];
   }
-  // Set a default center to the middle of the bounds.
-  if (stackSection.center === undefined) {
-    var bds = stackSection.bounds;
-    stackSection.center = [
-      (bds[0] + bds[1]) * 0.5,
-      (bds[2] + bds[3]) * 0.5];
-  }
   // Get / setup the cache.
   var cache = this.Caches[stackSection.imageId];
   if (! cache) {
@@ -424,40 +417,32 @@ GirderStackWidget.prototype.CreateSaSectionFromCache = function (stackSection, c
   if (stackSection.bounds === undefined) {
     stackSection.bounds = [0, image.dimensions[0] - 1, 0, image.dimensions[1] - 1];
   }
+  var bds = stackSection.bounds;
+  var center = [(bds[0] + bds[1]) * 0.5,
+                (bds[2] + bds[3]) * 0.5];
+  if (!this.VolumeCenter) {
+    this.VolumeCenter = center;
+  }
   // Set a default center to the middle of the bounds.
-  if (stackSection.center === undefined) {
-    var bds = stackSection.bounds;
-    stackSection.center = [(bds[0] + bds[1]) * 0.5,
-                           (bds[2] + bds[3]) * 0.5];
+  if (stackSection.transform === undefined) {
+    stackSection.transform = [1,0,0,1,
+                              center[0] - this.VolumeCenter[0],
+                              center[1] - this.VolumeCenter[1]];
   }
 
   // Setup the slideAtlas section
   var saSection = new SA.Section();
   saSection.AddCache(cache);
   // First set the world to image transformation.
-  if (stackSection.center) {
-    // Find the center of the whole slide.
-    // Pick an arbitrary global/world center.
-    if (this.VolumeCenter === undefined) {
-      this.VolumeCenter = stackSection.center;
-    }
-    // Transform the world center to the image center.
-    // Global/world to image coordinate system tranform.
-    saSection.SetTransform(1, 0, 0, 1,
-                           stackSection.center[0] - this.VolumeCenter[0],
-                           stackSection.center[1] - this.VolumeCenter[1]);
-  }
+  saSection.SetTransform(stackSection.transform)
+
   // Now set the slide atla section bounds. They are best kept in world
   // coordinate system because they are used for interaction.
   // The stackSection bounds are in image coodindate system (for now).
   // TODO: fix this:  Since we only have translation, hack in the
   // conversion to world coordinate system.
-  if (stackSection.bounds) {
-    var dx = stackSection.center[0] - this.VolumeCenter[0];
-    var dy = stackSection.center[1] - this.VolumeCenter[1];
-    var bds = stackSection.bounds;
-    saSection.Bounds = [bds[0] - dx, bds[1] - dx, bds[2] - dy, bds[3] - dy];
-  }
+  var tmp = SAM.InvertTransform(stackSection.transform);
+  saSection.Bounds = SAM.TranformBounds(tmp, bds);
 
   stackSection.SaSection = saSection;
 };

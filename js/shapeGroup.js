@@ -53,7 +53,7 @@
     // Find a world location of a popup point given a camera.
   ShapeGroup.prototype.FindPopupPoint = function (cam) {
     if (this.Shapes.length === 0) { return; }
-    var roll = cam.Roll;
+    var roll = cam.GetWorldRoll();
     var s = Math.sin(roll + (Math.PI * 0.25));
     var c = Math.cos(roll + (Math.PI * 0.25));
     var bestPt = this.Shapes[0].FindPopupPoint(cam);

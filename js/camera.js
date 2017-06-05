@@ -519,6 +519,27 @@ window.SAM = window.SAM || {};
     return [x,y];
   };
 
+  SAM.TransformBounds = function (t, bds) {
+    var pt = SAM.ApplyTransfrom(t, [bds[0], bds[2]]);
+    out = [pt[0], pt[0], pt[1], pt[1]];
+    var pt = SAM.ApplyTransfrom(t, [bds[1], bds[2]]);
+    out[0] = Math.min(out[0], pt[0]);
+    out[1] = Math.max(out[1], pt[0]);
+    out[2] = Math.min(out[2], pt[1]);
+    out[3] = Math.max(out[3], pt[1]);
+    var pt = SAM.ApplyTransfrom(t, [bds[0], bds[3]]);
+    out[0] = Math.min(out[0], pt[0]);
+    out[1] = Math.max(out[1], pt[0]);
+    out[2] = Math.min(out[2], pt[1]);
+    out[3] = Math.max(out[3], pt[1]);
+    var pt = SAM.ApplyTransfrom(t, [bds[1], bds[3]]);
+    out[0] = Math.min(out[0], pt[0]);
+    out[1] = Math.max(out[1], pt[0]);
+    out[2] = Math.min(out[2], pt[1]);
+    out[3] = Math.max(out[3], pt[1]);
+    return out;
+  };
+
   SAM.MultiplyTransforms = function (t1, t2) {
     return [(t1[0] * t2[0]) + (t1[2] * t2[1]),
             (t1[1] * t2[0]) + (t1[3] * t2[1]),

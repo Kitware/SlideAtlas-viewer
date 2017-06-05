@@ -113,7 +113,7 @@
     view.Context2d.setTransform(1, 0, 0, 1, 0, 0);
 
     // only supported case: this.PositionCoordinateSystem == Shape.SLIDE
-    var theta = view.Camera.Roll;
+    var theta = view.Camera.GetImageRoll();
     var matrix0 = Math.cos(theta);
     var matrix1 = Math.sin(theta);
     var matrix4 = -Math.sin(theta);

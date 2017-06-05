@@ -286,6 +286,7 @@
     camOut.Width = camOut.Height * camOut.ViewportWidth / camOut.ViewportHeight;
   };
 
+  // TODO: Fix this (image camera coordinate system) or get rid of pairTransform
   PairTransformation.prototype.ReverseTransformCamera = function (camIn, camOut) {
     camOut.FocalPoint = this.ReverseTransform(camIn.FocalPoint, camIn.Height / 2);
     camOut.Roll = camIn.Roll + this.DeltaRoll;

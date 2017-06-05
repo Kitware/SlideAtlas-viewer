@@ -1072,7 +1072,7 @@
     this.RollTarget = cam.GetWorldRoll();
     if (this.OverView) {
       this.OverView.CanvasDiv.css({'transform': 'rotate(' + this.RollTarget + 'rad'});
-      this.OverView.Camera.Roll = 0;
+      this.OverView.Camera.SetWorldRoll(0);
       this.OverView.Camera.ComputeMatrix();
     }
 

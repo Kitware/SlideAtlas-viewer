@@ -132,7 +132,7 @@
     // Find a world location of a popup point given a camera.
   Polyline.prototype.FindPopupPoint = function (cam) {
     if (this.Points.length === 0) { return; }
-    var roll = cam.Roll;
+    var roll = cam.GetWorldRoll();
     var s = Math.sin(roll + (Math.PI * 0.25));
     var c = Math.cos(roll + (Math.PI * 0.25));
     var bestPt = this.Points[0];

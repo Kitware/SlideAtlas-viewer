@@ -562,7 +562,7 @@
       return;
     }
     // Compute the location for the pop up and show it.
-    var roll = this.Layer.GetCamera().Roll;
+    var roll = this.Layer.GetCamera().GetWorldRoll();
     var rad = this.Shape.Width * 0.5;
     var x = this.Shape.Origin[0] + 0.8 * rad * (Math.cos(roll) - Math.sin(roll));
     var y = this.Shape.Origin[1] - 0.8 * rad * (Math.cos(roll) + Math.sin(roll));

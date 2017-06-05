@@ -502,7 +502,7 @@
 
     var viewer = this.Layer.GetViewer();
     // viewer.ZoomTarget = this.Layer.GetCamera().GetHeight();
-    viewer.RollTarget = this.Layer.GetCamera().Roll;
+    viewer.RollTarget = this.Layer.GetCamera().GetWorldRoll();
     viewer.TranslateTarget = rectSet.GetCenter(this.IteratorIndex);
     viewer.AnimateLast = new Date().getTime();
     viewer.AnimateDuration = 200.0;

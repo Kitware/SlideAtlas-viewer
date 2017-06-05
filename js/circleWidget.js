@@ -401,7 +401,7 @@
   CircleWidget.prototype.PlacePopup = function () {
         // Compute the location for the pop up and show it.
     var cam = this.Layer.GetCamera();
-    var roll = cam.Roll;
+    var roll = cam.GetImageRoll();
     var x = this.Shape.Origin[0] + 0.8 * this.Shape.Radius * (Math.cos(roll) - Math.sin(roll));
     var y = this.Shape.Origin[1] - 0.8 * this.Shape.Radius * (Math.cos(roll) + Math.sin(roll));
     var pt = cam.ConvertPointWorldToViewer(x, y);

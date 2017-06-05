@@ -44,9 +44,6 @@
     if (navigator.userAgent.match(/Windows Phone/i)) {
       SAM.MOBILE_DEVICE = 'Windows Phone';
     }
-    if (SA.MOBILE_DEVICE) {
-      SAM.MaximumNumberOfTiles = 5000;
-    }
     return SAM.MOBILE_DEVICE;
   };
 
@@ -860,11 +857,6 @@
         break;
       case 'polyline':
         widget = new SAM.PolylineWidget(this, false);
-        break;
-      case 'stack_section':
-        if (window.SA) {
-          widget = new SA.StackSectionWidget(this);
-        }
         break;
       case 'rect':
         widget = new SAM.RectWidget(this, false);

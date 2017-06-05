@@ -24,6 +24,10 @@
   SA.PruneTimeTiles = 0;
   SA.PruneTimeTextures = 0;
 
+  if (SA.MOBILE_DEVICE) {
+    SA.MaximumNumberOfTiles = 5000;
+  }
+
   SA.LoadProgressMax = 0;
   SA.ProgressBar = null;
 
