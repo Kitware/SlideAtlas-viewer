@@ -93,6 +93,30 @@
         });
   }
 
+  GirderWidget.prototype.SaveSectionMetaData = function (annot) {
+    if (confirm('Save section meta data?')) {
+      var sections = [];
+      for (var i = 0; i < annot.elements.length; ++i) {
+        var rect = annot.elements[i];
+        if (rect.type === 'rectangle') {
+          var x0 = rect.center[0] - rect.width / 2.0;
+          var y0 = rect.center[1] - rect.height / 2.0;
+          var x1 = x0 + rect.width;
+          var y1 = y0 + rect.height;
+          sections.push({'bounds': [x0, y0, x1, y1]});
+        }
+      }
+      girder.rest.restRequest({
+        path: 'item/' + this.ImageItemId + '/metadata',
+        method: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify({'sections': sections})
+      });
+      return true;
+    }
+    return false;
+  };
+
   // Create a new annotation item from the annotation layer.
   // Save it in the database.  Add the annotation as a dot in the GUI.
   GirderWidget.prototype.NewAnnotationItem = function (e) {
@@ -100,25 +124,9 @@
     annot.elements = this.RecordAnnotation();
 
     // Hack to save sections meta data to girder items
+    // Hack until we have a real GUI
     if (e.ctrlKey && window.girder) {
-      if (confirm('Save section meta data?')) {
-        var sections = [];
-        for (var i = 0; i < annot.elements.length; ++i) {
-          var rect = annot.elements[i];
-          if (rect.type === 'rectangle') {
-            var x0 = rect.center[0] - rect.width / 2.0;
-            var y0 = rect.center[1] - rect.height / 2.0;
-            var x1 = x0 + rect.width;
-            var y1 = y0 + rect.height;
-            sections.push({'bounds': [x0, y0, x1, y1]});
-          }
-        }
-        girder.rest.restRequest({
-          path: 'item/' + this.ImageItemId + '/metadata',
-          method: 'PUT',
-          contentType: 'application/json',
-          data: JSON.stringify({'sections': sections})
-        });
+      if (this.SaveSectionMetaData(annot)) {
         return;
       }
     }
@@ -127,6 +135,13 @@
     if (!annot.name) {
       return;
     }
+    // Hack until we have a real GUI
+    if (annot.name == "sections") {
+      if (this.SaveSectionMetaData(annot)) {
+        return;
+      }
+    }
+
     // Make a new annotation in the database.
     var self = this;
     if (window.girder) { // Conditional is for testing in slide atlas.
