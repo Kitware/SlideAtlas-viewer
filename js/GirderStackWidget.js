@@ -442,7 +442,7 @@ GirderStackWidget.prototype.CreateSaSectionFromCache = function (stackSection, c
   // TODO: fix this:  Since we only have translation, hack in the
   // conversion to world coordinate system.
   var tmp = SAM.InvertTransform(stackSection.transform);
-  saSection.Bounds = SAM.TranformBounds(tmp, bds);
+  saSection.Bounds = SAM.TransformBounds(tmp, bds);
 
   stackSection.SaSection = saSection;
 };

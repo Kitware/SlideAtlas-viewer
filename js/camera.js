@@ -283,8 +283,8 @@ window.SAM = window.SAM || {};
 
   // Image coordinates.
   Camera.prototype.GetImageBounds = function () {
-    var w = this.GetWidth();
-    var h = this.GetHeight();
+    var w = this.ViewportWidth;
+    var h = this.ViewportHeight;
 
     var pt = this.ConvertPointViewerToImage(0, 0);
     var sBds = [pt[0], pt[0], pt[1], pt[1]];
@@ -520,19 +520,20 @@ window.SAM = window.SAM || {};
   };
 
   SAM.TransformBounds = function (t, bds) {
-    var pt = SAM.ApplyTransfrom(t, [bds[0], bds[2]]);
+    var pt, out;
+    pt = SAM.ApplyTransform(t, [bds[0], bds[2]]);
     out = [pt[0], pt[0], pt[1], pt[1]];
-    var pt = SAM.ApplyTransfrom(t, [bds[1], bds[2]]);
+    pt = SAM.ApplyTransform(t, [bds[1], bds[2]]);
     out[0] = Math.min(out[0], pt[0]);
     out[1] = Math.max(out[1], pt[0]);
     out[2] = Math.min(out[2], pt[1]);
     out[3] = Math.max(out[3], pt[1]);
-    var pt = SAM.ApplyTransfrom(t, [bds[0], bds[3]]);
+    pt = SAM.ApplyTransform(t, [bds[0], bds[3]]);
     out[0] = Math.min(out[0], pt[0]);
     out[1] = Math.max(out[1], pt[0]);
     out[2] = Math.min(out[2], pt[1]);
     out[3] = Math.max(out[3], pt[1]);
-    var pt = SAM.ApplyTransfrom(t, [bds[1], bds[3]]);
+    pt = SAM.ApplyTransform(t, [bds[1], bds[3]]);
     out[0] = Math.min(out[0], pt[0]);
     out[1] = Math.max(out[1], pt[0]);
     out[2] = Math.min(out[2], pt[1]);
@@ -557,19 +558,5 @@ window.SAM = window.SAM || {};
     return inv;
   };
 
-  /*
-  SAM.InvertTransform = function (t) {
-    var p = (t[0] * t[3]) + (t[1] * t[2]);
-    var q = (t[0] * t[5]) + (t[1] * t[4]);
-    var inv = [
-      (p + (t[1] * t[2])) / (p * t[0]),
-      -t[1] / p,
-      -(t[0] * t[2]) / (p * t[0]),
-      t[0] / p,
-      ((q * t[2]) - (p * t[4])) / (p * t[0]),
-      -q / p]
-    return inv;
-  };
-  */
 
 })();

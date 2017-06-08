@@ -51,8 +51,8 @@
   // Set the tranform for cache 0.  Same api as html canvas transform.
   // This tranform is applied before the camera.  It converts world to image
   // coordinates.
-  Section.prototype.SetTransform = function (m00, m10, m01, m11, m02, m12) {
-    this.Transform = [m00, m10, m01, m11, m02, m12];
+  Section.prototype.SetTransform = function (tran) {
+    this.Transform = tran.slice(0);
   };
 
   Section.prototype.AddCache = function (cache) {
