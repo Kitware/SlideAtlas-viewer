@@ -283,7 +283,7 @@
     camOut.SetHeight(camIn.GetHeight());
     // This should be computed from the viewport
     // camOut.Width = camIn.Width;
-    camOut.Width = camOut.Height * camOut.ViewportWidth / camOut.ViewportHeight;
+    camOut.SetWidth(camOut.GetHeight() * camOut.GetViewportWidth() / camOut.GetViewportHeight());
   };
 
   // TODO: Fix this (image camera coordinate system) or get rid of pairTransform
@@ -292,7 +292,7 @@
     camOut.Roll = camIn.Roll + this.DeltaRoll;
     camOut.Height = camIn.Height;
     // TODO: Camera should do this internally.
-    camOut.SetWidth(camOut.GetHeight() * camOut.GetViewportWidth() / camOut.ViewportHeight());
+    camOut.SetWidth(camOut.GetHeight() * camOut.GetViewportWidth() / camOut.GetViewportHeight());
   };
 
   SA.PairCorrelation = PairCorrelation;

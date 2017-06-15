@@ -43,6 +43,10 @@ window.SAM = window.SAM || {};
     return this.ViewportHeight;
   };
 
+  Camera.prototype.GetViewportWidth = function () {
+    return this.ViewportWidth;
+  };
+
   // Spacing of pixels of the screen.
   Camera.prototype.GetSpacing = function () {
     return this.GetHeight() / this.ViewportHeight;
