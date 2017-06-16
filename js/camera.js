@@ -9,7 +9,7 @@ window.SAM = window.SAM || {};
 
   function Camera () {
     // This transformation is from global/world to slide coordinate system
-    this.WorldToImageTransform = [1,0,0,1,0,0];
+    this.WorldToImageTransform = [1, 0, 0, 1, 0, 0];
 
     // Better managmenet of layers and sub layers.
     // Assign a range of the z buffer  for the view to use exclusively.
@@ -364,7 +364,7 @@ window.SAM = window.SAM || {};
     this.ImageMatrix[15] = this.WorldMatrix[15];
 
     // Concatenate the section mmatrix.
-    
+
     var m0 = this.ImageMatrix[0];
     var m1 = this.ImageMatrix[1];
     var m4 = this.ImageMatrix[4];
@@ -430,15 +430,15 @@ window.SAM = window.SAM || {};
     var overviewCam = overview.Camera;
     var viewport = overview.Viewport;
 
-    var c = this.GetWorldFocalPoint();
+    var fp = this.GetWorldFocalPoint();
     var rx = this.GetWidth() * 0.5;
     var ry = this.GetHeight() * 0.5;
 
     // To handle rotation, I need to pass the center through
     // the overview camera matrix. Coordinate system is -1->1
-    var newCx = (c[0] * overviewCam.WorldMatrix[0] + c[1] * overviewCam.WorldMatrix[4] +
+    var newCx = (fp[0] * overviewCam.WorldMatrix[0] + fp[1] * overviewCam.WorldMatrix[4] +
                      overviewCam.WorldMatrix[12]) / overviewCam.WorldMatrix[15];
-    var newCy = (c[0] * overviewCam.WorldMatrix[1] + c[1] * overviewCam.WorldMatrix[5] +
+    var newCy = (fp[0] * overviewCam.WorldMatrix[1] + fp[1] * overviewCam.WorldMatrix[5] +
                      overviewCam.WorldMatrix[13]) / overviewCam.WorldMatrix[15];
 
     if (gl) { /*
@@ -520,7 +520,7 @@ window.SAM = window.SAM || {};
   SAM.ApplyTransform = function (t, pt) {
     var x = (t[0] * pt[0]) + (t[2] * pt[1]) + t[4];
     var y = (t[1] * pt[0]) + (t[3] * pt[1]) + t[5];
-    return [x,y];
+    return [x, y];
   };
 
   SAM.TransformBounds = function (t, bds) {
@@ -546,21 +546,20 @@ window.SAM = window.SAM || {};
   };
 
   SAM.MultiplyTransforms = function (t1, t2) {
-    return [(t1[0] * t2[0]) + (t1[2] * t2[1]),
-            (t1[1] * t2[0]) + (t1[3] * t2[1]),
-            (t1[0] * t2[2]) + (t1[2] * t2[3]),
-            (t1[1] * t2[2]) + (t1[3] * t2[3]),
-            (t1[0] * t2[4]) + (t1[2] * t2[5]) + t1[4],
-            (t1[1] * t2[4]) + (t1[3] * t2[5]) + t1[5]];
+    return [
+      (t1[0] * t2[0]) + (t1[2] * t2[1]),
+      (t1[1] * t2[0]) + (t1[3] * t2[1]),
+      (t1[0] * t2[2]) + (t1[2] * t2[3]),
+      (t1[1] * t2[2]) + (t1[3] * t2[3]),
+      (t1[0] * t2[4]) + (t1[2] * t2[5]) + t1[4],
+      (t1[1] * t2[4]) + (t1[3] * t2[5]) + t1[5]];
   };
 
   SAM.InvertTransform = function (t) {
     var p = (t[0] * t[3]) - (t[1] * t[2]);
     var q = (t[2] * t[5]) - (t[3] * t[4]);
     var s = (t[0] * t[5]) - (t[1] * t[4]);
-    var inv = [t[3]/p, -t[1]/p, -t[2]/p, t[0]/p, q/p, -s/p]
+    var inv = [t[3] / p, -t[1] / p, -t[2] / p, t[0] / p, q / p, -s / p];
     return inv;
   };
-
-
 })();

@@ -146,8 +146,9 @@
         var imageObj = this.View.GetCache().Image;
         outCam.DeepCopy(inCam);
         var fp = outCam.GetWorldFocalPoint();
-        outCam.SetWorldFocalPoint([(fp[0] - imageObj.origin[0]) / imageObj.spacing[0],
-                                   (fp[1] - imageObj.origin[1]) / imageObj.spacing[1]]);
+        outCam.SetWorldFocalPoint([
+          (fp[0] - imageObj.origin[0]) / imageObj.spacing[0],
+          (fp[1] - imageObj.origin[1]) / imageObj.spacing[1]]);
         outCam.SetWidth(outCam.GetWidth() / imageObj.spacing[0]);
         outCam.SetHeight(outCam.GetHeight() / imageObj.spacing[0]);
         outCam.ComputeMatrix();

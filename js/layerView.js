@@ -19,7 +19,9 @@
     var self = this;
     // For the stack viewer.  The layer gets loaded with another view,
     // We hve to apply the color and threshold.
-    layer.LoadCallbacks.push(function () {self.UpdateLayer(layer);});
+    layer.LoadCallbacks.push(function () {
+      self.UpdateLayer(layer);
+    });
 
     this.Layers.push(layer);
     if (this.VisibilityCheckBox && this.Slider) {
@@ -139,11 +141,11 @@
   };
 
   LayerView.prototype.VisibilityCheckCallback = function () {
-    //var checked = this.VisibilityCheckBox.prop('checked');
-    //for (var i = 0; i < this.Layers.length; ++i) {
-    //  this.Layers[i].SetVisibility(checked);
-    //  this.Layers[i].EventuallyDraw();
-    //}
+    // var checked = this.VisibilityCheckBox.prop('checked');
+    // for (var i = 0; i < this.Layers.length; ++i) {
+    //   this.Layers[i].SetVisibility(checked);
+    //   this.Layers[i].EventuallyDraw();
+    // }
     this.UpdateLayers();
   };
 
@@ -167,7 +169,7 @@
     var visibility = this.VisibilityCheckBox.prop('checked');
     var sizeScale = parseInt(this.SizeScaleInput.val() / 100);
     var visValue = parseInt(this.Slider.val()) / 100.0;
-    console.log("threshold: " + visValue);
+    console.log('threshold: ' + visValue);
     for (var wIndex = 0; wIndex < layer.WidgetList.length; wIndex++) {
       var widget = layer.WidgetList[wIndex];
       if (widget.Label === undefined || widget.Label === this.Label) {

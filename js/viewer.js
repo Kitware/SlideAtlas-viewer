@@ -860,8 +860,9 @@
       // never changes. Maybe this should be set in
       // "UpdateCamera".
       this.OverView.Camera.SetHeight(bounds[3] - bounds[2]);
-      this.OverView.Camera.SetWorldFocalPoint([0.5 * (bounds[0] + bounds[1]),
-                                               0.5 * (bounds[2] + bounds[3])]);
+      this.OverView.Camera.SetWorldFocalPoint([
+        0.5 * (bounds[0] + bounds[1]),
+        0.5 * (bounds[2] + bounds[3])]);
       this.OverView.Camera.ComputeMatrix();
     }
   };
@@ -886,8 +887,9 @@
       var halfHeight = cam.GetHeight() / 2;
       var halfWidth = cam.GetWidth() / 2;
       var fp = cam.GetWorldFocalPoint();
-      this.OverViewBounds = [fp[0] - halfWidth, fp[0] + halfWidth,
-                             fp[1] - halfHeight, fp[1] + halfHeight];
+      this.OverViewBounds = [
+        fp[0] - halfWidth, fp[0] + halfWidth,
+        fp[1] - halfHeight, fp[1] + halfHeight];
       return this.OverViewBounds;
     }
         // This method is called once too soon.  There is no image, and mobile devices have no overview.
@@ -898,25 +900,6 @@
     if (section === null) {
       return;
     }
-    // this.MainView.Section = section;
-    // if (this.OverView) {
-    //   this.OverView.Section = section;
-    // }
-    // this.EventuallyRender(true);
-    //this.SetCache(section.GetCache(0));
-    /* merged out
-    this.MainView.SetSection(section);
-    // Pass the sections bounds through its transform.
-    var bds = section.GetBounds();
-    var c0 = SAM.ApplyTransform(section.Transform, [bds[0],bds[2]]);
-    var c1 = SAM.ApplyTransform(section.Transform, [bds[1],bds[3]]);
-    var bds = [c0[0], c1[0], c0[1], c1[1]];
-    if (this.OverView) {
-      this.OverView.SetSection(section);
-      this.SetOverViewBounds(bds);
-    }
-    this.EventuallyRender(true);
-    */
 
     if (section.Bounds) {
       this.SetOverViewBounds(section.Bounds);
@@ -932,8 +915,9 @@
       this.OverView.SetSection(section);
       var bds = section.Bounds;
       if (bds) {
-        this.OverView.Camera.SetWorldFocalPoint([(bds[0] + bds[1]) / 2,
-                                                 (bds[2] + bds[3]) / 2]);
+        this.OverView.Camera.SetWorldFocalPoint([
+          (bds[0] + bds[1]) / 2,
+          (bds[2] + bds[3]) / 2]);
         var height = (bds[3] - bds[2]);
         // See if the view is constrained by the width.
         var height2 = (bds[1] - bds[0]) * this.OverView.Viewport[3] / this.OverView.Viewport[2];
@@ -1777,7 +1761,7 @@
     this.MomentumRoll = 0.0;
     this.MomentumScale = (this.MomentumScale + momentumScale) * 0.5;
 
-    cam.SetWorldFocalPoint([x,y]);
+    cam.SetWorldFocalPoint([x, y]);
     cam.SetHeight(cam.GetHeight() / scale);
     cam.ComputeMatrix();
     this.EventuallyRender(true);
@@ -1909,7 +1893,7 @@
     var cam = this.MainView.Camera;
 
     var modified = false;
-    var fp = cam.GetWorldFocalPoint()
+    var fp = cam.GetWorldFocalPoint();
     if (fp[0] < bounds[0]) {
       cam.SetWorldFocalPoint([bounds[0], fp[1]]);
       modified = true;

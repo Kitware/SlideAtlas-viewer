@@ -308,7 +308,6 @@
       }
       this.Polyline.UpdateBuffers(this.Layer.AnnotationView);
     }
-    //this.UserNoteFlag = obj.user_note_flag;
 
     if (obj.text) {
       if (!this.Text) {

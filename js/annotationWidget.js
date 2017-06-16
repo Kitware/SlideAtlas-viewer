@@ -281,12 +281,12 @@
   };
 
   AnnotationWidget.prototype.DetectSections = function () {
-    if ( ! window.SA) {return;}
+    if (!window.SA) { return; }
 
     var widget = this.Layer.GetActiveWidget();
     var button = this.SectionsButton;
-    if ( widget ) {
-      if  (button.Pressed) {
+    if (widget) {
+      if (button.Pressed) {
         // The user pressed the button again (while it was active).
         widget.Deactivate();
         return;
@@ -295,15 +295,15 @@
       widget.Deactivate();
     }
     button.Pressed = true;
-    button.addClass("sa-active");
+    button.addClass('sa-active');
 
     // See if a SectionsWidget already exists.
-    var widget = null;
+    widget = null;
     var widgets = this.Layer.GetWidgets();
     for (var i = 0; i < widgets.length && widget == null; ++i) {
       var w = widgets[i];
-      //if (w instanceOf SectionsWidget) {
-      if (w.Type == "sections") {
+      // if (w instanceOf SectionsWidget) {
+      if (w.Type === 'sections') {
         widget = w;
       }
     }
@@ -325,7 +325,7 @@
         button.removeClass('sa-active');
         widget.DeactivateCallback = undefined;
         button.Pressed = false;
-      }
+      };
   };
 
   SA.AnnotationWidget = AnnotationWidget;

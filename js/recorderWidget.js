@@ -72,11 +72,10 @@
     for (var ivar in obj) {
       this[ivar] = obj[ivar];
     }
-    if (this.OverviewBounds) { 
+    if (this.OverviewBounds) {
       this.OverViewBounds = obj.OverviewBounds;
       delete this.OverviewBounds;
     }
-
 
     if (this.Camera.Width === undefined) {
       this.Camera.Width = this.Camera.Height * 1.62;

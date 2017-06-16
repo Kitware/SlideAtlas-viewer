@@ -832,7 +832,7 @@
       (this.LoadCallback)();
     }
     if (this.LoadCallbacks) {
-      for (var i = 0; i < this.LoadCallbacks.length; ++i) {
+      for (i = 0; i < this.LoadCallbacks.length; ++i) {
         (this.LoadCallbacks[i])();
       }
     }

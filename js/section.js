@@ -5,11 +5,9 @@
 
 // I have just started implementing an API for a section transformation.
 // Use the same API as the canvas transform,
-// TODO: Generatlize to mesh based transformation. 
-//   A transformation for each cache. 
+// TODO: Generatlize to mesh based transformation.
+//   A transformation for each cache.
 //   (but not stored in the cache.  Sections can share a cache.)
-
-
 
 (function () {
   'use strict';
@@ -25,8 +23,8 @@
     this.Caches = [];
     // For debugging stitching.
     this.Markers = [];
-    this.Transform = [1,0,0,1,0,0];
-  };
+    this.Transform = [1, 0, 0, 1, 0, 0];
+  }
 
   Section.prototype.GetNumberOfCaches = function () {
     return this.Caches.length;
@@ -137,8 +135,7 @@
   // False implies that the user shoudl render again.
   Section.prototype.Draw = function (view) {
     var finishedRendering = true;
-    //view.Camera.SetTransform(this.Transform);
-    view.Camera.SectionTransform = this.Transform;
+    view.Camera.SetWorldToImageTransform(this.Transform);
     view.Camera.ComputeMatrix();
     var m = view.Camera.GetImageMatrix();
 

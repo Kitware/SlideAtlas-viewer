@@ -244,7 +244,7 @@ window.SA = window.SA || {};
     var cam = this.Viewer.GetCamera();
     var copyCam = this.OtherViewer.GetCamera();
 
-    this.Viewer.AnimateCamera(cam.GetWorldFocalPoint(), 
+    this.Viewer.AnimateCamera(cam.GetWorldFocalPoint(),
                               cam.GetWorldRoll(), copyCam.Height);
   };
 
@@ -262,7 +262,7 @@ window.SA = window.SA || {};
 
     var cam = this.Viewer.GetCamera();
     this.Viewer.ToggleMirror();
-    this.Viewer.SetCamera(cam.GetWorldFocalPoint(), 
+    this.Viewer.SetCamera(cam.GetWorldFocalPoint(),
                           cam.GetRotation() + 180.0, cam.Height);
     SA.RecordState();
   };
