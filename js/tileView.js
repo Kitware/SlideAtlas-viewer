@@ -74,7 +74,7 @@
       if (this.Transform) {
         this.Transform.ForwardTransformCamera(cam, this.Camera);
       } else {
-        this.Camera.DeepCopy(cam);
+        this.Camera.WorldCopy(cam);
       }
     }
 

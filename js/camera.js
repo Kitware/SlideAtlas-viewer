@@ -52,7 +52,8 @@ window.SAM = window.SAM || {};
     return this.GetHeight() / this.ViewportHeight;
   };
 
-  Camera.prototype.DeepCopy = function (inCam) {
+  // Copies the world view but not the slide to world transform. 
+  Camera.prototype.WorldCopy = function (inCam) {
     if (inCam.ZRange) { this.ZRange = inCam.ZRange.slice(0); }
     this.WorldRoll = inCam.WorldRoll;
     this.Height = inCam.Height;
@@ -61,6 +62,11 @@ window.SAM = window.SAM || {};
     if (inCam.ViewportWidth) { this.ViewportWidth = inCam.ViewportWidth; }
     if (inCam.ViewportHeight) { this.ViewportHeight = inCam.ViewportHeight; }
     this.ComputeMatrix();
+  };
+
+  Camera.prototype.DeepCopy = function (inCam) {
+    this.WorldToImageTransform = inCam.WorldToImageTransform.slice(0);
+    this.WorldCopy(inCam);;
   };
 
   Camera.prototype.SetViewport = function (viewport) {

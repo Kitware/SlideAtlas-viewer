@@ -380,11 +380,11 @@
       if (found) {
         // Animate the dots up to fill the space.
         y = 70 + ((i - 1) * 6 * this.Radius);
-        annotObj.Circle.animate({'top': y + 'px'});
+        annotObj.Div.animate({'top': y + 'px'});
         newObjects.push(annotObj);
       } else if (deleteAnnotObj === annotObj) {
         found = true;
-        annotObj.Circle.remove();
+        annotObj.Div.remove();
         if (window.girder) {
           // Remove the annotation from the database.
           girder.rest.restRequest({
@@ -411,8 +411,10 @@
     var y = 70 + (idx * 6 * this.Radius);
 
     var self = this;
-    var circle = $('<div>')
+    var div = $('<div>')
+      //.appendTo('body')
       .appendTo(this.AnnotationLayer.GetCanvasDiv())
+      //.appendTo(this.AnnotationLayer.LayerDiv.parent())
       .css({
         'position': 'absolute',
         'left': (3 * this.Radius) + 'px',
@@ -421,19 +423,38 @@
         'min-height': (2 * this.Radius) + 'px',
         'background-color': '#55BBFF',
         'opacity': '0.6',
-        'border': '1px solid #666666'
-        // 'border-radius': this.Radius + 'px'
+        'border': '1px solid #666666',
+        'border-radius': '2px',
+        'z-index': '100'
       })
-      .prop('title', 'Show Annotation')
-      .text(data.annotation.name)
+      .mouseenter(function() { div.focus(); console.log('enter');})
       .hide() // hide until animation is finished.
-      .hover(function () { $(this).css({'opacity': '1'}); },
-             function () { $(this).css({'opacity': '0.6'}); });
+      .hover(function () { div.css({'opacity': '1'}); },
+             function () { div.css({'opacity': '0.6'}); });
+
+    var circle = $('<div>')
+      .appendTo(div)
+      .prop('title', 'Show Annotation')
+      .text(data.annotation.name);
+
+    var slider = $('<div>')
+      .appendTo(div)
+      .css({'width': '10em',
+            'margin':'5px'});
 
     var annotObj = {
       Data: data,
-      Circle: circle};
+      Div: div,
+      Circle: circle,
+      Slider: slider};
     this.AnnotationObjects.push(annotObj);
+
+    slider
+      .slider({
+        start: function (e, ui) { self.UpdateThreshold(ui.value, annotObj); },
+        slide: function (e, ui) { self.UpdateThreshold(ui.value, annotObj); },
+        stop: function (e, ui) { self.UpdateThreshold(ui.value, annotObj); }
+      });
 
     circle.contextmenu(function () { return false; });
     circle.mousedown(function (e) {
@@ -457,20 +478,34 @@
 
     // Annotate the "add annotation" button down.
     this.Plus.animate({'top': (y + (6 * this.Radius)) + 'px'}, 400,
-                      function () { circle.show(); });
+                      function () { div.show(); });
 
     return annotObj;
+  };
+
+  GirderWidget.prototype.UpdateThreshold = function (valStr, annotObj) {
+    var visValue = parseInt(valStr) / 100.0;
+    console.log('threshold: ' + visValue);
+    var layer = this.AnnotationLayer;
+    for (var wIndex = 0; wIndex < layer.WidgetList.length; wIndex++) {
+      var widget = layer.WidgetList[wIndex];
+      if (widget.Label === undefined || widget.Label === this.Label) {
+        widget.SetThreshold(visValue);
+        widget.ComputeVisibilities();
+      }
+    }
+    layer.EventuallyDraw();
   };
 
   // Make the circle button yellow (and turn off the previous.)
   GirderWidget.prototype.Highlight = function (annotObj) {
     // Highlight the circle for this annotaiton.
     if (this.Highlighted) {
-      this.Highlighted.Circle.css({'background-color': '#55BBFF'});
+      this.Highlighted.Div.css({'background-color': '#55BBFF'});
     }
     this.Highlighted = annotObj;
     if (annotObj) {
-      annotObj.Circle.css({'background-color': '#FFDD00'});
+      annotObj.Div.css({'background-color': '#FFDD00'});
     }
   };
 

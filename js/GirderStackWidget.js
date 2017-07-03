@@ -17,11 +17,31 @@
 //   saSection: Object slide atlas uses to manage sections.
 // TODO: Merge these in the future if possible.
 
+// Loading is a bit confusing (due to load on demand requirements):
+// Initialize (block / serialized) 
+// 1: LoadFolder (called externally): Just gets the number of items in the folder.
+// 2: LoadFolderImageIds (chunked recursively):
+//      Gets the itemIds and meta data.  Creates the instance stack array.
+//      Section objects have bounds an transform, imageId.
+//      calls LoadStackMetaData to asynchronously load other item info.
+// Initialize (non blocking/ asynchonous, throttled)
+// 1: LoadStackMetaData: 
+//      Choose a (high priority) section that needs metadata loaded.
+//      Call CreateSaSection to load the metadata 
+//      (with a recursive callback to LoadStackMetaData)
+// 2: CreateSaSection: Loads the image tile meta data if necesary.
+//      No: Just call CreateSaSectionFromCache
+//      Yes: GirderRequest->LoadItem
+// 3: LoadItem: .....
+
+
+
+
 (function () {
     // Depends on the CIRCLE widget
   'use strict';
 
-  function GirderStackWidget (parent, display, apiRoot) {
+  function GirderStackWidget (parent, display, overlay, apiRoot) {
     // We need a common center to treat as the center for the stack.
     // This is used to compute the transforms from the section centers.
     this.VolumeCenter = undefined;
@@ -35,6 +55,7 @@
     // dictionary to share caches when multiple sections on one slide
     this.Caches = {};
     this.Display = display;
+    //this.Overlay = overlay;
 
     var self = this;
     this.SliderDiv = $('<div>')
@@ -74,6 +95,10 @@
         'text-shadow': '2px 2px #000'})
       .hide();
   }
+
+  GirderStackWidget.prototype.SetAnnotationName = function (name) {
+    this.AnnotationName = name;
+  };
 
   GirderStackWidget.prototype.StartCallback = function (value) {
     this.SlideLabel.text(this.SectionIndex.toString());
@@ -234,6 +259,7 @@
     if (stackSection.SaSection === undefined) {
       return;
     }
+
     var cache = this.Caches[stackSection.imageId];
     if (cache === undefined || !cache.RootsLoaded) {
       // The load callback will render if the section is current.
@@ -254,7 +280,24 @@
     }
     // Let the SlideAtlas sections deal with the transformations
     this.Display.SetSection(stackSection.SaSection);
+    if (cache.Annotation) {
+      var annotLayer = this.Display.GetAnnotationLayer();
+      DisplayAnnotation(annotLayer, cache.Annotation);
+    }
     this.Display.EventuallyRender();
+
+    // get the next section for the overlay
+    if (this.Overlay) {
+      var idx = this.Stack.indexOf(stackSection);
+      if (idx !== -1 && idx < this.Stack.length - 1) {
+        var nextSection = this.Stack[idx + 1];
+        var cache = this.Caches[nextSection.imageId];
+        if (cache === undefined || !cache.RootsLoaded) {
+          return;
+        }
+        this.Overlay.SetCache(cache);
+      }
+    }
   };
 
   // ============================================================================
@@ -275,7 +318,7 @@
     var self = this;
     // Find the highest priority section whose image has not been loaded.
     var startIdx = Math.max(this.SectionIndex, 0);
-    // Multi0le section can have the same image id.
+    // Multiple section can have the same image id.
     var foundSection = this.Stack[startIdx];
     if (foundSection.SaSection) {
       // already loaded
@@ -336,7 +379,7 @@
         console.error(error.status + ' ' + error.statusText, error.responseText);
         this.ErrorCount += 1;
         if (callback) {
-          (callback())();
+          (callback)();
         }
       }
     }).done(function (resp) {
@@ -344,52 +387,45 @@
     });
   };
 
+  // This is only called once per item.
   GirderStackWidget.prototype.LoadItem = function (resp, stackSection, callback) {
     var w = resp.sizeX;
     var h = resp.sizeY;
 
-    // There can be multiple sections on a single slide.
-    // Each needs its own region.
-    // Set a default bounds to the whole slide.
+    // If the item did not have bounds meta data, set bounds to be the
+    // whole slide.
     if (stackSection.bounds === undefined) {
       stackSection.bounds = [0, w - 1, 0, h - 1];
     }
     // Get / setup the cache.
-    var cache = this.Caches[stackSection.imageId];
-    if (!cache) {
-      cache = new SA.Cache();
-      this.Caches[stackSection.imageId] = cache;
-    }
-
-    if (cache.Image === undefined) {
-      var tileSource = new GirderTileSource(w, h, resp.tileWidth, resp.tileHeight,
-                                            0, resp.levels - 1,
-                                            this.ApiRoot,
-                                            stackSection.imageId,
-                                            [0, w - 1, 0, h - 1]);
-      cache.SetTileSource(tileSource);
-      // Request the lowest resolution tile from girder.
-      cache.LoadRoots();
-    }
+    // This check is not really necessary.
+    // Cache will always be undefined
+    //var cache = this.Caches[stackSection.imageId];
+    //if (!cache) {
+    var cache = new SA.Cache();
+    this.Caches[stackSection.imageId] = cache;
+    //}
+    // This check is also not necessary.  Image will nbe be set either.
+    //if (cache.Image === undefined) {
+    var tileSource = new GirderTileSource(w, h, resp.tileWidth, resp.tileHeight,
+                                          0, resp.levels - 1,
+                                          this.ApiRoot,
+                                          stackSection.imageId,
+                                          [0, w - 1, 0, h - 1]);
+    cache.SetTileSource(tileSource);
+    //}
     // Setup the slideAtlas section
     var saSection = new SA.Section();
     saSection.AddCache(cache);
     stackSection.SaSection = saSection;
 
-    // If this is the current stackSection, render it.
-    if (this.SectionIndex !== -1) {
-      var currentSection = this.Stack[this.SectionIndex];
-      if (stackSection.imageId === currentSection.imageId) {
-        this.RenderSection(currentSection);
-      }
-    }
     cache.SetTileSource(tileSource);
     // Request the lowest resolution tile from girder.
     var self = this;
     cache.LoadRoots(
       function () {
         cache.RootsLoaded = true;
-        // If this is the current stackSection, render it.
+        // If the current section uses this cache. render it.
         if (self.SectionIndex !== -1) {
           var currentSection = self.Stack[self.SectionIndex];
           if (stackSection.imageId === currentSection.imageId) {
@@ -398,6 +434,34 @@
         }
       });
     this.CreateSaSectionFromCache(stackSection, cache);
+
+    // Load annotation if necessary.
+    // Associated it with the cache.
+    // TODO: REnder when load if section is current.
+    if (this.AnnotationName) {
+      girder.rest.restRequest({
+        path: 'annotation?itemId=' + stackSection.imageId + '&name=' + this.AnnotationName,
+        method: 'GET',
+        contentType: 'application/json',
+        error: function (error, status) {
+          console.error(error.status + ' ' + error.statusText, error.responseText);
+        }
+      }).done(function (resp) {
+        if (resp.length > 0) {
+          var annotId = resp[0]['_id'];
+          girder.rest.restRequest({
+            path: 'annotation/' + annotId,
+            method: 'GET',
+            contentType: 'application/json',
+            error: function (error, status) {
+              console.error(error.status + ' ' + error.statusText, error.responseText);
+            }
+          }).done(function (resp) {
+            cache.Annotation = resp.annotation;
+          });
+        }
+      });
+    }
 
     // This serializes the requests. Starts loading the next after the
     // current is finished.
@@ -420,7 +484,7 @@
     if (!this.VolumeCenter) {
       this.VolumeCenter = center;
     }
-  // Set a default center to the middle of the bounds.
+    // Set a default center to the middle of the bounds.
     if (stackSection.transform === undefined) {
       stackSection.transform = [
         1, 0, 0, 1,
@@ -463,6 +527,122 @@
   GirderTileSource.prototype.getTileUrl = function (level, x, y, z) {
     return this.apiRoot + '/item/' + this.imageId +
       '/tiles/zxy/' + level + '/' + x + '/' + y;
+  };
+
+
+  // TODO: Copied from girderWidget.  Share code!!!!!!!!!!!!!!!!
+  // Move the annotation info to the layer widgets and draw.
+  // Converts annotObj from girder to slideAtlas
+  var DisplayAnnotation = function (annotLayer, girder_annot) {
+    annotLayer.SetVisibility(true);
+    annotLayer.Reset();
+
+    // Put all the rectangles into one set.
+    var setObj = {};
+    setObj.type = 'rect_set';
+    setObj.centers = [];
+    setObj.widths = [];
+    setObj.heights = [];
+    setObj.confidences = [];
+    setObj.labels = [];
+
+    var annot = girder_annot;
+    for (var i = 0; i < annot.elements.length; ++i) {
+      var element = annot.elements[i];
+      var obj = {};
+
+      if (element.type === 'view') {
+                // Set the camera / view.
+        var cam = annotLayer.GetCamera();
+        cam.SetWorldFocalPoint(element.center);
+        cam.SetHeight(element.height);
+        if (element.rotation) {
+          cam.SetWorldRoll(element.rotation);
+        } else {
+          cam.SetWorldRoll(0);
+        }
+        // Ignore width for now because it is determined by the
+        // viewport.
+        cam.ComputeMatrix();
+        // How to handle forcing viewer to render?
+        // I could have a callback.
+        // I could also make a $('.sa-viewer').EventuallyRender();
+        // or $('.sa-viewer').saViewer('EventuallyRender');
+        if (annotLayer.Viewer) {
+          annotLayer.Viewer.EventuallyRender();
+        }
+      }
+      if (element.type === 'circle') {
+        obj.type = element.type;
+        obj.outlinecolor = SAM.ConvertColor(element.lineColor);
+        obj.linewidth = element.lineWidth;
+        obj.origin = element.center;
+        obj.radius = element.radius;
+        annotLayer.LoadWidget(obj);
+      }
+      if (element.type === 'arrow') {
+        obj.type = 'text';
+        obj.string = element.label.value;
+        obj.color = SAM.ConvertColor(element.fillColor);
+        obj.size = element.label.fontSize;
+        obj.position = element.points[0].slice(0);
+        obj.offset = element.points[1].slice(0);
+        obj.offset[0] -= obj.position[0];
+        obj.offset[1] -= obj.position[1];
+        annotLayer.LoadWidget(obj);
+      }
+      if (element.type === 'rectanglegrid') {
+        obj.type = 'grid';
+        obj.outlinecolor = SAM.ConvertColor(element.lineColor);
+        obj.linewidth = element.lineWidth;
+        obj.origin = element.center;
+        obj.bin_width = element.width / element.widthSubdivisions;
+        obj.bin_height = element.height / element.heightSubdivisions;
+        obj.orientation = element.rotation;
+        obj.dimensions = [element.widthSubdivisions, element.heightSubdivisions];
+        annotLayer.LoadWidget(obj);
+      }
+      if (element.type === 'rectangle') {
+        if (element.type === 'rectangle') { // switch behavior to ....
+          setObj.widths.push(element.width);
+          setObj.heights.push(element.height);
+          setObj.centers.push(element.center[0]);
+          setObj.centers.push(element.center[1]);
+          if (element.scalar === undefined) {
+            element.scalar = 1.0;
+          }
+          setObj.confidences.push(element.scalar);
+          if (element.label) {
+            setObj.labels.push(element.label.value);
+          } else {
+            setObj.labels.push('');
+          }
+        } else {
+          obj.type = 'rect';
+          obj.outlinecolor = SAM.ConvertColor(element.lineColor);
+          obj.linewidth = element.lineWidth;
+          obj.origin = element.center;
+          obj.width = element.width;
+          obj.length = element.height;
+          obj.orientation = element.rotation;
+          annotLayer.LoadWidget(obj);
+        }
+      }
+      if (element.type === 'polyline') {
+        obj.type = element.type;
+        obj.closedloop = element.closed;
+        obj.outlinecolor = SAM.ConvertColor(element.lineColor);
+        obj.linewidth = element.lineWidth;
+        obj.points = element.points;
+        annotLayer.LoadWidget(obj);
+      }
+    }
+
+    if (setObj.widths.length > 0) {
+      annotLayer.LoadWidget(setObj);
+    }
+
+    annotLayer.EventuallyDraw();
   };
 
   SAM.GirderStackWidget = GirderStackWidget;
