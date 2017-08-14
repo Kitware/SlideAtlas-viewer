@@ -18,6 +18,7 @@
     this.Heights = [];
     this.Labels = [];
     this.Confidences = [];
+    this.Vectors = [];
     this.Visibilities = undefined;
     // Hack to hide rects below a specific confidence.
     this.Threshold = 0.0;
@@ -107,33 +108,40 @@
   // do not worry about webGl for now.  Only canvas drawing.
   // webgl would support more rects I assume.
   RectSet.prototype.Draw = function (view) {
-    // 2d Canvas -----------------------------------------------
+    // 2d Canvas ( saving is probably not necessary ) -----------
     view.Context2d.save();
-    // Identity.
-    view.Context2d.setTransform(1, 0, 0, 1, 0, 0);
 
-    // only supported case: this.PositionCoordinateSystem == Shape.SLIDE
-    var theta = view.Camera.GetImageRoll();
-    var matrix0 = Math.cos(theta);
-    var matrix1 = Math.sin(theta);
-    var matrix4 = -Math.sin(theta);
-    var matrix5 = Math.cos(theta);
+    // We only support image coordinate system for now.
+    var cam = view.GetCamera();
+    var t = cam.GetImageToViewerTransform();
+    view.Context2d.setTransform(t[0], t[1], t[2], t[3], t[4], t[5]);
 
-    var scale = view.Viewport[3] / view.Camera.GetHeight();
-
-    // First transform the origin-world to view.
-    var m = view.Camera.GetWorldMatrix();
-    var x = m[12] / m[15];
-    var y = m[13] / m[15];
-
-    // convert origin-view to pixels (view coordinate system).
-    x = view.Viewport[2] * (0.5 * (1.0 + x));
-    y = view.Viewport[3] * (0.5 * (1.0 - y));
-    view.Context2d.transform(matrix0, matrix1, matrix4, matrix5, x, y);
-    view.Context2d.lineWidth = 1;
+    var pixelSize = cam.ConvertScaleViewerToImage(1);
     var cIdx = 0;
-    x = 0;
-    y = 0;
+    var x, y, vx, vy;
+
+    // draw the vectors
+    view.Context2d.beginPath();
+    for (var i = 0; i < this.Widths.length; ++i) {
+      if ((!this.Visibilities || this.Visibilities[i]) &&
+          (this.Confidences[i] >= this.Threshold)) {
+        vx = this.Vectors[cIdx];
+        x = this.Centers[cIdx++];
+        vy = this.Vectors[cIdx];
+        y = this.Centers[cIdx++];
+
+        view.Context2d.moveTo(x, y);
+        view.Context2d.lineTo(x+vx, y+vy);
+      } else {
+        cIdx += 2;
+      }
+    }
+    view.Context2d.strokeStyle = '#ff00ff';
+    view.Context2d.lineWidth = pixelSize * 3;
+    view.Context2d.stroke();
+
+    cIdx = 0;
+    view.Context2d.lineWidth = pixelSize * 2;
     for (var i = 0; i < this.Widths.length; ++i) {
       if ((!this.Visibilities || this.Visibilities[i]) &&
           (this.Confidences[i] >= this.Threshold)) {
@@ -148,37 +156,41 @@
         } else if (this.Color) {
           view.Context2d.strokeStyle = this.Color;
         } else {
-          // TODO: Put the scale into the canvas transform
-          // Scalar to color map
-          var r = Math.floor(this.Confidences[i] * 255);
-          view.Context2d.strokeStyle = '#' + r.toString(16) + 'ff00';
-          view.Context2d.beginPath();
+          if (this.Confidences[i] == 0) {
+            view.Context2d.strokeStyle = '#ff0000';
+          } else {
+            var r = Math.floor(this.Confidences[i] * 255);
+            view.Context2d.strokeStyle = '#' + r.toString(16) + 'ff00';
+          }
         }
-        view.Context2d.moveTo((x - hw) * scale, (y - hh) * scale);
-        view.Context2d.lineTo((x + hw) * scale, (y - hh) * scale);
-        view.Context2d.lineTo((x + hw) * scale, (y + hh) * scale);
-        view.Context2d.lineTo((x - hw) * scale, (y + hh) * scale);
-        view.Context2d.lineTo((x - hw) * scale, (y - hh) * scale);
+        view.Context2d.moveTo(x-hw, y-hh);
+        view.Context2d.lineTo(x+hw, y-hh);
+        view.Context2d.lineTo(x+hw, y+hh);
+        view.Context2d.lineTo(x-hw, y+hh);
+        view.Context2d.lineTo(x-hw, y-hh);
+
         view.Context2d.stroke();
 
         if (i === this.ActiveIndex) {
           // mark the rectangle
           view.Context2d.beginPath();
           view.Context2d.strokeStyle = '#00ffff';
-          view.Context2d.moveTo((x - hw) * scale, y * scale);
-          view.Context2d.lineTo((x - hw / 2) * scale, y * scale);
-          view.Context2d.moveTo((x + hw) * scale, y * scale);
-          view.Context2d.lineTo((x + hw / 2) * scale, y * scale);
-          view.Context2d.moveTo(x * scale, (y - hh) * scale);
-          view.Context2d.lineTo(x * scale, (y - hh / 2) * scale);
-          view.Context2d.moveTo(x * scale, (y + hh) * scale);
-          view.Context2d.lineTo(x * scale, (y + hh / 2) * scale);
+          view.Context2d.moveTo((x - hw), y);
+          view.Context2d.lineTo((x - hw / 2), y);
+          view.Context2d.moveTo((x + hw), y);
+          view.Context2d.lineTo((x + hw / 2), y);
+          view.Context2d.moveTo(x, (y - hh));
+          view.Context2d.lineTo(x, (y - hh / 2));
+          view.Context2d.moveTo(x, (y + hh));
+          view.Context2d.lineTo(x, (y + hh / 2));
           view.Context2d.stroke();
         }
       } else {
         cIdx += 2;
       }
     }
+
+    view.Context2d.restore();
   };
 
   function RectSetWidget (layer, newFlag) {
@@ -361,6 +373,9 @@
     this.Shape.Widths = new Array(num);
     this.Shape.Heights = new Array(num);
     this.Shape.Centers = new Array(num * 2);
+    if (obj.vectors) {
+      this.Shape.Vectors = new Array(num * 2);
+    }
     for (var i = 0; i < num; ++i) {
       this.Shape.Widths[i] = parseFloat(obj.widths[i]);
       this.Shape.Heights[i] = parseFloat(obj.heights[i]);
@@ -372,6 +387,10 @@
       }
       this.Shape.Centers[i] = parseFloat(obj.centers[i]);
       this.Shape.Centers[i + num] = parseFloat(obj.centers[i + num]);
+      if (obj.vectors) {
+        this.Shape.Vectors[i] = parseFloat(obj.vectors[i]);
+        this.Shape.Vectors[i + num] = parseFloat(obj.vectors[i + num]);
+      }
     }
   };
 

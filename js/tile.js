@@ -350,8 +350,8 @@ window.SA = window.SA || {};
       // translate the tiles to the correct location.
       view.Context2d.save(); // Save the state of the transform so we can restore for the next tile.
 
-      // Map tile to world.
-      // Matrix is world to 0-1.
+      // Map tile to image.
+      // Context is in image coordinate system
       view.Context2d.transform(this.Matrix[0], this.Matrix[1],
                                this.Matrix[4], this.Matrix[5],
                                this.Matrix[12], this.Matrix[13]);

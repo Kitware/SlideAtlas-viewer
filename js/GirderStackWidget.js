@@ -34,9 +34,6 @@
 //      Yes: GirderRequest->LoadItem
 // 3: LoadItem: .....
 
-
-
-
 (function () {
     // Depends on the CIRCLE widget
   'use strict';
@@ -55,7 +52,7 @@
     // dictionary to share caches when multiple sections on one slide
     this.Caches = {};
     this.Display = display;
-    //this.Overlay = overlay;
+    this.Overlay = overlay;
 
     var self = this;
     this.SliderDiv = $('<div>')
@@ -148,7 +145,6 @@
   GirderStackWidget.prototype.LoadFolder = function (folderId) {
     var self = this;
     this.Stack = [];
-    this.SectionMap = {};
     // This just gets the number of items.
     // All we need to start is the number of images in the folder.
     // However, the folder may contain non image items (like this stack).
@@ -238,6 +234,35 @@
     });
   };
 
+  // Load section meta-data from the stack item.
+  // This is a second path that allows editing of the sequence.
+  GirderStackWidget.prototype.LoadSections = function (sectionData) {
+    var self = this;
+    this.Stack = [];
+
+    if (sectionData.length > 0) {
+        this.SetSectionIndex(0);
+    }
+
+    for (var idx = 0; idx < sectionData.length; ++idx) {
+      var metaSection = sectionData[idx];
+      var stackSection = {imageId: metaSection.itemId};
+      if (metaSection.trans) {
+        stackSection.transform = metaSection.trans;
+      }
+      if (metaSection.bounds) {
+        // These bounds are in image coordinate ssytem.
+        stackSection.bounds = [
+          metaSection.bounds[0],
+          metaSection.bounds[2],
+          metaSection.bounds[1],
+          metaSection.bounds[3]];
+      }
+      self.Stack.push(stackSection);
+    }
+    this.LoadStackMetaData();
+  };
+
   // Does everything necessary to load the section into the viewer.
   // Does nothing if the section is not loaded from the datbase yet.
   GirderStackWidget.prototype.SetSectionIndex = function (index) {
@@ -295,8 +320,9 @@
         if (cache === undefined || !cache.RootsLoaded) {
           return;
         }
-        this.Overlay.SetCache(cache);
+        this.Overlay.SetSection(nextSection.SaSection);
       }
+      this.Overlay.DrawTiles();
     }
   };
 
@@ -529,7 +555,6 @@
       '/tiles/zxy/' + level + '/' + x + '/' + y;
   };
 
-
   // TODO: Copied from girderWidget.  Share code!!!!!!!!!!!!!!!!
   // Move the annotation info to the layer widgets and draw.
   // Converts annotObj from girder to slideAtlas
@@ -612,6 +637,14 @@
             element.scalar = 1.0;
           }
           setObj.confidences.push(element.scalar);
+          if (element.vector === undefined) {
+            element.vector = [0,0,0];
+          }
+          if (setObj.vectors === undefined) {
+            setObj.vectors = [];
+          }
+          setObj.vectors.push(element.vector[0]);
+          setObj.vectors.push(element.vector[1]);
           if (element.label) {
             setObj.labels.push(element.label.value);
           } else {

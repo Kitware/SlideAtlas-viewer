@@ -33,6 +33,43 @@ window.SAM = window.SAM || {};
     this.ViewportHeight = 100;
   }
 
+  // User can draw in image coordinates.
+  /*
+  Camera.prototype.ContextSetImageTransform = function (ctx) {
+    // Start with a transform that flips the y axis.
+    ctx.setTransform(1, 0, 0, -1, 0, this.ViewportHeight);
+    // Map (-1->1, -1->1) to the viewport.
+    ctx.transform(0.5 * this.ViewportWidth, 0.0,
+                  0.0, 0.5 * this.ViewportHeight,
+                  0.5 * this.ViewportWidth,
+                  0.5 * this.ViewportHeight);
+    // Apply the image matrix
+    var m = this.GetImageMatrix();
+    var h = 1.0 / m[15];
+    ctx.transform(m[0] * h, m[1] * h,
+                  m[4] * h, m[5] * h,
+                  m[12] * h, m[13] * h);
+  };*/
+  // Get the image to viewer transformation (for the canvas).
+  Camera.prototype.GetImageToViewerTransform = function () {
+    // Start with a transform that flips the y axis.
+    var t1 = [1, 0, 0, -1, 0, this.ViewportHeight];
+    // Map (-1->1, -1->1) to the viewport.
+    var t2 = [0.5 * this.ViewportWidth, 0.0,
+              0.0, 0.5 * this.ViewportHeight,
+              0.5 * this.ViewportWidth,
+              0.5 * this.ViewportHeight];
+    // Apply the image matrix
+    var m = this.GetImageMatrix();
+    var h = 1.0 / m[15];
+    var t3 = [m[0] * h, m[1] * h,
+              m[4] * h, m[5] * h,
+              m[12] * h, m[13] * h];
+    var t = SAM.MultiplyTransforms(t1,t2);
+    var t = SAM.MultiplyTransforms(t,t3);
+    return t;
+  };
+
   // This transformation is from global/world to slide coordinate system
   Camera.prototype.SetWorldToImageTransform = function (trans) {
     this.WorldToImageTransform = trans;
@@ -199,6 +236,13 @@ window.SAM = window.SAM || {};
     yNew = (1.0 - yNew) * 0.5 * this.ViewportHeight;
 
     return [xNew, yNew];
+  };
+
+  Camera.prototype.ConvertScaleViewerToImage = function (dist) {
+    // It looks like ImageMatrix is scaled to width so to keep things
+    // simple ....
+    var m = this.ImageMatrix;
+    return dist * 2.0 * m[15] / this.ViewportWidth;
   };
 
   // dx, dy are in view coordinates [-0.5,0.5].

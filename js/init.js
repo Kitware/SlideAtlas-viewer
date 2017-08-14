@@ -26,6 +26,14 @@ window.SA = window.SA || {};
       spacing: tileSource.spacing,
       _id: new ObjectId().toString()};
 
+    if (tileSource.tileHeight) {
+      image.TileHeight = tileSource.tileHeight;
+    }
+
+    if (tileSource.tileWidth) {
+      image.TileWidth = tileSource.tileWidth;
+    }
+
     if (tileSource.filename) {
       image.filename = tileSource.filename;
       image.label = tileSource.filename;
