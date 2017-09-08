@@ -363,12 +363,15 @@
 
     if (!lockCamera) {
       this.Reset();
-      var cache = this.GetCache();
-      if (!cache || viewerRecord.Image._id !== cache.Image._id) {
-        var newCache = SA.FindCache(viewerRecord.Image);
-        this.SetCache(newCache);
-      }
+    }
 
+    var cache = this.GetCache();
+    if (!cache || viewerRecord.Image._id !== cache.Image._id) {
+      var newCache = SA.FindCache(viewerRecord.Image);
+      this.SetCache(newCache);
+    }
+
+    if (!lockCamera) {
       this.SetOverViewBounds(viewerRecord.OverViewBounds);
 
       if (viewerRecord.Camera !== undefined && viewerRecord.Transform === undefined) {
@@ -411,12 +414,12 @@
     this.UpdateSize();
   };
 
-  Viewer.prototype.SetNote = function (note, viewIdx) {
+  Viewer.prototype.SetNote = function (note, viewIdx, lockCamera) {
     if (!note || viewIdx < 0 || viewIdx >= note.ViewerRecords.length) {
       console.log('Cannot set viewer record of note');
       return;
     }
-    this.SetViewerRecord(note.ViewerRecords[viewIdx]);
+    this.SetViewerRecord(note.ViewerRecords[viewIdx], lockCamera);
     this.saNote = note;
     this.saViewerIndex = viewIdx;
   };
@@ -1697,6 +1700,7 @@
     this.EventuallyRender(true);
   };
 
+  // I want pinch to be able to zoom and translate.
   Viewer.prototype.HandleTouchPinch = function (event) {
     if (!this.InteractionEnabled) { return true; }
     var numTouches = this.Touches.length;
@@ -1714,6 +1718,8 @@
 
     var w0 = this.ConvertPointViewerToWorld(this.LastMouseX, this.LastMouseY);
     var w1 = this.ConvertPointViewerToWorld(this.MouseX, this.MouseY);
+    var dx = w1[0] - w0[0];
+    var dy = w1[1] - w0[1];
     var dt = event.Time - this.LastTime;
     // iPad / iPhone must have low precision time
     if (dt === 0) {
@@ -1747,8 +1753,8 @@
     // Focal point is the only difficult item.
     var cam = this.GetCamera();
     var fp = cam.GetWorldFocalPoint();
-    w0[0] = fp[0] - w1[0];
-    w0[1] = fp[1] - w1[1];
+    w0[0] = fp[0] - w1[0] - dx;
+    w0[1] = fp[1] - w1[1] - dy;
     // This is the new focal point.
     x = w1[0] + w0[0] / scale;
     y = w1[1] + w0[1] / scale;
@@ -1756,13 +1762,30 @@
     // Remember the last motion to implement momentum.
     var momentumScale = (scale - 1) / dt;
 
-    this.MomentumX = 0.0;
-    this.MomentumY = 0.0;
+    this.MomentumX = dx / dt;
+    this.MomentumY = dy / dt;
     this.MomentumRoll = 0.0;
     this.MomentumScale = (this.MomentumScale + momentumScale) * 0.5;
 
+    // === For translation
+    // This is the new focal point.
+    //var dx = w1[0] - w0[0];
+    //var dy = w1[1] - w0[1];
+
+
+    // Remember the last motion to implement momentum.
+    //var momentumX = dx / dt;
+    //var momentumY = dy / dt;
+
+    // Integrate momentum over a time period to avoid a fast event
+    // dominating behavior.
+    //var k = Math.min(this.Time - this.LastTime, 250) / 250;
+    //this.MomentumX += (momentumX - this.MomentumX) * k;
+    //this.MomentumY += (momentumY - this.MomentumY) * k;
+    
     cam.SetWorldFocalPoint([x, y]);
     cam.SetHeight(cam.GetHeight() / scale);
+    //cam.Translate(-dx, -dy, 0);
     cam.ComputeMatrix();
     this.EventuallyRender(true);
   };

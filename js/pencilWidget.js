@@ -16,11 +16,18 @@
   // Depends on the CIRCLE widget
   'use strict';
 
-  var DRAWING = 0;
+  // Two states for drawing.  Pencil up and pencil down.
+  var DRAWING_UP = 0;
+  var DRAWING_DOWN = 1;
+
+  // I am not sure draging a drawing makes much sense.
+  // What About scaling its size?
+  var DRAG = 3;
+
   // Active means highlighted.
-  var ACTIVE = 1;
-  var DRAG = 2;
-  var WAITING = 3;
+  var ACTIVE = 2;
+  // Waiting means not active or highlighted or drawing.
+  var WAITING = 4;
 
   function PencilWidget (layer, newFlag) {
     if (layer === null) {
@@ -31,7 +38,8 @@
     // permission.
     this.UserNoteFlag = !SA.Edit;
     this.Type = 'pencil';
-
+    this.StylusOnly = false;
+    
     var self = this;
     this.Dialog = new SAM.Dialog(function () { self.DialogApplyCallback(); });
     // Customize dialog for a pencil.
@@ -54,7 +62,7 @@
             .val('#30ff00')
             .css({'display': 'table-cell'});
 
-        // Line Width
+    // Line Width
     this.Dialog.LineWidthDiv =
             $('<div>')
             .appendTo(this.Dialog.Body)
@@ -102,13 +110,19 @@
   }
 
   PencilWidget.prototype.SetStateToDrawing = function () {
-    this.State = DRAWING;
-        // When drawing, the cursor is enough indication.
-        // We keep the lines the normal color. Yellow is too hard to see.
+    if (this.State === DRAWING_UP || this.State === DRAWING_DOWN) {
+      return;
+    }
+
+    this.State = DRAWING_UP;
+    // When drawing, the cursor is enough indication.
+    // We keep the lines the normal color. Yellow is too hard to see.
     this.Shapes.SetActive(false);
     this.Popup.Hide();
-    this.Layer.GetCanvasDiv().css(
-            {'cursor': 'url(' + SAM.ImagePathUrl + 'Pencil-icon.png) 0 24,crosshair'});
+    if ( ! this.StylusOnly) {
+      this.Layer.GetCanvasDiv().css(
+        {'cursor': 'url(' + SAM.ImagePathUrl + 'Pencil-icon.png) 0 24,crosshair'});
+    }
     this.Layer.EventuallyDraw();
   };
 
@@ -182,8 +196,11 @@
   };
 
   PencilWidget.prototype.HandleKeyDown = function (event) {
-    if (this.State === DRAWING) {
-            // escape key (or space or enter) to turn off drawing
+    if (this.StylusOnly) {
+      return true;
+    }
+    if (this.State === DRAWING_UP || this.State === DRAWING_DOWN) {
+      // escape key (or space or enter) to turn off drawing
       if (event.keyCode === 27 || event.keyCode === 32 || event.keyCode === 13) {
         this.Deactivate();
         return false;
@@ -191,106 +208,11 @@
     }
   };
 
-    // Change the line width with the wheel.
-  PencilWidget.prototype.HandleMouseWheel = function (event) {
-    if (this.State === DRAWING ||
-             this.State === ACTIVE) {
-      if (this.Shapes.GetNumberOfShapes() < 0) { return; }
-      var tmp = 0;
-
-      if (event.deltaY) {
-        tmp = event.deltaY;
-      } else if (event.wheelDelta) {
-        tmp = event.wheelDelta;
-      }
-
-      var minWidth = 1.0 / this.Layer.GetPixelsPerUnit();
-
-            // Wheel event seems to be in increments of 3.
-            // depreciated mousewheel had increments of 120....
-      var lineWidth = this.Shapes.GetLineWidth();
-      lineWidth = lineWidth || minWidth;
-      if (tmp > 0) {
-        lineWidth *= 1.1;
-      } else if (tmp < 0) {
-        lineWidth /= 1.1;
-      }
-      if (lineWidth <= minWidth) {
-        lineWidth = 0.0;
-      }
-      this.Dialog.LineWidthInput.val(lineWidth);
-      this.Shapes.SetLineWidth(lineWidth);
-      this.Shapes.UpdateBuffers(this.Layer.AnnotationView);
-
-      this.Layer.EventuallyDraw();
-      return false;
-    }
-    return true;
-  };
-
-  PencilWidget.prototype.HandleMouseDown = function (event) {
-    var x = event.offsetX;
-    var y = event.offsetY;
-
-    if (event.which === 1) {
-      if (this.State === DRAWING) {
-                // Start drawing.
-        var shape = new SAM.Polyline();
-                // shape.OutlineColor = [0.9, 1.0, 0.0];
-        shape.OutlineColor = [0.0, 0.0, 0.0];
-        shape.SetOutlineColor(this.Dialog.ColorInput.val());
-        shape.FixedSize = false;
-        shape.LineWidth = 0;
-        shape.LineWidth = this.Shapes.GetLineWidth();
-        this.Shapes.AddShape(shape);
-
-        var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
-        shape.Points.push([pt[0], pt[1]]); // avoid same reference.
-      }
-      if (this.State === ACTIVE) {
-                // Anticipate dragging (might be double click)
-        var cam = this.Layer.GetCamera();
-        this.LastMouse = cam.ConvertPointViewerToWorld(x, y);
-      }
-    }
-  };
-
-  PencilWidget.prototype.HandleMouseUp = function (event) {
-    if (event.which === 3) {
-            // Right mouse was pressed.
-            // Pop up the properties dialog.
-      this.ShowPropertiesDialog();
-      return false;
-    }
-        // Middle mouse deactivates the widget.
-    if (event.which === 2) {
-            // Middle mouse was pressed.
-      this.Deactivate();
-      return false;
-    }
-
-    if (this.State === DRAG) {
-            // Set the origin back to zero (put it explicitely in points).
-      this.Shapes.ResetOrigin();
-      this.State = ACTIVE;
-    }
-
-        // A stroke has just been finished.
-    var last = this.Shapes.GetNumberOfShapes() - 1;
-    if (this.State === DRAWING &&
-            event.which === 1 && last >= 0) {
-      var spacing = this.Layer.GetCamera().GetSpacing();
-            // NOTE: This assume that the shapes are polylines.
-            // this.Decimate(this.Shapes.GetShape(last), spacing);
-      this.Shapes.GetShape(last).Decimate(spacing);
-      if (window.SA) { SA.RecordState(); }
-      if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
-    }
-    return false;
-  };
-
   PencilWidget.prototype.HandleDoubleClick = function (event) {
-    if (this.State === DRAWING) {
+    if (this.StylusOnly) {
+      return true;
+    }
+    if (this.State === DRAWING_UP || this.State === DRAWING_DOWN) {
       this.Deactivate();
       return false;
     }
@@ -301,11 +223,116 @@
     return true;
   };
 
-  PencilWidget.prototype.HandleMouseMove = function (event) {
+  PencilWidget.prototype.SetStateToDrawingDown = function (x, y) {
+    if (this.State === DRAWING_DOWN) {
+      return;
+    }
+
+    this.State = DRAWING_DOWN;
+    // Start a new stroke
+    var shape = new SAM.Polyline();
+    // shape.OutlineColor = [0.9, 1.0, 0.0];
+    shape.OutlineColor = [0.0, 0.0, 0.0];
+    shape.SetOutlineColor(this.Dialog.ColorInput.val());
+    shape.FixedSize = false;
+    shape.LineWidth = 0;
+    shape.LineWidth = this.Shapes.GetLineWidth();
+    this.Shapes.AddShape(shape);
+
+    var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
+    shape.Points.push([pt[0], pt[1]]); // avoid same reference.
+  };
+
+  PencilWidget.prototype.HandleMouseDown = function (event) {
+    if (this.StylusOnly) {
+      return true;
+    }
+
     var x = event.offsetX;
     var y = event.offsetY;
 
-    if (event.which === 1 && this.State === DRAWING) {
+    if (this.State === ACTIVE) {
+      // Anticipate dragging (might be double click)
+      var cam = this.Layer.GetCamera();
+      this.LastMouse = cam.ConvertPointViewerToWorld(x, y);
+    }
+
+    return false;
+  };
+
+  PencilWidget.prototype.HandleTouchStart = function (layerEvent) {
+    if (this.StylusOnly && !layerEvent.OriginalEvent.pencil) {
+      return true;
+    }
+    if (layerEvent.Touches.length != 1) {
+      // We pass one multiple touches
+      return true;
+    }
+    console.log("start");
+
+    if (this.State === DRAWING_UP) {
+      var x = layerEvent.Touches[0][0];
+      var y = layerEvent.Touches[0][1];
+      this.SetStateToDrawingDown(x, y);
+    }
+    return false;
+  };
+
+  PencilWidget.prototype.HandleStop = function () {
+    // A stroke has just been finished.
+    var last = this.Shapes.GetNumberOfShapes() - 1;
+    if (this.State === DRAWING_DOWN && last >= 0) {
+      var spacing = this.Layer.GetCamera().GetSpacing();
+      // NOTE: This assume that the shapes are polylines.
+      this.Shapes.GetShape(last).Decimate(spacing);
+      if (window.SA) { SA.RecordState(); }
+      if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
+      this.State = DRAWING_UP;
+    }
+    return false;
+  };
+
+  PencilWidget.prototype.HandleMouseUp = function (event) {
+    if (this.StylusOnly) {
+      return true;
+    }
+    if (event.which === 3) {
+      // Right mouse was pressed.
+      // Pop up the properties dialog.
+      this.ShowPropertiesDialog();
+      return false;
+    }
+    // Middle mouse deactivates the widget.
+    if (event.which === 2) {
+      // Middle mouse was pressed.
+      this.Deactivate();
+      return false;
+    }
+
+    if (this.State === DRAG) {
+      // Set the origin back to zero (put it explicitely in points).
+      this.Shapes.ResetOrigin();
+      this.State = ACTIVE;
+      return false;
+    }
+
+    return this.HandleStop();
+  };
+
+  PencilWidget.prototype.HandleTouchEnd = function (layerEvent) {
+    if (this.State != DRAWING_DOWN) {
+      return true;
+    }
+    console.log("stop");
+    return this.HandleStop();
+  };
+
+  PencilWidget.prototype.HandleMove = function (x, y) {
+    if (this.State === DRAWING_UP) {
+      this.SetStateToDrawingDown(x, y);
+    }
+
+    if (this.State === DRAWING_DOWN) {
       var last = this.Shapes.GetNumberOfShapes() - 1;
       var shape = this.Shapes.GetShape(last);
       var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
@@ -316,20 +343,29 @@
       this.Layer.EventuallyDraw();
       return false;
     }
+    
+    return true;
+  };
 
-    if (this.State === ACTIVE &&
-            event.which === 0) {
-            // Deactivate
-      this.SetActive(this.CheckActive(event));
-      return false;
+  PencilWidget.prototype.HandleMouseMove = function (event) {
+    if (this.StylusOnly) {
+      return true;
+    }
+    var x = event.offsetX;
+    var y = event.offsetY;
+
+    if (event.which === 1) {
+      if (this.HandleMove(x, y) == false) {
+        return false;
+      }
     }
 
-    if (this.State === ACTIVE && event.which === 1) {
+    if (event.which && event.which === 1 && this.State === ACTIVE) {
       this.State = DRAG;
     }
 
     if (this.State === DRAG) {
-            // Drag
+      // Drag
       this.State = DRAG;
       this.Popup.Hide();
       var cam = this.Layer.GetCamera();
@@ -342,9 +378,35 @@
       this.Layer.EventuallyDraw();
       return false;
     }
+
+    // Active flag is not set but layer thinks it is active.
+    if (this === this.Layer.ActiveWidget &&
+        event.which === 0) {
+      // Deactivate
+      this.SetActive(this.CheckActive(event));
+    }
+    return false;
   };
 
-    // This also shows the popup if it is not visible already.
+  PencilWidget.prototype.HandleTouchMove = function (layerEvent) {
+    if (this.StylusOnly && !layerEvent.OriginalEvent.pencil) {
+      return true;
+    }
+
+    if (layerEvent.Touches.length != 1) {
+      return true;
+    }
+    
+    console.log("move");
+
+    var x = layerEvent.Touches[0][0];
+    var y = layerEvent.Touches[0][1];
+
+    this.HandleMove(x, y);
+    return false;
+  };
+
+  // This also shows the popup if it is not visible already.
   PencilWidget.prototype.PlacePopup = function () {
     var pt = this.Shapes.FindPopupPoint(this.Layer.GetCamera());
     if (!pt) { return; }
@@ -357,7 +419,9 @@
   };
 
   PencilWidget.prototype.CheckActive = function (event) {
-    if (this.State === DRAWING) { return true; }
+    if (this.State === DRAWING_UP || this.State === DRAWING_DOWN) {
+      return true;
+    }
     if (this.Shapes.GetNumberOfShapes() === 0) { return false; }
 
     var x = event.offsetX;
@@ -379,8 +443,8 @@
     return flag;
   };
 
-    // Setting to active always puts state into "active".
-    // It can move to other states and stay active.
+  // Setting to active always puts state into "active".
+  // It can move to other states and stay active.
   PencilWidget.prototype.SetActive = function (flag) {
     if (flag === this.GetActive()) { return; }
     if (flag) {
