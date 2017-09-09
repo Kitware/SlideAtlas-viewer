@@ -37,7 +37,7 @@
       .prop('title', 'Add Annotation')
       .hover(function () { $(this).css({'opacity': '1'}); },
              function () { $(this).css({'opacity': '0.6'}); })
-      .click(function (e) { self.NewAnnotationItem(e); });
+      .bind("click touchstart", function (e) { self.NewAnnotationItem(e); });
 
     this.AnnotationObjects = [];
     this.Highlighted = undefined;
@@ -64,33 +64,33 @@
         'margin': '2px 0px',
         'width': '100%'})
       .prop('title', 'Replace Annotation')
-      .click(
-        function () {
-          self.SnapShotAnnotation(self.MenuAnnotationObject);
-          self.Menu.hide();
-        });
+      .bind("click touchstart", 
+            function () {
+              self.SnapShotAnnotation(self.MenuAnnotationObject);
+              self.Menu.hide();
+            });
     $('<button>')
       .appendTo(this.Menu)
       .text('Delete')
       .css({
         'margin': '2px 0px',
         'width': '100%'})
-      .click(
-        function () {
-          self.DeleteAnnotation(self.MenuAnnotationObject);
-          self.Menu.hide();
-        });
+      .bind("click touchstart", 
+            function () {
+              self.DeleteAnnotation(self.MenuAnnotationObject);
+              self.Menu.hide();
+            });
     $('<button>')
       .appendTo(this.Menu)
       .text('Properties')
       .css({
         'margin': '2px 0px',
         'width': '100%'})
-      .click(
-        function () {
-          self.ShowAnnotationPropertiesDialog(self.MenuAnnotationObject);
-          self.Menu.hide();
-        });
+      .bind("click touchstart",
+            function () {
+              self.ShowAnnotationPropertiesDialog(self.MenuAnnotationObject);
+              self.Menu.hide();
+            });
   }
 
   GirderWidget.prototype.SaveSectionMetaData = function (annot) {
