@@ -49,24 +49,28 @@ window.SAM = window.SAM || {};
     ctx.transform(m[0] * h, m[1] * h,
                   m[4] * h, m[5] * h,
                   m[12] * h, m[13] * h);
-  };*/
+  }; */
   // Get the image to viewer transformation (for the canvas).
   Camera.prototype.GetImageToViewerTransform = function () {
     // Start with a transform that flips the y axis.
     var t1 = [1, 0, 0, -1, 0, this.ViewportHeight];
     // Map (-1->1, -1->1) to the viewport.
-    var t2 = [0.5 * this.ViewportWidth, 0.0,
-              0.0, 0.5 * this.ViewportHeight,
-              0.5 * this.ViewportWidth,
-              0.5 * this.ViewportHeight];
+    var t2 = [
+      0.5 * this.ViewportWidth, 0.0,
+      0.0, 0.5 * this.ViewportHeight,
+      0.5 * this.ViewportWidth,
+      0.5 * this.ViewportHeight
+    ];
     // Apply the image matrix
     var m = this.GetImageMatrix();
     var h = 1.0 / m[15];
-    var t3 = [m[0] * h, m[1] * h,
-              m[4] * h, m[5] * h,
-              m[12] * h, m[13] * h];
-    var t = SAM.MultiplyTransforms(t1,t2);
-    var t = SAM.MultiplyTransforms(t,t3);
+    var t3 = [
+      m[0] * h, m[1] * h,
+      m[4] * h, m[5] * h,
+      m[12] * h, m[13] * h
+    ];
+    var t = SAM.MultiplyTransforms(t1, t2);
+    t = SAM.MultiplyTransforms(t, t3);
     return t;
   };
 
@@ -89,7 +93,7 @@ window.SAM = window.SAM || {};
     return this.GetHeight() / this.ViewportHeight;
   };
 
-  // Copies the world view but not the slide to world transform. 
+  // Copies the world view but not the slide to world transform.
   Camera.prototype.WorldCopy = function (inCam) {
     if (inCam.ZRange) { this.ZRange = inCam.ZRange.slice(0); }
     this.WorldRoll = inCam.WorldRoll;
@@ -103,7 +107,7 @@ window.SAM = window.SAM || {};
 
   Camera.prototype.DeepCopy = function (inCam) {
     this.WorldToImageTransform = inCam.WorldToImageTransform.slice(0);
-    this.WorldCopy(inCam);;
+    this.WorldCopy(inCam);
   };
 
   Camera.prototype.SetViewport = function (viewport) {

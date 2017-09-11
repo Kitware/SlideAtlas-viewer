@@ -1767,25 +1767,9 @@
     this.MomentumRoll = 0.0;
     this.MomentumScale = (this.MomentumScale + momentumScale) * 0.5;
 
-    // === For translation
-    // This is the new focal point.
-    //var dx = w1[0] - w0[0];
-    //var dy = w1[1] - w0[1];
-
-
-    // Remember the last motion to implement momentum.
-    //var momentumX = dx / dt;
-    //var momentumY = dy / dt;
-
-    // Integrate momentum over a time period to avoid a fast event
-    // dominating behavior.
-    //var k = Math.min(this.Time - this.LastTime, 250) / 250;
-    //this.MomentumX += (momentumX - this.MomentumX) * k;
-    //this.MomentumY += (momentumY - this.MomentumY) * k;
-    
     cam.SetWorldFocalPoint([x, y]);
     cam.SetHeight(cam.GetHeight() / scale);
-    //cam.Translate(-dx, -dy, 0);
+    //  cam.Translate(-dx, -dy, 0);
     cam.ComputeMatrix();
     this.EventuallyRender(true);
   };

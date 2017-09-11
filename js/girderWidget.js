@@ -37,7 +37,7 @@
       .prop('title', 'Add Annotation')
       .hover(function () { $(this).css({'opacity': '1'}); },
              function () { $(this).css({'opacity': '0.6'}); })
-      .bind("click touchstart", function (e) { self.NewAnnotationItem(e); });
+      .bind('click touchstart', function (e) { self.NewAnnotationItem(e); });
 
     this.AnnotationObjects = [];
     this.Highlighted = undefined;
@@ -64,7 +64,7 @@
         'margin': '2px 0px',
         'width': '100%'})
       .prop('title', 'Replace Annotation')
-      .bind("click touchstart", 
+      .bind('click touchstart',
             function () {
               self.SnapShotAnnotation(self.MenuAnnotationObject);
               self.Menu.hide();
@@ -75,7 +75,7 @@
       .css({
         'margin': '2px 0px',
         'width': '100%'})
-      .bind("click touchstart", 
+      .bind('click touchstart',
             function () {
               self.DeleteAnnotation(self.MenuAnnotationObject);
               self.Menu.hide();
@@ -86,7 +86,7 @@
       .css({
         'margin': '2px 0px',
         'width': '100%'})
-      .bind("click touchstart",
+      .bind('click touchstart',
             function () {
               self.ShowAnnotationPropertiesDialog(self.MenuAnnotationObject);
               self.Menu.hide();
@@ -412,9 +412,7 @@
 
     var self = this;
     var div = $('<div>')
-      //.appendTo('body')
       .appendTo(this.AnnotationLayer.GetCanvasDiv())
-      //.appendTo(this.AnnotationLayer.LayerDiv.parent())
       .css({
         'position': 'absolute',
         'left': (3 * this.Radius) + 'px',
@@ -427,7 +425,7 @@
         'border-radius': '2px',
         'z-index': '100'
       })
-      .mouseenter(function() { div.focus(); console.log('enter');})
+      .mouseenter(function () { div.focus(); console.log('enter'); })
       .hide() // hide until animation is finished.
       .hover(function () { div.css({'opacity': '1'}); },
              function () { div.css({'opacity': '0.6'}); });
@@ -437,24 +435,25 @@
       .prop('title', 'Show Annotation')
       .text(data.annotation.name);
 
-    var slider = $('<div>')
-      .appendTo(div)
-      .css({'width': '10em',
-            'margin':'5px'});
+    // var slider = $('<div>')
+    //  .appendTo(div)
+    //  .css({'width': '10em',
+    //        'margin':'5px'});
 
     var annotObj = {
       Data: data,
       Div: div,
-      Circle: circle,
-      Slider: slider};
+      Circle: circle};
+      // Circle: circle,
+      // Slider: slider};
     this.AnnotationObjects.push(annotObj);
 
-    slider
-      .slider({
-        start: function (e, ui) { self.UpdateThreshold(ui.value, annotObj); },
-        slide: function (e, ui) { self.UpdateThreshold(ui.value, annotObj); },
-        stop: function (e, ui) { self.UpdateThreshold(ui.value, annotObj); }
-      });
+    // slider
+    //  .slider({
+    //    start: function (e, ui) { self.UpdateThreshold(ui.value, annotObj); },
+    //    slide: function (e, ui) { self.UpdateThreshold(ui.value, annotObj); },
+    //    stop: function (e, ui) { self.UpdateThreshold(ui.value, annotObj); }
+    //  });
 
     circle.contextmenu(function () { return false; });
     circle.mousedown(function (e) {

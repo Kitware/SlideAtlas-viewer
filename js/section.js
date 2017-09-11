@@ -136,21 +136,17 @@
   Section.prototype.Draw = function (view) {
     var finishedRendering = true;
     view.Camera.SetWorldToImageTransform(this.Transform);
-    /////var m = view.Camera.GetImageMatrix();
+    // var m = view.Camera.GetImageMatrix();
 
     if (view.gl) {
       // Draw tiles.
-      var program = view.ShaderProgram;
-      var gl = view.gl;
-      gl.viewport(view.Viewport[0], view.Viewport[1],
-                        view.Viewport[2], view.Viewport[3]);
-      gl.uniformMatrix4fv(program.pMatrixUniform, false, m);
+      // var program = view.ShaderProgram;
+      // var gl = view.gl;
+      // gl.viewport(view.Viewport[0], view.Viewport[1],
+      // view.Viewport[2], view.Viewport[3]);
+      // gl.uniformMatrix4fv(program.pMatrixUniform, false, m);
     } else {
       // The camera maps the world coordinate system to (-1->1, -1->1).
-      /////var h = 1.0 / m[15];
-      /////view.Context2d.transform(m[0] * h, m[1] * h,
-      /////                         m[4] * h, m[5] * h,
-      /////                         m[12] * h, m[13] * h);
       var t = view.Camera.GetImageToViewerTransform();
       view.Context2d.setTransform(t[0], t[1], t[2], t[3], t[4], t[5]);
     }
@@ -194,7 +190,7 @@
 
       // Reverse order to render low res tiles first.
       for (j = loadedTiles.length - 1; j >= 0; --j) {
-        loadedTiles[j].Draw(program, view);
+        // loadedTiles[j].Draw(program, view);
       }
     }
     return finishedRendering;

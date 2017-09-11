@@ -39,7 +39,7 @@
     this.UserNoteFlag = !SA.Edit;
     this.Type = 'pencil';
     this.StylusOnly = false;
-    
+
     var self = this;
     this.Dialog = new SAM.Dialog(function () { self.DialogApplyCallback(); });
     // Customize dialog for a pencil.
@@ -119,7 +119,7 @@
     // We keep the lines the normal color. Yellow is too hard to see.
     this.Shapes.SetActive(false);
     this.Popup.Hide();
-    if ( ! this.StylusOnly) {
+    if (!this.StylusOnly) {
       this.Layer.GetCanvasDiv().css(
         {'cursor': 'url(' + SAM.ImagePathUrl + 'Pencil-icon.png) 0 24,crosshair'});
     }
@@ -264,11 +264,10 @@
     if (this.StylusOnly && !layerEvent.OriginalEvent.pencil) {
       return true;
     }
-    if (layerEvent.Touches.length != 1) {
+    if (layerEvent.Touches.length !== 1) {
       // We pass one multiple touches
       return true;
     }
-    console.log("start");
 
     if (this.State === DRAWING_UP) {
       var x = layerEvent.Touches[0][0];
@@ -320,10 +319,9 @@
   };
 
   PencilWidget.prototype.HandleTouchEnd = function (layerEvent) {
-    if (this.State != DRAWING_DOWN) {
+    if (this.State !== DRAWING_DOWN) {
       return true;
     }
-    console.log("stop");
     return this.HandleStop();
   };
 
@@ -343,7 +341,7 @@
       this.Layer.EventuallyDraw();
       return false;
     }
-    
+
     return true;
   };
 
@@ -355,7 +353,7 @@
     var y = event.offsetY;
 
     if (event.which === 1) {
-      if (this.HandleMove(x, y) == false) {
+      if (this.HandleMove(x, y) === false) {
         return false;
       }
     }
@@ -393,11 +391,9 @@
       return true;
     }
 
-    if (layerEvent.Touches.length != 1) {
+    if (layerEvent.Touches.length !== 1) {
       return true;
     }
-    
-    console.log("move");
 
     var x = layerEvent.Touches[0][0];
     var y = layerEvent.Touches[0][1];

@@ -18,16 +18,16 @@
 // TODO: Merge these in the future if possible.
 
 // Loading is a bit confusing (due to load on demand requirements):
-// Initialize (block / serialized) 
+// Initialize (block / serialized)
 // 1: LoadFolder (called externally): Just gets the number of items in the folder.
 // 2: LoadFolderImageIds (chunked recursively):
 //      Gets the itemIds and meta data.  Creates the instance stack array.
 //      Section objects have bounds an transform, imageId.
 //      calls LoadStackMetaData to asynchronously load other item info.
 // Initialize (non blocking/ asynchonous, throttled)
-// 1: LoadStackMetaData: 
+// 1: LoadStackMetaData:
 //      Choose a (high priority) section that needs metadata loaded.
-//      Call CreateSaSection to load the metadata 
+//      Call CreateSaSection to load the metadata
 //      (with a recursive callback to LoadStackMetaData)
 // 2: CreateSaSection: Loads the image tile meta data if necesary.
 //      No: Just call CreateSaSectionFromCache
@@ -241,7 +241,7 @@
     this.Stack = [];
 
     if (sectionData.length > 0) {
-        this.SetSectionIndex(0);
+      this.SetSectionIndex(0);
     }
 
     for (var idx = 0; idx < sectionData.length; ++idx) {
@@ -316,7 +316,7 @@
       var idx = this.Stack.indexOf(stackSection);
       if (idx !== -1 && idx < this.Stack.length - 1) {
         var nextSection = this.Stack[idx + 1];
-        var cache = this.Caches[nextSection.imageId];
+        cache = this.Caches[nextSection.imageId];
         if (cache === undefined || !cache.RootsLoaded) {
           return;
         }
@@ -424,22 +424,14 @@
       stackSection.bounds = [0, w - 1, 0, h - 1];
     }
     // Get / setup the cache.
-    // This check is not really necessary.
-    // Cache will always be undefined
-    //var cache = this.Caches[stackSection.imageId];
-    //if (!cache) {
     var cache = new SA.Cache();
     this.Caches[stackSection.imageId] = cache;
-    //}
-    // This check is also not necessary.  Image will nbe be set either.
-    //if (cache.Image === undefined) {
     var tileSource = new GirderTileSource(w, h, resp.tileWidth, resp.tileHeight,
                                           0, resp.levels - 1,
                                           this.ApiRoot,
                                           stackSection.imageId,
                                           [0, w - 1, 0, h - 1]);
     cache.SetTileSource(tileSource);
-    //}
     // Setup the slideAtlas section
     var saSection = new SA.Section();
     saSection.AddCache(cache);
@@ -558,7 +550,7 @@
   // TODO: Copied from girderWidget.  Share code!!!!!!!!!!!!!!!!
   // Move the annotation info to the layer widgets and draw.
   // Converts annotObj from girder to slideAtlas
-  var DisplayAnnotation = function (annotLayer, girder_annot) {
+  var DisplayAnnotation = function (annotLayer, girderAnnot) {
     annotLayer.SetVisibility(true);
     annotLayer.Reset();
 
@@ -571,7 +563,7 @@
     setObj.confidences = [];
     setObj.labels = [];
 
-    var annot = girder_annot;
+    var annot = girderAnnot;
     for (var i = 0; i < annot.elements.length; ++i) {
       var element = annot.elements[i];
       var obj = {};
@@ -638,7 +630,7 @@
           }
           setObj.confidences.push(element.scalar);
           if (element.vector === undefined) {
-            element.vector = [0,0,0];
+            element.vector = [0, 0, 0];
           }
           if (setObj.vectors === undefined) {
             setObj.vectors = [];

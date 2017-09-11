@@ -983,11 +983,10 @@
     event.pencil = false;
     if (event.touches && event.touches.length === 1) {
       var touch = event.touches[0];
-      if (touch.force && ! isNaN(touch.force) && touch.force !== 0) {
+      if (touch.force && !isNaN(touch.force) && touch.force !== 0) {
         event.pencil = true;
       }
     }
-    
     return true;
   };
 
@@ -1003,17 +1002,17 @@
     if (this.ActiveWidget && this.ActiveWidget.HandleTouchStart) {
       // The pencil only responds to single touches.
       // Let unhandled multiple touch events fall through to the viewer.
-      if (this.ActiveWidget.HandleTouchStart(this) == false) {
+      if (this.ActiveWidget.HandleTouchStart(this) === false) {
         return false;
       }
     }
     // TODO: Just make the pencil widget active.
     if (event.pencil) {
-      if (this.Pencil.HandleTouchStart(this) == false) {
+      if (this.Pencil.HandleTouchStart(this) === false) {
         return false;
       }
     }
-    
+
     // Code from a conflict
     // Touch was not activating widgets on the ipad.
     // Show text on hover.
@@ -1034,22 +1033,22 @@
   };
 
   AnnotationLayer.prototype.CheckForPencil = function (event) {
-    if ( ! event.pencil) {
+    if (!event.pencil) {
       return;
     }
-    
+
     // Get a pencil widget if we do not already have one.
-	  if (!this.Pencil) {
+    if (!this.Pencil) {
       // Use the current widget if it is a pencil
       if (this.ActiveWidget) {
         // I am not sure about making the current pencil the apply pencil.
         var current = this.ActiveWidget;
-        if (currelt.Type == 'pencil') {
+        if (current.Type === 'pencil') {
           this.Pencil = current;
         }
       }
       // Code to make a new pencil
-	    if (!this.Pencil) {
+      if (!this.Pencil) {
         // Make a new widget (and make it active).
         this.Pencil = new SAM.PencilWidget(this, false);
         // I want this widget to only respond to pencil/stylus events
@@ -1058,24 +1057,24 @@
     }
 
     // I assume this deactivates any other active widget.
-    //this.Pencil.SetActive(true);
+    // this.Pencil.SetActive(true);
     this.Pencil.SetStateToDrawing();
   };
-  
+
   AnnotationLayer.prototype.HandleTouchMove = function (e) {
     // Put a throttle on events
     if (!this.InitializeTouch(e, false)) { return; }
     this.CheckForPencil(e);
-    
+
     if (e.pencil) {
-      if (this.Pencil.HandleTouchMove(this) == false) {
+      if (this.Pencil.HandleTouchMove(this) === false) {
         return false;
       }
     }
     if (this.ActiveWidget && this.ActiveWidget.HandleTouchMove) {
       // The pencil only responds to single touches.
       // Let unhandled multiple touch events fall through to the viewer.
-      if (this.ActiveWidget.HandleTouchMove(this) == false) {
+      if (this.ActiveWidget.HandleTouchMove(this) === false) {
         return false;
       }
     }
@@ -1115,7 +1114,7 @@
     }
     // End touch events have no touches so we cannot determine whether
     // they are from a stylus (presure pencil).
-    if (this.Pencil && this.Pencil.HandleTouchEnd(this) == false) {
+    if (this.Pencil && this.Pencil.HandleTouchEnd(this) === false) {
       return false;
     }
     if (this.ActiveWidget && this.ActiveWidget.HandleTouchEnd) {
@@ -1331,7 +1330,7 @@
     if (widget.Layer === null) {
       return;
     }
-    if (this.ActiveWidget == widget) {
+    if (this.ActiveWidget === widget) {
       this.ActiveWidget = undefined;
     }
     widget.Layer = null;

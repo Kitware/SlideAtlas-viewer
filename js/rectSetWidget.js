@@ -131,7 +131,7 @@
         y = this.Centers[cIdx++];
 
         view.Context2d.moveTo(x, y);
-        view.Context2d.lineTo(x+vx, y+vy);
+        view.Context2d.lineTo(x + vx, y + vy);
       } else {
         cIdx += 2;
       }
@@ -142,7 +142,7 @@
 
     cIdx = 0;
     view.Context2d.lineWidth = pixelSize * 2;
-    for (var i = 0; i < this.Widths.length; ++i) {
+    for (i = 0; i < this.Widths.length; ++i) {
       if ((!this.Visibilities || this.Visibilities[i]) &&
           (this.Confidences[i] >= this.Threshold)) {
         var hw = this.Widths[i] / 2;
@@ -156,18 +156,18 @@
         } else if (this.Color) {
           view.Context2d.strokeStyle = this.Color;
         } else {
-          if (this.Confidences[i] == 0) {
+          if (this.Confidences[i] === 0) {
             view.Context2d.strokeStyle = '#ff0000';
           } else {
             var r = Math.floor(this.Confidences[i] * 255);
             view.Context2d.strokeStyle = '#' + r.toString(16) + 'ff00';
           }
         }
-        view.Context2d.moveTo(x-hw, y-hh);
-        view.Context2d.lineTo(x+hw, y-hh);
-        view.Context2d.lineTo(x+hw, y+hh);
-        view.Context2d.lineTo(x-hw, y+hh);
-        view.Context2d.lineTo(x-hw, y-hh);
+        view.Context2d.moveTo(x - hw, y - hh);
+        view.Context2d.lineTo(x + hw, y - hh);
+        view.Context2d.lineTo(x + hw, y + hh);
+        view.Context2d.lineTo(x - hw, y + hh);
+        view.Context2d.lineTo(x - hw, y - hh);
 
         view.Context2d.stroke();
 
