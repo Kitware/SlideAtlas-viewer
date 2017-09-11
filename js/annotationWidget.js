@@ -229,10 +229,10 @@
     var button = this.GridButton;
     var widget = this.ActivateButton(button, SAM.GridWidget);
     var cam = this.Layer.GetCamera();
-    var fp = cam.GetFocalPoint();
+    var fp = cam.GetWorldFocalPoint();
     // Square grid elements determined by height
     widget.Grid.Origin = [fp[0], fp[1], 0.0];
-    widget.Grid.Orientation = cam.GetRotation();
+    widget.Grid.Orientation = cam.GetWorldRotation();
     this.Layer.DeactivateWidget(widget);
   };
 
@@ -282,7 +282,50 @@
 
   AnnotationWidget.prototype.DetectSections = function () {
     if (!window.SA) { return; }
-    window.alert('DetectSections has not been transfered');
+
+    var widget = this.Layer.GetActiveWidget();
+    var button = this.SectionsButton;
+    if (widget) {
+      if (button.Pressed) {
+        // The user pressed the button again (while it was active).
+        widget.Deactivate();
+        return;
+      }
+      // This call sets pressed to false as a side action.
+      widget.Deactivate();
+    }
+    button.Pressed = true;
+    button.addClass('sa-active');
+
+    // See if a SectionsWidget already exists.
+    widget = null;
+    var widgets = this.Layer.GetWidgets();
+    for (var i = 0; i < widgets.length && widget == null; ++i) {
+      var w = widgets[i];
+      // if (w instanceOf SectionsWidget) {
+      if (w.Type === 'sections') {
+        widget = w;
+      }
+    }
+    if (widget == null) {
+      // Find sections to initialize sections widget.
+      widget = new SA.SectionsWidget(this.Layer, this.Viewer, false);
+      widget.ComputeSections(this.Viewer);
+      if (widget.IsEmpty()) {
+        this.Layer.RemoveWidget(widget);
+        button.removeClass('sa-active');
+        button.Pressed = false;
+        return;
+      }
+    }
+
+    widget.SetActive(true);
+    widget.DeactivateCallback =
+      function () {
+        button.removeClass('sa-active');
+        widget.DeactivateCallback = undefined;
+        button.Pressed = false;
+      };
   };
 
   SA.AnnotationWidget = AnnotationWidget;

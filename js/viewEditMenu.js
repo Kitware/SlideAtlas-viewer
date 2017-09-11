@@ -118,12 +118,12 @@ window.SA = window.SA || {};
         // If the user is authorized, the new bounds are automatically saved.
       if (SA.Edit) {
         $('<button>').appendTo(this.Tab.Panel)
-                .text('Save Overview Bounds')
+                .text('Save OverView Bounds')
                 .addClass('sa-view-edit-button')
                 .click(function () { self.SetViewBounds(); });
       } else {
         $('<button>').appendTo(this.Tab.Panel)
-                .text('Set Overview Bounds')
+                .text('Set OverView Bounds')
                 .addClass('sa-view-edit-button')
                 .click(function () { self.SetViewBounds(); });
       }
@@ -160,7 +160,7 @@ window.SA = window.SA || {};
 
   ViewEditMenu.prototype.GetViewerBounds = function (viewer) {
     var cam = viewer.GetCamera();
-    var fp = cam.GetFocalPoint();
+    var fp = cam.GetWorldFocalPoint();
     var halfWidth = cam.GetWidth() / 2;
     var halfHeight = cam.GetHeight() / 2;
     return [fp[0] - halfWidth, fp[0] + halfWidth, fp[1] - halfHeight, fp[1] + halfHeight];
@@ -174,10 +174,10 @@ window.SA = window.SA || {};
     // Which view record?
     var viewerRecord = note.ViewerRecords[this.Viewer.RecordIndex];
 
-    viewerRecord.OverviewBounds = bounds;
+    viewerRecord.OverViewBounds = bounds;
     // Set the image bounds so the new bounds are used immediately.
-    viewerRecord.Image.bounds = viewerRecord.OverviewBounds;
-    this.Viewer.OverView.Camera.SetFocalPoint([(bounds[0] + bounds[1]) / 2,
+    viewerRecord.Image.bounds = viewerRecord.OverViewBounds;
+    this.Viewer.OverView.Camera.SetWorldFocalPoint([(bounds[0] + bounds[1]) / 2,
       (bounds[2] + bounds[3]) / 2]);
     this.Viewer.OverView.Camera.SetHeight(bounds[3] - bounds[2]);
     this.Viewer.OverView.Camera.ComputeMatrix();
@@ -215,7 +215,7 @@ window.SA = window.SA || {};
 
     // Set the image bounds so the new bounds are used immediately.
     viewer.GetCache().Image.bounds = bounds;
-    viewer.OverView.Camera.SetFocalPoint([(bounds[0] + bounds[1]) / 2,
+    viewer.OverView.Camera.SetWorldFocalPoint([(bounds[0] + bounds[1]) / 2,
       (bounds[2] + bounds[3]) / 2]);
     viewer.OverView.Camera.SetHeight(bounds[3] - bounds[2]);
     viewer.OverView.Camera.ComputeMatrix();
@@ -244,7 +244,8 @@ window.SA = window.SA || {};
     var cam = this.Viewer.GetCamera();
     var copyCam = this.OtherViewer.GetCamera();
 
-    this.Viewer.AnimateCamera(cam.GetFocalPoint(), cam.Roll, copyCam.Height);
+    this.Viewer.AnimateCamera(cam.GetWorldFocalPoint(),
+                              cam.GetWorldRoll(), copyCam.Height);
   };
 
   ViewEditMenu.prototype.ShowSlideInformation = function () {
@@ -261,7 +262,8 @@ window.SA = window.SA || {};
 
     var cam = this.Viewer.GetCamera();
     this.Viewer.ToggleMirror();
-    this.Viewer.SetCamera(cam.GetFocalPoint(), cam.GetRotation() + 180.0, cam.Height);
+    this.Viewer.SetCamera(cam.GetWorldFocalPoint(),
+                          cam.GetRotation() + 180.0, cam.Height);
     SA.RecordState();
   };
 

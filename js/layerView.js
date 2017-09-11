@@ -19,9 +19,9 @@
     var self = this;
     // For the stack viewer.  The layer gets loaded with another view,
     // We hve to apply the color and threshold.
-    layer.LoadCallback = function () {
+    layer.LoadCallbacks.push(function () {
       self.UpdateLayer(layer);
-    };
+    });
 
     this.Layers.push(layer);
     if (this.VisibilityCheckBox && this.Slider) {
@@ -132,32 +132,26 @@
 
   LayerView.prototype.SizeScaleCallback = function () {
     this.Color = SAM.ConvertColor(this.ColorInput.val());
-    for (var i = 0; i < this.Layers.length; ++i) {
-      this.UpdateLayer(this.Layers[i]);
-    }
+    this.UpdateLayers();
   };
 
   LayerView.prototype.ColorCallback = function () {
     this.Color = SAM.ConvertColor(this.ColorInput.val());
-    for (var i = 0; i < this.Layers.length; ++i) {
-      this.UpdateLayer(this.Layers[i]);
-    }
+    this.UpdateLayers();
   };
 
   LayerView.prototype.VisibilityCheckCallback = function () {
-    var checked = this.VisibilityCheckBox.prop('checked');
-    for (var i = 0; i < this.Layers.length; ++i) {
-      this.Layers[i].SetVisibility(checked);
-      this.Layers[i].EventuallyDraw();
-    }
+    // var checked = this.VisibilityCheckBox.prop('checked');
+    // for (var i = 0; i < this.Layers.length; ++i) {
+    //   this.Layers[i].SetVisibility(checked);
+    //   this.Layers[i].EventuallyDraw();
+    // }
+    this.UpdateLayers();
   };
 
   LayerView.prototype.ChangeCheckCallback = function () {
     this.ChangeFlag = this.ChangeCheckBox.prop('checked');
-    for (var i = 0; i < this.Layers.length; ++i) {
-      this.UpdateLayer(this.Layers[i]);
-      this.Layers[i].EventuallyDraw();
-    }
+    this.UpdateLayers();
     if (this.ChangeFlag) {
       var set1 = this.Layers[0].WidgetList[0].Shape;
       var set2 = this.Layers[1].WidgetList[0].Shape;
@@ -168,19 +162,18 @@
   };
 
   LayerView.prototype.SliderCallback = function () {
-    for (var i = 0; i < this.Layers.length; ++i) {
-      this.UpdateLayer(this.Layers[i]);
-    }
+    this.UpdateLayers();
   };
 
   LayerView.prototype.UpdateLayer = function (layer) {
-    var checked = this.VisibilityCheckBox.prop('checked');
-    layer.SetVisibility(checked);
-    if (checked) {
-      var sizeScale = parseInt(this.SizeScaleInput.val() / 100);
-      var visValue = parseInt(this.Slider.val()) / 100.0;
-      for (var wIndex = 0; wIndex < layer.WidgetList.length; wIndex++) {
-        var widget = layer.WidgetList[wIndex];
+    var visibility = this.VisibilityCheckBox.prop('checked');
+    var sizeScale = parseInt(this.SizeScaleInput.val() / 100);
+    var visValue = parseInt(this.Slider.val()) / 100.0;
+    console.log('threshold: ' + visValue);
+    for (var wIndex = 0; wIndex < layer.WidgetList.length; wIndex++) {
+      var widget = layer.WidgetList[wIndex];
+      if (widget.Label === undefined || widget.Label === this.Label) {
+        widget.Visibility = visibility;
         widget.SetThreshold(visValue);
         widget.Shape.SetOutlineColor(this.Color);
         widget.Shape.SetScale(sizeScale);
@@ -188,6 +181,13 @@
       }
     }
     layer.EventuallyDraw();
+  };
+
+  LayerView.prototype.UpdateLayers = function () {
+    for (var i = 0; i < this.Layers.length; ++i) {
+      var layer = this.Layers[i];
+      this.UpdateLayer(layer);
+    }
   };
 
   SA.LayerView = LayerView;

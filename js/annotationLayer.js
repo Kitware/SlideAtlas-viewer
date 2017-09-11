@@ -44,9 +44,6 @@
     if (navigator.userAgent.match(/Windows Phone/i)) {
       SAM.MOBILE_DEVICE = 'Windows Phone';
     }
-    if (SA.MOBILE_DEVICE) {
-      SAM.MaximumNumberOfTiles = 5000;
-    }
     return SAM.MOBILE_DEVICE;
   };
 
@@ -81,7 +78,7 @@
   // For manually moving annotations from individual slides to a stack.
   // Remove all annotations that are not in the current view.
   SAM.pruneAnnotations = function () {
-    var c = SA.VIEWER1.GetCamera().FocalPoint;
+    var c = SA.VIEWER1.GetCamera().GetWorldFocalPoint();
     var w = SA.VIEWER1.GetCamera().GetWidth() / 2;
     var h = SA.VIEWER1.GetCamera().GetHeight() / 2;
     var v = [c[0] - w, c[0] + w, c[1] - h, c[1] + h];
@@ -625,6 +622,7 @@
   function AnnotationLayer (parent) {
     var self = this;
 
+    this.LoadCallbacks = [];
     this.LayerDiv = $('<div>')
             .appendTo(parent)
             .css({'position': 'absolute',
@@ -833,6 +831,11 @@
     if (this.LoadCallback) {
       (this.LoadCallback)();
     }
+    if (this.LoadCallbacks) {
+      for (i = 0; i < this.LoadCallbacks.length; ++i) {
+        (this.LoadCallbacks[i])();
+      }
+    }
   };
 
     // Load a widget from a json object (origin MongoDB).
@@ -854,11 +857,6 @@
         break;
       case 'polyline':
         widget = new SAM.PolylineWidget(this, false);
-        break;
-      case 'stack_section':
-        if (window.SA) {
-          widget = new SA.StackSectionWidget(this);
-        }
         break;
       case 'rect':
         widget = new SAM.RectWidget(this, false);
@@ -936,7 +934,8 @@
   // I think MouseX,Y and, offestX,Y are both
   // Save the previous touches and record the new
   // touch locations in viewport coordinates.
-  AnnotationLayer.prototype.HandleTouch = function (e, startFlag) {
+  AnnotationLayer.prototype.InitializeTouch = function (e, startFlag) {
+    this.OriginalEvent = e;
     var date = new Date();
     var t = date.getTime();
     // I have had trouble on the iPad with 0 delta times.
@@ -980,6 +979,14 @@
     this.offsetX = this.MouseX;
     this.offsetY = this.MouseY;
 
+    // detect iPad pencil
+    event.pencil = false;
+    if (event.touches && event.touches.length === 1) {
+      var touch = event.touches[0];
+      if (touch.force && !isNaN(touch.force) && touch.force !== 0) {
+        event.pencil = true;
+      }
+    }
     return true;
   };
 
@@ -988,7 +995,23 @@
     if (!this.GetVisibility()) {
       return true;
     }
-    this.HandleTouch(event, true);
+
+    this.InitializeTouch(event, true);
+    this.CheckForPencil(event);
+
+    if (this.ActiveWidget && this.ActiveWidget.HandleTouchStart) {
+      // The pencil only responds to single touches.
+      // Let unhandled multiple touch events fall through to the viewer.
+      if (this.ActiveWidget.HandleTouchStart(this) === false) {
+        return false;
+      }
+    }
+    // TODO: Just make the pencil widget active.
+    if (event.pencil) {
+      if (this.Pencil.HandleTouchStart(this) === false) {
+        return false;
+      }
+    }
 
     // Code from a conflict
     // Touch was not activating widgets on the ipad.
@@ -1000,7 +1023,7 @@
         this.ComputeMouseWorld(event);
         for (var i = 0; i < this.WidgetList.length; ++i) {
           if (!this.WidgetList[i].GetActive() &&
-                         this.WidgetList[i].CheckActive(event)) {
+              this.WidgetList[i].CheckActive(event)) {
             this.ActivateWidget(this.WidgetList[i]);
             return true;
           }
@@ -1009,20 +1032,60 @@
     }
   };
 
+  AnnotationLayer.prototype.CheckForPencil = function (event) {
+    if (!event.pencil) {
+      return;
+    }
+
+    // Get a pencil widget if we do not already have one.
+    if (!this.Pencil) {
+      // Use the current widget if it is a pencil
+      if (this.ActiveWidget) {
+        // I am not sure about making the current pencil the apply pencil.
+        var current = this.ActiveWidget;
+        if (current.Type === 'pencil') {
+          this.Pencil = current;
+        }
+      }
+      // Code to make a new pencil
+      if (!this.Pencil) {
+        // Make a new widget (and make it active).
+        this.Pencil = new SAM.PencilWidget(this, false);
+        // I want this widget to only respond to pencil/stylus events
+        this.Pencil.StylusOnly = true;
+      }
+    }
+
+    // I assume this deactivates any other active widget.
+    // this.Pencil.SetActive(true);
+    this.Pencil.SetStateToDrawing();
+  };
+
   AnnotationLayer.prototype.HandleTouchMove = function (e) {
     // Put a throttle on events
-    if (!this.HandleTouch(e, false)) { return; }
+    if (!this.InitializeTouch(e, false)) { return; }
+    this.CheckForPencil(e);
 
+    if (e.pencil) {
+      if (this.Pencil.HandleTouchMove(this) === false) {
+        return false;
+      }
+    }
+    if (this.ActiveWidget && this.ActiveWidget.HandleTouchMove) {
+      // The pencil only responds to single touches.
+      // Let unhandled multiple touch events fall through to the viewer.
+      if (this.ActiveWidget.HandleTouchMove(this) === false) {
+        return false;
+      }
+    }
+
+    // More complex touch interactions.
     if (this.Touches.length === 1) {
       return this.HandleTouchPan(this);
     }
     if (this.Touches.length === 2) {
       return this.HandleTouchPinch(this);
     }
-    // if (this.Touches.length === 3) {
-    //    this.HandleTouchRotate(this);
-    //    return
-    // }
   };
 
   AnnotationLayer.prototype.HandleTouchPan = function (event) {
@@ -1048,6 +1111,11 @@
   AnnotationLayer.prototype.HandleTouchEnd = function (event) {
     if (!this.GetVisibility()) {
       return true;
+    }
+    // End touch events have no touches so we cannot determine whether
+    // they are from a stylus (presure pencil).
+    if (this.Pencil && this.Pencil.HandleTouchEnd(this) === false) {
+      return false;
     }
     if (this.ActiveWidget && this.ActiveWidget.HandleTouchEnd) {
       return this.ActiveWidget.HandleTouchEnd(event);
@@ -1262,6 +1330,9 @@
     if (widget.Layer === null) {
       return;
     }
+    if (this.ActiveWidget === widget) {
+      this.ActiveWidget = undefined;
+    }
     widget.Layer = null;
     var idx = this.WidgetList.indexOf(widget);
     if (idx !== -1) {
@@ -1463,8 +1534,8 @@
 
   // 1->2
   MatrixTransformation.prototype.ForwardTransformCamera = function (camIn, camOut) {
-    var fpIn = camIn.FocalPoint;
-    var fpOut = camOut.FocalPoint;
+    var fpIn = camIn.GetWorldFocalPoint();
+    var fpOut = camOut.GetWorldFocalPoint();
     var upIn = [fpIn[0] + 1, fpIn[1]];
 
     var pt = this.ForwardTransformPoint(fpIn);
@@ -1475,14 +1546,14 @@
     var scale = Math.sqrt(upOut[0] * upOut[0] + upOut[1] * upOut[1]);
     // compute the height.
     camOut.SetHeight(camIn.GetHeight() * scale);
-    camOut.Roll = camIn.Roll;// - angle;
+    camOut.SetWorldRoll(camIn.GetWorldRoll());
     camOut.ComputeMatrix();
   };
 
   // 2->1
   MatrixTransformation.prototype.ReverseTransformCamera = function (camIn, camOut) {
-    var fpIn = camIn.FocalPoint;
-    var fpOut = camOut.FocalPoint;
+    var fpIn = camIn.GetWorldFocalPoint();
+    var fpOut = camOut.GetWorldFocalPoint();
     var upIn = [fpIn[0] + 1, fpIn[1]];
 
     var pt = this.ReverseTransformPoint(fpIn);
@@ -1493,7 +1564,7 @@
     var scale = Math.sqrt(upOut[0] * upOut[0] + upOut[1] * upOut[1]);
     // compute the height.
     camOut.SetHeight(camIn.GetHeight() * scale);
-    camOut.Roll = camIn.Roll;// - angle;
+    camOut.SetWorldRoll(camIn.GetWorldRoll());
     camOut.ComputeMatrix();
   };
 

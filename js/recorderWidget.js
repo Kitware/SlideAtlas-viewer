@@ -42,7 +42,7 @@
     this.Camera = new SAM.Camera();
     this.Camera.DeepCopy(source.Camera);
     this.Image = source.Image;
-    this.OverviewBounds = source.OverviewBounds.slice(0);
+    this.OverViewBounds = source.OverViewBounds.slice(0);
     this.UserNote = source.UserNote;
   };
 
@@ -72,14 +72,17 @@
     for (var ivar in obj) {
       this[ivar] = obj[ivar];
     }
+    if (this.OverviewBounds) {
+      this.OverViewBounds = obj.OverviewBounds;
+      delete this.OverviewBounds;
+    }
 
     if (this.Camera.Width === undefined) {
       this.Camera.Width = this.Camera.Height * 1.62;
     }
 
-    // Stuck with Overview because it is in the database.
-    if (!this.OverviewBounds) {
-      this.OverviewBounds = this.Image.bounds;
+    if (!this.OverViewBounds) {
+      this.OverViewBounds = this.Image.bounds;
     }
 
     if (this.Annotations) {
@@ -117,7 +120,7 @@
           record.Camera = new SAM.Camera();
           record.Camera.DeepCopy(this.Camera);
           record.Image = this.Image;
-          record.OverviewBounds = this.OverviewBounds.slice(0);
+          record.OverViewBounds = this.OverViewBounds.slice(0);
                     // Records of usernotes should not have usernotes
           record.UserFlag = true;
           this.UserNote.ViewerRecords = [record];
@@ -209,9 +212,9 @@
       return;
     }
 
-    this.OverviewBounds = viewer.GetOverViewBounds();
+    this.OverViewBounds = viewer.GetOverViewBounds();
 
-    this.OverviewBounds = viewer.GetOverViewBounds();
+    this.OverViewBounds = viewer.GetOverViewBounds();
     this.Image = cache.Image;
     this.UserNote = SA.GetUserNoteFromImageId(this.Image._id);
     this.Camera = viewer.GetCamera().Serialize();
@@ -267,8 +270,8 @@
     }
     rec.AnnotationVisibility = this.AnnotationVisibility;
 
-    if (this.OverviewBounds) {
-      rec.OverviewBounds = this.OverviewBounds;
+    if (this.OverViewBounds) {
+      rec.OverViewBounds = this.OverViewBounds;
     }
 
     if (this.Transform) {

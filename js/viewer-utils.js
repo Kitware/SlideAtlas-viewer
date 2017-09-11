@@ -385,22 +385,23 @@
           'box-sizing': 'border-box'})
         .hide();
     var self = this;
-    tab.click(function () {
-      if (self.OpenAccordionPanel) {
-        self.OpenAccordionPanel.hide(200);
-      }
-      if (self.OpenAccordionPanel === panel) {
-            // Just closing the open panel.
-        self.OpenAccordionPanel = null;
-        return;
-      }
-        // Opening a new panel.
-      panel.show(200);
-      self.OpenAccordionPanel = panel;
-    });
+    tab.bind('click touchstart',
+             function () {
+               if (self.OpenAccordionPanel) {
+                 self.OpenAccordionPanel.hide(200);
+               }
+               if (self.OpenAccordionPanel === panel) {
+                 // Just closing the open panel.
+                 self.OpenAccordionPanel = null;
+                 return;
+               }
+               // Opening a new panel.
+               panel.show(200);
+               self.OpenAccordionPanel = panel;
+             });
     // The last tab created is visible by default.
     // This should have worked, but did not.
-    // tab.trigger("click");
+    // tab.trigger('click');
     if (this.OpenAccordionPanel) {
       this.OpenAccordionPanel.hide();
     }
@@ -2552,7 +2553,7 @@
         .css({'height': '16px'})
         .attr('src', src);
     if (callback) {
-      button.click(callback);
+      button.bind('click touchstart', callback);
     }
 
     if (tooltip) {
@@ -2954,13 +2955,14 @@
     contents[0].getLabel = function () {
       return labelSpan;
     };
-    openCloseIcon.click(function () {
-      if (open) {
-        contents[0].close();
-      } else {
-        contents[0].open();
-      }
-    });
+    openCloseIcon.bind('click touchstart',
+                       function () {
+                         if (open) {
+                           contents[0].close();
+                         } else {
+                           contents[0].open();
+                         }
+                       });
     return contents;
   };
 
@@ -2982,25 +2984,33 @@
           'z-index': '100'});
     // Attach variables to the dom button
     var self = fullScreenButton[0];
-    fullScreenButton.click(function () {
-      // varible 'this' is probably the same as 'self' here.
-      self.saved_height = parent.css('height');
-      $(self).hide();
-      var elem = parent[0];
-      if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-      } else if (elem.msRequestFullscreen) {
-        elem.msRequestFullscreen();
-      } else if (elem.mozRequestFullScreen) {
-        elem.mozRequestFullScreen();
-      } else if (elem.webkitRequestFullscreen) {
-        elem.webkitRequestFullscreen();
-      }
-      // var h = screen.height;
-      // parent.css({'height':h+'px'});
-      parent.css({'height': '100%'});
-      $(window).trigger('resize');
-    });
+    fullScreenButton.bind(
+      'click touchend',
+      function (e) {
+        e.preventDefault();
+        // varible 'this' is probably the same as 'self' here.
+        self.saved_height = parent.css('height');
+        $(self).hide();
+        var elem = parent[0];
+
+        var req = elem.requestFullScreen ||
+            elem.webkitRequestFullScreen ||
+            elem.mozRequestFullScreen;
+        try {
+          req.call(elem);
+        } catch (err) {
+          // just make the viewer fill the body.
+          $(elem)
+            .css({
+              'position': 'fixed',
+              'left': '0',
+              'top': '0',
+              'width': '100%',
+              'height': '100%'});
+        }
+        parent.css({'height': '100%'});
+        $(window).trigger('resize');
+      });
 
     // detect when we leave full screen.
     parent.bind(
@@ -3514,38 +3524,42 @@
   function SaFullWindowOption (div) {
     var self = this;
     this.FullWindowOptionButton = $('<img>')
-        .appendTo(div)
-        .attr('src', SA.ImagePathUrl + 'fullscreenOn.png')
-        .prop('title', 'full window')
-        .css({'position': 'absolute',
-          'width': '12px',
-          'left': '-5px',
-          'top': '-5px',
-          'opacity': '0.5',
-          'z-index': '-1'})
-        .hover(function () { $(this).css({'opacity': '1.0'}); },
-               function () { $(this).css({'opacity': '0.5'}); })
-        .click(function () {
-          self.SetFullWindow(div, true);
-        });
+      .appendTo(div)
+      .attr('src', SA.ImagePathUrl + 'fullscreenOn.png')
+      .prop('title', 'full window')
+      .css({
+        'position': 'absolute',
+        'width': '12px',
+        'left': '-5px',
+        'top': '-5px',
+        'opacity': '0.5',
+        'z-index': '-1'})
+      .hover(function () { $(this).css({'opacity': '1.0'}); },
+             function () { $(this).css({'opacity': '0.5'}); })
+      .bind('click touchstart',
+            function () {
+              self.SetFullWindow(div, true);
+            });
 
     this.FullWindowOptionOffButton = $('<img>')
-        .appendTo(div)
-        .hide()
-        .attr('src', SA.ImagePathUrl + 'fullscreenOff.png')
-        .prop('title', 'full window off')
-        .css({'position': 'absolute',
-          'background': '#FFF',
-          'width': '16px',
-          'left': '1px',
-          'top': '1px',
-          'opacity': '0.5',
-          'z-index': '1'})
-        .hover(function () { $(this).css({'opacity': '1.0'}); },
-               function () { $(this).css({'opacity': '0.5'}); })
-        .click(function () {
-          self.SetFullWindow(div, false);
-        });
+      .appendTo(div)
+      .hide()
+      .attr('src', SA.ImagePathUrl + 'fullscreenOff.png')
+      .prop('title', 'full window off')
+      .css({
+        'position': 'absolute',
+        'background': '#FFF',
+        'width': '16px',
+        'left': '1px',
+        'top': '1px',
+        'opacity': '0.5',
+        'z-index': '1'})
+      .hover(function () { $(this).css({'opacity': '1.0'}); },
+             function () { $(this).css({'opacity': '0.5'}); })
+      .bind('click touchstart',
+            function () {
+              self.SetFullWindow(div, false);
+            });
   }
 
 // TODO: Turn off other editing options: drag, delete, resize.
@@ -3561,7 +3575,8 @@
       this.Top = div[0].style.top;
       this.Height = div[0].style.height;
       this.ZIndex = div[0].style.zIndex;
-      div.css({'left': '0px',
+      div.css({
+        'left': '0px',
         'width': '100%',
         'top': '0px',
         'height': '100%',
@@ -3570,7 +3585,8 @@
       saButtonsEnable(div[0]);
       this.FullWindowOptionOffButton.hide();
       this.FullWindowOptionButton.show();
-      div.css({'left': this.Left,
+      div.css({
+        'left': this.Left,
         'width': this.Width,
         'top': this.Top,
         'height': this.Height,
@@ -3683,7 +3699,8 @@
           '-webkit-user-select': 'none',
           'z-index': '6'})
         .attr('src', SA.ImagePathUrl + 'dualArrowRight2.png')
-        .click(function () { self.SetVisibility(true); })
+        .bind('click touchstart',
+              function () { self.SetVisibility(true); })
         .attr('draggable', 'false')
         .hide()
         .on('dragstart', function () {
@@ -3703,7 +3720,8 @@
           'z-index': '6'})
         // .hide()
         .attr('src', SA.ImagePathUrl + 'dualArrowLeft2.png')
-        .click(function () { self.SetVisibility(false); })
+        .bind('click touchstart',
+              function () { self.SetVisibility(false); })
         .attr('draggable', 'false')
         .on('dragstart', function () {
           return false;
@@ -3886,10 +3904,11 @@
     // Make it easy to select the first item
     var self = this;
     label = Object.keys(args)[0];
-    menuButton.click(function () {
-      (args[label])();
-      self.InsertMenu.hide();
-    });
+    menuButton.bind('click touchstart',
+                    function () {
+                      (args[label])();
+                      self.InsertMenu.hide();
+                    });
 
     menuButton.mouseover(
         function () { self.ShowInsertMenu(); });
@@ -3909,7 +3928,7 @@
         .appendTo(this.InsertMenu)
         .text(label)
         .addClass('saButton') // for hover effect
-        .click(function () {
+        .bind('click touchstart', function () {
           (callback)();
           self.InsertMenu.hide();
           return false;

@@ -277,21 +277,22 @@
   };
 
   PairTransformation.prototype.ForwardTransformCamera = function (camIn, camOut) {
-    camOut.FocalPoint = this.ForwardTransform(camIn.FocalPoint, camIn.Height / 2);
-    camOut.Roll = camIn.Roll + this.DeltaRoll;
-    camOut.Height = camIn.Height;
-        // This should be computed from the viewport
-        // camOut.Width = camIn.Width;
-    camOut.Width = camOut.Height * camOut.ViewportWidth / camOut.ViewportHeight;
+    camOut.SetWorldFocalPoint(this.ForwardTransform(camIn.GetWorldFocalPoint(),
+                                                    camIn.Height / 2));
+    camOut.SetWorldRoll(camIn.GetWorldRoll() + this.DeltaRoll);
+    camOut.SetHeight(camIn.GetHeight());
+    // This should be computed from the viewport
+    // camOut.Width = camIn.Width;
+    camOut.SetWidth(camOut.GetHeight() * camOut.GetViewportWidth() / camOut.GetViewportHeight());
   };
 
+  // TODO: Fix this (image camera coordinate system) or get rid of pairTransform
   PairTransformation.prototype.ReverseTransformCamera = function (camIn, camOut) {
     camOut.FocalPoint = this.ReverseTransform(camIn.FocalPoint, camIn.Height / 2);
     camOut.Roll = camIn.Roll + this.DeltaRoll;
     camOut.Height = camIn.Height;
-        // This should be computed from the viewport
-        // camOut.Width = camIn.Width;
-    camOut.Width = camOut.Height * camOut.ViewportWidth / camOut.ViewportHeight;
+    // TODO: Camera should do this internally.
+    camOut.SetWidth(camOut.GetHeight() * camOut.GetViewportWidth() / camOut.GetViewportHeight());
   };
 
   SA.PairCorrelation = PairCorrelation;

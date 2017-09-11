@@ -37,7 +37,7 @@
       .prop('title', 'Add Annotation')
       .hover(function () { $(this).css({'opacity': '1'}); },
              function () { $(this).css({'opacity': '0.6'}); })
-      .click(function (e) { self.NewAnnotationItem(e); });
+      .bind('click touchstart', function (e) { self.NewAnnotationItem(e); });
 
     this.AnnotationObjects = [];
     this.Highlighted = undefined;
@@ -64,34 +64,58 @@
         'margin': '2px 0px',
         'width': '100%'})
       .prop('title', 'Replace Annotation')
-      .click(
-        function () {
-          self.SnapShotAnnotation(self.MenuAnnotationObject);
-          self.Menu.hide();
-        });
+      .bind('click touchstart',
+            function () {
+              self.SnapShotAnnotation(self.MenuAnnotationObject);
+              self.Menu.hide();
+            });
     $('<button>')
       .appendTo(this.Menu)
       .text('Delete')
       .css({
         'margin': '2px 0px',
         'width': '100%'})
-      .click(
-        function () {
-          self.DeleteAnnotation(self.MenuAnnotationObject);
-          self.Menu.hide();
-        });
+      .bind('click touchstart',
+            function () {
+              self.DeleteAnnotation(self.MenuAnnotationObject);
+              self.Menu.hide();
+            });
     $('<button>')
       .appendTo(this.Menu)
       .text('Properties')
       .css({
         'margin': '2px 0px',
         'width': '100%'})
-      .click(
-        function () {
-          self.ShowAnnotationPropertiesDialog(self.MenuAnnotationObject);
-          self.Menu.hide();
-        });
+      .bind('click touchstart',
+            function () {
+              self.ShowAnnotationPropertiesDialog(self.MenuAnnotationObject);
+              self.Menu.hide();
+            });
   }
+
+  GirderWidget.prototype.SaveSectionMetaData = function (annot) {
+    if (confirm('Save section meta data?')) {
+      var sections = [];
+      for (var i = 0; i < annot.elements.length; ++i) {
+        var rect = annot.elements[i];
+        if (rect.type === 'rectangle') {
+          var x0 = rect.center[0] - rect.width / 2.0;
+          var y0 = rect.center[1] - rect.height / 2.0;
+          var x1 = x0 + rect.width;
+          var y1 = y0 + rect.height;
+          sections.push({'bounds': [x0, y0, x1, y1]});
+        }
+      }
+      girder.rest.restRequest({
+        path: 'item/' + this.ImageItemId + '/metadata',
+        method: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify({'sections': sections})
+      });
+      return true;
+    }
+    return false;
+  };
 
   // Create a new annotation item from the annotation layer.
   // Save it in the database.  Add the annotation as a dot in the GUI.
@@ -100,25 +124,9 @@
     annot.elements = this.RecordAnnotation();
 
     // Hack to save sections meta data to girder items
+    // Hack until we have a real GUI
     if (e.ctrlKey && window.girder) {
-      if (confirm('Save section meta data?')) {
-        var sections = [];
-        for (var i = 0; i < annot.elements.length; ++i) {
-          var rect = annot.elements[i];
-          if (rect.type === 'rectangle') {
-            var x0 = rect.center[0] - rect.width / 2.0;
-            var y0 = rect.center[1] - rect.height / 2.0;
-            var x1 = x0 + rect.width;
-            var y1 = y0 + rect.height;
-            sections.push({'bounds': [x0, y0, x1, y1]});
-          }
-        }
-        girder.rest.restRequest({
-          path: 'item/' + this.ImageItemId + '/metadata',
-          method: 'PUT',
-          contentType: 'application/json',
-          data: JSON.stringify({'sections': sections})
-        });
+      if (this.SaveSectionMetaData(annot)) {
         return;
       }
     }
@@ -127,6 +135,13 @@
     if (!annot.name) {
       return;
     }
+    // Hack until we have a real GUI
+    if (annot.name === 'sections') {
+      if (this.SaveSectionMetaData(annot)) {
+        return;
+      }
+    }
+
     // Make a new annotation in the database.
     var self = this;
     if (window.girder) { // Conditional is for testing in slide atlas.
@@ -195,7 +210,7 @@
     var cam = this.AnnotationLayer.GetCamera();
     var element = {
       'type': 'view',
-      'center': cam.GetFocalPoint(),
+      'center': cam.GetWorldFocalPoint(),
       'height': cam.GetHeight(),
       'width': cam.GetWidth(),
       'rotation': cam.Roll};
@@ -365,11 +380,11 @@
       if (found) {
         // Animate the dots up to fill the space.
         y = 70 + ((i - 1) * 6 * this.Radius);
-        annotObj.Circle.animate({'top': y + 'px'});
+        annotObj.Div.animate({'top': y + 'px'});
         newObjects.push(annotObj);
       } else if (deleteAnnotObj === annotObj) {
         found = true;
-        annotObj.Circle.remove();
+        annotObj.Div.remove();
         if (window.girder) {
           // Remove the annotation from the database.
           girder.rest.restRequest({
@@ -396,7 +411,7 @@
     var y = 70 + (idx * 6 * this.Radius);
 
     var self = this;
-    var circle = $('<div>')
+    var div = $('<div>')
       .appendTo(this.AnnotationLayer.GetCanvasDiv())
       .css({
         'position': 'absolute',
@@ -407,17 +422,38 @@
         'background-color': '#55BBFF',
         'opacity': '0.6',
         'border': '1px solid #666666',
-        'border-radius': this.Radius + 'px'})
-      .prop('title', 'Show Annotation')
-      .text(data.annotation.name)
+        'border-radius': '2px',
+        'z-index': '100'
+      })
+      .mouseenter(function () { div.focus(); console.log('enter'); })
       .hide() // hide until animation is finished.
-      .hover(function () { $(this).css({'opacity': '1'}); },
-             function () { $(this).css({'opacity': '0.6'}); });
+      .hover(function () { div.css({'opacity': '1'}); },
+             function () { div.css({'opacity': '0.6'}); });
+
+    var circle = $('<div>')
+      .appendTo(div)
+      .prop('title', 'Show Annotation')
+      .text(data.annotation.name);
+
+    // var slider = $('<div>')
+    //  .appendTo(div)
+    //  .css({'width': '10em',
+    //        'margin':'5px'});
 
     var annotObj = {
       Data: data,
+      Div: div,
       Circle: circle};
+      // Circle: circle,
+      // Slider: slider};
     this.AnnotationObjects.push(annotObj);
+
+    // slider
+    //  .slider({
+    //    start: function (e, ui) { self.UpdateThreshold(ui.value, annotObj); },
+    //    slide: function (e, ui) { self.UpdateThreshold(ui.value, annotObj); },
+    //    stop: function (e, ui) { self.UpdateThreshold(ui.value, annotObj); }
+    //  });
 
     circle.contextmenu(function () { return false; });
     circle.mousedown(function (e) {
@@ -441,20 +477,34 @@
 
     // Annotate the "add annotation" button down.
     this.Plus.animate({'top': (y + (6 * this.Radius)) + 'px'}, 400,
-                      function () { circle.show(); });
+                      function () { div.show(); });
 
     return annotObj;
+  };
+
+  GirderWidget.prototype.UpdateThreshold = function (valStr, annotObj) {
+    var visValue = parseInt(valStr) / 100.0;
+    console.log('threshold: ' + visValue);
+    var layer = this.AnnotationLayer;
+    for (var wIndex = 0; wIndex < layer.WidgetList.length; wIndex++) {
+      var widget = layer.WidgetList[wIndex];
+      if (widget.Label === undefined || widget.Label === this.Label) {
+        widget.SetThreshold(visValue);
+        widget.ComputeVisibilities();
+      }
+    }
+    layer.EventuallyDraw();
   };
 
   // Make the circle button yellow (and turn off the previous.)
   GirderWidget.prototype.Highlight = function (annotObj) {
     // Highlight the circle for this annotaiton.
     if (this.Highlighted) {
-      this.Highlighted.Circle.css({'background-color': '#55BBFF'});
+      this.Highlighted.Div.css({'background-color': '#55BBFF'});
     }
     this.Highlighted = annotObj;
     if (annotObj) {
-      annotObj.Circle.css({'background-color': '#FFDD00'});
+      annotObj.Div.css({'background-color': '#FFDD00'});
     }
   };
 
@@ -482,12 +532,12 @@
       if (element.type === 'view') {
                 // Set the camera / view.
         var cam = this.AnnotationLayer.GetCamera();
-        cam.SetFocalPoint(element.center);
+        cam.SetWorldFocalPoint(element.center);
         cam.SetHeight(element.height);
         if (element.rotation) {
-          cam.Roll = element.rotation;
+          cam.SetWorldRoll(element.rotation);
         } else {
-          cam.Roll = 0;
+          cam.SetWorldRoll(0);
         }
         // Ignore width for now because it is determined by the
         // viewport.

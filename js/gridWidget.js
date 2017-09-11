@@ -262,7 +262,7 @@
     var x = this.Grid.Origin[0];
     var y = this.Grid.Origin[1];
         // Choose the corner from 0 to 90 degrees in the window.
-    var roll = (this.Layer.GetCamera().GetRotation() -
+    var roll = (this.Layer.GetCamera().GetImageRotation() -
                     this.Grid.Orientation) / 90; // range 0-4
     roll = Math.round(roll);
         // Modulo that works with negative numbers;
@@ -297,7 +297,7 @@
     var y = -(this.Grid.BinHeight * this.Grid.Dimensions[1] / 2);
     this.Text.Anchor = [0, 20];
     this.Text.Orientation = (this.Grid.Orientation -
-                                 this.Layer.GetCamera().GetRotation());
+                                 this.Layer.GetCamera().GetImageRotation());
         // Modulo that works with negative numbers;
     this.Text.Orientation = ((this.Text.Orientation % 360) + 360) % 360;
         // Do not draw text upside down.
@@ -328,8 +328,8 @@
   GridWidget.prototype.PasteCallback = function (data, mouseWorldPt, camera) {
     this.Load(data);
         // Keep the pasted grid from rotating when the camera changes.
-    var dr = this.Layer.GetCamera().GetRotation() -
-        camera.GetRotation();
+    var dr = this.Layer.GetCamera().GetImageRotation() -
+        camera.GetImageRotation();
     this.Grid.Orientation += dr;
         // Place the widget over the mouse.
         // This would be better as an argument.

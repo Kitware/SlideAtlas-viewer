@@ -123,6 +123,22 @@
             .appendTo(this.Dialog.AreaDiv)
             .css({'display': 'table-cell'});
 
+    // Bounds
+    this.Dialog.BoundsDiv =
+            $('<div>')
+            .appendTo(this.Dialog.Body)
+            .css({'display': 'table-row'});
+    this.Dialog.BoundsLabel =
+            $('<div>')
+            .appendTo(this.Dialog.BoundsDiv)
+            .text('Bounds:')
+            .css({'display': 'table-cell',
+              'text-align': 'left'});
+    this.Dialog.Bounds =
+            $('<div>')
+            .appendTo(this.Dialog.BoundsDiv)
+            .css({'display': 'table-cell'});
+
     // Get default properties.
     if (localStorage.RectWidgetDefaults) {
       var defaults = JSON.parse(localStorage.RectWidgetDefaults);
@@ -154,7 +170,7 @@
     var cam = layer.GetCamera();
     var viewport = layer.GetViewport();
     this.Shape = new Rect();
-    this.Shape.Orientation = cam.GetRotation();
+    this.Shape.Orientation = cam.GetImageRotation();
     this.Shape.Origin = [0, 0];
     this.Shape.OutlineColor = [0.0, 0.0, 0.0];
     this.Shape.SetOutlineColor(this.Dialog.ColorInput.val());
@@ -562,7 +578,7 @@
       return;
     }
     // Compute the location for the pop up and show it.
-    var roll = this.Layer.GetCamera().Roll;
+    var roll = this.Layer.GetCamera().GetWorldRoll();
     var rad = this.Shape.Width * 0.5;
     var x = this.Shape.Origin[0] + 0.8 * rad * (Math.cos(roll) - Math.sin(roll));
     var y = this.Shape.Origin[1] - 0.8 * rad * (Math.cos(roll) + Math.sin(roll));
@@ -575,8 +591,7 @@
 
     this.Dialog.LineWidthInput.val((this.Shape.LineWidth).toFixed(2));
 
-    var rad = this.Shape.Width * 0.5;
-    var area = (2.0 * Math.PI * rad * rad) * 0.25 * 0.25;
+    var area = this.Shape.Width * this.Shape.Height;
     var areaString = '';
     if (this.Shape.FixedSize) {
       areaString += area.toFixed(2);
@@ -591,6 +606,15 @@
       }
     }
     this.Dialog.Area.text(areaString);
+
+    var left = Math.round(this.Shape.Origin[0] - (this.Shape.Width * 0.5));
+    var right = Math.round(left + this.Shape.Width);
+    var top = Math.round(this.Shape.Origin[1] - (this.Shape.Height * 0.5));
+    var bottom = Math.round(top + this.Shape.Height);
+    this.Dialog.Bounds.text('left=' + left.toString() +
+                            '&top=' + top.toString() +
+                            '&right=' + right.toString() +
+                            '&bottom=' + bottom.toString());
 
     this.Dialog.Show(true);
   };

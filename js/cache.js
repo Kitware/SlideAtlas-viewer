@@ -1,19 +1,19 @@
 (function () {
   'use strict';
 
-    // I am adding a levels with grids to index tiles in addition
-    // to the tree.  Eventually I want to get rid fo the tree.
-    // I am trying to get rid of the roots now.
+  // I am adding a levels with grids to index tiles in addition
+  // to the tree.  Eventually I want to get rid fo the tree.
+  // I am trying to get rid of the roots now.
 
-    // A stripped down source object.
-    // A source object must have a getTileUrl method.
-    // It can have any instance variables it needs to
-    // compute the URL.
+  // A stripped down source object.
+  // A source object must have a getTileUrl method.
+  // It can have any instance variables it needs to
+  // compute the URL.
   SA.SlideAtlasSource = function () {
     this.Prefix = undefined;
 
-        // Higher levels are higher resolution.
-        // x, y, slide are integer indexes of tiles in the grid.
+    // Higher levels are higher resolution.
+    // x, y, slide are integer indexes of tiles in the grid.
     this.getTileUrl = function (level, x, y, z) {
       var name = this.Prefix + 't';
       while (level > 0) {
@@ -73,7 +73,7 @@
   SA.IIIFSource = function () {
     this.Prefix = 'http://ids.lib.harvard.edu/ids/view/Converter?id=834753&c=jpgnocap';
     alert('Hard coded tile size');
-    this.TileSize = 256;
+    this.TileWidth = this.TileHeight = 256;
 
     this.setDimensions = function (xDim, yDim) {
       this.Dimensions = [xDim, yDim];
@@ -93,12 +93,12 @@
     // Higher levels are higher resolution. (0 is the root).
     // x, y, slide are integer indexes of tiles in the grid.
     this.getTileUrl = function (level, x, y, z) {
-        // compute the dimensions of this resolution.
+      // compute the dimensions of this resolution.
       var x0 = x * 256;
       var y0 = y * 256;
       var x1 = x0 + 256;
       var y1 = y0 + 256;
-        // crop the tile
+      // crop the tile
       var res = this.Levels - level - 1;
       var dx = this.Dimensions[0] >> res;
       var dy = this.Dimensions[1] >> res;
@@ -106,7 +106,7 @@
       if (y1 > dy) { y1 = dy; }
       dx = x1 - x0;
       dy = y1 - y0;
-        // Compute the scale.
+      // Compute the scale.
       res = 1.0 / (1 << res);
 
       var name = this.Prefix + '&s=' + res + '&r=0&x=' + x0 + '&y=' + y0 + '&w=' + dx + '&h=' + dy;
@@ -178,24 +178,31 @@
 
   // This is specific for slideAtlas images.
   Cache.prototype.SetImageData = function (image) {
-    if (!image.TileSize) {
-      image.TileSize = 256;
+    if (!image.TileWidth) {
+      image.TileWidth = 256;
+    }
+    if (!image.TileHeight) {
+      image.TileHeight = image.TileWidth;
     }
 
     this.Image = image;
+
+    if (image.copyright === undefined) {
+      image.copyright = 'Copyright 2017. All Rights Reserved.';
+    }
 
     this.Levels = new Array(image.levels);
     for (var i = 0; i < image.levels; ++i) {
       var level = image.levels - 1 - i;
       this.Levels[i] = new CacheLevel(
-            Math.ceil(image.dimensions[0] / (image.TileSize << level)),
-            Math.ceil(image.dimensions[1] / (image.TileSize << level)));
+            Math.ceil(image.dimensions[0] / (image.TileWidth << level)),
+            Math.ceil(image.dimensions[1] / (image.TileHeight << level)));
     }
 
     if (!this.TileSource) {
-        // TODO:  This should not be here.
-        // Source should be initialized someplace else.
-        // Other sources have to overwrite this default.
+      // TODO:  This should not be here.
+      // Source should be initialized someplace else.
+      // Other sources have to overwrite this default.
       this.TileSource = new SA.SlideAtlasSource();
       this.TileSource.Prefix = '/tile?img=' + image._id + '&db=' + image.database + '&name=';
     }
@@ -212,7 +219,7 @@
       }
       SA.LoadQueueUpdate();
     } else {
-      this.TileDimensions = [image.TileSize, image.TileSize];
+      this.TileDimensions = [image.TileWidth, image.TileHeight];
       this.NumberOfSections = 1;
     }
   };
@@ -227,6 +234,12 @@
       bounds: [0, w - 1, 0, h - 1]};
     if (source.bounds) {
       image.bounds = source.bounds;
+    }
+    if (source.TileWidth) {
+      image.TileWidth = source.TileWidth;
+    }
+    if (source.TileHeight) {
+      image.TileHeight = source.TileHeight;
     }
 
     if (source.filename) {
@@ -247,26 +260,26 @@
     return [0, 10000, 0, 10000];
   };
 
-// This method converts a point in image coordinates to a point in world coordinates.
+  // This method converts a point in image coordinates to a point in world coordinates.
   Cache.prototype.ImageToWorld = function (imagePt) {
     if (this.Warp) {
       return this.Warp.ImageToWorld(imagePt);
     }
-  // Just shift by the origin.
-  // Assume spacing is 1.
-  // This should be a simple matrix version of warp.
+    // Just shift by the origin.
+    // Assume spacing is 1.
+    // This should be a simple matrix version of warp.
     return [imagePt[0] + this.Origin[0], imagePt[1] + this.Origin[1]];
   };
 
-// This method converts a point in world coordinates to a point in cache-image coordinates.
+  // This method converts a point in world coordinates to a point in cache-image coordinates.
   Cache.prototype.WorldToImage = function (worldPt) {
     if (this.Warp) {
       return this.Warp.WorldToImage(worldPt);
     }
-  // Just shift by the origin.
-  // Assume spacing is 1.
-  // TODO:
-  // This should be a simple matrix version of warp.
+    // Just shift by the origin.
+    // Assume spacing is 1.
+    // TODO:
+    // This should be a simple matrix version of warp.
     return [worldPt[0] - this.Origin[0], worldPt[1] - this.Origin[1]];
   };
 
@@ -274,11 +287,14 @@
     return this.Source;
   };
 
-  Cache.prototype.LoadRoots = function () {
+  Cache.prototype.LoadRoots = function (callback) {
     var qTile;
     if (this.Image.dimensions === undefined) {
       return;
     }
+    // Callback handled by the loaded which deletes the callback after it
+    // is executed.
+    this.LoadTileCallback = callback;
     if (this.Image.dimensions.length < 3) {
       qTile = this.GetTile(0, 0, 0);
       qTile.LoadQueueAdd();
@@ -291,11 +307,11 @@
     SA.LoadQueueUpdate();
   };
 
-// ------ I think this method really belongs in the view! -----------
-// This could get expensive because it is called so often.
-// Eventually I want a quick coverage test to exit early.
-// iPad flag includes low resolution ancestors to get rid of white lines between tiles.
-// Tiles is actually the return value.  It is not used for anything else.
+  // ------ I think this method really belongs in the view! -----------
+  // This could get expensive because it is called so often.
+  // Eventually I want a quick coverage test to exit early.
+  // iPad flag includes low resolution ancestors to get rid of white lines between tiles.
+  // Tiles is actually the return value.  It is not used for anything else.
   Cache.prototype.ChooseTiles = function (camera, slice, tiles) {
     // I am prioritizing tiles in the queue by time stamp.
     // Loader sets the the tiles time stamp.
@@ -311,8 +327,8 @@
     // level 0 is the root.  This chooses too high a level (resolution).
     // WHen I fixed it, the snap between levels was too noticable.
     // THis must be a problem with creation of the pyramid!!!!!
-    var canvasHeight = camera.ViewportHeight;
-    var tmp = this.TileDimensions[1] * this.RootSpacing[1] / camera.Height;
+    var canvasHeight = camera.GetViewportHeight();
+    var tmp = this.TileDimensions[1] * this.RootSpacing[1] / camera.GetHeight();
     // if (fast) {
     //  tmp = tmp * 0.5;
     // }
@@ -336,100 +352,8 @@
     //    level = level - 1;
     // }
 
-    // Compute the world bounds of camera view.
-    var xMax = 0.0;
-    var yMax = 0.0;
-    var hw = camera.GetWidth() * 0.5;
-    var hh = camera.GetHeight() * 0.5;
-    var roll = camera.Roll;
-    var s = Math.sin(roll);
-    var c = Math.cos(roll);
-    var rx, ry;
-    // Choose a camera corner and rotate. (Center of bounds in origin).
-    rx = hw * c + hh * s;
-    ry = hh * c - hw * s;
-    // Expand bounds.
-    if (xMax < rx) { xMax = rx; }
-    if (xMax < -rx) { xMax = -rx; }
-    if (yMax < ry) { yMax = ry; }
-    if (yMax < -ry) { yMax = -ry; }
-    // Now another corner (90 degrees away).
-    rx = hw * c - hh * s;
-    ry = -hh * c - hw * s;
-    // Expand bounds.
-    if (xMax < rx) { xMax = rx; }
-    if (xMax < -rx) { xMax = -rx; }
-    if (yMax < ry) { yMax = ry; }
-    if (yMax < -ry) { yMax = -ry; }
-
-    var bounds = [];
-    bounds[0] = camera.FocalPoint[0] - xMax;
-    bounds[1] = camera.FocalPoint[0] + xMax;
-    bounds[2] = camera.FocalPoint[1] - yMax;
-    bounds[3] = camera.FocalPoint[1] + yMax;
-
-    // Adjust bounds to compensate for warping.
-    if (this.Warp) {
-      // If this is too slow (occurs every render) we can estimate.
-      var iPt = this.WorldToImage([bounds[0], bounds[2]]);
-      if (!iPt) {
-        tiles.length = 0;
-        return tiles;
-      }
-      var iBounds = [iPt[0], iPt[0], iPt[1], iPt[1]];
-      iPt = this.WorldToImage([bounds[1], bounds[2]]);
-      if (!iPt) {
-        tiles.length = 0;
-        return tiles;
-      }
-      if (iBounds[0] > iPt[0]) {
-        iBounds[0] = iPt[0];
-      }
-      if (iBounds[1] < iPt[0]) {
-        iBounds[1] = iPt[0];
-      }
-      if (iBounds[2] > iPt[1]) {
-        iBounds[2] = iPt[1];
-      }
-      if (iBounds[3] < iPt[1]) {
-        iBounds[3] = iPt[1];
-      }
-      iPt = this.WorldToImage([bounds[0], bounds[3]]);
-      if (!iPt) {
-        tiles.length = 0;
-        return tiles;
-      }
-      if (iBounds[0] > iPt[0]) {
-        iBounds[0] = iPt[0];
-      }
-      if (iBounds[1] < iPt[0]) {
-        iBounds[1] = iPt[0];
-      }
-      if (iBounds[2] > iPt[1]) {
-        iBounds[2] = iPt[1];
-      }
-      if (iBounds[3] < iPt[1]) {
-        iBounds[3] = iPt[1];
-      }
-      iPt = this.WorldToImage([bounds[1], bounds[3]]);
-      if (!iPt) {
-        tiles.length = 0;
-        return tiles;
-      }
-      if (iBounds[0] > iPt[0]) {
-        iBounds[0] = iPt[0];
-      }
-      if (iBounds[1] < iPt[0]) {
-        iBounds[1] = iPt[0];
-      }
-      if (iBounds[2] > iPt[1]) {
-        iBounds[2] = iPt[1];
-      }
-      if (iBounds[3] < iPt[1]) {
-        iBounds[3] = iPt[1];
-      }
-      bounds = iBounds;
-    }
+    // TODO: Have camera return world bounds and compute this stuff internally.
+    var bounds = camera.GetImageBounds();
 
     // Some logic for progressive rendering is in the loader:
     // Do not load a tile if its parent is not loaded.
@@ -448,8 +372,8 @@
       tileIds = this.GetVisibleTileIds(i, bounds);
       for (var j = 0; j < tileIds.length; ++j) {
         tile = this.GetTile(slice, i, tileIds[j]);
-            // If the tile is loaded or loading,
-            // this does nothing.
+        // If the tile is loaded or loading,
+        // this does nothing.
         if (tile) {
           tile.LoadQueueAdd();
           tiles.push(tile);
@@ -462,8 +386,8 @@
     return tiles;
   };
 
-// Get ids of all visible tiles (including ones that have not been
-// loaded yet.)
+  // Get ids of all visible tiles (including ones that have not been
+  // loaded yet.)
   Cache.prototype.GetVisibleTileIds = function (level, bounds) {
     // Intersect the view bounds with the image bounds.
     // The ptif reader gives wrong times when out of bounds.
@@ -603,10 +527,10 @@
     this.Levels[level].SetTile(tile);
     if (level > 0) {
       var parent = this.RecursiveGetTile(level - 1, x >> 1, y >> 1, z);
-        // I do not know if this is still valid.
-        // This is to fix a bug. Root.BranchTime larger
-        // than all children BranchTimeStamps.  When
-        // long branch is added, node never gets updated.
+      // I do not know if this is still valid.
+      // This is to fix a bug. Root.BranchTime larger
+      // than all children BranchTimeStamps.  When
+      // long branch is added, node never gets updated.
       if (parent.Children[0] === null && parent.Children[1] === null &&
             parent.Children[2] === null && parent.Children[3] === null) {
         parent.BranchTimeStamp = SA.GetCurrentTime();

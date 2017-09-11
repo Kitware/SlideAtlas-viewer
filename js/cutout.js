@@ -57,8 +57,8 @@
     view.SetCache(cache);
     view.SetViewport(viewport);
     var newCam = view.Camera;
-    newCam.SetFocalPoint(focalPoint);
-    newCam.SetRoll(roll);
+    newCam.SetWorldFocalPoint(focalPoint);
+    newCam.SetWorldRoll(roll);
     newCam.SetHeight(height * scale);
     // TODO:  Hide matrix computation.  Make it automatic.
     newCam.ComputeMatrix();

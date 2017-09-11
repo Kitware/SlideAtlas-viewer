@@ -26,6 +26,14 @@ window.SA = window.SA || {};
       spacing: tileSource.spacing,
       _id: new ObjectId().toString()};
 
+    if (tileSource.tileHeight) {
+      image.TileHeight = tileSource.tileHeight;
+    }
+
+    if (tileSource.tileWidth) {
+      image.TileWidth = tileSource.tileWidth;
+    }
+
     if (tileSource.filename) {
       image.filename = tileSource.filename;
       image.label = tileSource.filename;
@@ -50,7 +58,7 @@ window.SA = window.SA || {};
     var image = cache.Image;
     var record = new SA.ViewerRecord();
     record.Image = image;
-    record.OverviewBounds = tileSource.bounds;
+    record.OverViewBounds = tileSource.bounds;
     var bds = tileSource.bounds;
     record.Camera = {
       FocalPoint: [(bds[0] + bds[1]) / 2, (bds[2] + bds[3]) / 2],

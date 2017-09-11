@@ -502,7 +502,7 @@
 
     var viewer = this.Layer.GetViewer();
     // viewer.ZoomTarget = this.Layer.GetCamera().GetHeight();
-    viewer.RollTarget = this.Layer.GetCamera().Roll;
+    viewer.RollTarget = this.Layer.GetCamera().GetWorldRoll();
     viewer.TranslateTarget = rectSet.GetCenter(this.IteratorIndex);
     viewer.AnimateLast = new Date().getTime();
     viewer.AnimateDuration = 200.0;
@@ -1055,6 +1055,7 @@
     var hh1 = height / 2;
     var cx1 = center[0];
     var cy1 = center[1];
+    var area1 = width * height;
 
     // Loop over bins touching the input rectangle
     var x, y;
@@ -1080,6 +1081,7 @@
           var rectIdx = bin[i];
           var hw2 = this.RectSet.Widths[rectIdx] / 2;
           var hh2 = this.RectSet.Heights[rectIdx] / 2;
+          var area2 = hw2 * hh2 * 4.0;
           var cx2 = this.RectSet.Centers[rectIdx << 1];
           var cy2 = this.RectSet.Centers[(rectIdx << 1) + 1];
           // Compute the intersection.
@@ -1089,7 +1091,7 @@
           var yMax = Math.min(cy1 + hh1, cy2 + hh2);
           var dx = Math.max(0, xMax - xMin);
           var dy = Math.max(0, yMax - yMin);
-          var overlap = (0.5 * dx * dy) / ((hw1 * hh1) + (hw2 * hh2));
+          var overlap = (dx * dy) / Math.min(area1, area2);
           if (overlap > overlapThresh) {
             var found = false;
             // SHould be few overlapping.  Linear search should be fine.

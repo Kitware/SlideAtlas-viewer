@@ -3,6 +3,12 @@
 // Leftover from Connectome.
 // Sections were a montage of multiple images (transformed and cropped)
 
+// I have just started implementing an API for a section transformation.
+// Use the same API as the canvas transform,
+// TODO: Generatlize to mesh based transformation.
+//   A transformation for each cache.
+//   (but not stored in the cache.  Sections can share a cache.)
+
 (function () {
   'use strict';
 
@@ -17,6 +23,7 @@
     this.Caches = [];
     // For debugging stitching.
     this.Markers = [];
+    this.Transform = [1, 0, 0, 1, 0, 0];
   }
 
   Section.prototype.GetNumberOfCaches = function () {
@@ -36,40 +43,55 @@
     } else {
       this.Caches = [cache];
     }
+    this.Bounds = undefined;
+  };
+
+  // Set the tranform for cache 0.  Same api as html canvas transform.
+  // This tranform is applied before the camera.  It converts world to image
+  // coordinates.
+  Section.prototype.SetTransform = function (tran) {
+    this.Transform = tran.slice(0);
   };
 
   Section.prototype.AddCache = function (cache) {
     if (cache) {
       this.Caches.push(cache);
+      this.Bounds = undefined;
     }
   };
 
   // For limiting interaction.
   Section.prototype.GetBounds = function () {
-    var bounds = [0, 10000, 0, 10000];
+    if (this.Bounds === undefined) {
+      this.ComputeBounds();
+    }
+    return this.Bounds;
+  };
+
+  // For limiting interaction.
+  Section.prototype.ComputeBounds = function () {
+    this.Bounds = [0, 10000, 0, 10000];
 
     for (var cIdx = 0; cIdx < this.Caches.length; ++cIdx) {
       var cache = this.Caches[cIdx];
       var bds = cache.GetBounds();
       if (cIdx === 0) {
-        bounds = [bds[0], bds[1], bds[2], bds[3]];
+        this.Bounds = [bds[0], bds[1], bds[2], bds[3]];
       } else {
-        if (bds[0] < bounds[0]) {
-          bounds[0] = bds[0];
+        if (bds[0] < this.Bounds[0]) {
+          this.Bounds[0] = bds[0];
         }
-        if (bds[1] > bounds[1]) {
-          bounds[1] = bds[1];
+        if (bds[1] > this.Bounds[1]) {
+          this.Bounds[1] = bds[1];
         }
-        if (bds[2] < bounds[2]) {
-          bounds[2] = bds[2];
+        if (bds[2] < this.Bounds[2]) {
+          this.Bounds[2] = bds[2];
         }
-        if (bds[3] < bounds[3]) {
-          bounds[3] = bds[3];
+        if (bds[3] < this.Bounds[3]) {
+          this.Bounds[3] = bds[3];
         }
       }
     }
-
-    return bounds;
   };
 
   // Size of a pixel at the highest resolution.
@@ -105,27 +127,28 @@
     return null;
   };
 
-    // I do not like passing in the whole view.
-    // Could we get away with just passing the camera?
-    // No, we need the viewport too.
-    // Could the viewport be part of the camera?
-    // Returns true if all the tiles to render were available.
-    // False implies that the user shoudl render again.
+  // I do not like passing in the whole view.
+  // Could we get away with just passing the camera?
+  // No, we need the viewport too.
+  // Could the viewport be part of the camera?
+  // Returns true if all the tiles to render were available.
+  // False implies that the user shoudl render again.
   Section.prototype.Draw = function (view) {
     var finishedRendering = true;
+    view.Camera.SetWorldToImageTransform(this.Transform);
+    // var m = view.Camera.GetImageMatrix();
+
     if (view.gl) {
       // Draw tiles.
-      var program = view.ShaderProgram;
-      var gl = view.gl;
-      gl.viewport(view.Viewport[0], view.Viewport[1],
-                        view.Viewport[2], view.Viewport[3]);
-      gl.uniformMatrix4fv(program.pMatrixUniform, false, view.Camera.Matrix);
+      // var program = view.ShaderProgram;
+      // var gl = view.gl;
+      // gl.viewport(view.Viewport[0], view.Viewport[1],
+      // view.Viewport[2], view.Viewport[3]);
+      // gl.uniformMatrix4fv(program.pMatrixUniform, false, m);
     } else {
       // The camera maps the world coordinate system to (-1->1, -1->1).
-      var h = 1.0 / view.Camera.Matrix[15];
-      view.Context2d.transform(view.Camera.Matrix[0] * h, view.Camera.Matrix[1] * h,
-                                     view.Camera.Matrix[4] * h, view.Camera.Matrix[5] * h,
-                                     view.Camera.Matrix[12] * h, view.Camera.Matrix[13] * h);
+      var t = view.Camera.GetImageToViewerTransform();
+      view.Context2d.setTransform(t[0], t[1], t[2], t[3], t[4], t[5]);
     }
 
     for (var i = 0; i < this.Caches.length; ++i) {
@@ -167,7 +190,7 @@
 
       // Reverse order to render low res tiles first.
       for (j = loadedTiles.length - 1; j >= 0; --j) {
-        loadedTiles[j].Draw(program, view);
+        // loadedTiles[j].Draw(program, view);
       }
     }
     return finishedRendering;

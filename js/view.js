@@ -98,7 +98,7 @@
     // The default world pixel = 0.25e-6 meters
   View.prototype.GetPixelsPerUnit = function () {
         // Determine the scale difference between the two coordinate systems.
-    var m = this.Camera.Matrix;
+    var m = this.Camera.GetWorldMatrix();
 
         // Convert from world coordinate to view (-1->1);
     return 0.5 * this.Viewport[2] / (m[3] + m[15]); // m[3] for x, m[7] for height
@@ -251,10 +251,11 @@
 
       // The camera maps the world coordinate system to (-1->1, -1->1).
       var cam = this.Camera;
-      var h = 1.0 / cam.Matrix[15];
-      ctx.transform(cam.Matrix[0] * h, cam.Matrix[1] * h,
-                          cam.Matrix[4] * h, cam.Matrix[5] * h,
-                          cam.Matrix[12] * h, cam.Matrix[13] * h);
+      var m = cam.GetWorldMatrix();
+      var h = 1.0 / m[15];
+      ctx.transform(m[0] * h, m[1] * h,
+                    m[4] * h, m[5] * h,
+                    m[12] * h, m[13] * h);
 
       var timeLine = SA.recorderWidget.TimeLine;
       for (var i = 0; i < timeLine.length; ++i) {
@@ -262,13 +263,14 @@
         var height = cam.Height;
         var width = cam.Width;
                 // camer roll is already in radians.
-        var c = Math.cos(cam.Roll);
-        var s = Math.sin(cam.Roll);
+        var c = Math.cos(cam.GetWorldRoll());
+        var s = Math.sin(cam.GetWorldRoll());
         ctx.save();
                 // transform to put focal point at 0,0
+        var fp = cam.GetWorldFocalPoint();
         ctx.transform(c, -s,
-                              s, c,
-                              cam.FocalPoint[0], cam.FocalPoint[1]);
+                      s, c,
+                      fp[0], fp[1]);
 
         // Compute the zoom factor for opacity.
         var opacity = 2 * windowHeight / height;
@@ -351,7 +353,7 @@
       ctx.fillStyle = 'rgba(255,0,0,100)';
       for (var i = 0; i < correlations.length; ++i) {
         var wPt = correlations[i].GetPoint(pointIdx);
-        var m = this.Camera.Matrix;
+        var m = this.Camera.GetWorldMatrix();
                 // Change coordinate system from world to -1->1
         var x = (wPt[0] * m[0] + wPt[1] * m[4] + m[12]) / m[15];
         var y = (wPt[0] * m[1] + wPt[1] * m[5] + m[13]) / m[15];

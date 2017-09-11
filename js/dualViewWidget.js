@@ -168,7 +168,7 @@ window.SA = window.SA || {};
         _id: note.TempId};
       var record = new SA.ViewerRecord();
       record.Image = image;
-      record.OverviewBounds = [0, w - 1, 0, h - 1];
+      record.OverViewBounds = [0, w - 1, 0, h - 1];
       record.Camera = {FocalPoint: [w / 2, h / 2],
         Roll: 0,
         Height: h};
@@ -662,16 +662,16 @@ window.SA = window.SA || {};
       }
       var cam0 = this.GetViewer(0).GetCamera();
       var cam1 = this.GetViewer(1).GetCamera();
-      note.ActiveCorrelation.SetPoint0(cam0.GetFocalPoint());
-      note.ActiveCorrelation.SetPoint1(cam1.GetFocalPoint());
+      note.ActiveCorrelation.SetPoint0(cam0.GetWorldFocalPoint());
+      note.ActiveCorrelation.SetPoint1(cam1.GetWorldFocalPoint());
       // I really do not want to set the roll unless the user specifically changed it.
       // It would be hard to correct if the wrong value got set early in the aligment.
-      var deltaRoll = cam1.Roll - cam0.Roll;
+      var deltaRoll = cam1.GetWorldRoll() - cam0.GetWorldRoll();
       if (trans.Correlations && trans.Correlations.length > 1) {
         deltaRoll = 0;
         // Let roll be set by multiple correlation points.
       }
-      note.ActiveCorrelation.SetRoll(deltaRoll);
+      note.ActiveCorrelation.SetWorldRoll(deltaRoll);
       note.ActiveCorrelation.SetHeight(0.5 * (cam1.Height + cam0.Height));
       return;
     } else {

@@ -152,7 +152,8 @@
 
     // I would like to setup the anchor in the middle of the screen,
     // And have the Anchor in the middle of the text.
-    this.Text.Position = [cam.FocalPoint[0], cam.FocalPoint[1], 0];
+    var fp = cam.GetWorldFocalPoint();
+    this.Text.Position = [fp[0], fp[1], 0];
 
     // The anchor shape could be put into the text widget, but I might want a thumb tack anchor.
     this.Arrow = new SAM.Arrow();

@@ -38,10 +38,11 @@
                           0.5 * view.Viewport[3]);
 
         // Change canvas coordinates to slide (world). (camera: slide to view).
-    var h = 1.0 / view.Camera.Matrix[15];
-    context.transform(view.Camera.Matrix[0] * h, view.Camera.Matrix[1] * h,
-                          view.Camera.Matrix[4] * h, view.Camera.Matrix[5] * h,
-                          view.Camera.Matrix[12] * h, view.Camera.Matrix[13] * h);
+    var m = view.Camera.GetWorldMatrix();
+    var h = 1.0 / m[15];
+    context.transform(m[0] * h, m[1] * h,
+                      m[4] * h, m[5] * h,
+                      m[12] * h, m[13] * h);
 
         // Change canvas to image coordinate system.
     var scale = this.Height / this.Image.height;
