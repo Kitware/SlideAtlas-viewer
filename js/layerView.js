@@ -157,7 +157,7 @@
       var set2 = this.Layers[1].WidgetList[0].Shape;
       set1.ChangeDetectionVisibilities(set1, set2);
       set1.SetOutlineColor('#FF0000');
-      set2.SetOutlineColor('#00FF00');
+      set2.SetOutlineColor('#0000FF');
     }
   };
 
