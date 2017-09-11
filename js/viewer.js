@@ -131,7 +131,7 @@
            SA.FirefoxWhich(event);
            return self.HandleMouseMove(event);
          });
-        // We need to detect the mouse up even if it happens outside the canvas,
+    // We need to detect the mouse up even if it happens outside the canvas,
     $(document.body).on(
             'mouseup.viewer',
          function (event) {
@@ -144,8 +144,8 @@
               return self.HandleMouseWheel(event.originalEvent);
             });
 
-        // I am delaying getting event manager out of receiving touch events.
-        // It has too many helper functions.
+    // I am delaying getting event manager out of receiving touch events.
+    // It has too many helper functions.
     can.on(
             'touchstart.viewer',
             function (event) {
@@ -163,7 +163,7 @@
               return true;
             });
 
-        // necesary to respond to keyevents.
+    // necesary to respond to keyevents.
     this.MainView.CanvasDiv.attr('tabindex', '1');
     can.on(
             'keydown.viewer',
