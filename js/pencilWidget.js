@@ -257,6 +257,21 @@
       this.LastMouse = cam.ConvertPointViewerToWorld(x, y);
     }
 
+    if (event.which === 3) {
+      // Right mouse was pressed.
+      // Pop up the properties dialog.
+      if (this.State === ACTIVE) {
+        this.ShowPropertiesDialog();
+      } else if (this.State === DRAWING_DOWN || this.State === DRAWING_UP) {
+        // Undo a stroke
+        if (this.Shapes.GetNumberOfShapes() > 1) {
+          this.Shapes.PopShape();
+          this.Layer.EventuallyDraw();
+        }
+      }
+      return false;
+    }
+    
     return false;
   };
 
@@ -295,12 +310,7 @@
     if (this.StylusOnly) {
       return true;
     }
-    if (event.which === 3) {
-      // Right mouse was pressed.
-      // Pop up the properties dialog.
-      this.ShowPropertiesDialog();
-      return false;
-    }
+
     // Middle mouse deactivates the widget.
     if (event.which === 2) {
       // Middle mouse was pressed.

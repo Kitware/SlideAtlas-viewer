@@ -31,8 +31,8 @@
         'position': 'absolute',
         'left': (3 * this.Radius) + 'px',
         'top': y + 'px',
-        'width': (2 * this.Radius) + 'px',
-        'height': (2 * this.Radius) + 'px',
+        'width': (3 * this.Radius) + 'px',
+        'height': (3 * this.Radius) + 'px',
         'opacity': '0.6'})
       .prop('title', 'Add Annotation')
       .hover(function () { $(this).css({'opacity': '1'}); },

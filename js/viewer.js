@@ -1811,7 +1811,7 @@
         }
         return;
       }
-      if (this.ActiveWidget !== null) {
+      if (this.ActiveWidget !== undefined) {
         this.ActiveWidget.HandleTouchEnd(event);
         return;
       }
