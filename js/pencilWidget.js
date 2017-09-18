@@ -368,9 +368,10 @@
       }
     }
 
-    if (event.which && event.which === 1 && this.State === ACTIVE) {
-      this.State = DRAG;
-    }
+    // Dragging is not intuitive.
+    //if (event.which && event.which === 1 && this.State === ACTIVE) {
+    //  this.State = DRAG;
+    //}
 
     if (this.State === DRAG) {
       // Drag
