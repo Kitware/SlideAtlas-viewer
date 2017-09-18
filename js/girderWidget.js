@@ -37,7 +37,7 @@
       .prop('title', 'Add Annotation')
       .hover(function () { $(this).css({'opacity': '1'}); },
              function () { $(this).css({'opacity': '0.6'}); })
-      .bind('click touchstart', function (e) { self.NewAnnotationItem(e); });
+      .on('click touchstart', function (e) { self.NewAnnotationItem(e); });
 
     this.AnnotationObjects = [];
     this.Highlighted = undefined;
@@ -64,33 +64,33 @@
         'margin': '2px 0px',
         'width': '100%'})
       .prop('title', 'Replace Annotation')
-      .bind('click touchstart',
-            function () {
-              self.SnapShotAnnotation(self.MenuAnnotationObject);
-              self.Menu.hide();
-            });
+      .on('click touchstart',
+          function () {
+            self.SnapShotAnnotation(self.MenuAnnotationObject);
+            self.Menu.hide();
+          });
     $('<button>')
       .appendTo(this.Menu)
       .text('Delete')
       .css({
         'margin': '2px 0px',
         'width': '100%'})
-      .bind('click touchstart',
-            function () {
-              self.DeleteAnnotation(self.MenuAnnotationObject);
-              self.Menu.hide();
-            });
+      .on('click touchstart',
+          function () {
+            self.DeleteAnnotation(self.MenuAnnotationObject);
+            self.Menu.hide();
+          });
     $('<button>')
       .appendTo(this.Menu)
       .text('Properties')
       .css({
         'margin': '2px 0px',
         'width': '100%'})
-      .bind('click touchstart',
-            function () {
-              self.ShowAnnotationPropertiesDialog(self.MenuAnnotationObject);
-              self.Menu.hide();
-            });
+      .on('click touchstart',
+          function () {
+            self.ShowAnnotationPropertiesDialog(self.MenuAnnotationObject);
+            self.Menu.hide();
+          });
   }
 
   GirderWidget.prototype.SaveSectionMetaData = function (annot) {
@@ -456,24 +456,25 @@
     //  });
 
     circle.contextmenu(function () { return false; });
-    circle.mousedown(function (e) {
-      if (e.button === 0) {
-        self.DisplayAnnotation(annotObj);
-        return false;
-      }
-      if (e.button === 2) {
-        self.MenuAnnotationObject = annotObj;
-        // Position and show the properties menu.
-        var pos = $(this).position();
-        self.Menu
-          .css({
-            'left': (5 + pos.left + 2 * self.Radius) + 'px',
-            'top': (pos.top) + 'px'})
-          .show();
-        return false;
-      }
-      return true;
-    });
+    circle.on('click touchstart',
+              function (e) {
+                if (e.button === 0) {
+                  self.DisplayAnnotation(annotObj);
+                  return false;
+                }
+                if (e.button === 2) {
+                  self.MenuAnnotationObject = annotObj;
+                  // Position and show the properties menu.
+                  var pos = $(this).position();
+                  self.Menu
+                    .css({
+                      'left': (5 + pos.left + 2 * self.Radius) + 'px',
+                      'top': (pos.top) + 'px'})
+                    .show();
+                  return false;
+                }
+                return true;
+              });
 
     // Annotate the "add annotation" button down.
     this.Plus.animate({'top': (y + (6 * this.Radius)) + 'px'}, 400,

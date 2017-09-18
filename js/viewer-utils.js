@@ -385,20 +385,20 @@
           'box-sizing': 'border-box'})
         .hide();
     var self = this;
-    tab.bind('click touchstart',
-             function () {
-               if (self.OpenAccordionPanel) {
-                 self.OpenAccordionPanel.hide(200);
-               }
-               if (self.OpenAccordionPanel === panel) {
-                 // Just closing the open panel.
-                 self.OpenAccordionPanel = null;
-                 return;
-               }
-               // Opening a new panel.
-               panel.show(200);
-               self.OpenAccordionPanel = panel;
-             });
+    tab.on('click touchstart',
+           function () {
+             if (self.OpenAccordionPanel) {
+               self.OpenAccordionPanel.hide(200);
+             }
+             if (self.OpenAccordionPanel === panel) {
+               // Just closing the open panel.
+               self.OpenAccordionPanel = null;
+               return;
+             }
+             // Opening a new panel.
+             panel.show(200);
+             self.OpenAccordionPanel = panel;
+           });
     // The last tab created is visible by default.
     // This should have worked, but did not.
     // tab.trigger('click');
@@ -2553,7 +2553,7 @@
         .css({'height': '16px'})
         .attr('src', src);
     if (callback) {
-      button.bind('click touchstart', callback);
+      button.on('click touchstart', callback);
     }
 
     if (tooltip) {
@@ -2955,14 +2955,14 @@
     contents[0].getLabel = function () {
       return labelSpan;
     };
-    openCloseIcon.bind('click touchstart',
-                       function () {
-                         if (open) {
-                           contents[0].close();
-                         } else {
-                           contents[0].open();
-                         }
-                       });
+    openCloseIcon.on('click touchstart',
+                     function () {
+                       if (open) {
+                         contents[0].close();
+                       } else {
+                         contents[0].open();
+                       }
+                     });
     return contents;
   };
 
@@ -2984,36 +2984,37 @@
           'z-index': '100'});
     // Attach variables to the dom button
     var self = fullScreenButton[0];
-    fullScreenButton.bind(
+    fullScreenButton.on(
       'click touchend',
       function (e) {
         e.preventDefault();
-        // varible 'this' is probably the same as 'self' here.
+        // variable 'this' is probably the same as 'self' here.
         self.saved_height = parent.css('height');
         $(self).hide();
         var elem = parent[0];
 
-        var req = elem.requestFullScreen ||
-            elem.webkitRequestFullScreen ||
-            elem.mozRequestFullScreen;
-        try {
-          req.call(elem);
-        } catch (err) {
+        if (SAM.MOBILE_DEVICE === 'iPad') {
           // just make the viewer fill the body.
+          var height = window.innerHeight;
           $(elem)
             .css({
               'position': 'fixed',
               'left': '0',
               'top': '0',
               'width': '100%',
-              'height': '100%'});
+              'height': height + 'px'});
+        } else {
+          var req = elem.requestFullScreen ||
+              elem.webkitRequestFullScreen ||
+              elem.mozRequestFullScreen;
+          req.call(elem);
         }
         parent.css({'height': '100%'});
         $(window).trigger('resize');
       });
 
     // detect when we leave full screen.
-    parent.bind(
+    parent.on(
         'webkitfullscreenchange mozfullscreenchange fullscreenchange',
         function (e) {
           var state = document.fullScreen || document.mozFullScreen ||
@@ -3536,10 +3537,10 @@
         'z-index': '-1'})
       .hover(function () { $(this).css({'opacity': '1.0'}); },
              function () { $(this).css({'opacity': '0.5'}); })
-      .bind('click touchstart',
-            function () {
-              self.SetFullWindow(div, true);
-            });
+      .on('click touchstart',
+          function () {
+            self.SetFullWindow(div, true);
+          });
 
     this.FullWindowOptionOffButton = $('<img>')
       .appendTo(div)
@@ -3556,10 +3557,10 @@
         'z-index': '1'})
       .hover(function () { $(this).css({'opacity': '1.0'}); },
              function () { $(this).css({'opacity': '0.5'}); })
-      .bind('click touchstart',
-            function () {
-              self.SetFullWindow(div, false);
-            });
+      .on('click touchstart',
+          function () {
+            self.SetFullWindow(div, false);
+          });
   }
 
 // TODO: Turn off other editing options: drag, delete, resize.
@@ -3699,8 +3700,8 @@
           '-webkit-user-select': 'none',
           'z-index': '6'})
         .attr('src', SA.ImagePathUrl + 'dualArrowRight2.png')
-        .bind('click touchstart',
-              function () { self.SetVisibility(true); })
+        .on('click touchstart',
+            function () { self.SetVisibility(true); })
         .attr('draggable', 'false')
         .hide()
         .on('dragstart', function () {
@@ -3720,8 +3721,8 @@
           'z-index': '6'})
         // .hide()
         .attr('src', SA.ImagePathUrl + 'dualArrowLeft2.png')
-        .bind('click touchstart',
-              function () { self.SetVisibility(false); })
+        .on('click touchstart',
+            function () { self.SetVisibility(false); })
         .attr('draggable', 'false')
         .on('dragstart', function () {
           return false;
@@ -3904,11 +3905,11 @@
     // Make it easy to select the first item
     var self = this;
     label = Object.keys(args)[0];
-    menuButton.bind('click touchstart',
-                    function () {
-                      (args[label])();
-                      self.InsertMenu.hide();
-                    });
+    menuButton.on('click touchstart',
+                  function () {
+                    (args[label])();
+                    self.InsertMenu.hide();
+                  });
 
     menuButton.mouseover(
         function () { self.ShowInsertMenu(); });
@@ -3925,14 +3926,14 @@
     var self = this;
 
     this[label] = $('<li>')
-        .appendTo(this.InsertMenu)
-        .text(label)
-        .addClass('saButton') // for hover effect
-        .bind('click touchstart', function () {
-          (callback)();
-          self.InsertMenu.hide();
-          return false;
-        });
+      .appendTo(this.InsertMenu)
+      .text(label)
+      .addClass('saButton') // for hover effect
+      .on('click touchstart', function () {
+        (callback)();
+        self.InsertMenu.hide();
+        return false;
+      });
   };
 
   SaMenuButton.prototype.ShowInsertMenu = function () {

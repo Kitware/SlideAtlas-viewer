@@ -983,8 +983,10 @@
     event.pencil = false;
     if (event.touches && event.touches.length === 1) {
       var touch = event.touches[0];
-      if (touch.force && !isNaN(touch.force) && touch.force !== 0) {
-        event.pencil = true;
+      if (touch.rotationAngle && !isNaN(touch.rotationAngle) && touch.rotationAngle !== 0) {
+        if (touch.force && !isNaN(touch.force) && touch.force !== 0) {
+          event.pencil = true;
+        }
       }
     }
     return true;
