@@ -455,10 +455,10 @@
     //    stop: function (e, ui) { self.UpdateThreshold(ui.value, annotObj); }
     //  });
 
-    circle.contextmenu(function () { return false; });
+    //circle.contextmenu(function () { return false; });
     circle.on('click touchstart',
               function (e) {
-                if (e.button === 0) {
+                if (e.button === undefined || e.button === 0) {
                   self.DisplayAnnotation(annotObj);
                   return false;
                 }
