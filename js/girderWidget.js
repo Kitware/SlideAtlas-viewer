@@ -456,12 +456,29 @@
     //  });
 
     //circle.contextmenu(function () { return false; });
+    var lastClickTime = 0;
+    var callbackId = -1;
     circle.on('click touchstart',
               function (e) {
                 if (e.button === undefined || e.button === 0) {
-                  self.DisplayAnnotation(annotObj);
+                  var now = new Date().getTime();
+                  var timesince = now - lastClickTime
+                  if((timesince < 600) && (timesince > 0)){
+                    clearTimeout(callbackId);
+                    if ( confirm("Save (snap shot) current view in "
+                                 + annotObj.Circle.prop('title'))) {
+                      self.SnapShotAnnotation(annotObj);
+                    }
+                    return false;
+                  }
+                  lastClickTime = now;
+                  setTimeout(function (e) { self.HandleCircleClick(annotObj);}, 700);
                   return false;
                 }
+              });
+    // click does not respond to right mouse for menu.
+    circle.on('mousedown',
+              function (e) {
                 if (e.button === 2) {
                   self.MenuAnnotationObject = annotObj;
                   // Position and show the properties menu.
@@ -483,6 +500,12 @@
     return annotObj;
   };
 
+  GirderWidget.prototype.HandleCircleClick = function (annotObj) {
+    this.DisplayAnnotation(annotObj);
+  }
+
+
+  
   GirderWidget.prototype.UpdateThreshold = function (valStr, annotObj) {
     var visValue = parseInt(valStr) / 100.0;
     console.log('threshold: ' + visValue);
