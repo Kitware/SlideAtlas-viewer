@@ -82,7 +82,7 @@
     return this;
   };
 
-// TODO: Rename Edit
+  // TODO: Rename Edit
   function SaElement (div) {
     var self = this;
 
@@ -153,7 +153,7 @@
     this.InitializeDialog();
   }
 
-// This changes the border to active color.
+  // This changes the border to active color.
   SaElement.prototype.ActiveOn = function () {
     var self = this;
     if (!this.Interactive) { return true; }
@@ -599,7 +599,7 @@
     this.Clickable = true;
   };
 
-// Not the best function name.  Editable => draggable, expandable and deletable.
+  // Not the best function name.  Editable => draggable, expandable and deletable.
   SaElement.prototype.EditableOn = function () {
     this.Editable = true;
     this.Clickable = true;
@@ -638,15 +638,15 @@
   SaElement.prototype.HandleMouseDown = function (event) {
     if (!this.Interactive) { return true; }
     if (event.which === 1) {
-        // Hack tp allow content editable to work with text editor.
-        // This event does not let content editable receive events
-        // if we return false.
+      // Hack tp allow content editable to work with text editor.
+      // This event does not let content editable receive events
+      // if we return false.
       if (!this.Clickable) {
         return true;
       }
 
       var self = this;
-        // To detect quick click for expansion.
+      // To detect quick click for expansion.
       this.ClickStart = Date.now();
       $('body').on(
             'mouseup.element',
@@ -655,10 +655,10 @@
             });
 
       if (this.Editable && this.Position === 'absolute') {
-            // Setup dragging.
+        // Setup dragging.
         this.DragLastX = event.screenX;
         this.DragLastY = event.screenY;
-            // Add the event to stop dragging
+        // Add the event to stop dragging
         $('body').on(
                 'mousemove.element',
                 function (event) {
@@ -669,7 +669,7 @@
                 function (e) {
                   return self.HandleMouseUp(e);
                 });
-            // Hack to keep active even when mouse leaves the div.
+        // Hack to keep active even when mouse leaves the div.
         this.Div[0].saElement.LockActive = true;
       }
       return false;
@@ -677,8 +677,8 @@
     return true;
   };
 
-// raise to the top of the draw order.
-// Note: it will not override z-index
+  // raise to the top of the draw order.
+  // Note: it will not override z-index
   SaElement.prototype.RaiseToTop = function () {
     var parent = this.Div.parent();
     this.Div.detach();
@@ -689,7 +689,7 @@
     if (!this.Interactive) { return true; }
     SA.FirefoxWhich(event);
     if (event.which === 0) {
-        // Is it dangerous to modify the event object?
+      // Is it dangerous to modify the event object?
       while (event.srcElement && event.srcElement !== this.Div[0]) {
         event.offsetX += event.srcElement.offsetLeft;
         event.offsetY += event.srcElement.offsetTop;
@@ -740,7 +740,7 @@
   SaElement.prototype.HandleMouseMove = function (event) {
     SA.FirefoxWhich(event);
     if (event.which === 1) {
-        // Wait for the click duration to start dragging.
+      // Wait for the click duration to start dragging.
       if (Date.now() - this.ClickStart < 200) {
         return true;
       }
@@ -755,13 +755,13 @@
       this.DragLastX = event.screenX;
       this.DragLastY = event.screenY;
 
-        // Maybe we should not let the object leave the page.
+      // Maybe we should not let the object leave the page.
       var pos = this.Div.position();
-        // It is odd.  First setting width has the same value as getting
-        // outerWidth. Now it behaves as expected (consistent outer set / get).
+      // It is odd.  First setting width has the same value as getting
+      // outerWidth. Now it behaves as expected (consistent outer set / get).
       var width = this.Div.outerWidth();
       var height = this.Div.outerHeight();
-        // Hack,  I cannot figure out how jquery deals with box-sizing.
+      // Hack,  I cannot figure out how jquery deals with box-sizing.
       var sizing = this.Div.css('box-sizing');
       if (this.AspectRatio && typeof (this.AspectRatio) !== 'number') {
         this.AspectRatio = width / height;
@@ -827,7 +827,7 @@
         this.Div.trigger('resize');
         return false;
       } else if (this.MoveState === 5) {
-            // upper left corner resize
+        // upper left corner resize
         left = pos.left + dx;
         top = pos.top + dy;
         width = width - dx;
@@ -847,7 +847,7 @@
         this.Div.trigger('resize');
         return false;
       } else if (this.MoveState === 6) {
-            // lower right corner resize
+        // lower right corner resize
         width = width + dx;
         height = height + dy;
         if (sizing === 'border-box') {
@@ -863,7 +863,7 @@
         this.Div.trigger('resize');
         return false;
       } else if (this.MoveState === 7) {
-            // lower left corner resize
+        // lower left corner resize
         left = pos.left + dx;
         width = width - dx;
         height = height + dy;
@@ -881,7 +881,7 @@
         this.Div.trigger('resize');
         return false;
       } else if (this.MoveState === 8) {
-            // upper right corner resize
+        // upper right corner resize
         top = pos.top + dy;
         width = width + dx;
         height = height - dy;
@@ -915,7 +915,7 @@
       }
       $('body').off('mousemove.element');
       $('body').off('mouseleave.element');
-        // hack
+      // hack
       this.Div[0].saElement.LockActive = false;
       this.Div[0].saElement.ActiveOff();
     }
@@ -1109,8 +1109,8 @@
 
     // generic method call. Give jquery ui access to all this objects methods.
     if (typeof (this[args[0]]) === 'function') {
-        // first list item is the method name,
-        // the rest are arguments to the method.
+      // first list item is the method name,
+      // the rest are arguments to the method.
       return this[args[0]].apply(this, Array.prototype.slice.call(args, 1));
     }
   };
@@ -1129,7 +1129,7 @@
       return;
     }
     if (color.substring(0, 3) === 'rgb') {
-        // Single color in background (no 'linear-gradient')
+      // Single color in background (no 'linear-gradient')
       this.BackgroundCheck.prop('checked', true);
       this.BackgroundColor.spectrum('set', color);
       this.BackgroundColor.spectrum('enable');
@@ -1271,8 +1271,8 @@
 
     // generic method call. Give jquery ui access to all this objects methods.
     if (typeof (this[args[0]]) === 'function') {
-        // first list item is the method name,
-        // the rest are arguments to the method.
+      // first list item is the method name,
+      // the rest are arguments to the method.
       return this[args[0]].apply(this, Array.prototype.slice.call(args, 1));
     }
   };
@@ -1338,8 +1338,8 @@
     this.DialogInitialize();
   }
 
-// Meant to be acll externally.
-// Assumes multiple choice for now.
+  // Meant to be acll externally.
+  // Assumes multiple choice for now.
   SaQuestion.prototype.SetQuestionText = function (text) {
     var question = this.Div.find('.sa-q');
     if (question.length === 0) {
@@ -1378,8 +1378,8 @@
 
     // generic method call. Give jquery ui access to all this objects methods.
     if (typeof (this[args[0]]) === 'function') {
-        // first list item is the method name,
-        // the rest are arguments to the method.
+      // first list item is the method name,
+      // the rest are arguments to the method.
       return this[args[0]].apply(this, Array.prototype.slice.call(args, 1));
     }
   };
@@ -1401,7 +1401,7 @@
     }
 
     if (mode === 'answer-interactive') {
-        // Bind response to the user selecting an answer.
+      // Bind response to the user selecting an answer.
       this.Div.find('.sa-answer')
             .css({'cursor': 'pointer',
               'color': '#057'})
@@ -1621,8 +1621,8 @@
     }
     if (this.QuestionTypeSelect.val() === 'True or False') {
       this.Div.attr('type', 'true-false');
-        // TODO: Share code with multiple choice
-        // TODO: Make true false be mutually exclusive (radio button).
+      // TODO: Share code with multiple choice
+      // TODO: Make true false be mutually exclusive (radio button).
       tmp = $('<ol>')
             .appendTo(this.Div)
             .css({'margin': '0px 0px 0px 0.5em'});
@@ -1663,9 +1663,9 @@
     for (var i = 0; i < this.length; ++i) {
       if (!this[i].saTextEditor) {
         var textEditor = new SaTextEditor($(this[i]), args);
-            // Add the viewer as an instance variable to the dom object.
+        // Add the viewer as an instance variable to the dom object.
         this[i].saTextEditor = textEditor;
-            // TODO: Hide any dialog tabs?
+        // TODO: Hide any dialog tabs?
       }
       this[i].saTextEditor.ProcessArguments(arguments);
     }
@@ -1810,8 +1810,8 @@
     $('body').on(
         'mousedown.textEditor',
         function (e) {
-            // We do not want click in the text box (or buttons) to turn
-            // off editing.
+          // We do not want click in the text box (or buttons) to turn
+          // off editing.
           if (self.Div[0] !== e.srcElement &&
                  self.EditButtonDiv[0] !== e.srcElement &&
                  !$.contains(self.Div[0], e.srcElement) &&
@@ -1861,7 +1861,7 @@
       } else {
         this.Div.outerHeight(textHeight + 4);
       }
-        // Aspect ratio on TextEditor is not supported.
+      // Aspect ratio on TextEditor is not supported.
       this.Div.trigger('resize');
       this.Div[0].saElement.ConvertToPercentages();
     }
@@ -1913,8 +1913,8 @@
 
     // generic method call. Give jquery ui access to all this objects methods.
     if (typeof (this[args[0]]) === 'function') {
-        // first list item is the method name,
-        // the rest are arguments to the method.
+      // first list item is the method name,
+      // the rest are arguments to the method.
       return this[args[0]].apply(this, Array.prototype.slice.call(args, 1));
     }
   };
@@ -1953,8 +1953,8 @@
     if (this.FontSize) {
       var scale = parseFloat(this.FontSize.val()) / 800;
       var jSel = this.Div;
-        // It is contained in a parent scalable font, so just set the attribute.
-        // jSel.setAttribute('sa-font-scale', scale.toString());
+      // It is contained in a parent scalable font, so just set the attribute.
+      // jSel.setAttribute('sa-font-scale', scale.toString());
       jSel.saScalableFont({scale: scale});
     }
 
@@ -2034,11 +2034,11 @@
             .on('input', function () {
               var url = self.UrlDialog.UrlInput.val();
               if (self.UrlDialog.LastUrl === self.UrlDialog.TextInput.val()) {
-                    // The text is same as the URL. Keep them synchronized.
+                // The text is same as the URL. Keep them synchronized.
                 self.UrlDialog.TextInput.val(url);
               }
               self.UrlDialog.LastUrl = url;
-                // Deactivate the apply button if the url is blank.
+              // Deactivate the apply button if the url is blank.
               if (url === '') {
                 self.UrlDialog.ApplyButton.attr('disabled', true);
               } else {
@@ -2075,7 +2075,7 @@
 
     // Replace or insert the text.
     if (!range.collapsed) {
-        // Remove the seelcted text.
+      // Remove the seelcted text.
       range.extractContents(); // deleteContents(); // cloneContents
       range.collapse(true);
     }
@@ -2087,15 +2087,15 @@
 
     range.insertNode(link);
     if (range.noCursor) {
-        // Leave the selection the same as we found it.
-        // Ready for the next link.
+      // Leave the selection the same as we found it.
+      // Ready for the next link.
       sel.removeAllRanges();
     }
   };
 
-// This does not work yet.!!!!!!!!!!!!!!!
-// Returns the jquery object selected.  If a partial object is selected,
-// the dom is split up into fragments.
+  // This does not work yet.!!!!!!!!!!!!!!!
+  // Returns the jquery object selected.  If a partial object is selected,
+  // the dom is split up into fragments.
   SaTextEditor.prototype.GetSelection = function () {
     var sel = window.getSelection();
     var range;
@@ -2105,12 +2105,12 @@
     // nothing selected, and something selected in wrong parent.
     // use parent as a flag.
     if (sel.rangeCount > 0) {
-        // Something is selected
+      // Something is selected
       range = sel.getRangeAt(0);
       range.noCursor = false;
-        // Make sure the selection / cursor is in this editor.
+      // Make sure the selection / cursor is in this editor.
       parent = range.commonAncestorContainer;
-        // I could use jquery .parents(), but I bet this is more efficient.
+      // I could use jquery .parents(), but I bet this is more efficient.
       while (parent && parent !== this.Div[0]) {
             // if ( ! parent) {
                 // I believe this happens when outside text is selected.
@@ -2170,7 +2170,7 @@
     for (var i = 0; i < this.length; ++i) {
       if (!this[i].saLightBox) {
         var helper = new SaLightBox($(this[i]));
-            // Add the helper as an instance variable to the dom object.
+        // Add the helper as an instance variable to the dom object.
         this[i].saLightBox = helper;
       }
       this[i].saLightBox.ProcessArguments(arguments);
@@ -2218,8 +2218,8 @@
 
     // generic method call. Give jquery ui access to all this objects methods.
     if (typeof (this[args[0]]) === 'function') {
-        // first list item is the method name,
-        // the rest are arguments to the method.
+      // first list item is the method name,
+      // the rest are arguments to the method.
       return this[args[0]].apply(this, Array.prototype.slice.call(args, 1));
     }
 
@@ -2254,8 +2254,8 @@
 
     // generic method call. Give jquery ui access to all this objects methods.
     if (typeof (this[args[0]]) === 'function') {
-        // first list item is the method name,
-        // the rest are arguments to the method.
+      // first list item is the method name,
+      // the rest are arguments to the method.
       return this[args[0]].apply(this, Array.prototype.slice.call(args, 1));
     }
   };
@@ -2271,7 +2271,7 @@
     var width = '90%';
     var height = '90%';
     if (this.AspectRatio) {
-        // Hack to get expanded images to resize.
+      // Hack to get expanded images to resize.
       if (!this.Div[0].onresize) {
         this.Div[0].onresize =
                 function () {
@@ -2280,7 +2280,7 @@
         this.Div.addClass('sa-resize');
       }
 
-        // Compute the new size.
+      // Compute the new size.
       var ratio = this.Div.width() / this.Div.height();
       var pWidth = this.Div.parent().width();
       var pHeight = this.Div.parent().height();
@@ -2313,37 +2313,37 @@
     var self = this;
     if (flag) {
       this.Div.saElement({editable: false});
-        // We have to disable teh expand behavior too.
+      // We have to disable teh expand behavior too.
       this.Expanded = true;
 
-        // Save the current position and size.
+      // Save the current position and size.
       this.SavedTop = this.Div[0].style.top;
       this.SavedLeft = this.Div[0].style.left;
       this.SavedWidth = this.Div[0].style.width;
       this.SavedHeight = this.Div[0].style.height;
       this.SavedZIndex = this.Div[0].style.zIndex;
 
-        // Make the image big
-        // Not resize handles have z-index 1000 !
-        // I am close to just implementing my own resize feature.
+      // Make the image big
+      // Not resize handles have z-index 1000 !
+      // I am close to just implementing my own resize feature.
       this.Div.css({'z-index': '1001'});
       this.UpdateSize();
       this.Div.trigger('resize');
 
-        // Show the mask.
+      // Show the mask.
       this.Mask.show();
-        // Clicking outside the div will cause the div to shrink back to
-        // its original size.
+      // Clicking outside the div will cause the div to shrink back to
+      // its original size.
       this.Mask.on(
             'mousedown.lightbox',
             function () {
               self.Expand(false, true);
             });
     } else {
-        // Reverse the expansion.
-        // hide the mask
+      // Reverse the expansion.
+      // hide the mask
       this.Mask.hide();
-        // remove event to shrink div.
+      // remove event to shrink div.
       this.Mask.off('mousedown.lightbox');
       if (animate) {
         this.Div.animate({'top': self.SavedTop,
@@ -2466,7 +2466,7 @@
 
   function saGetButtonsDiv (domElement) {
     if (!domElement.saButtons) {
-        // Edit buttons.
+      // Edit buttons.
       var helper = new SaButtons($(domElement));
       domElement.saButtons = helper;
     }
@@ -2569,8 +2569,8 @@
     return button;
   }
 
-// private functions.
-// TODO: Make an api through jquery to do this.
+  // private functions.
+  // TODO: Make an api through jquery to do this.
   function saButtonsDisable (element) {
     if (!element.saButtons) { return; }
     element.saButtons.Enabled = false;
@@ -2597,20 +2597,20 @@
     if (string) {
       this.html(string);
       this.find('.sa-scalable-font').saScalableFont();
-        // this.find('.sa-full-window-option').saFullWindowOption();
-        // TODO: Move this out of this file.
+      // this.find('.sa-full-window-option').saFullWindowOption();
+      // TODO: Move this out of this file.
       this.find('.sa-presentation-rectangle').saRectangle();
-        // Change legacy sa-presentation-view into sa-lightbox-viewer
+      // Change legacy sa-presentation-view into sa-lightbox-viewer
       this.find('.sa-presentation-view')
             .addClass('sa-lightbox-viewer')
             .removeClass('sa-presentation-view');
-        // Get rid of the extra handles we no longer use.
-        // the ui-resiable was flakey.  It was eaiser just to code the
-        // behavior myself.
+      // Get rid of the extra handles we no longer use.
+      // the ui-resiable was flakey.  It was eaiser just to code the
+      // behavior myself.
       this.find('.ui-resizable-handle').remove();
       this.find('.ui-resizable').removeClass('ui-resizable');
 
-        // We need to load the note.
+      // We need to load the note.
       var viewDivs = this.find('.sa-lightbox-viewer');
       viewDivs.saLightBoxViewer({'hideCopyright': true,
         'interaction': false});
@@ -2620,10 +2620,10 @@
         var noteId = $(viewDivs[i]).attr('sa-note-id');
         var viewerIdx = $(viewDivs[i]).attr('sa-viewer-index') || 0;
         viewerIdx = parseInt(viewerIdx);
-            // var viewerIdx = $(viewDivs[i]).attr('sa-viewer-index') || 0;
-            // viewerIdx = parseInt(viewerIdx);
-            // TODO: This should not be here.
-            // The saViewer should handle this internally.
+        // var viewerIdx = $(viewDivs[i]).attr('sa-viewer-index') || 0;
+        // viewerIdx = parseInt(viewerIdx);
+        // TODO: This should not be here.
+        // The saViewer should handle this internally.
         if (noteId) {
           display.SetNoteFromId(noteId, viewerIdx);
         }
@@ -2631,7 +2631,7 @@
 
       if (SA.Edit) {
         var items = this.find('.sa-resizable');
-            // temporary to make previous editors draggable.
+        // temporary to make previous editors draggable.
         items = this.find('.sa-text-editor');
         items.saTextEditor({editable: true});
 
@@ -2648,7 +2648,7 @@
         items = this.find('.sa-lightbox-viewer');
         items.saViewer({drawWidget: false});
       } else {
-            // I need the text to show when the bounds are too small.
+        // I need the text to show when the bounds are too small.
         items = this.find('.sa-text-editor');
         items.css({'overflow': 'visible'});
       }
@@ -2690,18 +2690,18 @@
       }
     };
     args.stop = function (e, ui) {
-        // change the width to a percentage.
+      // change the width to a percentage.
       var width = $(this).width();
       width = 100 * width / $(this).parent().width();
       this.style.width = width.toString() + '%';
-        // change the height to a percentage.
+      // change the height to a percentage.
       var height = $(this).height();
       height = 100 * height / $(this).parent().height();
       this.style.height = height.toString() + '%';
 
-        // We have to change the top and left ot percentages too.
-        // I might have to make my own resizable to get the exact behavior
-        // I want.
+      // We have to change the top and left ot percentages too.
+      // I might have to make my own resizable to get the exact behavior
+      // I want.
       var pos = $(this).position();
       var top = 100 * pos.top / $(this).parent().height();
       var left = 100 * pos.left / $(this).parent().width();
@@ -2733,19 +2733,19 @@
   jQuery.prototype.saViewer = function (args) {
     return SAViewer(this, args);
   };
-// Non jquery api
+  // Non jquery api
   var SAViewer = function (element, args) {
     // default
     args = args || {};
     if (typeof (args) === 'object') {
-        // This is ignored if there is not viewId or note.
+      // This is ignored if there is not viewId or note.
       args.viewerIndex = args.viewerIndex || 0;
     }
     // get the note object if an id is specified.
     if (args.viewId) {
       args.note = SA.GetNoteFromId(args.viewId);
       if (args.note === null) {
-            // It has not been loaded yet.  Get if from the server.
+        // It has not been loaded yet.  Get if from the server.
         args.note = new SA.Note();
         args.note.LoadViewId(
                 args.viewId,
@@ -2764,16 +2764,16 @@
     return saViewerSetup(arguments) || element;
   };
 
-// I am struggling for an API to choose between single view and dual view.
-// - I considered saDualViewer, but it is nearly identical to saViewer and
-// saLightBoxViewer does not know which to create because it does not have
-// the note early enough.
-// - I consider hinging it on the existence of sa-viewer-index but that is
-// hidden and not obvious.
-// I choose to pass an argument flag "dual", but am sure how to store the
-// flag in html. I could have an attribute "dual", but I think I like to
-// change the class from sa-viewer to sa-dual-viewer better.
-// TODO: Make the argument calls not dependant on order.
+  // I am struggling for an API to choose between single view and dual view.
+  // - I considered saDualViewer, but it is nearly identical to saViewer and
+  // saLightBoxViewer does not know which to create because it does not have
+  // the note early enough.
+  // - I consider hinging it on the existence of sa-viewer-index but that is
+  // hidden and not obvious.
+  // I choose to pass an argument flag "dual", but am sure how to store the
+  // flag in html. I could have an attribute "dual", but I think I like to
+  // change the class from sa-viewer to sa-dual-viewer better.
+  // TODO: Make the argument calls not dependant on order.
   function saViewerSetup (args) {
     // TODO: Think about making this viewer specific rather than a global.
 
@@ -2797,8 +2797,8 @@
     for (var i = 0; i < self.length; ++i) {
       if (args[1] === 'destroy') {
         $(self[i]).removeClass('sa-resize');
-            // This should not cause a problem.
-            // Only one resize element should be using this element.
+        // This should not cause a problem.
+        // Only one resize element should be using this element.
         $(self[i]).removeClass('sa-resize');
         $(self[i]).removeClass('sa-viewer');
         if (self[i].saViewer) {
@@ -2810,37 +2810,37 @@
 
       if (!self[i].saViewer) {
         if (params) {
-                // look for class name.
+          // look for class name.
           if (self.hasClass('sa-dual-viewer')) {
             params.dual = true;
           }
-                // Add the viewer as an instance variable to the dom object.
+          // Add the viewer as an instance variable to the dom object.
           if (params.dual) {
-                    // TODO: dual has to be set on the first call.  Make this
-                    // order independant. Also get rid of args here. We should
-                    // use process arguments to setup options.
+            // TODO: dual has to be set on the first call.  Make this
+            // order independant. Also get rid of args here. We should
+            // use process arguments to setup options.
             self[i].saViewer = new SA.DualViewWidget($(self[i]));
           } else {
             self[i].saViewer = new SA.Viewer($(self[i]));
           }
         }
 
-            // When the div resizes, we need to synch the camera and
-            // canvas.
+        // When the div resizes, we need to synch the camera and
+        // canvas.
         self[i].onresize =
                 function () {
                   this.saViewer.UpdateSize();
                 };
-            // Only the body seems to trigger onresize.  We need to trigger
-            // it explicitly (from the body onresize function).
+        // Only the body seems to trigger onresize.  We need to trigger
+        // it explicitly (from the body onresize function).
         $(self[i]).addClass('sa-resize');
       }
-        // generic method call. Give jquery ui access to all this objects methods.
-        // jquery puts the query results as the first argument.
+      // generic method call. Give jquery ui access to all this objects methods.
+      // jquery puts the query results as the first argument.
       var viewer = self[i].saViewer;
       if (viewer && typeof (viewer[args[1]]) === 'function') {
-            // first list item is the method name,
-            // the rest are arguments to the method.
+        // first list item is the method name,
+        // the rest are arguments to the method.
         return viewer[args[1]].apply(viewer, Array.prototype.slice.call(args, 2));
       }
 
@@ -2851,9 +2851,9 @@
     }
   }
 
-// This put changes from the viewer in to the note.
-// Is there a better way to do this?
-// Maybe a save method?
+  // This put changes from the viewer in to the note.
+  // Is there a better way to do this?
+  // Maybe a save method?
   jQuery.prototype.saRecordViewer = function () {
     for (var i = 0; i < this.length; ++i) {
       if (this[i].saViewer && this[i].saViewer.saNote) {
@@ -2973,6 +2973,9 @@
   // The user can even choose their own image for the button.
   // TODO: callbacks for start and stop full screen.
   var SAFullScreenButton = function (parent) {
+    var fullScreenFlag = false;
+    var savedHeight = 'auto';
+    
     var fullScreenButton = $('<img>')
         .appendTo(parent)
         .prop('title', 'full screen')
@@ -2982,6 +2985,7 @@
           'position': 'absolute',
           'height': '24px',
           'z-index': '100'});
+
     // Attach variables to the dom button
     var self = fullScreenButton[0];
     fullScreenButton.on(
@@ -2989,27 +2993,51 @@
       function (e) {
         e.preventDefault();
         // variable 'this' is probably the same as 'self' here.
-        self.saved_height = parent.css('height');
-        $(self).hide();
         var elem = parent[0];
 
         if (SAM.MOBILE_DEVICE === 'iPad') {
-          // just make the viewer fill the body.
-          var height = window.innerHeight;
-          $(elem)
-            .css({
-              'position': 'fixed',
-              'left': '0',
-              'top': '0',
-              'width': '100%',
-              'height': height + 'px'});
+          fullScreenFlag = !fullScreenFlag;
+          if (fullScreenFlag) {
+            savedHeight = parent.css('height');
+            // just make the viewer fill the body.
+            var height = window.innerHeight;
+            $(elem)
+              .css({
+                'position': 'fixed',
+                'left': '0',
+                'top': '0',
+                'width': '100%',
+                'height': height + 'px'});
+            fullScreenButton.attr('src', SA.ImagePathUrl + 'fullScreenOff32.png')
+          } else {
+            $(elem)
+              .css({
+                'position': 'static',
+                'height': savedHeight});
+            console.log(savedHeight);
+            fullScreenButton.attr('src', SA.ImagePathUrl + 'fullScreen32.png')
+          }
+          $(window).trigger('resize');
         } else {
-          var req = elem.requestFullScreen ||
+          fullScreenFlag = !fullScreenFlag;
+          if (fullScreenFlag) {
+            var req;
+            req = elem.requestFullScreen ||
               elem.webkitRequestFullScreen ||
               elem.mozRequestFullScreen;
-          req.call(elem);
+            req.call(elem);
+          } else {
+            if (document.exitFullscreen) {
+              document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+              document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+              document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+              document.msExitFullscreen();
+            }
+          }
         }
-        parent.css({'height': '100%'});
         $(window).trigger('resize');
       });
 
@@ -3019,29 +3047,41 @@
         function (e) {
           var state = document.fullScreen || document.mozFullScreen ||
                 document.webkitIsFullScreen;
-          if (!state) {
+          if (state) {
+            // Entering full screen
+            savedHeight = parent.css('height');
+            fullScreenFlag = true;
+            fullScreenButton.attr('src', SA.ImagePathUrl + 'fullScreenOff32.png')
+            parent.css({'height': '100%'});
+          } else {
+            // Exiting full screen
             $(self).show();
-            parent.css({'height': self.saved_height});
-            $(window).trigger('resize');
+            fullScreenFlag = false;
+            fullScreenButton.attr('src', SA.ImagePathUrl + 'fullScreen32.png')
+            //parent.css({'height': 'auto'});            
+            parent.css({'height': savedHeight});
+            console.log(savedHeight);
           }
+          $(window).trigger('resize');
         });
     return fullScreenButton;
   };
 
-// Args: not used
+  // Args: not used
   jQuery.prototype.saFullHeight = function (args) {
     return SAFullHeight(this, args);
   };
-// ==============================================================================
-// Non jquery api
-// Add resize callbacks that make a jquery element fit the windows height.
+
+  // ==============================================================================
+  // Non jquery api
+  // Add resize callbacks that make a jquery element fit the windows height.
   var SAFullHeight = function (element, args) {
     element.css({'top': '0px'});
     element.addClass('sa-full-height');
     for (var i = 0; i < element.length; ++i) {
-        // I want to put the resize event on "element[i]",
-        // but, I am afraid it might not get trigerend always, or
-        // setting the height would cause recursive calls to resize.
+      // I want to put the resize event on "element[i]",
+      // but, I am afraid it might not get trigerend always, or
+      // setting the height would cause recursive calls to resize.
       element[i].saFullHeight = args;
     }
 
@@ -3053,11 +3093,11 @@
     return element;
   };
 
-// ==============================================================================
-// Make this window as large as possible in parent, but keep the aspect
-// ratio. This is for presentation windows.
-// Note:  Position of parent has to be not static.
-//        Should I make the position relative rather than absolute?
+  // ==============================================================================
+  // Make this window as large as possible in parent, but keep the aspect
+  // ratio. This is for presentation windows.
+  // Note:  Position of parent has to be not static.
+  //        Should I make the position relative rather than absolute?
   jQuery.prototype.saPresentation = function (args) {
     this.addClass('sa-presentation');
     this.addClass('sa-resize');
@@ -3076,8 +3116,8 @@
                   this.saPresentation.Resize();
                 };
       }
-        // Trouble if their is more than 1.  Maybe trigger
-        // a window resize?
+      // Trouble if their is more than 1.  Maybe trigger
+      // a window resize?
       setTimeout(function () { item.saPresentation.Resize(); }, 300);
     }
 
@@ -3118,10 +3158,10 @@
     var width = pWidth;
     var height = pHeight;
     if (width / height > ar) {
-        // Window is too wide.
+      // Window is too wide.
       width = height * ar;
     } else {
-        // Window is too tall.
+      // Window is too tall.
       height = width / ar;
     }
     width = width * this.Zoom;
@@ -3168,8 +3208,8 @@
     }
   };
 
-// TODO: rethink offset/zoom.  Scale from the middle. Offset should
-// be in percentages maybe
+  // TODO: rethink offset/zoom.  Scale from the middle. Offset should
+  // be in percentages maybe
   SaPresentation.prototype.HandleMouseWheel = function (event) {
     var tmp = 0;
     if (event.deltaY) {
@@ -3240,27 +3280,27 @@
         text.onresize =
                 function () {
                   scale = this.saScalableFont.scale;
-                    // Scale it relative to the window.
+                  // Scale it relative to the window.
                   var height = $(this).parent().innerHeight();
                   var fontSize = Math.round(scale * height) + 'px';
                   this.style.fontSize = fontSize;
-                    // Getting and setting the html creates text chidlren
-                    // with their own font size.
+                  // Getting and setting the html creates text chidlren
+                  // with their own font size.
                   $(this).children('font').css({'font-size': fontSize});
                 };
         text.saScalableFont = {};
         text.saScalableFont.scale = 0.1;
       }
       var scale = text.saScalableFont.scale;
-        // html() saves this attribute.
-        // this will restore the scale.
+      // html() saves this attribute.
+      // this will restore the scale.
       var scaleStr = text.getAttribute('sa-font-scale');
       if (scaleStr) {
         scale = parseFloat(scaleStr);
       }
-        // This overrides the previous two.
+      // This overrides the previous two.
       if (args && args.scale) {
-            // convert to a decimal.
+        // convert to a decimal.
         scale = args.scale;
         if (typeof (scale) === 'string') {
           if (scale.substring(-1) === '%') {
@@ -3270,8 +3310,8 @@
           }
         }
       }
-        // I can either keep this up to date or set it when the
-        // saHtml is called. Keeping it set is more local.
+      // I can either keep this up to date or set it when the
+      // saHtml is called. Keeping it set is more local.
       text.setAttribute('sa-font-scale', scale.toString());
       text.saScalableFont.scale = scale;
       text.onresize();
@@ -3292,7 +3332,7 @@
     for (var i = 0; i < this.length; ++i) {
       if (!this[i].saDraggable) {
         var helper = new SaDraggable($(this[i]));
-            // Add the helper as an instance variable to the dom object.
+        // Add the helper as an instance variable to the dom object.
         this[i].saDraggable = helper;
       }
       this[i].saDraggable.ProcessArguments(args);
@@ -3312,9 +3352,9 @@
                         'drag', null, true);
     d.mousedown(
         function (e) {
-            // raise to the top of the layers.
-            // this did not work for text boxes on top of views.
-            // it did work for mutiple views.
+          // raise to the top of the layers.
+          // this did not work for text boxes on top of views.
+          // it did work for mutiple views.
           var parent = self.Div.parent();
           self.Div.detach();
           self.Div.appendTo(parent);
@@ -3351,20 +3391,20 @@
 
   SaDraggable.prototype.ProcessArguments = function (args) {
     if (args.grid) {
-        // The grid is not shared.
+      // The grid is not shared.
       this.XStops = new SaStops(args.grid[0]);
       this.YStops = new SaStops(args.grid[1]);
     }
 
     // generic method call. Give jquery ui access to all this objects methods.
     if (typeof (this[args[0]]) === 'function') {
-        // first list item is the method name,
-        // the rest are arguments to the method.
+      // first list item is the method name,
+      // the rest are arguments to the method.
       return this[args[0]].apply(this, Array.prototype.slice.call(args, 1));
     }
   };
 
-// (dx, dy) drag vector in pixels.
+  // (dx, dy) drag vector in pixels.
   SaDraggable.prototype.Drag = function (dx, dy) {
     var pos = this.Div.position();
     var x = pos.left;
@@ -3442,17 +3482,17 @@
     var next = this.Last + delta;
 
     if (this.Stopped) {
-        // Acculilate the movement.
+      // Acculilate the movement.
       this.Delta = this.Delta + delta;
-        // Have we passed the threshold to exit?
+      // Have we passed the threshold to exit?
       if (Math.abs(this.Delta) > this.Threshold) {
-            // yes
+        // yes
         this.Stopped = false;
         this.Delta = 0;
         this.Last = next;
         return next;
       }
-        // no
+      // no
       return this.Stop;
     }
 
@@ -3461,13 +3501,13 @@
     var stop = this.GetStop(this.Last, next);
 
     if (stop < this.Last && stop < next) {
-        // We did not pass a stop.
+      // We did not pass a stop.
       this.Delta = 0;
       this.Last = next;
       return next;
     }
     if (stop > this.Last && stop > next) {
-        // We did not pass a stop.
+      // We did not pass a stop.
       this.Delta = 0;
       this.Last = next;
       return next;
@@ -3500,6 +3540,8 @@
   };
 
 // ==============================================================================
+// DUPLICATE feature
+// TODO: remove this
 // Option to go full window.  This is intended for viewers, but might be
 // made general.
 
@@ -3511,7 +3553,7 @@
     for (var i = 0; i < this.length; ++i) {
       if (!this[i].saFullWindowOption) {
         var helper = new SaFullWindowOption($(this[i]));
-            // Add the helper as an instance variable to the dom object.
+        // Add the helper as an instance variable to the dom object.
         this[i].saFullWindowOption = helper;
       }
       if (args === 'off') {
@@ -3554,7 +3596,7 @@
         'left': '1px',
         'top': '1px',
         'opacity': '0.5',
-        'z-index': '1'})
+        'z-index': '-1'})
       .hover(function () { $(this).css({'opacity': '1.0'}); },
              function () { $(this).css({'opacity': '0.5'}); })
       .on('click touchstart',
@@ -3563,14 +3605,14 @@
           });
   }
 
-// TODO: Turn off other editing options: drag, delete, resize.
+  // TODO: Turn off other editing options: drag, delete, resize.
   SaFullWindowOption.prototype.SetFullWindow = function (div, flag) {
     if (flag) {
-        // TODO: Put this in a call back.
+      // TODO: Put this in a call back.
       saButtonsDisable(div[0]);
       this.FullWindowOptionOffButton.show();
       this.FullWindowOptionButton.hide();
-        // Save the css values to undo.
+      // Save the css values to undo.
       this.Left = div[0].style.left;
       this.Width = div[0].style.width;
       this.Top = div[0].style.top;
@@ -3597,9 +3639,9 @@
     $(window).trigger('resize');
   };
 
-// ==============================================================================
-// LEGACY
-// Add a delete button to the jquery objects.
+  // ==============================================================================
+  // LEGACY
+  // Add a delete button to the jquery objects.
 
   jQuery.prototype.saDeletable = function (args) {
     this.addClass('sa-deletable');
@@ -3749,8 +3791,8 @@
         });
   }
 
-// TODO: Remove reference to body directly
-// Maybe use parent.
+  // TODO: Remove reference to body directly
+  // Maybe use parent.
   ResizePanel.prototype.StartDrag = function () {
     this.Dragging = true;
     var self = this;
@@ -3778,8 +3820,8 @@
     return false;
   };
 
-// TODO: Notes widget should just follow the parent.
-// Get rid of this.
+  // TODO: Notes widget should just follow the parent.
+  // Get rid of this.
   ResizePanel.prototype.SetWidth = function (width) {
     this.Width = width;
     this.PanelDiv.css({'width': this.Width + 'px'});
@@ -3793,7 +3835,7 @@
   ResizePanel.prototype.AnimateNotesWindow = function () {
     var animationTime = new Date().getTime() - this.AnimationStartTime;
     if (animationTime > this.AnimationDuration || this.AnimationDuration <= 0) {
-        // end the animation.
+      // end the animation.
       this.SetWidth(this.AnimationTarget);
 
       if (this.Visibility) {
@@ -3819,7 +3861,7 @@
     this.SetWidth(this.Width + (this.AnimationTarget - this.Width) * k);
   };
 
-// Open and close the panel
+  // Open and close the panel
   ResizePanel.prototype.SetVisibility = function (visibility, duration) {
     if (duration === undefined) { duration = 1000.0; }
     if (this.Visibility === visibility) { return; }
@@ -3842,8 +3884,8 @@
     this.AnimationId = setInterval(function () { self.AnimateNotesWindow(); }, 10);
   };
 
-// Show / hide the panel and handles.
-// I keep the "visibility" state and restore it.
+  // Show / hide the panel and handles.
+  // I keep the "visibility" state and restore it.
   ResizePanel.prototype.Show = function () {
     this.Visibility = true;
     this.ResizeEdge.show();
@@ -3870,7 +3912,7 @@
 
 // ==============================================================================
 
-// args: { label: function, ...}
+  // args: { label: function, ...}
   jQuery.prototype.saMenuButton = function (args) {
     if (this.length === 0) { return this; }
     var item = this[0];
