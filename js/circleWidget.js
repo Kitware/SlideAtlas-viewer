@@ -243,6 +243,11 @@
     var x = event.offsetX;
     var y = event.offsetY;
 
+    // Hack to fix weird state where mouse up is not called.
+    if (event.which === 0 && (this.State === RADIUS_DRAG || this.State === DRAG)) {
+      return this.HandleMouseUp(event);
+    }
+
     if (event.which === 0 && this.State === ACTIVE) {
       this.SetActive(this.CheckActive(event));
       return false;
