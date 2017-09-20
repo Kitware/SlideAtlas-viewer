@@ -22,7 +22,7 @@
             .attr('type', 'image')
             .attr('src', imageSrc)
             .addClass('sa-view-button')
-            .click(function () { self.TogglePanel(); })
+            .on('click touchstart', function () { self.TogglePanel(); })
             .attr('draggable', 'false')
             .on('dragstart', function () {
               return false;

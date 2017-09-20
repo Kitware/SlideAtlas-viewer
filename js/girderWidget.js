@@ -37,7 +37,10 @@
       .prop('title', 'Add Annotation')
       .hover(function () { $(this).css({'opacity': '1'}); },
              function () { $(this).css({'opacity': '0.6'}); })
-      .on('click touchstart', function (e) { self.NewAnnotationItem(e); });
+      .on('click touchstart',
+          function (e) { self.NewAnnotationItem(e);
+                         return false;})
+      .on('touchmove touchend', function (e) { return false;});
 
     this.AnnotationObjects = [];
     this.Highlighted = undefined;
@@ -203,6 +206,7 @@
     var returnElements = [];
     var i;
     var j;
+    var k;
     var points;
 
     // record the view.
@@ -302,8 +306,8 @@
       }
       // Pencil scheme not exact match.  Need to split up polylines.
       if (widget.type === 'pencil') {
-        for (i = 0; i < widget.shapes.length; ++i) {
-          points = widget.shapes[i];
+        for (k = 0; k < widget.shapes.length; ++k) {
+          points = widget.shapes[k];
           // Add the z coordinate.
           for (j = 0; j < points.length; ++j) {
             points[j][2] = 0;
@@ -313,20 +317,20 @@
             'closed': false,
             'points': points};
           // Hackish way to deal with multiple lines.
-          if (widget.outlinecolor) {
+          if (widget.outlinecolor != undefined) {
             element.lineColor = SAM.ConvertColorToHex(widget.outlinecolor);
           }
-          if (widget.linewidth) {
+          if (widget.linewidth !== undefined) {
             element.lineWidth = Math.round(widget.linewidth);
           }
           returnElements.push(element);
           element = undefined;
         }
       } else if (element) {
-        if (widget.outlinecolor) {
+        if (widget.outlinecolor !== undefined) {
           element.lineColor = SAM.ConvertColorToHex(widget.outlinecolor);
         }
-        if (widget.linewidth) {
+        if (widget.linewidth !== undefined) {
           element.lineWidth = Math.round(widget.linewidth);
         }
         returnElements.push(element);
@@ -425,7 +429,7 @@
         'border-radius': '2px',
         'z-index': '100'
       })
-      .mouseenter(function () { div.focus(); console.log('enter'); })
+      .mouseenter(function () { div.focus();  })
       .hide() // hide until animation is finished.
       .hover(function () { div.css({'opacity': '1'}); },
              function () { div.css({'opacity': '0.6'}); });
@@ -456,30 +460,23 @@
     //  });
 
     //circle.contextmenu(function () { return false; });
-    var lastClickTime = 0;
     var callbackId = -1;
-    circle.on('click touchstart',
+    var slowClickFlag = false;
+    circle.on('mousedown touchstart',
               function (e) {
                 if (e.button === undefined || e.button === 0) {
-                  var now = new Date().getTime();
-                  var timesince = now - lastClickTime
-                  if((timesince < 600) && (timesince > 0)){
-                    clearTimeout(callbackId);
-                    if ( confirm("Save (snap shot) current view in "
-                                 + annotObj.Circle.prop('title'))) {
-                      self.SnapShotAnnotation(annotObj);
-                    }
-                    return false;
-                  }
-                  lastClickTime = now;
-                  setTimeout(function (e) { self.HandleCircleClick(annotObj);}, 700);
+                  slowClickFlag = false;
+                  callbackId = setTimeout(
+                    function() {
+                      slowClickFlag = true;
+                      if ( confirm("Save (snap shot) current view in "
+                                 + annotObj.Circle.text())) {
+                        self.SnapShotAnnotation(annotObj);
+                      }
+                    }, 700);
                   return false;
                 }
-              });
-    // click does not respond to right mouse for menu.
-    circle.on('mousedown',
-              function (e) {
-                if (e.button === 2) {
+                if (e.button && e.button === 2) {
                   self.MenuAnnotationObject = annotObj;
                   // Position and show the properties menu.
                   var pos = $(this).position();
@@ -488,9 +485,24 @@
                       'left': (5 + pos.left + 2 * self.Radius) + 'px',
                       'top': (pos.top) + 'px'})
                     .show();
-                  return false;
                 }
                 return true;
+              });
+    circle.on('mousemove touchmove', function () { return false;})
+    circle.on('mouseup touchend',
+              function (e) {
+                if (e.button === undefined || e.button === 0) {
+                  if (slowClickFlag) {
+                    slowClickFlag = false;
+                    return false;
+                  }
+                  if (callbackId != -1) {
+                    clearTimeout(callbackId);
+                    callbackId = -1;
+                  }
+                  self.DisplayAnnotation(annotObj);
+                }
+                return false;
               });
 
     // Annotate the "add annotation" button down.
@@ -500,15 +512,8 @@
     return annotObj;
   };
 
-  GirderWidget.prototype.HandleCircleClick = function (annotObj) {
-    this.DisplayAnnotation(annotObj);
-  }
-
-
-  
   GirderWidget.prototype.UpdateThreshold = function (valStr, annotObj) {
     var visValue = parseInt(valStr) / 100.0;
-    console.log('threshold: ' + visValue);
     var layer = this.AnnotationLayer;
     for (var wIndex = 0; wIndex < layer.WidgetList.length; wIndex++) {
       var widget = layer.WidgetList[wIndex];

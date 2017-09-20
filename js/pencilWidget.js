@@ -85,7 +85,7 @@
       if (defaults.Color) {
         this.Dialog.ColorInput.val(SAM.ConvertColorToHex(defaults.Color));
       }
-      if (defaults.LineWidth) {
+      if (defaults.LineWidth !=- undefined) {
         this.LineWidth = defaults.LineWidth;
         this.Dialog.LineWidthInput.val(this.LineWidth);
       }
@@ -155,7 +155,7 @@
   PencilWidget.prototype.Load = function (obj) {
     this.LineWidth = parseFloat(obj.linewidth);
     this.UserNoteFlag = obj.user_note_flag;
-    if (obj.linewidth) {
+    if (obj.linewidth !== undefined) {
       this.LineWidth = parseFloat(obj.linewidth);
     }
     var outlineColor = SAM.ConvertColor(this.Dialog.ColorInput.val());
@@ -196,6 +196,15 @@
   };
 
   PencilWidget.prototype.HandleKeyDown = function (event) {
+    console.log("pw handleKeyDown " + this.State + "  " + event.keyCode);
+    if (this.State === DRAWING_UP && event.keyCode == 46) {
+      // Undo a stroke
+      if (this.Shapes.GetNumberOfShapes() > 1) {
+        this.Shapes.PopShape();
+        this.Layer.EventuallyDraw();
+        return false;
+      }      
+    }
     if (this.StylusOnly) {
       return true;
     }
@@ -206,6 +215,7 @@
         return false;
       }
     }
+    return true;
   };
 
   PencilWidget.prototype.HandleDoubleClick = function (event) {
@@ -276,6 +286,7 @@
   };
 
   PencilWidget.prototype.HandleTouchStart = function (layerEvent) {
+    console.log("pw Handle touchstart " + this.State);
     if (this.StylusOnly && !layerEvent.OriginalEvent.pencil) {
       return true;
     }

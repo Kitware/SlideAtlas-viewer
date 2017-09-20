@@ -293,7 +293,7 @@
       this.Polyline.OutlineColor[1] = parseFloat(obj.outlinecolor[1]);
       this.Polyline.OutlineColor[2] = parseFloat(obj.outlinecolor[2]);
     }
-    if (obj.linewidth) {
+    if (obj.linewidth !== undefined) {
       this.LineWidth = parseFloat(obj.linewidth);
       this.Polyline.LineWidth = this.LineWidth;
     }
@@ -919,6 +919,66 @@
         }
       }
     }
+  };
+
+  // Convert to right handed loop
+  PolylineWidget.prototype.ConvertToRightHandedLoop = function () {
+    var end = this.Polyline.Points.length -1;
+    if (end < 2) {
+      return false;
+    }
+    var x;
+    var y;
+    var x2;
+    var y2;
+    var x0 = this.Polyline.Points[end-1][0];
+    var y0 = this.Polyline.Points[end-1][1];
+    var x1 = this.Polyline.Points[end][0];
+    var y1 = this.Polyline.Points[end][1];
+    var x01 = x1-x0;
+    var y01 = y1-y0;
+    var m01 = Math.sqrt(x01 * x01 + y01 * y01);
+    var x12;
+    var y12;
+    var m12;
+    var angleSum = 0.0;
+    for (var i = 0; i <= end; ++i) {
+      x2 = this.Polyline.Points[i][0];
+      y2 = this.Polyline.Points[i][1];
+      x12 = x2-x1;
+      y12 = y2-y1;
+      m12 = Math.sqrt(x12 * x12 + y12 * y12);
+      // dot product for the sine.
+      x = (x01 * x12 + y01 * y12) / (m01 * m12);
+      // cross product for the cosine
+      y = (x01 * y12 - x12 * y01) / (m01 * m12);
+      angleSum += Math.atan2(y,x);
+
+      x01 = x12;
+      y01 = y12;
+      m01 = m12;
+      x1 = x2;
+      y1 = y2;
+    }
+    /*
+    if (angleSum < 0) {
+      // right handed
+      // Reverse the order of the points.
+      this.Polyline.Points.reverse();
+    }
+    this.LineWidth = 0.0;
+    this.Polyline.LineWidth = this.LineWidth;
+    */
+    
+    if (angleSum < 0) {
+      // right handed
+      this.Polyline.OutlineColor = [1.0, 0.0, 0.0];
+    } else {
+      // left handed
+      this.Polyline.OutlineColor = [0.0, 0.0, 1.0];
+    }
+
+    this.Layer.EventuallyDraw(true);
   };
 
   /*

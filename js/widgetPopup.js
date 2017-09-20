@@ -30,11 +30,11 @@
     this.DeleteButton = $('<img>').appendTo(this.ButtonDiv)
             .css({'height': '20px'})
             .attr('src', SA.ImagePathUrl + 'deleteSmall.png')
-            .click(function () { self.DeleteCallback(); });
+            .on('click touchstart', function () { self.DeleteCallback(); });
     this.PropertiesButton = $('<img>').appendTo(this.ButtonDiv)
             .css({'height': '20px'})
             .attr('src', SA.ImagePathUrl + 'Menu.jpg')
-            .click(function () { self.PropertiesCallback(); });
+            .on('click touchstart', function () { self.PropertiesCallback(); });
 
     this.HideCallback = undefined;
   }

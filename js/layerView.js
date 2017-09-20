@@ -169,7 +169,6 @@
     var visibility = this.VisibilityCheckBox.prop('checked');
     var sizeScale = parseInt(this.SizeScaleInput.val() / 100);
     var visValue = parseInt(this.Slider.val()) / 100.0;
-    console.log('threshold: ' + visValue);
     for (var wIndex = 0; wIndex < layer.WidgetList.length; wIndex++) {
       var widget = layer.WidgetList[wIndex];
       if (widget.Label === undefined || widget.Label === this.Label) {

@@ -39,7 +39,7 @@
         .appendTo(this.Tab.Panel)
         .addClass('sa-view-annotation-vis')
         .prop('title', 'Visibility')
-        .click(function () { self.ToggleVisibility(); });
+        .on('click touchstart', function () { self.ToggleVisibility(); });
     this.VisibilityImage = $('<img>')
         .appendTo(this.VisibilityDiv)
         .addClass('sa-view-annotation-vis-img')
@@ -54,7 +54,7 @@
         .attr('type', 'image')
         .attr('src', SA.ImagePathUrl + 'Text.gif')
         .prop('title', 'Text')
-        .click(function () { self.NewText(); });
+        .on('click touchstart', function () { self.NewText(); });
     this.CircleButton = $('<img>')
         .appendTo(this.Tab.Panel)
         .addClass('sa-view-annotation-button sa-flat-button-active')
@@ -62,7 +62,7 @@
         .attr('type', 'image')
         .attr('src', SA.ImagePathUrl + 'Circle.gif')
         .prop('title', 'Circle')
-        .click(function () { self.NewCircle(); });
+        .on('click touchstart', function () { self.NewCircle(); });
     this.RectButton = $('<img>')
         .appendTo(this.Tab.Panel)
         .addClass('sa-view-annotation-button sa-flat-button-active')
@@ -70,7 +70,7 @@
         .attr('type', 'image')
         .attr('src', SA.ImagePathUrl + 'rectangle.gif')
         .prop('title', 'Rectangle')
-        .click(function () { self.NewRect(); });
+        .on('click touchstart', function () { self.NewRect(); });
     this.GridButton = $('<img>')
         .appendTo(this.Tab.Panel)
         .addClass('sa-view-annotation-button sa-flat-button-active')
@@ -78,7 +78,7 @@
         .attr('type', 'image')
         .attr('src', SA.ImagePathUrl + 'grid.png')
         .prop('title', 'Grid')
-        .click(function () { self.NewGrid(); });
+        .on('click touchstart', function () { self.NewGrid(); });
     this.PolylineButton = $('<img>')
         .appendTo(this.Tab.Panel)
         .addClass('sa-view-annotation-button sa-flat-button-active')
@@ -86,7 +86,7 @@
         .attr('type', 'image')
         .attr('src', SA.ImagePathUrl + 'FreeForm.gif')
         .prop('title', 'Polygon')
-        .click(function () { self.NewPolyline(); });
+        .on('click touchstart', function () { self.NewPolyline(); });
     this.PencilButton = $('<img>')
         .appendTo(this.Tab.Panel)
         .addClass('sa-view-annotation-button sa-flat-button-active')
@@ -94,7 +94,7 @@
         .attr('type', 'image')
         .prop('title', 'Pencil')
         .attr('src', SA.ImagePathUrl + 'Pencil-icon.jpg')
-        .click(function () { self.NewPencil(); });
+        .on('click touchstart', function () { self.NewPencil(); });
     this.LassoButton = $('<img>')
         .appendTo(this.Tab.Panel)
         .addClass('sa-view-annotation-button sa-flat-button-active')
@@ -102,7 +102,7 @@
         .attr('type', 'image')
         .attr('src', SA.ImagePathUrl + 'select_lasso.png')
         .prop('title', 'Lasso')
-        .click(function () { self.NewLasso(); });
+        .on('click touchstart', function () { self.NewLasso(); });
     if (window.SA && this.Viewer) {
       this.SectionsButton = $('<img>')
             .appendTo(this.Tab.Panel)
@@ -111,7 +111,7 @@
             .attr('type', 'image')
             .attr('src', SA.ImagePathUrl + 'sections.png')
             .prop('title', 'Segment')
-            .click(function () { self.DetectSections(); });
+            .on('click touchstart', function () { self.DetectSections(); });
     }
     /*
     this.FillButton = $('<img>')
@@ -124,7 +124,7 @@
               'border-thickness':'2px'})
         .attr('type','image')
         .attr('src',SA.ImagePathUrl+"brush1.jpg")
-        .click(function(){self.NewFill();});
+        .on('click touchstart', function(){self.NewFill();});
         */
   }
 

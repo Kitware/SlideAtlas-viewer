@@ -87,7 +87,6 @@
     var n = [];
     var r = [w.length, 0];
     for (var i = 0; i < w.length; ++i) {
-            // console.log(i)
       var p = w[i];
       if (p.Polyline) {
         var b = p.Polyline.GetBounds();
@@ -1008,6 +1007,7 @@
     }
     // TODO: Just make the pencil widget active.
     if (event.pencil) {
+      console.log("Handle touchstart Pencil " + this.Pencil);
       if (this.Pencil.HandleTouchStart(this) === false) {
         return false;
       }
@@ -1271,6 +1271,10 @@
     if (this.ActiveWidget && this.ActiveWidget.HandleKeyDown) {
       return this.ActiveWidget.HandleKeyDown(event);
     }
+    if (this.Pencil) {
+      return this.Pencil.HandleKeyDown(event);
+    }
+
     return true;
   };
 
@@ -1429,6 +1433,16 @@
       return true;
     }
     return false;
+  };
+
+  AnnotationLayer.prototype.Test = function () {
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var w = this.WidgetList[i];
+      if (w.Type === "polyline") {
+        w.ConvertToRightHandedLoop();
+      }
+      this.EventuallyDraw();
+    }
   };
 
   SAM.AnnotationLayer = AnnotationLayer;

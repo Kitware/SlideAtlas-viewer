@@ -667,7 +667,7 @@
             .addClass('sa-view-zoom-button sa-zoom-in')
             .attr('type', 'image')
             .attr('src', SA.ImagePathUrl + 'zoomin2.png')
-            .click(function () { self.AnimateZoom(0.5); })
+            .on('click touchstart', function () { self.AnimateZoom(0.5); })
             .attr('draggable', 'false')
             .on('dragstart', function () {
               return false;
@@ -677,7 +677,7 @@
             .addClass('sa-view-zoom-button sa-zoom-out')
             .attr('type', 'image')
             .attr('src', SA.ImagePathUrl + 'zoomout2.png')
-            .click(function () { self.AnimateZoom(2.0); })
+            .on('click touchstart', function () { self.AnimateZoom(2.0); })
             .attr('draggable', 'false')
             .on('dragstart', function () {
               return false;
