@@ -149,6 +149,17 @@
             .appendTo(this.Dialog.ClosedDiv)
             .attr('checked', 'false')
             .css({'display': 'table-cell'});
+    /*
+      this.Dialog.ReverseButton =
+            $('<button>')
+            .appendTo(this.Dialog.ClosedDiv)
+            .text('Reverse')
+            .css({'display': 'table-cell'})
+            .on('click touchstart',
+                function () {
+                  self.Polyline.Points.reverse();
+                });
+    */
 
     // Line Width
     this.Dialog.LineWidthDiv =
@@ -293,7 +304,7 @@
       this.Polyline.OutlineColor[1] = parseFloat(obj.outlinecolor[1]);
       this.Polyline.OutlineColor[2] = parseFloat(obj.outlinecolor[2]);
     }
-    if (obj.linewidth) {
+    if (obj.linewidth !== undefined) {
       this.LineWidth = parseFloat(obj.linewidth);
       this.Polyline.LineWidth = this.LineWidth;
     }
@@ -327,6 +338,13 @@
   };
 
   PolylineWidget.prototype.HandleKeyDown = function (event) {
+    // 'r' reverses loop (and colors: Blue clockwise, Red counter clockwise)
+    if (event.keyCode === 82) {
+      this.Polyline.Points.reverse();
+      this.ColorByHandedness();
+      this.Layer.EventuallyDraw(true);
+    }
+
     // Copy
     if (event.keyCode === 67 && event.ctrlKey) {
       // control-c for copy
@@ -794,7 +812,7 @@
 
     if (this.Polyline.Closed) {
       this.Dialog.AreaDiv.show();
-      var area = this.ComputeArea() * 0.25 * 0.25;
+      var area = Math.abs(this.ComputeArea() * 0.25 * 0.25);
       var areaString = '';
       if (this.Polyline.FixedSize) {
         areaString += area.toFixed(2);
@@ -833,12 +851,6 @@
         LineWidth: this.LineWidth});
     if (SAM.NotesWidget && !this.UserNoteFlag) { SAM.NotesWidget.MarkAsModified(); } // Hack
     if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
-  };
-
-  // Note, self intersection can cause unexpected areas.
-  // i.e looping around a point twice ...
-  PolylineWidget.prototype.ComputeArea = function () {
-    return this.Polyline.ComputeArea();
   };
 
   // Note, self intersection can cause unexpected areas.
@@ -919,6 +931,20 @@
         }
       }
     }
+  };
+
+  // Convert to right handed loop
+  PolylineWidget.prototype.ColorByHandedness = function () {
+    var area = this.Polyline.ComputeArea();
+    if (area > 0) {
+      // right handed
+      this.Polyline.OutlineColor = [1.0, 0.0, 0.0];
+    } else {
+      // left handed
+      this.Polyline.OutlineColor = [0.0, 0.0, 1.0];
+    }
+
+    this.Layer.EventuallyDraw(true);
   };
 
   /*

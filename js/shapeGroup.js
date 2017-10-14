@@ -87,6 +87,10 @@
     return this.Shapes[index];
   };
 
+  ShapeGroup.prototype.PopShape = function () {
+    return this.Shapes.pop();
+  };
+
   ShapeGroup.prototype.SetActive = function (flag) {
     for (var i = 0; i < this.Shapes.length; ++i) {
       this.Shapes[i].SetActive(flag);

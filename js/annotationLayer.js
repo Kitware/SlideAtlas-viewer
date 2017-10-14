@@ -87,7 +87,6 @@
     var n = [];
     var r = [w.length, 0];
     for (var i = 0; i < w.length; ++i) {
-            // console.log(i)
       var p = w[i];
       if (p.Polyline) {
         var b = p.Polyline.GetBounds();
@@ -981,7 +980,7 @@
 
     // detect iPad pencil
     event.pencil = false;
-    if (event.touches && event.touches.length === 1) {
+    if (SAM.MOBILE_DEVICE === 'iPad' && event.touches && event.touches.length === 1) {
       var touch = event.touches[0];
       if (touch.force && !isNaN(touch.force) && touch.force !== 0) {
         event.pencil = true;
@@ -1271,6 +1270,10 @@
     if (this.ActiveWidget && this.ActiveWidget.HandleKeyDown) {
       return this.ActiveWidget.HandleKeyDown(event);
     }
+    if (this.Pencil) {
+      return this.Pencil.HandleKeyDown(event);
+    }
+
     return true;
   };
 
@@ -1429,6 +1432,16 @@
       return true;
     }
     return false;
+  };
+
+  AnnotationLayer.prototype.Test = function () {
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var w = this.WidgetList[i];
+      if (w.Type === 'polyline') {
+        w.ColorByHandedness();
+      }
+      this.EventuallyDraw();
+    }
   };
 
   SAM.AnnotationLayer = AnnotationLayer;

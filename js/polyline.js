@@ -183,10 +183,6 @@
       area += (vx1 * vy2) - (vx2 * vy1);
     }
 
-    // Handle both left hand loops and right hand loops.
-    if (area < 0) {
-      area = -area;
-    }
     return area;
   };
 

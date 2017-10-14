@@ -85,7 +85,7 @@
       if (defaults.Color) {
         this.Dialog.ColorInput.val(SAM.ConvertColorToHex(defaults.Color));
       }
-      if (defaults.LineWidth) {
+      if (defaults.LineWidth !== undefined) {
         this.LineWidth = defaults.LineWidth;
         this.Dialog.LineWidthInput.val(this.LineWidth);
       }
@@ -155,7 +155,7 @@
   PencilWidget.prototype.Load = function (obj) {
     this.LineWidth = parseFloat(obj.linewidth);
     this.UserNoteFlag = obj.user_note_flag;
-    if (obj.linewidth) {
+    if (obj.linewidth !== undefined) {
       this.LineWidth = parseFloat(obj.linewidth);
     }
     var outlineColor = SAM.ConvertColor(this.Dialog.ColorInput.val());
@@ -196,6 +196,14 @@
   };
 
   PencilWidget.prototype.HandleKeyDown = function (event) {
+    if (this.State === DRAWING_UP && event.keyCode === 46) {
+      // Undo a stroke
+      if (this.Shapes.GetNumberOfShapes() > 1) {
+        this.Shapes.PopShape();
+        this.Layer.EventuallyDraw();
+        return false;
+      }
+    }
     if (this.StylusOnly) {
       return true;
     }
@@ -206,6 +214,7 @@
         return false;
       }
     }
+    return true;
   };
 
   PencilWidget.prototype.HandleDoubleClick = function (event) {
@@ -257,6 +266,21 @@
       this.LastMouse = cam.ConvertPointViewerToWorld(x, y);
     }
 
+    if (event.which === 3) {
+      // Right mouse was pressed.
+      // Pop up the properties dialog.
+      if (this.State === ACTIVE) {
+        this.ShowPropertiesDialog();
+      } else if (this.State === DRAWING_DOWN || this.State === DRAWING_UP) {
+        // Undo a stroke
+        if (this.Shapes.GetNumberOfShapes() > 1) {
+          this.Shapes.PopShape();
+          this.Layer.EventuallyDraw();
+        }
+      }
+      return false;
+    }
+
     return false;
   };
 
@@ -280,10 +304,15 @@
   PencilWidget.prototype.HandleStop = function () {
     // A stroke has just been finished.
     var last = this.Shapes.GetNumberOfShapes() - 1;
+
     if (this.State === DRAWING_DOWN && last >= 0) {
       var spacing = this.Layer.GetCamera().GetSpacing();
       // NOTE: This assume that the shapes are polylines.
       this.Shapes.GetShape(last).Decimate(spacing);
+      if (this.Shapes.Shapes[last].Points.length <= 1) {
+        this.Shapes.Shapes[last].Points.pop();
+        return false;
+      }
       if (window.SA) { SA.RecordState(); }
       if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
       this.State = DRAWING_UP;
@@ -295,12 +324,7 @@
     if (this.StylusOnly) {
       return true;
     }
-    if (event.which === 3) {
-      // Right mouse was pressed.
-      // Pop up the properties dialog.
-      this.ShowPropertiesDialog();
-      return false;
-    }
+
     // Middle mouse deactivates the widget.
     if (event.which === 2) {
       // Middle mouse was pressed.
@@ -358,9 +382,10 @@
       }
     }
 
-    if (event.which && event.which === 1 && this.State === ACTIVE) {
-      this.State = DRAG;
-    }
+    // Dragging is not intuitive.
+    // if (event.which && event.which === 1 && this.State === ACTIVE) {
+    //  this.State = DRAG;
+    // }
 
     if (this.State === DRAG) {
       // Drag

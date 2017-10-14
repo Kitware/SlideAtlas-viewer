@@ -188,7 +188,6 @@ window.SAM = window.SAM || {};
   // This is in global/world coordinate system.
   Camera.prototype.SetWorldFocalPoint = function (fp) {
     if (isNaN(fp[0]) || isNaN(fp[1])) {
-      console.log('Camera 1');
       return;
     }
     this.WorldFocalPoint[0] = fp[0];
@@ -296,7 +295,6 @@ window.SAM = window.SAM || {};
 
   Camera.prototype.Translate = function (dx, dy, dz) {
     if (isNaN(dx) || isNaN(dy) || isNaN(dz)) {
-      console.log('Camera 2');
       return;
     }
     // I will leave this as an exception.
@@ -312,7 +310,6 @@ window.SAM = window.SAM || {};
 
   Camera.prototype.SetHeight = function (height) {
     if (isNaN(height)) {
-      console.log('Camera 3');
       return;
     }
     this.Height = height;
@@ -326,7 +323,6 @@ window.SAM = window.SAM || {};
 
   Camera.prototype.SetWidth = function (width) {
     if (isNaN(width)) {
-      console.log('Camera 4');
       return;
     }
     this.Width = width;

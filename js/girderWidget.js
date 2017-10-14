@@ -31,13 +31,20 @@
         'position': 'absolute',
         'left': (3 * this.Radius) + 'px',
         'top': y + 'px',
-        'width': (2 * this.Radius) + 'px',
-        'height': (2 * this.Radius) + 'px',
+        'width': (3 * this.Radius) + 'px',
+        'height': (3 * this.Radius) + 'px',
         'opacity': '0.6'})
-      .prop('title', 'Add Annotation')
+      // .prop('title', 'Add Annotation')
       .hover(function () { $(this).css({'opacity': '1'}); },
              function () { $(this).css({'opacity': '0.6'}); })
-      .bind('click touchstart', function (e) { self.NewAnnotationItem(e); });
+      .on('click touchstart',
+          function (e) {
+            self.NewAnnotationItem(e);
+            return false;
+          })
+      .on('touchmove touchend', function (e) {
+        return false;
+      });
 
     this.AnnotationObjects = [];
     this.Highlighted = undefined;
@@ -63,34 +70,34 @@
       .css({
         'margin': '2px 0px',
         'width': '100%'})
-      .prop('title', 'Replace Annotation')
-      .bind('click touchstart',
-            function () {
-              self.SnapShotAnnotation(self.MenuAnnotationObject);
-              self.Menu.hide();
-            });
+      // .prop('title', 'Replace Annotation')
+      .on('click touchstart',
+          function () {
+            self.SnapShotAnnotation(self.MenuAnnotationObject);
+            self.Menu.hide();
+          });
     $('<button>')
       .appendTo(this.Menu)
       .text('Delete')
       .css({
         'margin': '2px 0px',
         'width': '100%'})
-      .bind('click touchstart',
-            function () {
-              self.DeleteAnnotation(self.MenuAnnotationObject);
-              self.Menu.hide();
-            });
+      .on('click touchstart',
+          function () {
+            self.DeleteAnnotation(self.MenuAnnotationObject);
+            self.Menu.hide();
+          });
     $('<button>')
       .appendTo(this.Menu)
       .text('Properties')
       .css({
         'margin': '2px 0px',
         'width': '100%'})
-      .bind('click touchstart',
-            function () {
-              self.ShowAnnotationPropertiesDialog(self.MenuAnnotationObject);
-              self.Menu.hide();
-            });
+      .on('click touchstart',
+          function () {
+            self.ShowAnnotationPropertiesDialog(self.MenuAnnotationObject);
+            self.Menu.hide();
+          });
   }
 
   GirderWidget.prototype.SaveSectionMetaData = function (annot) {
@@ -203,6 +210,7 @@
     var returnElements = [];
     var i;
     var j;
+    var k;
     var points;
 
     // record the view.
@@ -302,8 +310,8 @@
       }
       // Pencil scheme not exact match.  Need to split up polylines.
       if (widget.type === 'pencil') {
-        for (i = 0; i < widget.shapes.length; ++i) {
-          points = widget.shapes[i];
+        for (k = 0; k < widget.shapes.length; ++k) {
+          points = widget.shapes[k];
           // Add the z coordinate.
           for (j = 0; j < points.length; ++j) {
             points[j][2] = 0;
@@ -313,20 +321,20 @@
             'closed': false,
             'points': points};
           // Hackish way to deal with multiple lines.
-          if (widget.outlinecolor) {
+          if (widget.outlinecolor !== undefined) {
             element.lineColor = SAM.ConvertColorToHex(widget.outlinecolor);
           }
-          if (widget.linewidth) {
+          if (widget.linewidth !== undefined) {
             element.lineWidth = Math.round(widget.linewidth);
           }
           returnElements.push(element);
           element = undefined;
         }
       } else if (element) {
-        if (widget.outlinecolor) {
+        if (widget.outlinecolor !== undefined) {
           element.lineColor = SAM.ConvertColorToHex(widget.outlinecolor);
         }
-        if (widget.linewidth) {
+        if (widget.linewidth !== undefined) {
           element.lineWidth = Math.round(widget.linewidth);
         }
         returnElements.push(element);
@@ -425,14 +433,14 @@
         'border-radius': '2px',
         'z-index': '100'
       })
-      .mouseenter(function () { div.focus(); console.log('enter'); })
+      .mouseenter(function () { div.focus(); })
       .hide() // hide until animation is finished.
       .hover(function () { div.css({'opacity': '1'}); },
              function () { div.css({'opacity': '0.6'}); });
 
     var circle = $('<div>')
       .appendTo(div)
-      .prop('title', 'Show Annotation')
+      // .prop('title', 'Show Annotation')
       .text(data.annotation.name);
 
     // var slider = $('<div>')
@@ -455,25 +463,51 @@
     //    stop: function (e, ui) { self.UpdateThreshold(ui.value, annotObj); }
     //  });
 
-    circle.contextmenu(function () { return false; });
-    circle.mousedown(function (e) {
-      if (e.button === 0) {
-        self.DisplayAnnotation(annotObj);
-        return false;
-      }
-      if (e.button === 2) {
-        self.MenuAnnotationObject = annotObj;
-        // Position and show the properties menu.
-        var pos = $(this).position();
-        self.Menu
-          .css({
-            'left': (5 + pos.left + 2 * self.Radius) + 'px',
-            'top': (pos.top) + 'px'})
-          .show();
-        return false;
-      }
-      return true;
-    });
+    // circle.contextmenu(function () { return false; });
+    var callbackId = -1;
+    var slowClickFlag = false;
+    circle.on('mousedown touchstart',
+              function (e) {
+                if (e.button === undefined || e.button === 0) {
+                  slowClickFlag = false;
+                  callbackId = setTimeout(
+                    function () {
+                      slowClickFlag = true;
+                      if (confirm('Save (snap shot) current view in ' +
+                                  annotObj.Circle.text())) {
+                        self.SnapShotAnnotation(annotObj);
+                      }
+                    }, 700);
+                  return false;
+                }
+                if (e.button && e.button === 2) {
+                  self.MenuAnnotationObject = annotObj;
+                  // Position and show the properties menu.
+                  var pos = $(this).position();
+                  self.Menu
+                    .css({
+                      'left': (5 + pos.left + 2 * self.Radius) + 'px',
+                      'top': (pos.top) + 'px'})
+                    .show();
+                }
+                return true;
+              });
+    circle.on('mousemove touchmove', function () { return false; });
+    circle.on('mouseup touchend',
+              function (e) {
+                if (e.button === undefined || e.button === 0) {
+                  if (slowClickFlag) {
+                    slowClickFlag = false;
+                    return false;
+                  }
+                  if (callbackId !== -1) {
+                    clearTimeout(callbackId);
+                    callbackId = -1;
+                  }
+                  self.DisplayAnnotation(annotObj);
+                }
+                return false;
+              });
 
     // Annotate the "add annotation" button down.
     this.Plus.animate({'top': (y + (6 * this.Radius)) + 'px'}, 400,
@@ -484,7 +518,6 @@
 
   GirderWidget.prototype.UpdateThreshold = function (valStr, annotObj) {
     var visValue = parseInt(valStr) / 100.0;
-    console.log('threshold: ' + visValue);
     var layer = this.AnnotationLayer;
     for (var wIndex = 0; wIndex < layer.WidgetList.length; wIndex++) {
       var widget = layer.WidgetList[wIndex];
@@ -581,6 +614,7 @@
         this.AnnotationLayer.LoadWidget(obj);
       }
       if (element.type === 'rectangle') {
+        // Switch to rect set versus individual rects. if false
         if (element.type === 'rectangle') { // switch behavior to ....
           setObj.widths.push(element.width);
           setObj.heights.push(element.height);
