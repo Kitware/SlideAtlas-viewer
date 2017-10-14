@@ -85,7 +85,7 @@
       if (defaults.Color) {
         this.Dialog.ColorInput.val(SAM.ConvertColorToHex(defaults.Color));
       }
-      if (defaults.LineWidth !=- undefined) {
+      if (defaults.LineWidth !== undefined) {
         this.LineWidth = defaults.LineWidth;
         this.Dialog.LineWidthInput.val(this.LineWidth);
       }
@@ -196,14 +196,13 @@
   };
 
   PencilWidget.prototype.HandleKeyDown = function (event) {
-    console.log("pw handleKeyDown " + this.State + "  " + event.keyCode);
-    if (this.State === DRAWING_UP && event.keyCode == 46) {
+    if (this.State === DRAWING_UP && event.keyCode === 46) {
       // Undo a stroke
       if (this.Shapes.GetNumberOfShapes() > 1) {
         this.Shapes.PopShape();
         this.Layer.EventuallyDraw();
         return false;
-      }      
+      }
     }
     if (this.StylusOnly) {
       return true;
@@ -281,12 +280,11 @@
       }
       return false;
     }
-    
+
     return false;
   };
 
   PencilWidget.prototype.HandleTouchStart = function (layerEvent) {
-    console.log("pw Handle touchstart " + this.State);
     if (this.StylusOnly && !layerEvent.OriginalEvent.pencil) {
       return true;
     }
@@ -385,9 +383,9 @@
     }
 
     // Dragging is not intuitive.
-    //if (event.which && event.which === 1 && this.State === ACTIVE) {
+    // if (event.which && event.which === 1 && this.State === ACTIVE) {
     //  this.State = DRAG;
-    //}
+    // }
 
     if (this.State === DRAG) {
       // Drag

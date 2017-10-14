@@ -2975,7 +2975,7 @@
   var SAFullScreenButton = function (parent) {
     var fullScreenFlag = false;
     var savedHeight = 'auto';
-    
+
     var fullScreenButton = $('<img>')
         .appendTo(parent)
         .prop('title', 'full screen')
@@ -3008,14 +3008,14 @@
                 'top': '0',
                 'width': '100%',
                 'height': height + 'px'});
-            fullScreenButton.attr('src', SA.ImagePathUrl + 'fullScreenOff32.png')
+            fullScreenButton.attr('src', SA.ImagePathUrl + 'fullScreenOff32.png');
           } else {
             $(elem)
               .css({
                 'position': 'static',
                 'height': savedHeight});
             console.log(savedHeight);
-            fullScreenButton.attr('src', SA.ImagePathUrl + 'fullScreen32.png')
+            fullScreenButton.attr('src', SA.ImagePathUrl + 'fullScreen32.png');
           }
           $(window).trigger('resize');
         } else {
@@ -3051,14 +3051,14 @@
             // Entering full screen
             savedHeight = parent.css('height');
             fullScreenFlag = true;
-            fullScreenButton.attr('src', SA.ImagePathUrl + 'fullScreenOff32.png')
+            fullScreenButton.attr('src', SA.ImagePathUrl + 'fullScreenOff32.png');
             parent.css({'height': '100%'});
           } else {
             // Exiting full screen
             $(self).show();
             fullScreenFlag = false;
-            fullScreenButton.attr('src', SA.ImagePathUrl + 'fullScreen32.png')
-            //parent.css({'height': 'auto'});            
+            fullScreenButton.attr('src', SA.ImagePathUrl + 'fullScreen32.png');
+            // parent.css({'height': 'auto'});
             parent.css({'height': savedHeight});
             console.log(savedHeight);
           }

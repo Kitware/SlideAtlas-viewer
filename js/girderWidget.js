@@ -34,13 +34,17 @@
         'width': (3 * this.Radius) + 'px',
         'height': (3 * this.Radius) + 'px',
         'opacity': '0.6'})
-      //.prop('title', 'Add Annotation')
+      // .prop('title', 'Add Annotation')
       .hover(function () { $(this).css({'opacity': '1'}); },
              function () { $(this).css({'opacity': '0.6'}); })
       .on('click touchstart',
-          function (e) { self.NewAnnotationItem(e);
-                         return false;})
-      .on('touchmove touchend', function (e) { return false;});
+          function (e) {
+            self.NewAnnotationItem(e);
+            return false;
+          })
+      .on('touchmove touchend', function (e) {
+        return false;
+      });
 
     this.AnnotationObjects = [];
     this.Highlighted = undefined;
@@ -66,7 +70,7 @@
       .css({
         'margin': '2px 0px',
         'width': '100%'})
-      //.prop('title', 'Replace Annotation')
+      // .prop('title', 'Replace Annotation')
       .on('click touchstart',
           function () {
             self.SnapShotAnnotation(self.MenuAnnotationObject);
@@ -317,7 +321,7 @@
             'closed': false,
             'points': points};
           // Hackish way to deal with multiple lines.
-          if (widget.outlinecolor != undefined) {
+          if (widget.outlinecolor !== undefined) {
             element.lineColor = SAM.ConvertColorToHex(widget.outlinecolor);
           }
           if (widget.linewidth !== undefined) {
@@ -429,14 +433,14 @@
         'border-radius': '2px',
         'z-index': '100'
       })
-      .mouseenter(function () { div.focus();  })
+      .mouseenter(function () { div.focus(); })
       .hide() // hide until animation is finished.
       .hover(function () { div.css({'opacity': '1'}); },
              function () { div.css({'opacity': '0.6'}); });
 
     var circle = $('<div>')
       .appendTo(div)
-      //.prop('title', 'Show Annotation')
+      // .prop('title', 'Show Annotation')
       .text(data.annotation.name);
 
     // var slider = $('<div>')
@@ -459,7 +463,7 @@
     //    stop: function (e, ui) { self.UpdateThreshold(ui.value, annotObj); }
     //  });
 
-    //circle.contextmenu(function () { return false; });
+    // circle.contextmenu(function () { return false; });
     var callbackId = -1;
     var slowClickFlag = false;
     circle.on('mousedown touchstart',
@@ -467,10 +471,10 @@
                 if (e.button === undefined || e.button === 0) {
                   slowClickFlag = false;
                   callbackId = setTimeout(
-                    function() {
+                    function () {
                       slowClickFlag = true;
-                      if ( confirm("Save (snap shot) current view in "
-                                 + annotObj.Circle.text())) {
+                      if (confirm('Save (snap shot) current view in ' +
+                                  annotObj.Circle.text())) {
                         self.SnapShotAnnotation(annotObj);
                       }
                     }, 700);
@@ -488,7 +492,7 @@
                 }
                 return true;
               });
-    circle.on('mousemove touchmove', function () { return false;})
+    circle.on('mousemove touchmove', function () { return false; });
     circle.on('mouseup touchend',
               function (e) {
                 if (e.button === undefined || e.button === 0) {
@@ -496,7 +500,7 @@
                     slowClickFlag = false;
                     return false;
                   }
-                  if (callbackId != -1) {
+                  if (callbackId !== -1) {
                     clearTimeout(callbackId);
                     callbackId = -1;
                   }
@@ -610,7 +614,8 @@
         this.AnnotationLayer.LoadWidget(obj);
       }
       if (element.type === 'rectangle') {
-        if (false && element.type === 'rectangle') { // switch behavior to ....
+        // Switch to rect set versus individual rects. if false
+        if (element.type === 'rectangle') { // switch behavior to ....
           setObj.widths.push(element.width);
           setObj.heights.push(element.height);
           setObj.centers.push(element.center[0]);

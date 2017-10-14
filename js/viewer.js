@@ -643,7 +643,7 @@
               'bottom': '0px',
               'right': '7px',
               'z-index': '200'});
-            //.prop('title', 'Zoom scroll');
+    // .prop('title', 'Zoom scroll');
     this.ZoomTab.Panel
             .addClass('sa-view-zoom-panel');
 

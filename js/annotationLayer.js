@@ -1007,7 +1007,6 @@
     }
     // TODO: Just make the pencil widget active.
     if (event.pencil) {
-      console.log("Handle touchstart Pencil " + this.Pencil);
       if (this.Pencil.HandleTouchStart(this) === false) {
         return false;
       }
@@ -1438,7 +1437,7 @@
   AnnotationLayer.prototype.Test = function () {
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var w = this.WidgetList[i];
-      if (w.Type === "polyline") {
+      if (w.Type === 'polyline') {
         w.ColorByHandedness();
       }
       this.EventuallyDraw();

@@ -342,7 +342,7 @@
     if (event.keyCode === 82) {
       this.Polyline.Points.reverse();
       this.ColorByHandedness();
-      this.Layer.EventuallyDraw(true);      
+      this.Layer.EventuallyDraw(true);
     }
 
     // Copy
