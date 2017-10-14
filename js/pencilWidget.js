@@ -306,10 +306,15 @@
   PencilWidget.prototype.HandleStop = function () {
     // A stroke has just been finished.
     var last = this.Shapes.GetNumberOfShapes() - 1;
+
     if (this.State === DRAWING_DOWN && last >= 0) {
       var spacing = this.Layer.GetCamera().GetSpacing();
       // NOTE: This assume that the shapes are polylines.
       this.Shapes.GetShape(last).Decimate(spacing);
+      if (this.Shapes.Shapes[last].Points.length <= 1) {
+        this.Shapes.Shapes[last].Points.pop();
+        return false;
+      }
       if (window.SA) { SA.RecordState(); }
       if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
       this.State = DRAWING_UP;

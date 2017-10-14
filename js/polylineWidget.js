@@ -149,6 +149,17 @@
             .appendTo(this.Dialog.ClosedDiv)
             .attr('checked', 'false')
             .css({'display': 'table-cell'});
+    /*
+      this.Dialog.ReverseButton =
+            $('<button>')
+            .appendTo(this.Dialog.ClosedDiv)
+            .text('Reverse')
+            .css({'display': 'table-cell'})
+            .on('click touchstart',
+                function () {
+                  self.Polyline.Points.reverse();
+                });
+    */
 
     // Line Width
     this.Dialog.LineWidthDiv =
@@ -327,6 +338,13 @@
   };
 
   PolylineWidget.prototype.HandleKeyDown = function (event) {
+    // 'r' reverses loop (and colors: Blue clockwise, Red counter clockwise)
+    if (event.keyCode === 82) {
+      this.Polyline.Points.reverse();
+      this.ColorByHandedness();
+      this.Layer.EventuallyDraw(true);      
+    }
+
     // Copy
     if (event.keyCode === 67 && event.ctrlKey) {
       // control-c for copy
@@ -794,7 +812,7 @@
 
     if (this.Polyline.Closed) {
       this.Dialog.AreaDiv.show();
-      var area = this.ComputeArea() * 0.25 * 0.25;
+      var area = Math.abs(this.ComputeArea() * 0.25 * 0.25);
       var areaString = '';
       if (this.Polyline.FixedSize) {
         areaString += area.toFixed(2);
@@ -833,12 +851,6 @@
         LineWidth: this.LineWidth});
     if (SAM.NotesWidget && !this.UserNoteFlag) { SAM.NotesWidget.MarkAsModified(); } // Hack
     if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
-  };
-
-  // Note, self intersection can cause unexpected areas.
-  // i.e looping around a point twice ...
-  PolylineWidget.prototype.ComputeArea = function () {
-    return this.Polyline.ComputeArea();
   };
 
   // Note, self intersection can cause unexpected areas.
@@ -922,55 +934,9 @@
   };
 
   // Convert to right handed loop
-  PolylineWidget.prototype.ConvertToRightHandedLoop = function () {
-    var end = this.Polyline.Points.length -1;
-    if (end < 2) {
-      return false;
-    }
-    var x;
-    var y;
-    var x2;
-    var y2;
-    var x0 = this.Polyline.Points[end-1][0];
-    var y0 = this.Polyline.Points[end-1][1];
-    var x1 = this.Polyline.Points[end][0];
-    var y1 = this.Polyline.Points[end][1];
-    var x01 = x1-x0;
-    var y01 = y1-y0;
-    var m01 = Math.sqrt(x01 * x01 + y01 * y01);
-    var x12;
-    var y12;
-    var m12;
-    var angleSum = 0.0;
-    for (var i = 0; i <= end; ++i) {
-      x2 = this.Polyline.Points[i][0];
-      y2 = this.Polyline.Points[i][1];
-      x12 = x2-x1;
-      y12 = y2-y1;
-      m12 = Math.sqrt(x12 * x12 + y12 * y12);
-      // dot product for the sine.
-      x = (x01 * x12 + y01 * y12) / (m01 * m12);
-      // cross product for the cosine
-      y = (x01 * y12 - x12 * y01) / (m01 * m12);
-      angleSum += Math.atan2(y,x);
-
-      x01 = x12;
-      y01 = y12;
-      m01 = m12;
-      x1 = x2;
-      y1 = y2;
-    }
-    /*
-    if (angleSum < 0) {
-      // right handed
-      // Reverse the order of the points.
-      this.Polyline.Points.reverse();
-    }
-    this.LineWidth = 0.0;
-    this.Polyline.LineWidth = this.LineWidth;
-    */
-    
-    if (angleSum < 0) {
+  PolylineWidget.prototype.ColorByHandedness = function () {
+    var area = this.Polyline.ComputeArea();
+    if (area > 0) {
       // right handed
       this.Polyline.OutlineColor = [1.0, 0.0, 0.0];
     } else {

@@ -1439,7 +1439,7 @@
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var w = this.WidgetList[i];
       if (w.Type === "polyline") {
-        w.ConvertToRightHandedLoop();
+        w.ColorByHandedness();
       }
       this.EventuallyDraw();
     }

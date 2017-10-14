@@ -36,7 +36,7 @@
         // SA.OnStartInteraction( function () { panel.hide();} );
     } else {
       this.Tab = new SA.Tab(parent, SA.ImagePathUrl + 'nav.png', 'navigationTab');
-      this.Tab.Div.prop('title', 'Navigation');
+      //this.Tab.Div.prop('title', 'Navigation');
       this.Tab.Div.addClass('sa-view-navigation-div');
       this.Tab.Panel.addClass('sa-view-navigation-panel');
 
@@ -51,28 +51,28 @@
         $('<img>').appendTo(this.Tab.Panel)
         .addClass('sa-view-navigation-button')
         .attr('src', SA.ImagePathUrl + 'previousSlide.png')
-        .prop('title', 'Previous Slide. (page-up)')
+        //.prop('title', 'Previous Slide. (page-up)')
         .click(function () { self.PreviousSlide(); });
 
     this.PreviousNoteButton =
         $('<img>').appendTo(this.Tab.Panel)
         .addClass('sa-view-navigation-button')
         .attr('src', SA.ImagePathUrl + 'previousNote.png')
-        .prop('title', 'Previous Note. (p)')
+        //.prop('title', 'Previous Note. (p)')
         .click(function () { self.PreviousNote(); });
 
     this.NextNoteButton =
         $('<img>').appendTo(this.Tab.Panel)
         .addClass('sa-view-navigation-button')
         .attr('src', SA.ImagePathUrl + 'nextNote.png')
-        .prop('title', 'Next Note, (n, space)')
+        //.prop('title', 'Next Note, (n, space)')
         .click(function () { self.NextNote(); });
 
     this.NextSlideButton =
         $('<img>').appendTo(this.Tab.Panel)
         .addClass('sa-view-navigation-button')
         .attr('src', SA.ImagePathUrl + 'nextSlide.png')
-        .prop('title', 'Next Slide. (page-down)')
+        //.prop('title', 'Next Slide. (page-down)')
         .css({'z-index': '100'})
         .click(function () { self.NextSlide(); });
     this.NextSlideButton

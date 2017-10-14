@@ -34,7 +34,7 @@
         'width': (3 * this.Radius) + 'px',
         'height': (3 * this.Radius) + 'px',
         'opacity': '0.6'})
-      .prop('title', 'Add Annotation')
+      //.prop('title', 'Add Annotation')
       .hover(function () { $(this).css({'opacity': '1'}); },
              function () { $(this).css({'opacity': '0.6'}); })
       .on('click touchstart',
@@ -66,7 +66,7 @@
       .css({
         'margin': '2px 0px',
         'width': '100%'})
-      .prop('title', 'Replace Annotation')
+      //.prop('title', 'Replace Annotation')
       .on('click touchstart',
           function () {
             self.SnapShotAnnotation(self.MenuAnnotationObject);
@@ -436,7 +436,7 @@
 
     var circle = $('<div>')
       .appendTo(div)
-      .prop('title', 'Show Annotation')
+      //.prop('title', 'Show Annotation')
       .text(data.annotation.name);
 
     // var slider = $('<div>')
@@ -610,7 +610,7 @@
         this.AnnotationLayer.LoadWidget(obj);
       }
       if (element.type === 'rectangle') {
-        if (element.type === 'rectangle') { // switch behavior to ....
+        if (false && element.type === 'rectangle') { // switch behavior to ....
           setObj.widths.push(element.width);
           setObj.heights.push(element.height);
           setObj.centers.push(element.center[0]);

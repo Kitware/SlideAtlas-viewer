@@ -260,7 +260,7 @@
       if (this.OutlineColor !== undefined) {
         var width = this.LineWidth * scale;
         if (width === 0) {
-          width = 1;
+          width = 3;
         }
         view.Context2d.lineWidth = width;
         if (this.Active) {

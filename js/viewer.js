@@ -44,7 +44,7 @@
     this.Rotatable = true;
 
     this.HistoryFlag = false;
-    this.MinPixelSize = 0.5;
+    this.MinPixelSize = 0.25;
 
     // Interaction state:
     // What to do for mouse move or mouse up.
@@ -642,8 +642,8 @@
               'position': 'absolute',
               'bottom': '0px',
               'right': '7px',
-              'z-index': '200'})
-            .prop('title', 'Zoom scroll');
+              'z-index': '200'});
+            //.prop('title', 'Zoom scroll');
     this.ZoomTab.Panel
             .addClass('sa-view-zoom-panel');
 
@@ -2345,7 +2345,7 @@
     if (event.keyCode === 38) {
       // Up cursor key
       dx = 0.0;
-      dy = -0.8 * cam.GetHeight();
+      dy = -0.5 * cam.GetHeight();
       rx = dx * c - dy * s;
       ry = dx * s + dy * c;
       this.TranslateTarget[0] = fp[0] + rx;
@@ -2357,7 +2357,7 @@
     } else if (event.keyCode === 40) {
       // Down cursor key
       dx = 0.0;
-      dy = 0.8 * cam.GetHeight();
+      dy = 0.5 * cam.GetHeight();
       rx = dx * c - dy * s;
       ry = dx * s + dy * c;
       this.TranslateTarget[0] = fp[0] + rx;
@@ -2368,7 +2368,7 @@
       return false;
     } else if (event.keyCode === 37) {
       // Left cursor key
-      dx = -0.8 * cam.GetWidth();
+      dx = -0.5 * cam.GetWidth();
       dy = 0.0;
       rx = dx * c - dy * s;
       ry = dx * s + dy * c;
@@ -2380,7 +2380,7 @@
       return false;
     } else if (event.keyCode === 39) {
       // Right cursor key
-      dx = 0.8 * cam.GetWidth();
+      dx = 0.5 * cam.GetWidth();
       dy = 0.0;
       rx = dx * c - dy * s;
       ry = dx * s + dy * c;
