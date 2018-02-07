@@ -289,7 +289,7 @@
         // We keep the lines the normal color. Yellow is too hard to see.
     this.Loop.SetActive(false);
     this.Popup.Hide();
-    this.Layer.GetCanvasDiv().css(
+    this.Layer.GetParent().css(
             {'cursor': 'url(' + SAM.ImagePathUrl + 'select_lasso.png) 5 30,crosshair'});
     this.Layer.EventuallyDraw();
   };

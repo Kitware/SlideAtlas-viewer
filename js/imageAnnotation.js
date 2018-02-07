@@ -50,7 +50,8 @@
                           0, scale,
                           this.Origin[0], this.Origin[1]);
 
-    context.drawImage(this.Image, 0, 0);
+    //context.drawImage(this.Image, 0, 0);
+    context.fillRect(100, 100, 500, 300);
 
     context.restore();
   };

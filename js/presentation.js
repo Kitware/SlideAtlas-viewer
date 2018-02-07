@@ -1385,7 +1385,7 @@
       this.RemoveView2Button.hide();
       this.List.EditOff();
         // This causes the viewers to look transparent.
-        // SA.VIEWER.MainView.CanvasDiv.resizable('disable');
+        // SA.VIEWER.MainView.Parent.resizable('disable');
     }
   };
 

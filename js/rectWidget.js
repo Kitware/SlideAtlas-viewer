@@ -194,11 +194,11 @@
       // Do not render mouse "cursor" unti it moves and we know its location.
       this.Visibility = false;
       this.Layer.ActivateWidget(this);
-      this.Layer.GetCanvasDiv().css({'cursor': 'crosshair'});
+      this.Layer.GetParent().css({'cursor': 'crosshair'});
       return;
     }
 
-    this.Layer.GetCanvasDiv().css({'cursor': 'default'});
+    this.Layer.GetParent().css({'cursor': 'default'});
     this.State = WAITING;
   }
 
@@ -538,7 +538,7 @@
 
   RectWidget.prototype.Deactivate = function () {
     this.Popup.StartHideTimer();
-    this.Layer.GetCanvasDiv().css({'cursor': 'default'});
+    this.Layer.GetParent().css({'cursor': 'default'});
     this.Layer.DeactivateWidget(this);
     this.State = WAITING;
     this.Shape.Active = false;

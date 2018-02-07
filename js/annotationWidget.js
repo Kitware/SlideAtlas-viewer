@@ -24,7 +24,7 @@
     layer.AnnotationWidget = this;
 
     SAM.detectMobile();
-    this.Tab = new SA.Tab(layer.GetCanvasDiv(),
+    this.Tab = new SA.Tab(layer.GetParent(),
                        SA.ImagePathUrl + 'pencil3Up.png',
                        'annotationTab');
     this.Tab.Div
@@ -207,7 +207,7 @@
 
   AnnotationWidget.prototype.NewLasso = function () {
     var button = this.LassoButton;
-    this.ActivateButton(button, SAM.LassoWidget);
+    this.ActivateButton(button, SAM.ImageWidget);
   };
 
   AnnotationWidget.prototype.NewPolyline = function () {

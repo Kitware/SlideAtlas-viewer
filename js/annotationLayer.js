@@ -630,8 +630,7 @@
               'border-width': '0px',
               'width': '100%',
               'height': '100%',
-              'box-sizing': 'border-box',
-              'z-index': '100'})
+              'box-sizing': 'border-box'})
             .addClass('sa-resize');
 
     // I do not like modifying the parent.
@@ -658,13 +657,16 @@
     this.ScaleWidget = new SAM.ScaleWidget(this);
   }
 
+  // Not used.  Events are forwarded from the viewer.
   // Annotation layers ussualy let the viewer receive the events, and the
   // forward them to this layer.  Whey they handle the events separately, I
   // could never get the key and scroll events to stop propagation
   // (like "preventDefault"). This method is not used, but I am leaving it
   // because the layer can be created without a viewer.
+  /*
   AnnotationLayer.prototype.BindEvents = function () {
     var can = this.LayerDiv;
+    can.addClass("AnnotationLayerDiv");
     can.on(
       'mousedown.viewer',
       function (event) {
@@ -673,6 +675,7 @@
     can.on(
       'mousemove.viewer',
       function (event) {
+        console.log("layer mousemove");
         // So key events go the the right viewer.
         this.focus();
         // Firefox does not set which for mouse move events.
@@ -719,6 +722,7 @@
         return self.HandleKeyDown(event);
       });
   };
+*/
 
   // Try to remove all global references to this viewer.
   AnnotationLayer.prototype.Delete = function () {
@@ -745,13 +749,13 @@
   AnnotationLayer.prototype.Clear = function () {
     this.AnnotationView.Clear();
   };
-    // This is the same as LayerDiv.
-    // Get the div of the layer (main div).
-    // It is used to append DOM GUI children.
-  AnnotationLayer.prototype.GetCanvasDiv = function () {
-    return this.AnnotationView.CanvasDiv;
+  // This is the same as LayerDiv.
+  // Get the div of the layer (main div).
+  // It is used to append DOM GUI children.
+  AnnotationLayer.prototype.GetParent = function () {
+    return this.AnnotationView.Parent;
   };
-    // Get the current scale factor between pixels and world units.
+  // Get the current scale factor between pixels and world units.
   AnnotationLayer.prototype.GetPixelsPerUnit = function () {
     return this.AnnotationView.GetPixelsPerUnit();
   };
@@ -760,8 +764,8 @@
     return this.AnnotationView.GetMetersPerUnit();
   };
 
-    // the view arg is necessary for rendering into a separate canvas for
-    // saving large images.
+  // the view arg is necessary for rendering into a separate canvas for
+  // saving large images.
   AnnotationLayer.prototype.Draw = function (masterView) {
     masterView = masterView || this.AnnotationView;
     this.AnnotationView.Clear();
@@ -780,7 +784,7 @@
     }
   };
 
-    // To compress draw events.
+  // To compress draw events.
   AnnotationLayer.prototype.EventuallyDraw = function () {
     if (!this.RenderPending) {
       this.RenderPending = true;
@@ -796,7 +800,11 @@
   // Allow the layer to receive keyboard events.
   // TODO: If we have not bound out own events, forward focus to the viewer.
   AnnotationLayer.prototype.Focus = function () {
-    var can = this.LayerDiv.CanvasDiv;
+    // This looks like an error LayerDiv is a jquery pointer
+    // It was probably can = this.AnnotationView.Parent
+    // which is the same thing as LayerDiv (unless AnnotationView was created without a parent arg)
+    //var can = this.LayerDiv.Parent;
+    var can = this.LayerDiv;
     can.focus();
   };
 
@@ -805,19 +813,19 @@
     return this.Viewer || SA.VIEWER1;
   };
 
-    // Load an array of anntoations into this layer.
-    // It does not clear previous annotations. Call reset to do that.
-    // Called by Viewer.SetViewerRecord()
-    // This is neede to give a callback to an app that needs to update the
-    // visibility of annotations based on a threshold.
+  // Load an array of anntoations into this layer.
+  // It does not clear previous annotations. Call reset to do that.
+  // Called by Viewer.SetViewerRecord()
+  // This is neede to give a callback to an app that needs to update the
+  // visibility of annotations based on a threshold.
   AnnotationLayer.prototype.LoadAnnotations = function (annotations) {
-        // TODO: Fix this.  Keep actual widgets in the records / notes.
-        // For now lets just do the easy thing and recreate all the
-        // annotations.
+    // TODO: Fix this.  Keep actual widgets in the records / notes.
+    // For now lets just do the easy thing and recreate all the
+    // annotations.
     for (var i = 0; i < annotations.length; ++i) {
       var widget = this.LoadWidget(annotations[i]);
-            // This a bad hack. Modifying that array passed in.
-            // It is not really needed.  It was a fix for a schema mistake.
+      // This a bad hack. Modifying that array passed in.
+      // It is not really needed.  It was a fix for a schema mistake.
       if (!widget) {
                 // Get rid of corrupt widgets that do not load properly
         annotations.splice(i, 1);
@@ -825,8 +833,8 @@
       }
     }
 
-        // This is used by the vigilant plugnin to update which annotations
-        // are visible based on a confidence threshold.
+    // This is used by the vigilant plugnin to update which annotations
+    // are visible based on a confidence threshold.
     if (this.LoadCallback) {
       (this.LoadCallback)();
     }
@@ -837,8 +845,8 @@
     }
   };
 
-    // Load a widget from a json object (origin MongoDB).
-    // Returns the widget if there was not an error.
+  // Load a widget from a json object (origin MongoDB).
+  // Returns the widget if there was not an error.
   AnnotationLayer.prototype.LoadWidget = function (obj) {
     var widget;
     switch (obj.type) {
@@ -989,7 +997,7 @@
     return true;
   };
 
-    // TODO: Try to get rid of the viewer argument.
+  // TODO: Try to get rid of the viewer argument.
   AnnotationLayer.prototype.HandleTouchStart = function (event) {
     if (!this.GetVisibility()) {
       return true;
@@ -1144,8 +1152,8 @@
     this.LastMouseDownTime = this.MouseDownTime || 1;
     this.SetMousePositionFromEvent(event);
 
-        // Trying to detect click
-        // TODO: How to skip clicks when doubleclick occur.
+    // Trying to detect click
+    // TODO: How to skip clicks when doubleclick occur.
     this.MouseClick = true;
     this.MouseDownX = this.MouseX;
     this.MouseDownY = this.MouseY;

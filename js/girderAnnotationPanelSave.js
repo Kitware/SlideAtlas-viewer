@@ -1,57 +1,83 @@
-// TODO:
-// Record id when creating a new annotation.
-// Finish polyline "NewAnnotationItem"
-// Load annotation into layer when circle is clicked on.
-// Right click menu to "delete, modify (record over), set name.
-// Hover over circle to see annotation name.
-// Finish remaining annotation items.
-// Add camera view as annotation.
+// Split from girderWidget.
+//  1: Make the check boxes disply the annotation. (Separate layers or separate widget lists?)
+//     Separate layers for now. Layers might share a canvas or split into two objects.
+//  4: Make sure it loads on demand.
+//  5: Make the title editable text
+//  6: Change behavior of ‘+” icon.
+//  7: Make a default annotation if one does not exist (for a user).
+//      Saves only when changed.
+//      Deletes if name is default and all annotations are gone.
+//  8: Add pencil and text tools to top (not scrolled).
+//  9: Make the panel collapse to a single button.
+// 10: Make the panel expand to fit buttons, upto a maximum
+// 11: make sure it works on an ipad / surface.
+// 12: make it go opaque when mouse enters.
 
 (function () {
   'use strict';
 
-  function GirderWidget (layer, itemId) {
+  // Parent is the viewer.Div
+  function GirderAnnotationPanel (viewer, itemId) {
+    this.Parent = viewer.Div;
+
+    // Create a parent div to hold all of the annotation labels
+    this.Margin = 6
+
+    this.ScrollDiv = $('<div>')
+      // Have to use this parent, or events are blocked.
+      //.appendTo($('.ViewerDiv'))
+      .appendTo(this.Parent)
+      .css({
+        'direction': 'rtl',
+        'overflow-y': 'auto',
+        'position': 'absolute',
+        'left': (3 * this.Margin) + 'px',
+        'top': (10 * this.Margin) + 'px',
+        'bottom': (5* this.Margin) + 'px',
+        'width': '30%'});    
+    this.ScrollDiv.addClass("AnnotationPanel");
+    
+    this.Div = $('<div>')
+      .appendTo(this.ScrollDiv)
+      .on('mousemove touchmove', function () { return true; })
+      .css({'direction': 'ltr'});
+
     if (itemId) {
       this.ImageItemId = itemId;
       this.LoadGirderImageItem(itemId);
     }
     this.Radius = 7;
-    this.AnnotationLayer = layer;
-    document.addEventListener('contextmenu', function (e) {
-      e.preventDefault();
-    }, false);
+    this.AnnotationLayer = viewer.GetAnnotationLayer();
 
     var idx = 0;
     var y = 70 + (idx * 6 * this.Radius);
     var self = this;
     this.Plus = $('<img>')
-      .appendTo(this.AnnotationLayer.GetParent())
+      .appendTo(this.Div)
       .attr('src', SA.ImagePathUrl + 'bluePlus.png')
       .css({
-        'position': 'absolute',
-        'left': (3 * this.Radius) + 'px',
-        'top': y + 'px',
-        'width': (3 * this.Radius) + 'px',
-        'height': (3 * this.Radius) + 'px',
-        'opacity': '0.6'})
-      // .prop('title', 'Add Annotation')
+        //'display': 'table',
+        'opacity': '0.4'
+      })
+      .prop('title', 'Add Annotation')
       .hover(function () { $(this).css({'opacity': '1'}); },
-             function () { $(this).css({'opacity': '0.6'}); })
+             function () { $(this).css({'opacity': '0.4'}); })
       .on('click touchstart',
           function (e) {
             self.NewAnnotationItem(e);
             return false;
           })
       .on('touchmove touchend', function (e) {
-        return false;
+        return true;
       });
 
     this.AnnotationObjects = [];
     this.Highlighted = undefined;
 
     this.MenuAnnotationObject = undefined;
+    /*
     this.Menu = $('<div>')
-      .appendTo(this.AnnotationLayer.GetParent())
+      .appendTo(this.Div)
       .hide()
       .mouseleave(function () { $(this).hide(); })
       .css({
@@ -98,9 +124,10 @@
             self.ShowAnnotationPropertiesDialog(self.MenuAnnotationObject);
             self.Menu.hide();
           });
+*/
   }
 
-  GirderWidget.prototype.SaveSectionMetaData = function (annot) {
+  GirderAnnotationPanel.prototype.SaveSectionMetaData = function (annot) {
     if (confirm('Save section meta data?')) {
       var sections = [];
       for (var i = 0; i < annot.elements.length; ++i) {
@@ -126,7 +153,7 @@
 
   // Create a new annotation item from the annotation layer.
   // Save it in the database.  Add the annotation as a dot in the GUI.
-  GirderWidget.prototype.NewAnnotationItem = function (e) {
+  GirderAnnotationPanel.prototype.NewAnnotationItem = function (e) {
     var annot = {'elements': []};
     annot.elements = this.RecordAnnotation();
 
@@ -170,7 +197,7 @@
     }
   };
 
-  GirderWidget.prototype.LoadGirderImageItem = function (itemId) {
+  GirderAnnotationPanel.prototype.LoadGirderImageItem = function (itemId) {
         // var itemId = "564e42fe3f24e538e9a20eb9";
         // I think data is the wron place to pass these parameters.
     var data = {
@@ -192,7 +219,8 @@
     });
   };
 
-  GirderWidget.prototype.LoadAnnotationItem = function (annotId) {
+  // TODO: change to load on demand.
+  GirderAnnotationPanel.prototype.LoadAnnotationItem = function (annotId) {
     // var annotId = "572be29d3f24e53573aa8e91";
     var self = this;
     girder.rest.restRequest({
@@ -206,7 +234,7 @@
 
   // Converts annotation layer widgets into girder annotation elements.
   // returns an elements array.
-  GirderWidget.prototype.RecordAnnotation = function () {
+  GirderAnnotationPanel.prototype.RecordAnnotation = function () {
     var returnElements = [];
     var i;
     var j;
@@ -344,7 +372,7 @@
     return returnElements;
   };
 
-  GirderWidget.prototype.ShowAnnotationPropertiesDialog = function (annotObj) {
+  GirderAnnotationPanel.prototype.ShowAnnotationPropertiesDialog = function (annotObj) {
     this.Highlight(annotObj);
     annotObj.name = prompt('Name', annotObj.name);
     annotObj.Circle.text(annotObj.name);
@@ -362,7 +390,7 @@
   // Replace an existing annotation with the current state of the
   // annotation layer.  Saves in the database too.
   // NOTE: We have no safe way for the database save to fail.
-  GirderWidget.prototype.SnapShotAnnotation = function (annotObj) {
+  GirderAnnotationPanel.prototype.SnapShotAnnotation = function (annotObj) {
     this.Highlight(annotObj);
     annotObj.Data.annotation.elements = this.RecordAnnotation();
     if (window.girder) {
@@ -378,17 +406,13 @@
 
   // Delete button in menu calls this.
   // Remove the annotation from the gui and database.
-  // TODO: animate the circles moving up.
-  GirderWidget.prototype.DeleteAnnotation = function (deleteAnnotObj) {
+  GirderAnnotationPanel.prototype.DeleteAnnotation = function (deleteAnnotObj) {
     var found = false;
     var newObjects = [];
     var y;
     for (var i = 0; i < this.AnnotationObjects.length; ++i) {
       var annotObj = this.AnnotationObjects[i];
       if (found) {
-        // Animate the dots up to fill the space.
-        y = 70 + ((i - 1) * 6 * this.Radius);
-        annotObj.Div.animate({'top': y + 'px'});
         newObjects.push(annotObj);
       } else if (deleteAnnotObj === annotObj) {
         found = true;
@@ -405,41 +429,40 @@
         newObjects.push(annotObj);
       }
     }
-    // Animate the "Add Annotation" button up too.
-    y = 70 + ((i - 1) * 6 * this.Radius);
-    this.Plus.animate({'top': y + 'px'});
     this.AnnotationObjects = newObjects;
   };
 
-  // Animate the "add annotation" button down to make room for another
-  // annotation button.  Make a new annotation and save it in the
-  // database. Return the annotationObject which has GUI and data.
-  GirderWidget.prototype.AddAnnotation = function (data) {
+  // Add a new annotation to the list
+  GirderAnnotationPanel.prototype.AddAnnotation = function (data) {
     var idx = this.AnnotationObjects.length;
     var y = 70 + (idx * 6 * this.Radius);
 
     var self = this;
     var div = $('<div>')
-      .appendTo(this.AnnotationLayer.GetParent())
+      .insertBefore(this.Plus)
       .css({
-        'position': 'absolute',
-        'left': (3 * this.Radius) + 'px',
-        'top': y + 'px',
+        'display': 'table',
         'min-width': (2 * this.Radius) + 'px',
         'min-height': (2 * this.Radius) + 'px',
+        'margin': '2px',
         'background-color': '#55BBFF',
-        'opacity': '0.6',
+        'opacity': '0.4',
         'border': '1px solid #666666',
-        'border-radius': '2px',
-        'z-index': '100'
+        'border-radius': '2px'
       })
       .mouseenter(function () { div.focus(); })
-      .hide() // hide until animation is finished.
       .hover(function () { div.css({'opacity': '1'}); },
-             function () { div.css({'opacity': '0.6'}); });
+             function () { div.css({'opacity': '0.4'}); });
 
+    var check = $('<input type="checkbox">')
+        .css({'display':'inline',
+              'position':'static'})
+      .appendTo(div);
+        
     var circle = $('<div>')
       .appendTo(div)
+        .css({'display':'inline',
+              'position':'static'})
       // .prop('title', 'Show Annotation')
       .text(data.annotation.name);
 
@@ -456,81 +479,24 @@
       // Slider: slider};
     this.AnnotationObjects.push(annotObj);
 
-    // slider
-    //  .slider({
-    //    start: function (e, ui) { self.UpdateThreshold(ui.value, annotObj); },
-    //    slide: function (e, ui) { self.UpdateThreshold(ui.value, annotObj); },
-    //    stop: function (e, ui) { self.UpdateThreshold(ui.value, annotObj); }
-    //  });
-
-    // circle.contextmenu(function () { return false; });
-    var callbackId = -1;
-    var slowClickFlag = false;
-    circle.on('mousedown touchstart',
-              function (e) {
-                if (e.button === undefined || e.button === 0) {
-                  slowClickFlag = false;
-                  callbackId = setTimeout(
-                    function () {
-                      slowClickFlag = true;
-                      if (confirm('Save (snap shot) current view in ' +
-                                  annotObj.Circle.text())) {
-                        self.SnapShotAnnotation(annotObj);
-                      }
-                    }, 700);
-                  return false;
-                }
-                if (e.button && e.button === 2) {
-                  self.MenuAnnotationObject = annotObj;
-                  // Position and show the properties menu.
-                  var pos = $(this).position();
-                  self.Menu
-                    .css({
-                      'left': (5 + pos.left + 2 * self.Radius) + 'px',
-                      'top': (pos.top) + 'px'})
-                    .show();
-                }
-                return true;
-              });
-    circle.on('mousemove touchmove', function () { return false; });
-    circle.on('mouseup touchend',
-              function (e) {
-                if (e.button === undefined || e.button === 0) {
-                  if (slowClickFlag) {
-                    slowClickFlag = false;
-                    return false;
-                  }
-                  if (callbackId !== -1) {
-                    clearTimeout(callbackId);
-                    callbackId = -1;
-                  }
-                  self.DisplayAnnotation(annotObj);
-                }
-                return false;
-              });
-
-    // Annotate the "add annotation" button down.
-    this.Plus.animate({'top': (y + (6 * this.Radius)) + 'px'}, 400,
-                      function () { div.show(); });
+    check.change(function() {
+      // this will contain a reference to the checkbox
+      if (this.checked) {
+        //alert(annotObj.data._id);
+        // the checkbox is now checked
+        widget = new ImageWidget(this.AnnotationLayer, true);
+        this.Layer.ActivateWidget(widget);
+        this.AnnotationLayer
+      } else {
+        // the checkbox is now no longer checked
+      }
+    });
 
     return annotObj;
   };
 
-  GirderWidget.prototype.UpdateThreshold = function (valStr, annotObj) {
-    var visValue = parseInt(valStr) / 100.0;
-    var layer = this.AnnotationLayer;
-    for (var wIndex = 0; wIndex < layer.WidgetList.length; wIndex++) {
-      var widget = layer.WidgetList[wIndex];
-      if (widget.Label === undefined || widget.Label === this.Label) {
-        widget.SetThreshold(visValue);
-        widget.ComputeVisibilities();
-      }
-    }
-    layer.EventuallyDraw();
-  };
-
   // Make the circle button yellow (and turn off the previous.)
-  GirderWidget.prototype.Highlight = function (annotObj) {
+  GirderAnnotationPanel.prototype.Highlight = function (annotObj) {
     // Highlight the circle for this annotaiton.
     if (this.Highlighted) {
       this.Highlighted.Div.css({'background-color': '#55BBFF'});
@@ -542,7 +508,7 @@
   };
 
   // Move the annotation info to the layer widgets and draw.
-  GirderWidget.prototype.DisplayAnnotation = function (annotObj) {
+  GirderAnnotationPanel.prototype.DisplayAnnotation = function (annotObj) {
     this.AnnotationLayer.SetVisibility(true);
     this.Highlight(annotObj);
 
@@ -657,5 +623,5 @@
     this.AnnotationLayer.EventuallyDraw();
   };
 
-  SAM.GirderWidget = GirderWidget;
+  SAM.GirderAnnotationPanel = GirderAnnotationPanel;
 })();

@@ -1,7 +1,7 @@
 // Originally to hold a set of polylines for the pencil widget.
 
 (function () {
-    // Depends on the CIRCLE widget
+  // Depends on the CIRCLE widget
   'use strict';
 
   function ShapeGroup () {
@@ -13,9 +13,9 @@
     return this.Bounds;
   };
 
-    // Returns 0 if is does not overlap at all.
-    // Returns 1 if part of the section is in the bounds.
-    // Returns 2 if all of the section is in the bounds.
+  // Returns 0 if is does not overlap at all.
+  // Returns 1 if part of the section is in the bounds.
+  // Returns 2 if all of the section is in the bounds.
   ShapeGroup.prototype.ContainedInBounds = function (bds) {
     if (this.Shapes.length === 0) { return 0; }
     var retVal = this.Shapes[0].ContainedInBounds(bds);
@@ -50,7 +50,7 @@
     }
   };
 
-    // Find a world location of a popup point given a camera.
+  // Find a world location of a popup point given a camera.
   ShapeGroup.prototype.FindPopupPoint = function (cam) {
     if (this.Shapes.length === 0) { return; }
     var roll = cam.GetWorldRoll();
@@ -103,7 +103,7 @@
     }
   };
 
-    // Just returns the first.
+  // Just returns the first.
   ShapeGroup.prototype.GetLineWidth = function () {
     if (this.Shapes.length !== 0) {
       return this.Shapes[0].GetLineWidth();
@@ -117,7 +117,7 @@
     }
   };
 
-    // Just returns the first.
+  // Just returns the first.
   ShapeGroup.prototype.GetOutlineColor = function () {
     if (this.Shapes.length !== 0) {
       return this.Shapes[0].OutlineColor;
@@ -127,19 +127,19 @@
 
   ShapeGroup.prototype.SetOrigin = function (origin) {
     for (var i = 0; i < this.Shapes.length; ++i) {
-            // Makes a copy of the array.
+      // Makes a copy of the array.
       this.Shapes[i].SetOrigin(origin);
     }
   };
 
-    // Adds origin to points and sets origin to 0.
+  // Adds origin to points and sets origin to 0.
   ShapeGroup.prototype.ResetOrigin = function () {
     for (var i = 0; i < this.Shapes.length; ++i) {
       this.Shapes[i].ResetOrigin();
     }
   };
 
-    // Just returns the first.
+  // Just returns the first.
   ShapeGroup.prototype.GetOrigin = function () {
     if (this.Shapes.length !== 0) {
       return this.Shapes[0].Origin;

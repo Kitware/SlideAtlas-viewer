@@ -383,19 +383,19 @@
             this.SetActive(true);
             if (ix === 0) {
                 this.State = DRAG_LEFT;
-                thisLayer.AnnotationView.CanvasDiv.css({'cursor':'col-resize'});
+                thisLayer.AnnotationView.Parent.css({'cursor':'col-resize'});
             } else if (ix === this.Shape.Dimensions[0]) {
                 this.State = DRAG_RIGHT;
-                this.Layer.AnnotationView.CanvasDiv.css({'cursor':'col-resize'});
+                this.Layer.AnnotationView.Parent.css({'cursor':'col-resize'});
             } else if (iy === 0) {
                 this.State = DRAG_TOP;
-                this.Viewer.AnnotationView.CanvasDiv.css({'cursor':'row-resize'});
+                this.Viewer.AnnotationView.Parent.css({'cursor':'row-resize'});
             } else if (iy === this.Shape.Dimensions[1]) {
                 this.State = DRAG_BOTTOM;
-                this.Layer.MainView.CanvasDiv.css({'cursor':'row-resize'});
+                this.Layer.MainView.Parent.css({'cursor':'row-resize'});
             } else {
                 this.State = DRAG;
-                this.Layer.MainView.CanvasDiv.css({'cursor':'move'});
+                this.Layer.MainView.Parent.css({'cursor':'move'});
             }
             return true;
         }
@@ -413,7 +413,7 @@
   };
 
   ScaleWidget.prototype.Deactivate = function () {
-    this.Layer.AnnotationView.CanvasDiv.css({'cursor': 'default'});
+    this.Layer.AnnotationView.Parent.css({'cursor': 'default'});
     this.Popup.StartHideTimer();
     this.State = WAITING;
     this.Shape.Active = false;

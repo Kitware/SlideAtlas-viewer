@@ -100,7 +100,7 @@
 
     if (!newFlag) {
       this.State = WAITING;
-      this.Layer.GetCanvasDiv().css({'cursor': 'default'});
+      this.Layer.GetParent().css({'cursor': 'default'});
     }
 
     // Lets save the zoom level (sort of).
@@ -120,7 +120,7 @@
     this.Shapes.SetActive(false);
     this.Popup.Hide();
     if (!this.StylusOnly) {
-      this.Layer.GetCanvasDiv().css(
+      this.Layer.GetParent().css(
         {'cursor': 'url(' + SAM.ImagePathUrl + 'Pencil-icon.png) 0 24,crosshair'});
     }
     this.Layer.EventuallyDraw();
@@ -185,7 +185,7 @@
 
   PencilWidget.prototype.Deactivate = function () {
     this.Popup.StartHideTimer();
-    this.Layer.GetCanvasDiv().css({'cursor': 'default'});
+    this.Layer.GetParent().css({'cursor': 'default'});
     this.Layer.DeactivateWidget(this);
     this.State = WAITING;
     this.Shapes.SetActive(false);

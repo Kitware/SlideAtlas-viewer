@@ -199,9 +199,10 @@
                                                    overlapThreshold,
                                                    confidenceThresh) {
     var overlapping = [];
-    var width1 = rect1.point2[0] - rect1.point1[0];
-    var height1 = rect1.point2[1] - rect1.point1[1];
-
+    var width1 = Math.abs(rect1.point2[0] - rect1.point1[0]);
+    var height1 = Math.abs(rect1.point2[1] - rect1.point1[1]);
+    var area1 = width1 * height1;
+    
     // Loop over bins touching the input rectangle
     var x, y;
     x = rect1.point1[0];
@@ -228,6 +229,7 @@
           if (rect1.confidence > confidenceThresh) {
             var width2 = rect2.point2[0] - rect1.point1[0];
             var height2 = rect2.point2[1] - rect1.point1[1];
+            var area2 = width2 * height2;
             // Compute the intersection.
             var xMin = Math.max(rect1.point1[0], rect2.point1[0]);
             var xMax = Math.min(rect1.point2[0], rect2.point2[0]);
@@ -235,8 +237,7 @@
             var yMax = Math.min(rect1.point2[1], rect2.point2[1]);
             var dx = Math.max(0, xMax - xMin);
             var dy = Math.max(0, yMax - yMin);
-            var overlap = (2.0 * dx * dy) /
-              ((width1 * height1) + (width2 * height2));
+            var overlap = (dx * dy) / Math.min(area1, area2);
             if (overlap > overlapThreshold) {
               overlapping.push({overlap: overlap, index: rect2Idx});
             }

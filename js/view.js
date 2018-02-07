@@ -20,11 +20,12 @@
     this.OutlineMatrix = mat4.create();
     this.OutlineCamMatrix = mat4.create();
 
-    this.CanvasDiv = parent;
+    this.Parent = parent;
     if (parent) {
-      this.CanvasDiv = parent;
+      this.Parent = parent;
     } else {
-      this.CanvasDiv = $('<div>');
+      // USed for off screen rendering. (Can we depreciate off screen feature in girder viewer?)
+      this.Parent = $('<div>');
     }
         // 2d canvas
         // Add a new canvas.
@@ -35,32 +36,32 @@
     }
 
     this.Canvas
-            .appendTo(this.CanvasDiv)
+            .appendTo(this.Parent)
             .css({'position': 'absolute',
               'left': '0%',
               'top': '0%',
               'width': '100%',
               'height': '100%'});
 
-    this.CanvasDiv
+    this.Parent
             .addClass('sa-view-canvas-div');
   }
 
     // Try to remove all global and circular references to this view.
   View.prototype.Delete = function () {
-    this.CanvasDiv.off('mousedown.viewer');
-    this.CanvasDiv.off('mousemove.viewer');
-    this.CanvasDiv.off('wheel.viewer');
-    this.CanvasDiv.off('touchstart.viewer');
-    this.CanvasDiv.off('touchmove.viewer');
-    this.CanvasDiv.off('touchend.viewer');
-    this.CanvasDiv.off('keydown.viewer');
-    this.CanvasDiv.off('wheel.viewer');
+    this.Parent.off('mousedown.viewer');
+    this.Parent.off('mousemove.viewer');
+    this.Parent.off('wheel.viewer');
+    this.Parent.off('touchstart.viewer');
+    this.Parent.off('touchmove.viewer');
+    this.Parent.off('touchend.viewer');
+    this.Parent.off('keydown.viewer');
+    this.Parent.off('wheel.viewer');
     delete this.ShapeList;
         // delete this.Section;
     delete this.Camera;
         // delete this.Tiles;
-    delete this.CanvasDiv;
+    delete this.Parent;
     delete this.Canvas;
   };
 
@@ -126,17 +127,17 @@
 
     // TODO: Get rid of these since the user can manipulate the parent / canvas
     // div which can be passed into the constructor.
-  View.prototype.appendTo = function (j) {
-    return this.CanvasDiv.appendTo(j);
-  };
+  //View.prototype.appendTo = function (j) {
+  //  return this.Parent.appendTo(j);
+  //};
 
-  View.prototype.remove = function (j) {
-    return this.CanvasDiv.remove(j);
-  };
+  //View.prototype.remove = function (j) {
+  //  return this.Parent.remove(j);
+  //};
 
-  View.prototype.css = function (j) {
-    return this.CanvasDiv.css(j);
-  };
+  //View.prototype.css = function (j) {
+  //  return this.Parent.css(j);
+  //};
 
     // TODO: Get rid of this.
   View.prototype.GetViewport = function () {
@@ -144,11 +145,11 @@
   };
 
   View.prototype.GetWidth = function () {
-    return this.CanvasDiv.width();
+    return this.Parent.width();
   };
 
   View.prototype.GetHeight = function () {
-    return this.CanvasDiv.height();
+    return this.Parent.height();
   };
 
   View.prototype.UpdateSize = function () {
@@ -158,15 +159,15 @@
     // The canvasDiv changes size, the width and height of the canvas and
     // camera need to follow.  I am going to make this the resize callback.
   View.prototype.UpdateCanvasSize = function () {
-    if (!this.CanvasDiv.is(':visible')) {
+    if (!this.Parent.is(':visible')) {
       return false;
     }
 
-    var pos = this.CanvasDiv.position();
-        // var width = this.CanvasDiv.innerWidth();
-        // var height = this.CanvasDiv.innerHeight();
-    var width = this.CanvasDiv.width();
-    var height = this.CanvasDiv.height();
+    var pos = this.Parent.position();
+        // var width = this.Parent.innerWidth();
+        // var height = this.Parent.innerHeight();
+    var width = this.Parent.width();
+    var height = this.Parent.height();
         // resizable is making width 0 intermitently ????
     if (width <= 0 || height <= 0) { return false; }
 
@@ -212,7 +213,7 @@
   // reference to this view.  I like that better than the view knowing
   // how to draw all these things.
   View.prototype.DrawShapes = function () {
-    if (!this.CanvasDiv.is(':visible')) {
+    if (!this.Parent.is(':visible')) {
       return;
     }
     for (var i = 0; i < this.ShapeList.length; i++) {

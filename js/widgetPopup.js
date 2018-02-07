@@ -10,7 +10,7 @@
     this.Visible = false;
     this.HideTimerId = 0;
 
-    var parent = widget.Layer.GetCanvasDiv();
+    var parent = widget.Layer.GetParent();
 
         // buttons to replace right click.
     var self = this;

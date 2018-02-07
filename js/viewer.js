@@ -25,6 +25,10 @@
     this.Parent = parent;
     parent.addClass('sa-viewer');
 
+    // For debugging event propagation.
+    //this.SetupTestDivs(parent);
+    //return;
+    
     this.Div = $('<div>')
             .appendTo(this.Parent)
             .css({'position': 'relative',
@@ -89,7 +93,7 @@
 
       this.RotateIcon =
                 $('<img>')
-                .appendTo(this.OverView.CanvasDiv)
+                .appendTo(this.OverView.Parent)
                 .attr('src', SA.ImagePathUrl + 'rotate.png')
                 .addClass('sa-view-rotate')
                 .mouseenter(function (e) { return self.RollEnter(e); })
@@ -114,17 +118,19 @@
     // This is only for drawing correlations.
     this.RecordIndex = 0; // Only used for drawing correlations.
 
-    var can = this.MainView.CanvasDiv;
+    //var can = this.MainView.Parent;
+    var can = this.Div;
+    can.addClass("ViewerDiv");
     // So we can programatically set the keyboard focus
     can.attr('tabindex', '1');
     can.on(
-            'mousedown.viewer',
-         function (event) {
-           return self.HandleMouseDown(event);
-         });
+        'mousedown.viewer',
+        function (event) {
+            return self.HandleMouseDown(event);
+        });
     can.on(
-            'mousemove.viewer',
-         function (event) {
+        'mousemove.viewer',
+        function (event) {
            // So key events go the the right viewer.
            this.focus();
            // Firefox does not set which for mouse move events.
@@ -164,7 +170,7 @@
             });
 
     // necesary to respond to keyevents.
-    this.MainView.CanvasDiv.attr('tabindex', '1');
+    this.MainView.Parent.attr('tabindex', '1');
     can.on(
             'keydown.viewer',
          function (event) {
@@ -184,7 +190,8 @@
     //                    false);
 
     if (this.OverView) {
-      can = this.OverView.CanvasDiv;
+      //can = this.OverView.Parent;
+      can = this.OverViewDiv;
       can.on(
                 'mousedown.viewer',
                 function (e) {
@@ -210,11 +217,11 @@
     }
 
     this.CopyrightWrapper = $('<div>')
-            .appendTo(this.MainView.CanvasDiv)
+            .appendTo(this.MainView.Parent)
             .addClass('sa-view-copyright');
     if (SA.Session && SA.Session.sessid === '560b5127a7a1412195d13685') {
       this.Icon = $('<img>')
-                .appendTo(this.MainView.CanvasDiv)
+                .appendTo(this.MainView.Parent)
                 .attr('src', 'http://static1.squarespace.com/static/5126bbb4e4b08c2e6d1cb6e4/t/54e66f05e4b0440df79a5729/1424387847915/')
                 .prop('title', 'UC Davis')
                 .css({'position': 'absolute',
@@ -225,7 +232,7 @@
     }
     if (SA.Session && SA.Session.sessid === '57504ba7a7a1411310dd2637') {
       this.Icon = $('<img>')
-                .appendTo(this.MainView.CanvasDiv)
+                .appendTo(this.MainView.Parent)
                 .attr('src', 'https://slide-atlas.org/api/v2/sessions/53d9230fdd98b54fd71e8ed7/attachments/57518ce4a7a14113156b8166')
                 .prop('title', 'Philips')
                 .css({'position': 'absolute',
@@ -236,16 +243,120 @@
     }
 
     // notice this is not new AnnotationLayer();
-    var annotationLayer1 = this.NewAnnotationLayer();
+    //var annotationLayer1 = this.NewAnnotationLayer();
     // Some widgets need access to the viewer.  rectSet and segment/contour
-    annotationLayer1.Viewer = this;
-    this.annotationWidget1 =
-      new SA.AnnotationWidget(annotationLayer1, this);
+    //annotationLayer1.Viewer = this;
+    //this.annotationWidget1 =
+      //new SA.AnnotationWidget(annotationLayer1, this);
   }
 
+
+
+  
+  Viewer.prototype.SetupTestDivs = function(parent) {
+    this.Div = $('<div>')
+      .appendTo(parent)
+      .addClass('viewer')
+      .css({'position': 'relative',
+            'border-width': '0px',
+            //'width': '100%',
+            //'height': '100%',
+            'width': '1000px',
+            'height': '1000px',
+            'left': '100px',
+            'background-color': 'blue',
+            'box-sizing': 'border-box'});
+      //.addClass('sa-resize');
+    this.Div.on('mousedown', function(e) {console.log("viewerdiv mouse down"); return true;});
+    this.Div.on('mousemove', function(e) {console.log("viewerdiv mouse move"); return true;});
+
+    this.MainView = {'Parent':this.Div};
+    
+    this.MainViewDiv = $('<div>')
+      .appendTo(this.Div)
+      .addClass('MainView')
+      .css({'position': 'absolute',
+            'border-width': '0px',
+            //'width': '100%',
+            //'height': '100%',
+            'width': '800px',
+            'height': '800px',
+            'left': '50px',
+            'top': '50px', 
+            'background-color': '#AFF',
+            'box-sizing': 'border-box'});
+    
+    
+    this.OverViewDiv = $('<div>')
+      .appendTo(this.Div)
+      .addClass('OverView')
+      .css({'position': 'absolute',
+            'border-width': '0px',
+            //'width': '100%',
+            //'height': '100%',
+            'width': '100px',
+            'height': '100px',
+            'left': '70px',
+            'top': '70px',
+            'background-color': 'green',
+            'box-sizing': 'border-box'});
+
+    //this.OverViewDiv.on('mousedown', function(e) {console.log("---^^^ over mouse down"); return true;});
+    //this.OverViewDiv.on('mousemove', function(e) {console.log("---^^^ over mouse move"); return true;});
+
+    //this.OverViewCanvas = $('<div>')
+    //  .appendTo(this.OverViewDiv)
+    //  .addClass('OverView')
+    //  .css({
+    //        'width': '100%',
+    //        'height': '100%',
+    //        'background-color': 'green',
+    //        'box-sizing': 'border-box'});
+
+
+    this.LayerDiv = $('<div>')
+      .appendTo(this.Div)
+      .addClass('Layer')
+      .css({'position': 'absolute',
+            'border-width': '0px',
+            //'width': '100%',
+            //'height': '100%',
+            'width': '780px',
+            'height': '700px',
+            'left': '60px',
+            'top': '60px',
+            'background-color': 'yellow',
+            'box-sizing': 'border-box'});
+    //this.LayerDiv.on('mousedown', function(e) {console.log("---layer mouse down"); return true;});
+    //this.LayerDiv.on('mousemove', function(e) {console.log("---layer mouse move"); return true;});
+
+    this.PanelDiv = $('<div>')
+      .appendTo(this.Div)
+      .addClass('Layer')
+      .css({'position': 'relative',
+            'border-width': '0px',
+            //'width': '100%',
+            //'height': '100%',
+            'width': '130px',
+            'height': '400px',
+            'left': '60px',
+            'top': '200px',
+            'background-color': 'pink',
+            'box-sizing': 'border-box'})
+      .hover(function () { $(this).css({'opacity': '1'}); },
+             function () { $(this).css({'opacity': '0.4'}); })
+
+
+  }
+
+
+
+
+
+  
   // Allow the viewer to receive keyboard events.
   Viewer.prototype.Focus = function () {
-    var can = this.MainView.CanvasDiv;
+    var can = this.MainView.Parent;
     can.focus();
   };
 
@@ -260,6 +371,7 @@
 
   // Try to remove all global references to this viewer.
   Viewer.prototype.Delete = function () {
+    /*
     this.Div.remove();
     // Remove circular references too?
     // This will probably affect all viewers.
@@ -276,6 +388,7 @@
     delete this.RotateIcon;
     delete this.StackCorrelations;
     delete this.CopyrightWrapper;
+    */
   };
 
   // Layers have a Draw(masterView) method.
@@ -292,6 +405,7 @@
     }
 
     return this.NewAnnotationLayer();
+    //return undefined;
   };
 
     // Abstracting saViewer  for viewer and dualViewWidget.
@@ -386,7 +500,7 @@
       }
     } else {
       // Just get rid of the annotations.
-      this.GetAnnotationLayer().Reset();
+      //this.GetAnnotationLayer().Reset();
     }
 
     // TODO: Get rid of this hack.
@@ -454,16 +568,16 @@
   };
 
   Viewer.prototype.Hide = function () {
-    this.MainView.CanvasDiv.hide();
+    this.MainView.Parent.hide();
     if (this.OverView) {
-      this.OverView.CanvasDiv.hide();
+      this.OverView.Parent.hide();
     }
   };
 
   Viewer.prototype.Show = function () {
-    this.MainView.CanvasDiv.show();
+    this.MainView.Parent.show();
     if (this.OverView && this.OverViewVisibility) {
-      this.OverView.CanvasDiv.show();
+      this.OverView.Parent.show();
     }
   };
 
@@ -502,7 +616,7 @@
     if (!this.Rotatable) { return; }
     this.RotateIconDrag = true;
     // Find the center of the overview window.
-    var w = this.OverView.CanvasDiv;
+    var w = this.OverView.Parent;
     var o = w.offset();
     var cx = o.left + (w.width() / 2);
     var cy = o.top + (w.height() / 2);
@@ -521,7 +635,7 @@
       return;
     }
     // Find the center of the overview window.
-    var origin = this.MainView.CanvasDiv.offset();
+    var origin = this.MainView.Parent.offset();
     // center of rotation
     var cx = this.OverViewport[0] + (this.OverViewport[2] / 2);
     var cy = this.OverViewport[1] + (this.OverViewport[3] / 2);
@@ -629,7 +743,7 @@
   };
 
   Viewer.prototype.GetDiv = function () {
-    return this.MainView.CanvasDiv;
+    return this.MainView.Parent;
   };
 
   Viewer.prototype.InitializeZoomGui = function () {
@@ -1058,7 +1172,7 @@
     this.TranslateTarget[1] = fp[1];
     this.RollTarget = cam.GetWorldRoll();
     if (this.OverView) {
-      this.OverView.CanvasDiv.css({'transform': 'rotate(' + this.RollTarget + 'rad'});
+      this.OverView.Parent.css({'transform': 'rotate(' + this.RollTarget + 'rad'});
       this.OverView.Camera.SetWorldRoll(0);
       this.OverView.Camera.ComputeMatrix();
     }
@@ -1290,7 +1404,7 @@
       this.ConstrainCamera();
       if (this.OverView) {
         roll = this.RollTarget;
-        this.OverView.CanvasDiv.css({'transform': 'rotate(' + roll + 'rad'});
+        this.OverView.Parent.css({'transform': 'rotate(' + roll + 'rad'});
         this.OverView.Camera.SetWorldRoll(0);
         this.OverView.Camera.ComputeMatrix();
       }
@@ -1319,7 +1433,7 @@
       this.ConstrainCamera();
       if (this.OverView) {
         roll = this.MainView.Camera.GetWorldRoll();
-        this.OverView.CanvasDiv.css({'transform': 'rotate(' + roll + 'rad'});
+        this.OverView.Parent.css({'transform': 'rotate(' + roll + 'rad'});
         this.OverView.Camera.SetWorldRoll(0);
         this.OverView.Camera.ComputeMatrix();
       }
@@ -1375,7 +1489,7 @@
     this.LastMouseX = this.MouseX || 0;
     this.LastMouseY = this.MouseY || 0;
     this.LastMouseTime = this.MouseTime || 0;
-    this.SetMousePositionFromEvent(event);
+    if ( !this.SetMousePositionFromEvent(event)) {return false;}
 
     // TODO:  Formalize a call back to make GUI disappear when
     // navigation starts.  I think I did this already but have not
@@ -1400,30 +1514,27 @@
   // Used to be in EventManager.
   // TODO: Evaluate and cleanup.
   Viewer.prototype.SetMousePositionFromEvent = function (event) {
-    if (event.offsetX && event.offsetY) {
-      this.MouseX = event.offsetX;
-      this.MouseY = event.offsetY;
-      this.MouseTime = (new Date()).getTime();
-    } else if (event.layerX && event.layerY) {
-      this.MouseX = event.layerX;
-      this.MouseY = event.layerY;
-      this.MouseTime = (new Date()).getTime();
-      event.offsetX = event.layerX;
-      event.offsetY = event.layerY;
+    var pt = this.GetMousePosition(event);
+    if (pt === undefined) {
+      return false;
     }
+    this.MouseX = pt[0];
+    this.MouseY = pt[1];
+    this.MouseTime = (new Date()).getTime();
+    return true;
   };
   Viewer.prototype.RecordMouseMove = function (event) {
     this.LastMouseX = this.MouseX;
     this.LastMouseY = this.MouseY;
     this.LastMouseTime = this.MouseTime;
-    this.SetMousePositionFromEvent(event);
+    if (!this.SetMousePositionFromEvent(event)) {return false;}
     this.MouseDeltaX = this.MouseX - this.LastMouseX;
     this.MouseDeltaY = this.MouseY - this.LastMouseY;
     this.MouseDeltaTime = this.MouseTime - this.LastMouseTime;
     return this.MouseDeltaX !== 0 || this.MouseDeltaY !== 0;
   };
   Viewer.prototype.RecordMouseUp = function (event) {
-    this.SetMousePositionFromEvent(event);
+    if (!this.SetMousePositionFromEvent(event)) {return false;}
     this.MouseDown = false;
 
     // Record time so we can detect double click.
@@ -1555,7 +1666,7 @@
 
     // detect sweep
     // Cross the screen in 1/2 second.
-    var viewerWidth = this.MainView.CanvasDiv.width();
+    var viewerWidth = this.MainView.Parent.width();
     var dxdt = 1000 * (this.MouseX - this.LastMouseX) / ((this.Time - this.LastTime) * viewerWidth);
         // console.log(dxdt);
     if (SA.display && SA.display.NavigationWidget) {
@@ -2036,12 +2147,61 @@
     return false; // trying to keep the browser from selecting images
   };
 
+  // I forget why this is necesary. Firefox, MS Edge?
+  Viewer.prototype.GetEventOffset = function (event) {
+    if (event.offsetX && event.offsetY) {
+      return [event.offsetX, event.offsetY];
+    } else if (event.layerX && event.layerY) {
+      return [event.layerX, event.layerY];
+    }
+    return undefined;
+  };
+  
+  // Relative to the div receiving the event. I do not know why this is so hard.
+  // The event has postiion relative to the local child, or top window.
+  // I might consider adding a class to divs that are "transparent" to events.
+  Viewer.prototype.GetMousePosition = function (event) {
+    // Possibly a child.
+    var pt = this.GetEventOffset(event);
+    if ( pt === undefined) {
+      return undefined;
+    }
+    var element = event.target;
+    if (element == this.Div[0]) {
+      return pt;
+    }
+    
+    // look one parent up.
+    pt[0] += element.offsetLeft;
+    pt[1] += element.offsetTop;
+    element = element.parentElement;
+    if (element == this.Div[0]) {
+      return pt;
+    }
+
+    // one more.
+    pt[0] += element.offsetLeft;
+    pt[1] += element.offsetTop;
+    element = element.parentElement;
+    if (element == this.Div[0]) {
+      return pt;
+    }
+
+    return undefined;
+  };
+  
   Viewer.prototype.HandleMouseMove = function (event) {
     if (!this.InteractionEnabled) { return true; }
 
+    // I think we can do the same thing by setting the z-index (or returning false)
     // The event position is relative to the target which can be a tab on
     // top of the canvas.  Just skip these events.
-    if ($(event.target).width() !== $(event.currentTarget).width()) {
+    //if ($(event.target).width() !== $(event.currentTarget).width()) {
+    //  console.log("child");
+    //  //  return true;
+    //}
+    var pt = this.GetMousePosition(event);
+    if (pt === undefined) {
       return true;
     }
 
@@ -2072,8 +2232,8 @@
       return true;
     }
 
-    var x = event.offsetX;
-    var y = event.offsetY;
+    var x = pt[0];
+    var y = pt[1];
     var dx;
     var dy;
 
@@ -2282,7 +2442,6 @@
     if (event.keyCode === 79) {
       // o to print out world mouse location for debugging.
       var wPt = this.ConvertPointViewerToWorld(this.LastMouseX, this.LastMouseY);
-      console.log('World: ' + wPt[0] + ', ' + wPt[1]);
     }
 
     // Handle paste
@@ -2477,10 +2636,10 @@
     if ((Math.abs(hw - nx) < 5 && ny < hh) ||
             (Math.abs(hh - ny) < 5 && nx < hw)) {
       this.OverViewActive = true;
-      this.OverView.CanvasDiv.addClass('sa-view-overview-canvas sa-active');
+      this.OverView.Parent.addClass('sa-view-overview-canvas sa-active');
     } else {
       this.OverViewActive = false;
-      this.OverView.CanvasDiv.removeClass('sa-view-overview-canvas sa-active');
+      this.OverView.Parent.removeClass('sa-view-overview-canvas sa-active');
     }
     // return this.OverViewActive;
   };

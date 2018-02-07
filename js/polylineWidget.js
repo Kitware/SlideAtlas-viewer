@@ -768,7 +768,7 @@
 
   PolylineWidget.prototype.SetCursorToDrawing = function () {
     this.Popup.Hide();
-    this.Layer.GetCanvasDiv().css(
+    this.Layer.GetParent().css(
             {'cursor': 'url(' + SAM.ImagePathUrl + 'dotCursor8.png) 4 4,crosshair'});
     this.Layer.EventuallyDraw();
   };

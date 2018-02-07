@@ -136,7 +136,7 @@
 
     // draw the vectors
     view.Context2d.beginPath();
-    for (var i = 0; i < this.Widths.length; ++i) {
+    for (var i = 0; i < this.Vectors.length; ++i) {
       if ((!this.Visibilities || this.Visibilities[i]) &&
           (this.Confidences[i] >= this.Threshold)) {
         vx = this.Vectors[cIdx];
@@ -229,13 +229,55 @@
     return this.Shape.Widths.length;
   };
 
+
+
+  // Prioritizing by confidence does not work because they all have such high (equal) confidences.
+  // Lets prioritize by area instead
+  RectSetWidget.prototype.ComputeVisibilities = function () {
+    var rectSet = this.Shape;
+    if (rectSet.Visibilities === undefined) {
+      rectSet.Visibilities = Array(rectSet.Confidences.length);
+      rectSet.Hash = new SAM.SpatialHash();
+      var bds = this.Layer.GetViewer().GetOverViewBounds();
+      rectSet.Hash.Build(rectSet, bds);
+    }
+    var visibilities = rectSet.Visibilities;
+    visibilities.fill(true);
+
+    // Rectangles are reverse sorted by confidnece
+    for (var i = 0; i < visibilities.length; ++i) {
+      if (visibilities[i] === true && rectSet.Confidences[i] >= rectSet.Threshold) {
+        var width = rectSet.Widths[i];
+        var height = rectSet.Heights[i];
+        var area1 = width*height;
+        var center = rectSet.GetCenter(i);
+        // Get all the other rects overlapping this one.
+        var indexes = rectSet.Hash.GetOverlapping(center, width, height, 0.3);
+        var alone = true;
+        for (var j = 0; j < indexes.length; ++j) {
+          var rect2Idx = indexes[j];
+          if (rect2Idx !== i && visibilities[rect2Idx] &&
+              rectSet.Confidences[rect2Idx] >= rectSet.Threshold) {
+            // which should we hide?  Look at area to decide
+            var area2 = rectSet.Widths[rect2Idx] * rectSet.Heights[rect2Idx];
+            if (area1 < area2) {
+              visibilities[i] = false;
+            } else {
+              visibilities[rect2Idx] = false;              
+            }
+          }
+        }
+      }
+    }
+  };
+  
   // note: this assumes rects are squares.
   // I assume that the annotations are fixed and do not change after this
   // is called.  This can be called multiple times
   // (when threshold or size changes).
   // Remove overlapping annoations (visibility = false).
   // greedy: first supresses later)
-  RectSetWidget.prototype.ComputeVisibilities = function () {
+  RectSetWidget.prototype.ComputeVisibilitiesConfidence = function () {
     var rectSet = this.Shape;
     if (rectSet.Visibilities === undefined) {
       rectSet.Visibilities = Array(rectSet.Confidences.length);
@@ -257,7 +299,8 @@
         var alone = true;
         for (var j = 0; j < indexes.length; ++j) {
           var rect2Idx = indexes[j];
-          if (rect2Idx !== i && visibilities[rect2Idx]) {
+          // Odd: Make them visible one by one.
+          if (rect2Idx < i && visibilities[rect2Idx]) {
             // found a visibile neighbor.
             alone = false;
           }
