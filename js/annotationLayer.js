@@ -1,3 +1,6 @@
+// Active is used for a single widget when we are drawing or editing.
+// Selected can be multiple widgets.
+
 // -Separating annotations from the viewer. They have their own canvas / layer now.
 // -This is more like a view than a viewer.
 // -Viewer still handles stack correlations crosses.
@@ -17,6 +20,46 @@
   window.SAM = window.SAM || {};
   window.SAM.ImagePathUrl = 'not set';
   window.SAM.MOBILE_DEVICE = false;
+
+  // Widget factory.  Return a widget from its serialized metadata.
+  SAM.ConstructWidget = function (obj) {
+    var widget;
+    switch (obj.type) {
+      case 'lasso':
+        widget = new SAM.LassoWidget();
+        break;
+      case 'pencil':
+        widget = new SAM.PencilWidget();
+        break;
+      case 'text':
+        widget = new SAM.TextWidget();
+        break;
+      case 'circle':
+        widget = new SAM.CircleWidget();
+        break;
+      case 'polyline':
+        widget = new SAM.PolylineWidget();
+        break;
+      case 'rect':
+        widget = new SAM.RectWidget();
+        break;
+      case 'rect_set':
+        widget = new SAM.RectSetWidget();
+        break;
+      case 'grid':
+        widget = new SAM.GridWidget();
+        break;
+    }
+    widget.Load(obj);
+    // TODO: Get rid of this hack.
+    // This is the messy way of detecting widgets that did not load
+    // properly.
+    if (widget.Type === 'sections' && widget.IsEmpty()) {
+      // delete widget;
+      return undefined;
+    }
+    return widget;
+  };
 
   SAM.detectMobile = function () {
     if (SAM.MOBILE_DEVICE) {
@@ -621,17 +664,34 @@
   function AnnotationLayer (parent) {
     var self = this;
 
+    // This will be called when a widget is selected by the user.
+    // So the panel can put the layer into edit mode.
+    this.ActivatedCallback = undefined;
+    this.SelectChangeCallback = undefined;
+    this.ModifiedCallback = undefined;
+
+    // Equivalent to editing.  Only one should be editing at a time.
+    this.Active = false;
+
+    this.Visibility = true;
+    // TODO: Get rid of this.  The layer should not enforce
+    // a single active widget.
+    this.ActiveWidget = null;
+
+    this.Parent = parent;
     this.LoadCallbacks = [];
     this.LayerDiv = $('<div>')
-            .appendTo(parent)
-            .css({'position': 'absolute',
-              'left': '0px',
-              'top': '0px',
-              'border-width': '0px',
-              'width': '100%',
-              'height': '100%',
-              'box-sizing': 'border-box',
-              'z-index': '100'})
+      .appendTo(parent)
+      .css({
+        'position': 'absolute',
+        'left': '0px',
+        'top': '0px',
+        'border-width': '0px',
+        'width': '100%',
+        'height': '100%',
+        'z-index': '1',
+        'box-sizing': 'border-box'
+      })
             .addClass('sa-resize');
 
     // I do not like modifying the parent.
@@ -650,74 +710,63 @@
       .saOnResize(function () { self.UpdateCanvasSize(); });
 
     this.WidgetList = [];
-    this.ActiveWidget = null;
 
-    this.Visibility = true;
     // Scale widget is unique. Deal with it separately so it is not
     // saved with the notes.
     this.ScaleWidget = new SAM.ScaleWidget(this);
   }
 
-  // Annotation layers ussualy let the viewer receive the events, and the
-  // forward them to this layer.  Whey they handle the events separately, I
-  // could never get the key and scroll events to stop propagation
-  // (like "preventDefault"). This method is not used, but I am leaving it
-  // because the layer can be created without a viewer.
-  AnnotationLayer.prototype.BindEvents = function () {
-    var can = this.LayerDiv;
-    can.on(
-      'mousedown.viewer',
-      function (event) {
-        return self.HandleMouseDown(event);
-      });
-    can.on(
-      'mousemove.viewer',
-      function (event) {
-        // So key events go the the right viewer.
-        this.focus();
-        // Firefox does not set which for mouse move events.
-        SA.FirefoxWhich(event);
-        return self.HandleMouseMove(event);
-      });
-    // We need to detect the mouse up even if it happens outside the canvas,
-    $(document.body).on(
-      'mouseup.viewer',
-      function (event) {
-        self.HandleMouseUp(event);
-        return true;
-      });
-    can.on(
-      'wheel.viewer',
-      function (event) {
-        return self.HandleMouseWheel(event.originalEvent);
-      });
+  // This gets called when a click causes as single widget in this layer
+  // to be selected. The annotation panel, uses it to turn editing on for this layer.
+  AnnotationLayer.prototype.SetActivatedCallback = function (callback) {
+    this.ActivatedCallback = callback;
+  };
+  AnnotationLayer.prototype.SetActive = function (flag) {
+    if (flag === this.Active) {
+      return;
+    }
+    this.Active = flag;
+    if (flag && this.ActivatedCallback) {
+      (this.ActivatedCallback)(this);
+    }
+  };
 
-    // I am delaying getting event manager out of receiving touch events.
-    // It has too many helper functions.
-    can.on(
-      'touchstart.viewer',
-      function (event) {
-        return self.HandleTouchStart(event.originalEvent);
-      });
-    can.on(
-      'touchmove.viewer',
-      function (event) {
-        return self.HandleTouchMove(event.originalEvent);
-      });
-    can.on(
-      'touchend.viewer',
-      function (event) {
-        self.HandleTouchEnd(event.originalEvent);
-        return true;
-      });
+  // This will be called anytime one of the widgets in this layer gets modified.
+  // This layer is apssed as an argument (rethink this.  It is not necessary).
+  AnnotationLayer.prototype.SetModifiedCallback = function (callback) {
+    this.ModifiedCallback = callback;
+  };
 
-    // necesary to respond to keyevents.
-    this.LayerDiv.attr('tabindex', '1');
-    can.on(
-      'keydown.viewer',
-      function (event) {
-        return self.HandleKeyDown(event);
-      });
+  // TODO: Not really select: Remove this (or change its name)
+  // This will be called when a widget is selected by the user.
+  // I am not sure about the usefulness of this method.
+  AnnotationLayer.prototype.SetSelectChangeCallback = function (callback) {
+    this.SelectChangeCallback = callback;
+  };
+
+  // Applies to all widgets in the layer.
+  // Returns true if something changed.
+  AnnotationLayer.prototype.SetSelected = function (flag) {
+    var changed = false;
+    for (var idx = 0; idx < this.WidgetList.length; ++idx) {
+      if (this.WidgetList[idx].SetSelected(flag)) {
+        changed = true;
+      }
+    }
+    if (changed && this.SelectChangeCallback) {
+      (this.SelectChangeCallback)(this);
+    }
+    return changed;
+  };
+
+  AnnotationLayer.prototype.IsEmpty = function () {
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var widget = this.WidgetList[i];
+      if (!widget.IsEmpty()) {
+        return false;
+      }
+    }
+    return true;
   };
 
   // Try to remove all global references to this viewer.
@@ -736,6 +785,9 @@
   AnnotationLayer.prototype.GetCamera = function () {
     return this.AnnotationView.GetCamera();
   };
+  AnnotationLayer.prototype.SetCamera = function (cam) {
+    return this.AnnotationView.SetCamera(cam);
+  };
   AnnotationLayer.prototype.GetViewport = function () {
     return this.AnnotationView.Viewport;
   };
@@ -745,13 +797,14 @@
   AnnotationLayer.prototype.Clear = function () {
     this.AnnotationView.Clear();
   };
-    // This is the same as LayerDiv.
-    // Get the div of the layer (main div).
-    // It is used to append DOM GUI children.
-  AnnotationLayer.prototype.GetCanvasDiv = function () {
-    return this.AnnotationView.CanvasDiv;
+  // This is the same as LayerDiv.
+  // Get the div of the layer (main div).
+  // It is used to append DOM GUI children.
+  AnnotationLayer.prototype.GetParent = function () {
+    // return this.AnnotationView.Parent;
+    return this.Parent;
   };
-    // Get the current scale factor between pixels and world units.
+  // Get the current scale factor between pixels and world units.
   AnnotationLayer.prototype.GetPixelsPerUnit = function () {
     return this.AnnotationView.GetPixelsPerUnit();
   };
@@ -760,27 +813,27 @@
     return this.AnnotationView.GetMetersPerUnit();
   };
 
-    // the view arg is necessary for rendering into a separate canvas for
-    // saving large images.
-  AnnotationLayer.prototype.Draw = function (masterView) {
-    masterView = masterView || this.AnnotationView;
+  // the view arg is necessary for rendering into a separate canvas for
+  // saving large images.
+  AnnotationLayer.prototype.Draw = function () {
     this.AnnotationView.Clear();
     if (!this.Visibility) { return; }
 
-    var cam = masterView.Camera;
-    this.AnnotationView.Camera.DeepCopy(cam);
-
     for (var i = 0; i < this.WidgetList.length; ++i) {
-      this.WidgetList[i].Draw(this.AnnotationView);
+      this.WidgetList[i].Draw(this);
     }
-    if (this.ScaleWidget) {
+    // if (this.ScaleWidget) {
       // Girder is not setting spacing correct.
       // But we still need the scale widget for the grid widget.
       // this.ScaleWidget.Draw(this.AnnotationView);
-    }
+    // }
   };
 
-    // To compress draw events.
+  AnnotationLayer.prototype.GetView = function () {
+    return this.AnnotationView;
+  };
+
+  // To compress draw events.
   AnnotationLayer.prototype.EventuallyDraw = function () {
     if (!this.RenderPending) {
       this.RenderPending = true;
@@ -796,7 +849,11 @@
   // Allow the layer to receive keyboard events.
   // TODO: If we have not bound out own events, forward focus to the viewer.
   AnnotationLayer.prototype.Focus = function () {
-    var can = this.LayerDiv.CanvasDiv;
+    // This looks like an error LayerDiv is a jquery pointer
+    // It was probably can = this.AnnotationView.Parent
+    // which is the same thing as LayerDiv (unless AnnotationView was created without a parent arg)
+    // var can = this.LayerDiv.Parent;
+    var can = this.LayerDiv;
     can.focus();
   };
 
@@ -805,28 +862,28 @@
     return this.Viewer || SA.VIEWER1;
   };
 
-    // Load an array of anntoations into this layer.
-    // It does not clear previous annotations. Call reset to do that.
-    // Called by Viewer.SetViewerRecord()
-    // This is neede to give a callback to an app that needs to update the
-    // visibility of annotations based on a threshold.
+  // Load an array of anntoations into this layer.
+  // It does not clear previous annotations. Call reset to do that.
+  // Called by Viewer.SetViewerRecord()
+  // This is neede to give a callback to an app that needs to update the
+  // visibility of annotations based on a threshold.
   AnnotationLayer.prototype.LoadAnnotations = function (annotations) {
-        // TODO: Fix this.  Keep actual widgets in the records / notes.
-        // For now lets just do the easy thing and recreate all the
-        // annotations.
+    // TODO: Fix this.  Keep actual widgets in the records / notes.
+    // For now lets just do the easy thing and recreate all the
+    // annotations.
     for (var i = 0; i < annotations.length; ++i) {
       var widget = this.LoadWidget(annotations[i]);
-            // This a bad hack. Modifying that array passed in.
-            // It is not really needed.  It was a fix for a schema mistake.
+      // This a bad hack. Modifying that array passed in.
+      // It is not really needed.  It was a fix for a schema mistake.
       if (!widget) {
-                // Get rid of corrupt widgets that do not load properly
+        // Get rid of corrupt widgets that do not load properly
         annotations.splice(i, 1);
         --i;
       }
     }
 
-        // This is used by the vigilant plugnin to update which annotations
-        // are visible based on a confidence threshold.
+    // This is used by the vigilant plugnin to update which annotations
+    // are visible based on a confidence threshold.
     if (this.LoadCallback) {
       (this.LoadCallback)();
     }
@@ -837,88 +894,23 @@
     }
   };
 
-    // Load a widget from a json object (origin MongoDB).
-    // Returns the widget if there was not an error.
+  // Load a widget from a json object (origin MongoDB).
+  // Returns the widget if there was not an error.
   AnnotationLayer.prototype.LoadWidget = function (obj) {
-    var widget;
-    switch (obj.type) {
-      case 'lasso':
-        widget = new SAM.LassoWidget(this, false);
-        break;
-      case 'pencil':
-        widget = new SAM.PencilWidget(this, false);
-        break;
-      case 'text':
-        widget = new SAM.TextWidget(this, '');
-        break;
-      case 'circle':
-        widget = new SAM.CircleWidget(this, false);
-        break;
-      case 'polyline':
-        widget = new SAM.PolylineWidget(this, false);
-        break;
-      case 'rect':
-        widget = new SAM.RectWidget(this, false);
-        break;
-      case 'rect_set':
-        widget = new SAM.RectSetWidget(this, false);
-        break;
-      case 'grid':
-        widget = new SAM.GridWidget(this, false);
-        break;
+    var widget = SAM.ConstructWidget(obj);
+    if (widget) {
+      this.AddWidget(widget);
     }
-    widget.Load(obj);
-    // TODO: Get rid of this hack.
-    // This is the messy way of detecting widgets that did not load
-    // properly.
-    if (widget.Type === 'sections' && widget.IsEmpty()) {
-      return undefined;
-    }
-
-    // We may want to load without adding.
-    // this.AddWidget(widget);
-
     return widget;
-  };
-
-  // I expect only the widget SetActive to call these method.
-  // A widget cannot call this if another widget is active.
-  // The widget deals with its own activation and deactivation.
-  AnnotationLayer.prototype.ActivateWidget = function (widget) {
-    // not getting key events for copy.
-    this.LayerDiv.focus();
-    if (this.ActiveWidget === widget) {
-      return;
-    }
-    // Make sure only one popup is visible at a time.
-    for (var i = 0; i < this.WidgetList.length; ++i) {
-      if (this.WidgetList[i].Popup) {
-        this.WidgetList[i].Popup.Hide();
-      }
-    }
-
-    this.ActiveWidget = widget;
-    widget.SetActive(true);
-  };
-  AnnotationLayer.prototype.DeactivateWidget = function (widget) {
-    if (this.ActiveWidget !== widget || widget === null) {
-      // Do nothing if the widget is not active.
-      return;
-    }
-    // Incase the widget changed the cursor.  Change it back.
-    this.LayerDiv.css({'cursor': 'default'});
-    // The cursor does not change immediatly.  Try to flush.
-    this.EventuallyDraw();
-    this.ActiveWidget = null;
-    widget.SetActive(false);
-  };
-  AnnotationLayer.prototype.GetActiveWidget = function () {
-    return this.ActiveWidget;
   };
 
   // Return to initial state.
   AnnotationLayer.prototype.Reset = function () {
     this.WidgetList = [];
+  };
+
+  AnnotationLayer.prototype.GetMouseWorld = function () {
+    return this.MouseWorld;
   };
 
   AnnotationLayer.prototype.ComputeMouseWorld = function (event) {
@@ -933,8 +925,8 @@
   // I think MouseX,Y and, offestX,Y are both
   // Save the previous touches and record the new
   // touch locations in viewport coordinates.
-  AnnotationLayer.prototype.InitializeTouch = function (e, startFlag) {
-    this.OriginalEvent = e;
+  AnnotationLayer.prototype.InitializeTouch = function (event, startFlag) {
+    this.OriginalEvent = event;
     var date = new Date();
     var t = date.getTime();
     // I have had trouble on the iPad with 0 delta times.
@@ -946,17 +938,13 @@
     this.LastTime = this.Time;
     this.Time = t;
 
-    if (!e) {
-      e = event;
-    }
-
     // Still used on mobile devices?
     this.LastTouches = this.Touches;
     this.Touches = [];
-    for (var i = 0; i < e.targetTouches.length; ++i) {
+    for (var i = 0; i < event.targetTouches.length; ++i) {
       var offset = this.AnnotationView.Canvas.offset();
-      var x = e.targetTouches[i].pageX - offset.left;
-      var y = e.targetTouches[i].pageY - offset.top;
+      var x = event.targetTouches[i].pageX - offset.left;
+      var y = event.targetTouches[i].pageY - offset.top;
       this.Touches.push([x, y]);
     }
 
@@ -982,51 +970,35 @@
     event.pencil = false;
     if (SAM.MOBILE_DEVICE === 'iPad' && event.touches && event.touches.length === 1) {
       var touch = event.touches[0];
-      if (touch.force && !isNaN(touch.force) && touch.force !== 0) {
+      if (touch.force && !isNaN(touch.force) && touch.force !== 0 && touch.force !== 1) {
         event.pencil = true;
       }
     }
     return true;
   };
 
-    // TODO: Try to get rid of the viewer argument.
+  // TODO: Try to get rid of the viewer argument.
   AnnotationLayer.prototype.HandleTouchStart = function (event) {
     if (!this.GetVisibility()) {
       return true;
     }
 
+    this.Event = event;
     this.InitializeTouch(event, true);
     this.CheckForPencil(event);
 
-    if (this.ActiveWidget && this.ActiveWidget.HandleTouchStart) {
-      // The pencil only responds to single touches.
-      // Let unhandled multiple touch events fall through to the viewer.
-      if (this.ActiveWidget.HandleTouchStart(this) === false) {
-        return false;
-      }
-    }
     // TODO: Just make the pencil widget active.
+    // This is for the iPad pro pencil, I think.
     if (event.pencil) {
       if (this.Pencil.HandleTouchStart(this) === false) {
         return false;
       }
     }
 
-    // Code from a conflict
-    // Touch was not activating widgets on the ipad.
-    // Show text on hover.
-    if (this.Visibility) {
-      for (var touchIdx = 0; touchIdx < this.Touches.length; ++touchIdx) {
-        event.offsetX = this.Touches[touchIdx][0];
-        event.offsetY = this.Touches[touchIdx][1];
-        this.ComputeMouseWorld(event);
-        for (var i = 0; i < this.WidgetList.length; ++i) {
-          if (!this.WidgetList[i].GetActive() &&
-              this.WidgetList[i].CheckActive(event)) {
-            this.ActivateWidget(this.WidgetList[i]);
-            return true;
-          }
-        }
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var widget = this.WidgetList[i];
+      if (widget.HandleTouchStart && !widget.HandleTouchStart(this)) {
+        return false;
       }
     }
   };
@@ -1039,15 +1011,11 @@
     // Get a pencil widget if we do not already have one.
     if (!this.Pencil) {
       // Use the current widget if it is a pencil
-      if (this.ActiveWidget) {
-        // I am not sure about making the current pencil the apply pencil.
-        var current = this.ActiveWidget;
-        if (current.Type === 'pencil') {
-          this.Pencil = current;
-        }
-      }
-      // Code to make a new pencil
-      if (!this.Pencil) {
+      var current = this.FindActivePencil();
+      if (current) {
+        this.Pencil = current;
+      } else {
+        // Code to make a new pencil
         // Make a new widget (and make it active).
         this.Pencil = new SAM.PencilWidget(this, false);
         // I want this widget to only respond to pencil/stylus events
@@ -1055,12 +1023,23 @@
       }
     }
 
-    // I assume this deactivates any other active widget.
-    // this.Pencil.SetActive(true);
-    this.Pencil.SetStateToDrawing();
+    this.Pencil.SetStateToDrawing(this);
+  };
+
+  AnnotationLayer.prototype.FindActivePencilWidget = function () {
+    for (var i = 0; i < this.WidgetList.lenght; ++i) {
+      var widget = this.WidgetList[i];
+      if (widget.Type === 'pencil' && widget.GetActive()) {
+        return widget;
+      }
+      return undefined;
+    }
   };
 
   AnnotationLayer.prototype.HandleTouchMove = function (e) {
+    if (!this.GetVisibility()) {
+      return true;
+    }
     // Put a throttle on events
     if (!this.InitializeTouch(e, false)) { return; }
     this.CheckForPencil(e);
@@ -1070,10 +1049,9 @@
         return false;
       }
     }
-    if (this.ActiveWidget && this.ActiveWidget.HandleTouchMove) {
-      // The pencil only responds to single touches.
-      // Let unhandled multiple touch events fall through to the viewer.
-      if (this.ActiveWidget.HandleTouchMove(this) === false) {
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var widget = this.WidgetList[i];
+      if (widget.HandleTouchMove && !widget.HandleTouchMove(this)) {
         return false;
       }
     }
@@ -1092,7 +1070,8 @@
       return true;
     }
     if (this.ActiveWidget && this.ActiveWidget.HandleTouchPan) {
-      return this.ActiveWidget.HandleTouchPan(event);
+      this.Event = event;
+      return this.ActiveWidget.HandleTouchPan(this);
     }
     return true;
   };
@@ -1101,8 +1080,9 @@
     if (!this.GetVisibility()) {
       return true;
     }
+    this.Event = event;
     if (this.ActiveWidget && this.ActiveWidget.HandleTouchPinch) {
-      return this.ActiveWidget.HandleTouchPinch(event);
+      return this.ActiveWidget.HandleTouchPinch(this);
     }
     return true;
   };
@@ -1111,42 +1091,118 @@
     if (!this.GetVisibility()) {
       return true;
     }
+    this.Event = event;
+
     // End touch events have no touches so we cannot determine whether
     // they are from a stylus (presure pencil).
     if (this.Pencil && this.Pencil.HandleTouchEnd(this) === false) {
       return false;
     }
-    if (this.ActiveWidget && this.ActiveWidget.HandleTouchEnd) {
-      return this.ActiveWidget.HandleTouchEnd(event);
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var widget = this.WidgetList[i];
+      if (widget.HandleTouchEnd && !widget.HandleTouchEnd(this)) {
+        return false;
+      }
     }
     return true;
   };
 
   AnnotationLayer.prototype.SetMousePositionFromEvent = function (event) {
-    if (event.offsetX && event.offsetY) {
+    if (event.MouseX && event.MouseY) {
+      this.MouseX = event.MouseX;
+      this.MouseY = event.MouseY;
+    } else if (event.offsetX && event.offsetY) {
       this.MouseX = event.offsetX;
       this.MouseY = event.offsetY;
-      this.MouseTime = (new Date()).getTime();
     } else if (event.layerX && event.layerY) {
       this.MouseX = event.layerX;
       this.MouseY = event.layerY;
-      this.MouseTime = (new Date()).getTime();
       event.offsetX = event.layerX;
       event.offsetY = event.layerY;
     }
     this.MouseTime = new Date().getTime();
   };
 
+  // I use click to select (activate) widgets or widget components.
+  // Click will only select one widget.
+  AnnotationLayer.prototype.HandleSingleSelect = function (event) {
+    if (!this.GetVisibility()) {
+      return true;
+    }
+    this.Event = event;
+    this.SetMousePositionFromEvent(event);
+
+    // Not the same as modified.
+    var changed = false;
+
+    // Each widget can use the click to activate itself.
+    // No cometition yet.  Just try the widgets one at a time.
+    var found = false;
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var widget = this.WidgetList[i];
+      if (found) {
+        // We already found one.  Unselect the rest.
+        if (widget.SetSelected(false)) {
+          // Assume the selection changed.
+          changed = true;
+        }
+      } else if (widget.HandleSingleSelect) {
+        if (widget.IsSelected()) {
+          changed = true;
+        }
+        if (widget.HandleSingleSelect(this) === false) {
+          found = true;
+          // Not perfect.  I think it will mark a change even if the
+          // mark was reselected.
+          changed = true;
+        }
+      }
+    }
+    if (found && !this.Active) {
+      this.SetActive(true);
+    }
+    // This does not work when previously selected
+    if (changed) {
+      if (this.SelectChangeCallback) {
+        (this.SelectChangeCallback)(this);
+      }
+      this.EventuallyDraw();
+    }
+    return !found;
+  };
+
+  AnnotationLayer.prototype.HasSelections = function () {
+    if (this.GetASelectedWidget()) {
+      return true;
+    }
+    return false;
+  };
+
+  // Widget type is the objects type string instance variable.
+  // If undefined, it will match any type.
+  AnnotationLayer.prototype.GetASelectedWidget = function (widgetType) {
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var widget = this.WidgetList[i];
+      if (widget.IsSelected()) {
+        if (widgetType === undefined || widgetType === widget.Type) {
+          return this.WidgetList[i];
+        }
+      }
+    }
+    return undefined;
+  };
+
   AnnotationLayer.prototype.HandleMouseDown = function (event) {
     if (!this.GetVisibility()) {
       return true;
     }
+    this.Event = event;
     this.LastMouseDownTime = this.MouseDownTime || 1;
     this.SetMousePositionFromEvent(event);
 
-        // Trying to detect click
-        // TODO: How to skip clicks when doubleclick occur.
-    this.MouseClick = true;
+    // Trying to detect click
+    // TODO: How to skip clicks when doubleclick occur.
+    // this.MouseClick = true;
     this.MouseDownX = this.MouseX;
     this.MouseDownY = this.MouseY;
     this.MouseDownTime = this.MouseTime;
@@ -1154,14 +1210,16 @@
     if (this.LastMouseDownTime) {
       if (this.MouseDownTime - this.LastMouseDownTime < 200) {
         delete this.LastMouseDownTime;
-        return this.HandleDoubleClick(event);
+        return this.HandleDoubleClick(this);
       }
     }
 
-    if (this.ActiveWidget && this.ActiveWidget.HandleMouseDown) {
-      return this.ActiveWidget.HandleMouseDown(event);
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var widget = this.WidgetList[i];
+      if (widget.HandleMouseDown && !widget.HandleMouseDown(this)) {
+        return false;
+      }
     }
-    // We do not know if the widget will handle click or double click.
     return true;
   };
 
@@ -1170,15 +1228,8 @@
       return true;
     }
     if (this.ActiveWidget && this.ActiveWidget.HandleDoubleClick) {
-      return this.ActiveWidget.HandleDoubleClick(event);
-    }
-    return true;
-  };
-
-  AnnotationLayer.prototype.HandleClick = function (event) {
-    if (!this.GetVisibility()) { return true; }
-    if (this.ActiveWidget && this.ActiveWidget.HandleClick) {
-      return this.ActiveWidget.HandleClick(event);
+      this.Event = event;
+      return this.ActiveWidget.HandleDoubleClick(this);
     }
     return true;
   };
@@ -1188,13 +1239,16 @@
       return true;
     }
 
-    if (this.MouseClick) {
-      this.MouseClick = false;
-      return this.HandleClick(event);
-    }
+    // if (this.MouseClick) {
+    //  this.MouseClick = false;
+    //  return this.HandleClick(event);
+    // }
 
-    if (this.ActiveWidget && this.ActiveWidget.HandleMouseUp) {
-      return this.ActiveWidget.HandleMouseUp(event);
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var widget = this.WidgetList[i];
+      if (widget.HandleMouseUp && !widget.HandleMouseUp(this)) {
+        return false;
+      }
     }
 
     return true;
@@ -1205,26 +1259,13 @@
       return true;
     }
 
+    this.Event = event;
     this.SetMousePositionFromEvent(event);
-    if (event.which !== 0 && this.MouseClick) {
-      if (Math.abs(this.MouseDownX - this.MouseX) > 5) {
-        this.MouseClick = false;
-      }
-      if (Math.abs(this.MouseDownY - this.MouseY) > 5) {
-        this.MouseClick = false;
-      }
-      if ((this.MouseTime - this.MouseDownTime) > 400) {
-        this.MouseClick = false;
-      }
-      // Wait to process a move until we know it will not
-      // be a click.
-      return true;
-    }
 
     // The event position is relative to the target which can be a tab on
     // top of the canvas.  Just skip these events.
     if ($(event.target).width() !== $(event.currentTarget).width()) {
-      return true;
+      console.log('child event ' + event.MouseY);
     }
 
     this.ComputeMouseWorld(event);
@@ -1237,14 +1278,10 @@
       event.which = 2;
     }
 
-    if (this.ActiveWidget) {
-      if (this.ActiveWidget.HandleMouseMove) {
-        return this.ActiveWidget.HandleMouseMove(event);
-      }
-    } else {
-      if (!event.which) {
-        this.CheckActive(event);
-        return true;
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var widget = this.WidgetList[i];
+      if (widget.HandleMouseMove && !widget.HandleMouseMove(this)) {
+        return false;
       }
     }
 
@@ -1258,7 +1295,8 @@
       return true;
     }
     if (this.ActiveWidget && this.ActiveWidget.HandleMouseWheel) {
-      return this.ActiveWidget.HandleMouseWheel(event);
+      this.Event = event;
+      return this.ActiveWidget.HandleMouseWheel(this);
     }
     return true;
   };
@@ -1267,11 +1305,41 @@
     if (!this.GetVisibility()) {
       return true;
     }
-    if (this.ActiveWidget && this.ActiveWidget.HandleKeyDown) {
-      return this.ActiveWidget.HandleKeyDown(event);
+    // Handle delete as a first class event.
+    // This is the first time I am by passing the "ActiveWidget".
+    // That pattern only allows one widget to receive events.
+    // I want to select and delete a set of widgets / shapes.
+    var widget;
+    if (event.keyCode === 46) {
+      var keepers = [];
+      // Let every widget delete its selected components.
+      for (var idx = 0; idx < this.WidgetList.length; ++idx) {
+        widget = this.WidgetList[idx];
+        // Only deletes the selected widgets / shapes.
+        if (widget.HandleDelete) {
+          widget.HandleDelete(this);
+        }
+        if (!widget.IsEmpty()) {
+          keepers.push(widget);
+        }
+      }
+      if (keepers.length < this.WidgetList.length) {
+        this.WidgetList = keepers;
+      }
+
+      return false;
+    }
+
+    this.Event = event;
+
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      widget = this.WidgetList[i];
+      if (widget.HandleKeyDown && !widget.HandleKeyDown(this)) {
+        return false;
+      }
     }
     if (this.Pencil) {
-      return this.Pencil.HandleKeyDown(event);
+      return this.Pencil.HandleKeyDown(this);
     }
 
     return true;
@@ -1281,30 +1349,13 @@
     if (!this.GetVisibility()) {
       return true;
     }
-    if (this.ActiveWidget && this.ActiveWidget.HandleKeyUp) {
-      return this.ActiveWidget.HandleKeyUp(event);
-    }
-    return true;
-  };
-
-  // Called on mouse motion with no button pressed.
-  // Looks for widgets under the cursor to make active.
-  // Returns true if a widget is active.
-  AnnotationLayer.prototype.CheckActive = function (event) {
-    if (!this.GetVisibility()) {
-      return true;
-    }
-    if (this.ActiveWidget) {
-      return this.ActiveWidget.CheckActive(event);
-    } else {
-      for (var i = 0; i < this.WidgetList.length; ++i) {
-        if (this.WidgetList[i].CheckActive(event)) {
-          this.ActivateWidget(this.WidgetList[i]);
-          return true; // trying to keep the browser from selecting images
-        }
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var widget = this.WidgetList[i];
+      if (widget.HandleKeyDown && !widget.HandleKeyDown(this)) {
+        return false;
       }
     }
-    return false;
+    return true;
   };
 
   AnnotationLayer.prototype.GetNumberOfWidgets = function () {
@@ -1321,12 +1372,60 @@
   };
 
   AnnotationLayer.prototype.AddWidget = function (widget) {
-    widget.Layer = this;
+    var self = this;
     this.WidgetList.push(widget);
-    if (SAM.NotesWidget) {
-            // Hack.
-      SAM.NotesWidget.MarkAsModified();
+    if (widget.SetModifiedCallback) {
+      widget.SetModifiedCallback(
+        function (w) { self.WidgetModifiedCallback(w); });
     }
+
+    if (widget.UpdateBuffers) { widget.UpdateBuffers(this); }
+  };
+
+  // Callback being used for to generally.
+  AnnotationLayer.prototype.WidgetModifiedCallback = function (widget) {
+    // Just forward the message on.
+    if (this.ModifiedCallback) {
+      (this.ModifiedCallback)(this);
+    }
+  };
+
+  // Hmmmm.  Try to remove this.  It would be nice not to keep a pointer to an active widget.
+  AnnotationLayer.prototype.ActivateWidget = function (widget) {
+    if (widget !== this.ActiveWidget) {
+      this.LayerDiv.focus();
+      this.ActiveWidget = widget;
+      // Tell the panel that this layer has been selected.
+      if (this.SelectedCallback) {
+        (this.SelectedCallback)(this);
+      }
+    }
+  };
+
+  // TODO: Get rid of this depreciated methods.
+  // A widget cannot call this if another widget is active.
+  // The widget deals with its own activation and deactivation.
+  AnnotationLayer.prototype.DeactivateWidget = function (widget) {
+    if (this.ActiveWidget !== widget || widget === null) {
+      // Do nothing if the widget is not active.
+      return;
+    }
+    // Incase the widget changed the cursor.  Change it back.
+    this.LayerDiv.css({'cursor': ''});
+    // The cursor does not change immediatly.  Try to flush.
+    this.EventuallyDraw();
+    this.ActiveWidget = null;
+    widget.SetStateToInactive(this);
+  };
+  // Deactivate all widgets (should the layer have an active state?)
+  AnnotationLayer.prototype.Deactivate = function () {
+    for (var idx = 0; idx < this.WidgetList.length; ++idx) {
+      this.WidgetList[idx].SetStateToInactive(this);
+    }
+  };
+
+  AnnotationLayer.prototype.GetActiveWidget = function () {
+    return this.ActiveWidget;
   };
 
   AnnotationLayer.prototype.RemoveWidget = function (widget) {

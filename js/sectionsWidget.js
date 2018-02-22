@@ -35,7 +35,7 @@
         // permission.
     this.UserNoteFlag = !SA.Edit;
 
-    var parent = layer.AnnotationView.CanvasDiv;
+    var parent = layer.AnnotationView.Parent;
 
     this.Type = 'sections';
     this.Viewer = viewer;

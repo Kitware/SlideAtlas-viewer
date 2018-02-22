@@ -10,24 +10,25 @@
   function View (parent, useWebGL) {
     this.Viewport = [0, 0, 100, 100];
 
-        // Should widgets use shapes?
-        // Should views be used independently to viewers?
+    // Should widgets use shapes?
+    // Should views be used independently to viewers?
     this.ShapeList = [];
 
-        // connectome: remove Cache ivar.
+    // connectome: remove Cache ivar.
     this.Camera = new SAM.Camera();
     this.OutlineColor = [0, 0.5, 0];
     this.OutlineMatrix = mat4.create();
     this.OutlineCamMatrix = mat4.create();
 
-    this.CanvasDiv = parent;
+    this.Parent = parent;
     if (parent) {
-      this.CanvasDiv = parent;
+      this.Parent = parent;
     } else {
-      this.CanvasDiv = $('<div>');
+      // USed for off screen rendering. (Can we depreciate off screen feature in girder viewer?)
+      this.Parent = $('<div>');
     }
-        // 2d canvas
-        // Add a new canvas.
+    // 2d canvas
+    // Add a new canvas.
     this.Canvas = $('<canvas>');
 
     if (!useWebGL) {
@@ -35,32 +36,33 @@
     }
 
     this.Canvas
-            .appendTo(this.CanvasDiv)
-            .css({'position': 'absolute',
-              'left': '0%',
-              'top': '0%',
-              'width': '100%',
-              'height': '100%'});
+      .appendTo(this.Parent)
+      .css({
+        'position': 'absolute',
+        'left': '0%',
+        'top': '0%',
+        'width': '100%',
+        'height': '100%'});
 
-    this.CanvasDiv
-            .addClass('sa-view-canvas-div');
+    this.Parent
+      .addClass('sa-view-canvas-div');
   }
 
-    // Try to remove all global and circular references to this view.
+  // Try to remove all global and circular references to this view.
   View.prototype.Delete = function () {
-    this.CanvasDiv.off('mousedown.viewer');
-    this.CanvasDiv.off('mousemove.viewer');
-    this.CanvasDiv.off('wheel.viewer');
-    this.CanvasDiv.off('touchstart.viewer');
-    this.CanvasDiv.off('touchmove.viewer');
-    this.CanvasDiv.off('touchend.viewer');
-    this.CanvasDiv.off('keydown.viewer');
-    this.CanvasDiv.off('wheel.viewer');
+    this.Parent.off('mousedown.viewer');
+    this.Parent.off('mousemove.viewer');
+    this.Parent.off('wheel.viewer');
+    this.Parent.off('touchstart.viewer');
+    this.Parent.off('touchmove.viewer');
+    this.Parent.off('touchend.viewer');
+    this.Parent.off('keydown.viewer');
+    this.Parent.off('wheel.viewer');
     delete this.ShapeList;
-        // delete this.Section;
+    // delete this.Section;
     delete this.Camera;
-        // delete this.Tiles;
-    delete this.CanvasDiv;
+    // delete this.Tiles;
+    delete this.Parent;
     delete this.Canvas;
   };
 
@@ -68,12 +70,17 @@
     return this.Camera;
   };
 
-    // Get raw image data from the view.
+  // For shared camera with viewer.
+  View.prototype.SetCamera = function (cam) {
+    this.Camera = cam;
+  };
+
+  // Get raw image data from the view.
   View.prototype.GetImageData = function () {
-        // interesting: When does it need to be set?
-        // ctx.imageSmoothingEnabled = true;
-        // useful for debugging
-        // ctx.putImageData(imagedata, dx, dy);
+    // interesting: When does it need to be set?
+    // ctx.imageSmoothingEnabled = true;
+    // useful for debugging
+    // ctx.putImageData(imagedata, dx, dy);
     var cam = this.Camera;
     var width = Math.floor(cam.ViewportWidth);
     var height = Math.floor(cam.ViewportHeight);
@@ -84,23 +91,23 @@
     // This will ne slow (wrapper class, or tack on methods)
     Object.setPrototypeOf(data, new SAM.ImageData());
     data.IncX = 4;
-      // Super has height and width which should be imutable.
+    // Super has height and width which should be imutable.
     data.width = width;
     data.height = height;
     data.IncY = data.IncX * data.width;
     return data;
   };
 
-    // Get the current scale factor between pixels and world units.
-    // World unit is the highest resolution image pixel.
-    // Returns the size of a world pixel in screen pixels.
-    // factor: screen/world
-    // The default world pixel = 0.25e-6 meters
+  // Get the current scale factor between pixels and world units.
+  // World unit is the highest resolution image pixel.
+  // Returns the size of a world pixel in screen pixels.
+  // factor: screen/world
+  // The default world pixel = 0.25e-6 meters
   View.prototype.GetPixelsPerUnit = function () {
-        // Determine the scale difference between the two coordinate systems.
+    // Determine the scale difference between the two coordinate systems.
     var m = this.Camera.GetWorldMatrix();
 
-        // Convert from world coordinate to view (-1->1);
+    // Convert from world coordinate to view (-1->1);
     return 0.5 * this.Viewport[2] / (m[3] + m[15]); // m[3] for x, m[7] for height
   };
 
@@ -124,50 +131,50 @@
     return dist.value;
   };
 
-    // TODO: Get rid of these since the user can manipulate the parent / canvas
-    // div which can be passed into the constructor.
-  View.prototype.appendTo = function (j) {
-    return this.CanvasDiv.appendTo(j);
-  };
+  // TODO: Get rid of these since the user can manipulate the parent / canvas
+  // div which can be passed into the constructor.
+  // View.prototype.appendTo = function (j) {
+  //  return this.Parent.appendTo(j);
+  // };
 
-  View.prototype.remove = function (j) {
-    return this.CanvasDiv.remove(j);
-  };
+  // View.prototype.remove = function (j) {
+  //  return this.Parent.remove(j);
+  // };
 
-  View.prototype.css = function (j) {
-    return this.CanvasDiv.css(j);
-  };
+  // View.prototype.css = function (j) {
+  //  return this.Parent.css(j);
+  // };
 
-    // TODO: Get rid of this.
+  // TODO: Get rid of this.
   View.prototype.GetViewport = function () {
     return this.Viewport;
   };
 
   View.prototype.GetWidth = function () {
-    return this.CanvasDiv.width();
+    return this.Parent.width();
   };
 
   View.prototype.GetHeight = function () {
-    return this.CanvasDiv.height();
+    return this.Parent.height();
   };
 
   View.prototype.UpdateSize = function () {
     this.UpdateCanvasSize();
   };
 
-    // The canvasDiv changes size, the width and height of the canvas and
-    // camera need to follow.  I am going to make this the resize callback.
+  // The canvasDiv changes size, the width and height of the canvas and
+  // camera need to follow.  I am going to make this the resize callback.
   View.prototype.UpdateCanvasSize = function () {
-    if (!this.CanvasDiv.is(':visible')) {
+    if (!this.Parent.is(':visible')) {
       return false;
     }
 
-    var pos = this.CanvasDiv.position();
-        // var width = this.CanvasDiv.innerWidth();
-        // var height = this.CanvasDiv.innerHeight();
-    var width = this.CanvasDiv.width();
-    var height = this.CanvasDiv.height();
-        // resizable is making width 0 intermitently ????
+    var pos = this.Parent.position();
+    // var width = this.Parent.innerWidth();
+    // var height = this.Parent.innerHeight();
+    var width = this.Parent.width();
+    var height = this.Parent.height();
+    // resizable is making width 0 intermitently ????
     if (width <= 0 || height <= 0) { return false; }
 
     this.SetViewport([pos.left, pos.top, width, height]);
@@ -212,7 +219,7 @@
   // reference to this view.  I like that better than the view knowing
   // how to draw all these things.
   View.prototype.DrawShapes = function () {
-    if (!this.CanvasDiv.is(':visible')) {
+    if (!this.Parent.is(':visible')) {
       return;
     }
     for (var i = 0; i < this.ShapeList.length; i++) {
@@ -223,7 +230,7 @@
   View.prototype.Clear = function () {
     this.Context2d.save();
     this.Context2d.setTransform(1, 0, 0, 1, 0, 0);
-        // TODO: get width and height from the canvas.
+    // TODO: get width and height from the canvas.
     this.Context2d.clearRect(0, 0, this.Viewport[2], this.Viewport[3]);
     this.Context2d.restore();
   };
@@ -262,11 +269,11 @@
         cam = timeLine[i].ViewerRecords[0].Camera;
         var height = cam.Height;
         var width = cam.Width;
-                // camer roll is already in radians.
+        // camer roll is already in radians.
         var c = Math.cos(cam.GetWorldRoll());
         var s = Math.sin(cam.GetWorldRoll());
         ctx.save();
-                // transform to put focal point at 0,0
+        // transform to put focal point at 0,0
         var fp = cam.GetWorldFocalPoint();
         ctx.transform(c, -s,
                       s, c,
@@ -340,8 +347,8 @@
     }
   };
 
-    // Draw a cross hair at each correlation point.
-    // pointIdx is 0 or 1.  It indicates which correlation point should be drawn.
+  // Draw a cross hair at each correlation point.
+  // pointIdx is 0 or 1.  It indicates which correlation point should be drawn.
   View.prototype.DrawCorrelations = function (correlations, pointIdx) {
     if (this.gl) {
       alert('Drawing correlations does not work with webGl yet.');
@@ -354,10 +361,10 @@
       for (var i = 0; i < correlations.length; ++i) {
         var wPt = correlations[i].GetPoint(pointIdx);
         var m = this.Camera.GetWorldMatrix();
-                // Change coordinate system from world to -1->1
+        // Change coordinate system from world to -1->1
         var x = (wPt[0] * m[0] + wPt[1] * m[4] + m[12]) / m[15];
         var y = (wPt[0] * m[1] + wPt[1] * m[5] + m[13]) / m[15];
-                // Transform coordinate system from -1->1 to canvas
+        // Transform coordinate system from -1->1 to canvas
         x = (1.0 + x) * this.Viewport[2] * 0.5;
         y = (1.0 - y) * this.Viewport[3] * 0.5;
 
@@ -373,13 +380,13 @@
     }
   };
 
-    // NOTE: Not used anymore. Viewer uses a DOM.
+  // NOTE: Not used anymore. Viewer uses a DOM.
   View.prototype.DrawCopyright = function (copyright) {
     if (copyright === undefined) {
       return;
     }
     if (this.gl) {
-            // not implemented yet.
+      // not implemented yet.
     } else {
       this.Context2d.setTransform(1, 0, 0, 1, 0, 0);
       this.Context2d.font = '18px Arial';
@@ -387,12 +394,12 @@
       var y = this.Viewport[3] - 10;
       this.Context2d.fillStyle = 'rgba(128,128,128,0.5)';
       this.Context2d.fillText(copyright, x, y);
-            // this.Context2d.strokeStyle = "rgba(255,255,255,0.5)";
-            // this.Context2d.strokeText(copyright,x,y);
+      // this.Context2d.strokeStyle = "rgba(255,255,255,0.5)";
+      // this.Context2d.strokeText(copyright,x,y);
     }
   };
 
-    // I think this was only used for webgl.  Not used anymore
+  // I think this was only used for webgl.  Not used anymore
   View.prototype.DrawOutline = function (backgroundFlag) {
     if (this.gl) {
       var program = SA.polyProgram;
@@ -403,7 +410,7 @@
                              this.Viewport[2],
                              this.Viewport[3]);
 
-            // Draw a line around the viewport, so move (0,0),(1,1) to (-1,-1),(1,1)
+      // Draw a line around the viewport, so move (0,0),(1,1) to (-1,-1),(1,1)
       mat4.identity(this.OutlineCamMatrix);
       this.OutlineCamMatrix[0] = 2.0; // width x
       this.OutlineCamMatrix[5] = 2.0; // width y
@@ -419,7 +426,7 @@
       this.gl.uniformMatrix4fv(program.mvMatrixUniform, false, this.OutlineMatrix);
 
       if (backgroundFlag) {
-                // White background fill
+        // White background fill
         this.OutlineCamMatrix[14] = viewBackZ; // back plane
         this.gl.uniformMatrix4fv(program.pMatrixUniform, false, this.OutlineCamMatrix);
         this.gl.uniform3f(program.colorUniform, 1.0, 1.0, 1.0);
@@ -430,7 +437,7 @@
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, SA.squarePositionBuffer.numItems);
       }
 
-            // outline
+      // outline
       this.OutlineCamMatrix[14] = viewFrontZ; // force in front
       this.gl.uniformMatrix4fv(program.pMatrixUniform, false, this.OutlineCamMatrix);
       this.gl.uniform3f(program.colorUniform, this.OutlineColor[0], this.OutlineColor[1], this.OutlineColor[2]);
@@ -463,12 +470,12 @@
     return (x >= 0 && x < this.width && y >= 0 && y < this.height);
   };
 
-    // Mark edges visited so we do not create the same contour twice.
-    // I cannot mark the pixel cell because two contours can go through the same cell.
-    // Note:  I have to keep track of both the edge and the direction the contour leaves
-    // the edge.  The backward direction was to being contoured because the starting
-    // edge was already marked.  The order of the points here matters.  Each point
-    // marks 4 edges.
+  // Mark edges visited so we do not create the same contour twice.
+  // I cannot mark the pixel cell because two contours can go through the same cell.
+  // Note:  I have to keep track of both the edge and the direction the contour leaves
+  // the edge.  The backward direction was to being contoured because the starting
+  // edge was already marked.  The order of the points here matters.  Each point
+  // marks 4 edges.
   ImageData.prototype.MarkEdge = function (x0, y0, x1, y1) {
     if (!this.EdgeMarks) {
       var numTemplates = Math.round((this.width) * (this.height));

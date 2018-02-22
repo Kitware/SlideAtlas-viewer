@@ -70,7 +70,7 @@
     this.UserNoteFlag = !SA.Edit;
 
     var self = this;
-    this.Dialog = new SAM.Dialog(function () { self.DialogApplyCallback(); });
+    this.Dialog = new SAM.Dialog(function () { self.DialogApplyCallback(layer); });
     // Customize dialog for a circle.
     this.Dialog.Title.text('Rect Annotation Editor');
     // Color
@@ -165,8 +165,7 @@
     // This will allow us to expand annotations into notes.
     this.CreationCamera = layer.GetCamera().Serialize();
 
-    this.Layer = layer;
-    this.Popup = new SAM.WidgetPopup(this);
+    this.Popup = new SAM.WidgetPopup(this, layer);
     var cam = layer.GetCamera();
     var viewport = layer.GetViewport();
     this.Shape = new Rect();
@@ -184,7 +183,7 @@
     this.Shape.LineWidth = 0;
     this.Shape.FixedSize = false;
 
-    this.Layer.AddWidget(this);
+    layer.AddWidget(this);
 
     // Note: If the user clicks before the mouse is in the
     // canvas, this will behave odd.
@@ -193,12 +192,12 @@
       this.State = NEW;
       // Do not render mouse "cursor" unti it moves and we know its location.
       this.Visibility = false;
-      this.Layer.ActivateWidget(this);
-      this.Layer.GetCanvasDiv().css({'cursor': 'crosshair'});
+      layer.ActivateWidget(this);
+      layer.GetParent().css({'cursor': 'crosshair'});
       return;
     }
 
-    this.Layer.GetCanvasDiv().css({'cursor': 'default'});
+    layer.GetParent().css({'cursor': 'default'});
     this.State = WAITING;
   }
 
@@ -216,12 +215,12 @@
     }
   };
 
-  RectWidget.prototype.PasteCallback = function (data, mouseWorldPt) {
+  RectWidget.prototype.PasteCallback = function (data, layer, mouseWorldPt) {
     this.Load(data);
     // Place the widget over the mouse.
     // This would be better as an argument.
     this.Shape.Origin = [mouseWorldPt[0], mouseWorldPt[1]];
-    this.Layer.EventuallyDraw();
+    layer.EventuallyDraw();
     if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
     if (SAM.NotesWidget && !this.UserNoteFlag) { SAM.NotesWidget.MarkAsModified(); } // Hack
   };
@@ -243,7 +242,7 @@
   };
 
   // Load a widget from a json object (origin MongoDB).
-  RectWidget.prototype.Load = function (obj) {
+  RectWidget.prototype.Load = function (obj, layer) {
     this.UserNoteFlag = obj.user_note_flag;
     this.Shape.Origin[0] = parseFloat(obj.origin[0]);
     this.Shape.Origin[1] = parseFloat(obj.origin[1]);
@@ -269,7 +268,7 @@
       this.Shape.LineWidth = parseFloat(obj.linewidth);
     }
     this.Shape.FixedSize = false;
-    this.Shape.UpdateBuffers(this.Layer.AnnotationView);
+    this.Shape.UpdateBuffers(layer.AnnotationView);
 
     // How zoomed in was the view when the annotation was created.
     if (obj.creation_camera !== undefined) {
@@ -277,7 +276,7 @@
     }
   };
 
-  RectWidget.prototype.HandleKeyDown = function (keyCode, shift) {
+  RectWidget.prototype.HandleKeyDown = function (layer) {
     if (!this.Visibility) {
       return true;
     }
@@ -287,12 +286,13 @@
       return false;
     }
 
+    var event = layer.Event;
     if (this.State === NEW) {
       // escape key (or space or enter) to turn off drawing
       if (event.keyCode === 27 || event.keyCode === 32 || event.keyCode === 13) {
         this.Deactivate();
                 // this widget was temporary, All rects created have been copied.
-        this.RemoveFromLayer();
+        layer.RemoveWidget(this);
         return false;
       }
     }
@@ -310,17 +310,17 @@
     return true;
   };
 
-  RectWidget.prototype.HandleDoubleClick = function (event) {
+  RectWidget.prototype.HandleDoubleClick = function (layer) {
     if (this.State === NEW) {
       this.Deactivate();
       // this widget was temporary, All rects created have been copied.
-      this.RemoveFromLayer();
+      layer.RemoveWidget(this);
       return false;
     }
     if (this.State === ACTIVE) {
       // Start adding again
       // Duplicate this widget and keep on drawing.
-      var copy = new RectWidget(this.Layer, false);
+      var copy = new RectWidget(layer, false);
       copy.Load(this.Serialize());
       this.State = WAITING;
       if (window.SA) { SA.RecordState(); }
@@ -341,7 +341,8 @@
     return false;
   };
 
-  RectWidget.prototype.HandleMouseMove = function (event) {
+  RectWidget.prototype.HandleMouseMove = function (layer) {
+    var event = layer.Event;
     var x = event.offsetX;
     var y = event.offsetY;
 
@@ -354,13 +355,13 @@
         // THis is ignored until the mouse is pressed.
         this.Visibility = true;
         // Center follows mouse.
-        this.Shape.Origin = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
-        this.Layer.EventuallyDraw();
+        this.Shape.Origin = layer.GetCamera().ConvertPointViewerToWorld(x, y);
+        layer.EventuallyDraw();
         return false;
       } else if (this.State === ACTIVE) {
         // HandleMouseMove will not be called if the widget is waiting.
         // This turns the widget off when the mouse moves away.
-        this.SetActive(this.CheckActive(event));
+        this.SetActive(this.CheckActive(layer), layer);
         return false;
       }
     }
@@ -372,7 +373,7 @@
 
     if (event.which !== 1) { return false; }
 
-    var worldPt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
+    var worldPt = layer.GetCamera().ConvertPointViewerToWorld(x, y);
     if (this.State === ACTIVE && WHICH_DRAG === DRAG_CENTER) {
       // Drag the whole thing.
       this.Shape.Origin = worldPt;
@@ -389,57 +390,58 @@
     }
 
     this.Shape.UpdateBuffers();
-    this.PlacePopup();
-    this.Layer.EventuallyDraw();
+    this.PlacePopup(layer);
+    layer.EventuallyDraw();
     return false;
   };
 
   // returns false when it is finished doing its work.
-  RectWidget.prototype.HandleMouseUp = function (event) {
+  RectWidget.prototype.HandleMouseUp = function (layer) {
     if (!this.Visibility) {
       return true;
     }
 
     if (this.State === NEW) {
-      this.NewAddAndContinue();
+      this.NewAddAndContinue(layer);
     }
     DEFAULT_WIDTH = this.Shape.Width;
     DEFAULT_HEIGHT = this.Shape.Height;
   };
 
   // returns false when it is finished doing its work.
-  RectWidget.prototype.HandleClick = function (event) {
+  RectWidget.prototype.HandleClick = function (layer) {
     if (!this.Visibility) {
       return true;
     }
 
     if (this.State === NEW) {
-      this.NewAddAndContinue();
+      this.NewAddAndContinue(layer);
     }
   };
 
   // Make the "new" rect permenant and add another "new" rectangle
   // so multiple rectangles can be added quickly.
-  RectWidget.prototype.NewAddAndContinue = function () {
+  RectWidget.prototype.NewAddAndContinue = function (layer) {
     // TODO: Ripout this usernote stuff and replace with modified callbacks.
     if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
     if (SAM.NotesWidget && !this.UserNoteFlag) { SAM.NotesWidget.MarkAsModified(); } // Hack
     // Duplicate this widget and keep on drawing.
-    var copy = new RectWidget(this.Layer, true);
+    var copy = new RectWidget(layer, true);
     copy.Load(this.Serialize());
     // The old one becomes inactive and the copy takes over.
     this.State = WAITING;
     if (window.SA) { SA.RecordState(); }
   };
 
-  RectWidget.prototype.HandleTouchPan = function (event) {
+  RectWidget.prototype.HandleTouchPan = function (layer) {
     if (!this.Visibility) {
       return true;
     }
 
-    var w0 = this.Layer.GetCamera().ConvertPointViewerToWorld(this.Layer.LastMouseX,
-                                                              this.Layer.LastMouseY);
-    var w1 = this.Layer.GetCamera().ConvertPointViewerToWorld(event.offsetX, event.offsetY);
+    var event = layer.Event;
+    var w0 = layer.GetCamera().ConvertPointViewerToWorld(layer.LastMouseX,
+                                                              layer.LastMouseY);
+    var w1 = layer.GetCamera().ConvertPointViewerToWorld(event.offsetX, event.offsetY);
 
     // This is the translation.
     var dx = w1[0] - w0[0];
@@ -447,33 +449,34 @@
 
     this.Shape.Origin[0] += dx;
     this.Shape.Origin[1] += dy;
-    this.Layer.EventuallyDraw();
+    layer.EventuallyDraw();
   };
 
-  RectWidget.prototype.HandleTouchPinch = function (event) {
+  RectWidget.prototype.HandleTouchPinch = function (layer) {
     if (!this.Visibility) {
       return true;
     }
 
-    this.Shape.UpdateBuffers(this.Layer.AnnotationView);
-    this.Layer.EventuallyDraw();
+    this.Shape.UpdateBuffers(layer.AnnotationView);
+    layer.EventuallyDraw();
   };
 
-  RectWidget.prototype.HandleTouchEnd = function (event) {
+  RectWidget.prototype.HandleTouchEnd = function (layer) {
     if (!this.Visibility) {
       return true;
     }
 
-    this.SetActive(false);
+    this.SetActive(false, layer);
     if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
     if (SAM.NotesWidget && !this.UserNoteFlag) { SAM.NotesWidget.MarkAsModified(); } // Hack
   };
 
-  RectWidget.prototype.CheckActive = function (event) {
+  RectWidget.prototype.CheckActive = function (layer) {
     if (!this.Visibility) {
       return false;
     }
 
+    var event = layer.Event;
     var dx, dy;
     // change dx and dy to vector from center of circle.
     if (this.FixedSize) {
@@ -492,7 +495,7 @@
     // Terminiate if outside bounds.
     if (dx > tol + (this.Shape.Width / 2.0) ||
         dy > tol + (this.Shape.Height / 2.0)) {
-      this.SetActive(false);
+      this.SetActive(false, layer);
       return false;
     }
 
@@ -501,7 +504,7 @@
     // First see if we are over the center.
     if (dx < tol && dy < tol) {
       WHICH_DRAG = DRAG_CENTER;
-      this.SetActive(true);
+      this.SetActive(true, layer);
       return true;
     }
 
@@ -514,10 +517,10 @@
     }
 
     if (WHICH_DRAG === 0) {
-      this.SetActive(false);
+      this.SetActive(false, layer);
       return false;
     }
-    this.SetActive(true);
+    this.SetActive(true, layer);
     return true;
   };
 
@@ -529,28 +532,21 @@
     return true;
   };
 
-  RectWidget.prototype.RemoveFromLayer = function () {
-    if (this.Layer) {
-      this.Layer.RemoveWidget(this);
-    }
-    this.Layer = null;
-  };
-
-  RectWidget.prototype.Deactivate = function () {
+  RectWidget.prototype.Deactivate = function (layer) {
     this.Popup.StartHideTimer();
-    this.Layer.GetCanvasDiv().css({'cursor': 'default'});
-    this.Layer.DeactivateWidget(this);
+    layer.GetParent().css({'cursor': 'default'});
+    layer.DeactivateWidget(this);
     this.State = WAITING;
     this.Shape.Active = false;
     if (this.DeactivateCallback) {
       this.DeactivateCallback();
     }
-    this.Layer.EventuallyDraw();
+    layer.EventuallyDraw();
   };
 
   // Setting to active always puts state into "active".
   // It can move to other states and stay active.
-  RectWidget.prototype.SetActive = function (flag) {
+  RectWidget.prototype.SetActive = function (flag, layer) {
     if (!this.Visibility) {
       this.Visibility = true;
     }
@@ -562,27 +558,27 @@
     if (flag) {
       this.State = ACTIVE;
       this.Shape.Active = true;
-      this.Layer.ActivateWidget(this);
-      this.Layer.EventuallyDraw();
+      layer.ActivateWidget(this);
+      layer.EventuallyDraw();
       // Compute the location for the pop up and show it.
-      this.PlacePopup();
+      this.PlacePopup(layer);
     } else {
       this.Deactivate();
     }
-    this.Layer.EventuallyDraw();
+    layer.EventuallyDraw();
   };
 
   // This also shows the popup if it is not visible already.
-  RectWidget.prototype.PlacePopup = function () {
+  RectWidget.prototype.PlacePopup = function (layer) {
     if (!this.Visibility) {
       return;
     }
     // Compute the location for the pop up and show it.
-    var roll = this.Layer.GetCamera().GetWorldRoll();
+    var roll = layer.GetCamera().GetWorldRoll();
     var rad = this.Shape.Width * 0.5;
     var x = this.Shape.Origin[0] + 0.8 * rad * (Math.cos(roll) - Math.sin(roll));
     var y = this.Shape.Origin[1] - 0.8 * rad * (Math.cos(roll) + Math.sin(roll));
-    var pt = this.Layer.GetCamera().ConvertPointWorldToViewer(x, y);
+    var pt = layer.GetCamera().ConvertPointWorldToViewer(x, y);
     this.Popup.Show(pt[0], pt[1]);
   };
 
@@ -619,14 +615,14 @@
     this.Dialog.Show(true);
   };
 
-  RectWidget.prototype.DialogApplyCallback = function () {
+  RectWidget.prototype.DialogApplyCallback = function (layer) {
     var hexcolor = this.Dialog.ColorInput.val();
     this.Shape.SetOutlineColor(hexcolor);
     this.Shape.LineWidth = parseFloat(this.Dialog.LineWidthInput.val());
-    this.Shape.UpdateBuffers(this.Layer.AnnotationView);
-    this.SetActive(false);
+    this.Shape.UpdateBuffers(layer.AnnotationView);
+    this.SetActive(false, layer);
     if (window.SA) { SA.RecordState(); }
-    this.Layer.EventuallyDraw();
+    layer.EventuallyDraw();
 
     if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
     if (SAM.NotesWidget && !this.UserNoteFlag) { SAM.NotesWidget.MarkAsModified(); } // Hack

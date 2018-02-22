@@ -24,8 +24,8 @@
     this.FixedOrientation = true;
     this.LineWidth = 0; // Line width has to be in same coordinates as points.
     this.Visibility = true; // An easy way to turn off a shape (with removing it from the shapeList).
-    this.Active = false;
-    this.ActiveColor = [1.0, 1.0, 0.0];
+    this.Selected = false;
+    this.SelectedColor = [1.0, 1.0, 0.0];
         // Playing around with layering.  The anchor is being obscured by the text.
     this.ZOffset = 0.1;
   }
@@ -123,9 +123,9 @@
 
       // Fill color
       if (this.FillColor !== undefined) {
-        if (this.Active) {
-          view.gl.uniform3f(program.colorUniform, this.ActiveColor[0],
-                                 this.ActiveColor[1], this.ActiveColor[2]);
+        if (this.Selected) {
+          view.gl.uniform3f(program.colorUniform, this.SelectedColor[0],
+                                 this.SelectedColor[1], this.SelectedColor[2]);
         } else {
           view.gl.uniform3f(program.colorUniform, this.FillColor[0],
                                  this.FillColor[1], this.FillColor[2]);
@@ -138,9 +138,9 @@
       }
 
       if (this.OutlineColor !== undefined) {
-        if (this.Active) {
-          view.gl.uniform3f(program.colorUniform, this.ActiveColor[0],
-                                 this.ActiveColor[1], this.ActiveColor[2]);
+        if (this.Selected) {
+          view.gl.uniform3f(program.colorUniform, this.SelectedColor[0],
+                                 this.SelectedColor[1], this.SelectedColor[2]);
         } else {
           view.gl.uniform3f(program.colorUniform, this.OutlineColor[0],
                                  this.OutlineColor[1], this.OutlineColor[2]);
@@ -260,11 +260,11 @@
       if (this.OutlineColor !== undefined) {
         var width = this.LineWidth * scale;
         if (width === 0) {
-          width = 3;
+          width = 1;
         }
         view.Context2d.lineWidth = width;
-        if (this.Active) {
-          view.Context2d.strokeStyle = SAM.ConvertColorToHex(this.ActiveColor);
+        if (this.Selected) {
+          view.Context2d.strokeStyle = SAM.ConvertColorToHex(this.SelectedColor);
         } else {
           view.Context2d.strokeStyle = SAM.ConvertColorToHex(this.OutlineColor);
         }
@@ -273,8 +273,8 @@
       }
 
       if (this.FillColor !== undefined) {
-        if (this.Active) {
-          view.Context2d.fillStyle = SAM.ConvertColorToHex(this.ActiveColor);
+        if (this.Selected) {
+          view.Context2d.fillStyle = SAM.ConvertColorToHex(this.SelectedColor);
         } else {
           view.Context2d.fillStyle = SAM.ConvertColorToHex(this.FillColor);
         }

@@ -68,48 +68,52 @@
 
   function Text () {
     this.Color = [0.5, 1.0, 1.0];
-    this.Size = 12; // Height in pixels
+    this.FontSize = 12; // Height in pixels
 
     // Position of the anchor in the world coordinate system.
     this.Position = [100, 100];
     this.Orientation = 0.0; // in degrees, counter clockwise, 0 is left
 
-        // The anchor point and position are the same point.
-        // Position is in world coordinates.
-        // Anchor is in pixel coordinates of text (buffers).
-        // In pixel(text) coordinate system
+    // The anchor point and position are the same point.
+    // Position is in world coordinates.
+    // Anchor is in pixel coordinates of text (buffers).
+    // In pixel(text) coordinate system
     this.Anchor = [0, 0];
-    this.Active = false;
+    this.Selected = false;
 
-        // this.String = "Hello World";
-        // this.String = "0123456789";
-    this.String = ',./<>?[]\\{}|-=~!@#$%^&*()_+';
+    // this.String = "Hello World";
+    // this.String = "0123456789";
+    this.String = '';
 
-        // Pixel bounds are in text box coordiante system.
+    // Pixel bounds are in text box coordiante system.
     this.PixelBounds = [0, 0, 0, 0];
 
     this.BackgroundFlag = false;
   }
 
-  Text.prototype.destructor = function () {
-        // Get rid of the buffers?
+  Text.prototype.SetString = function (str) {
+    this.String = str;
+  };
+
+  Text.prototype.GetString = function () {
+    return this.String;
   };
 
   Text.prototype.Draw = function (view) {
-        // Place the anchor of the text.
-        // First transform the world anchor to view.
+    // Place the anchor of the text.
+    // First transform the world anchor to view.
     var x = this.Position[0];
     var y = this.Position[1];
     if (this.PositionCoordinateSystem !== SAM.Shape.VIEWER) {
       var m = view.Camera.GetImageMatrix();
       x = (this.Position[0] * m[0] + this.Position[1] * m[4] + m[12]) / m[15];
       y = (this.Position[0] * m[1] + this.Position[1] * m[5] + m[13]) / m[15];
-            // convert view to pixels (view coordinate system).
+      // convert view to pixels (view coordinate system).
       x = view.Viewport[2] * (0.5 * (1.0 + x));
       y = view.Viewport[3] * (0.5 * (1.0 - y));
     }
 
-        // Hacky attempt to mitigate the bug that randomly sends the Anchor values into the tens of thousands.
+    // Hacky attempt to mitigate the bug that randomly sends the Anchor values into the tens of thousands.
     if (Math.abs(this.Anchor[0]) > 1000 || Math.abs(this.Anchor[1]) > 1000) {
       this.Anchor = [-50, 0];
     }
@@ -127,31 +131,31 @@
     x = -this.Anchor[0];
     y = -this.Anchor[1];
 
-    ctx.font = this.Size + 'pt Calibri';
+    ctx.font = this.FontSize + 'pt Calibri';
     var width = this.PixelBounds[1];
     var height = this.PixelBounds[3];
     // Draw the background text box.
     if (this.BackgroundFlag) {
       // ctx.fillStyle = '#fff';
       // ctx.strokeStyle = '#000';
-      // ctx.fillRect(x - 2, y - 2, this.PixelBounds[1] + 4, (this.PixelBounds[3] + this.Size/3)*1.4);
-      roundRect(ctx, x - 2, y - 2, width + 6, height + 2, this.Size / 2, true, false);
+      // ctx.fillRect(x - 2, y - 2, this.PixelBounds[1] + 4, (this.PixelBounds[3] + this.FontSize/3)*1.4);
+      roundRect(ctx, x - 2, y - 2, width + 6, height + 2, this.FontSize / 2, true, false);
     }
 
     // Choose the color for the text.
-    if (this.Active) {
+    if (this.Selected) {
       ctx.fillStyle = '#FF0';
     } else {
       ctx.fillStyle = SAM.ConvertColorToHex(this.Color);
     }
 
     // Convert (x,y) from upper left of textbox to lower left of first character.
-    y = y + this.Size;
+    y = y + this.FontSize;
     // Draw the lines of the text.
     for (var i = 0; i < strArray.length; ++i) {
       ctx.fillText(strArray[i], x, y);
       // Move to the lower left of the next line.
-      y = y + this.Size * LINE_SPACING;
+      y = y + this.FontSize * LINE_SPACING;
     }
 
     ctx.stroke();
@@ -160,10 +164,13 @@
 
   function roundRect (ctx, x, y, width, height, radius) {
     if (typeof radius === 'undefined') {
-      radius = 5;
+      radius = 2;
     }
     ctx.fillStyle = '#fff';
     ctx.strokeStyle = '#666';
+    ctx.fillRect(x, y, width, height);
+
+    /*
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
     ctx.lineTo(x + width - radius, y);
@@ -175,16 +182,17 @@
     ctx.lineTo(x, y + radius);
     ctx.quadraticCurveTo(x, y, x + radius, y);
     ctx.closePath();
+    */
     ctx.stroke();
-    ctx.fill();
+    // ctx.fill();
   }
 
   Text.prototype.UpdateBuffers = function (view) {
     var i;
     if (!view.gl) {
-            // Canvas.  Compute pixel bounds.
+      // Canvas.  Compute pixel bounds.
       var strArray = this.String.split('\n');
-      var height = this.Size * LINE_SPACING * strArray.length;
+      var height = this.FontSize * LINE_SPACING * strArray.length;
       var width = 0;
       // Hack: use a global viewer because I do not have the viewer.
       // Maybe it should be passed in as an argument, or store the context
@@ -192,7 +200,7 @@
       var ctx = view.Context2d;
       ctx.save();
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.font = this.Size + 'pt Calibri';
+      ctx.font = this.FontSize + 'pt Calibri';
       // Compute the width of the text box.
       for (i = 0; i < strArray.length; ++i) {
         var lineWidth = ctx.measureText(strArray[i]).width;
@@ -210,13 +218,13 @@
     var charLeft = 0;
     var charTop = 0;
     var ptId = 0;
-    this.PixelBounds = [0, 0, 0, this.Size];
+    this.PixelBounds = [0, 0, 0, this.FontSize];
 
     for (i = 0; i < this.String.length; ++i) {
       var idx = this.String.charCodeAt(i);
       if (idx === 10 || idx === 13) { // newline
         charLeft = 0;
-        charTop += this.Size;
+        charTop += this.FontSize;
       } else {
         var port = ASCII_LOOKUP[idx];
         // Convert to texture coordinate values.
@@ -225,8 +233,8 @@
         var tBottom = port[1] / 512.0;
         var tTop = (port[1] + port[3]) / 512.0;
         // To place vertices
-        var charRight = charLeft + port[2] * this.Size / 98.0;
-        var charBottom = charTop + port[3] * this.Size / 98.0;
+        var charRight = charLeft + port[2] * this.FontSize / 98.0;
+        var charBottom = charTop + port[3] * this.FontSize / 98.0;
 
         // Accumulate bounds;
         if (this.PixelBounds[0] > charLeft) { this.PixelBounds[0] = charLeft; }
@@ -292,13 +300,46 @@
     this.CellBuffer.numItems = cellData.length;
   };
 
-  Text.prototype.HandleMouseMove = function (event, dx, dy) {
-    // convert the position to screen pixel coordinates.
+  // Point in text coordinates is over the text.
+  Text.prototype.PointInText = function (xMouse, yMouse) {
+    if (!this.Visibility) { return false; }
+    if (xMouse > this.PixelBounds[0] && xMouse < this.PixelBounds[1] &&
+        yMouse > this.PixelBounds[2] && yMouse < this.PixelBounds[3]) {
+      return true;
+    }
     return false;
   };
 
   Text.prototype.SetColor = function (c) {
     this.Color = SAM.ConvertColor(c);
+  };
+  Text.prototype.GetColor = function () {
+    return this.Color;
+  };
+
+  Text.prototype.SetFontSize = function (s) {
+    this.FontSize = s;
+  };
+  Text.prototype.GetFontSize = function () {
+    return this.FontSize;
+  };
+
+  Text.prototype.SetBackgroundFlag = function (f) {
+    this.BackgroundFlag = f;
+  };
+  Text.prototype.GetBackgroundFlag = function () {
+    return this.BackgroundFlag;
+  };
+
+  Text.prototype.IsSelected = function () {
+    return this.Selected;
+  };
+
+  // Returns true if the selected state changed.
+  Text.prototype.SetSelected = function (f) {
+    if (f === this.Selected) { return false; }
+    this.Selected = f;
+    return true;
   };
 
   SAM.Text = Text;

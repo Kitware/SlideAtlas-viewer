@@ -213,7 +213,7 @@
     this.ActiveClassIndex = idx;
     this.Classes[idx].gui
             .css({'background-color': '#DEF'});
-    this.SetCursorColor(this.Layer.GetCanvasDiv(), this.Classes[idx].color);
+    this.SetCursorColor(this.Layer.GetParent(), this.Classes[idx].color);
     if (!this.IteratorClass) {
       var selectedClass = this.Classes[idx];
       this.ActiveLabel.text(selectedClass.label);

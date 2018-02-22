@@ -626,7 +626,7 @@
   };
 
   GridWidget.prototype.Deactivate = function () {
-    this.Layer.AnnotationView.CanvasDiv.css({'cursor': 'default'});
+    this.Layer.AnnotationView.Parent.css({'cursor': 'default'});
     this.Popup.StartHideTimer();
     this.State = WAITING;
     this.Grid.Active = false;
@@ -650,19 +650,19 @@
       }
       if (this.ActiveIndex[0] === 0) {
         this.State = DRAG_LEFT;
-        this.Layer.AnnotationView.CanvasDiv.css({'cursor': 'col-resize'});
+        this.Layer.AnnotationView.Parent.css({'cursor': 'col-resize'});
       } else if (this.ActiveIndex[0] === this.Grid.Dimensions[0]) {
         this.State = DRAG_RIGHT;
-        this.Layer.AnnotationView.CanvasDiv.css({'cursor': 'col-resize'});
+        this.Layer.AnnotationView.Parent.css({'cursor': 'col-resize'});
       } else if (this.ActiveIndex[1] === 0) {
         this.State = DRAG_TOP;
-        this.Layer.AnnotationView.CanvasDiv.css({'cursor': 'row-resize'});
+        this.Layer.AnnotationView.Parent.css({'cursor': 'row-resize'});
       } else if (this.ActiveIndex[1] === this.Grid.Dimensions[1]) {
         this.State = DRAG_BOTTOM;
-        this.Layer.AnnotationView.CanvasDiv.css({'cursor': 'row-resize'});
+        this.Layer.AnnotationView.Parent.css({'cursor': 'row-resize'});
       } else {
         this.State = DRAG;
-        this.Layer.AnnotationView.CanvasDiv.css({'cursor': 'move'});
+        this.Layer.AnnotationView.Parent.css({'cursor': 'move'});
       }
 
             // Compute the location for the pop up and show it.

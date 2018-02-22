@@ -2984,7 +2984,7 @@
         .css({
           'position': 'absolute',
           'height': '24px',
-          'z-index': '100'});
+          'z-index': '300'});
 
     // Attach variables to the dom button
     var self = fullScreenButton[0];

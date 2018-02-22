@@ -99,7 +99,7 @@
   TileView.prototype.DrawTiles = function () {
     // Download view is not visible, but still needs to render tiles.
     // This causes black/blank download images
-    // if ( ! this.CanvasDiv.is(':visible') ) {
+    // if ( ! this.Parent.is(':visible') ) {
     //    return;
     // }
     // console.time("  ViewDraw");

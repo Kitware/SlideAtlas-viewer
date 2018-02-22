@@ -25,7 +25,7 @@
     var y = 70 + (idx * 6 * this.Radius);
     var self = this;
     this.Plus = $('<img>')
-      .appendTo(this.AnnotationLayer.GetCanvasDiv())
+      .appendTo(this.AnnotationLayer.GetParent())
       .attr('src', SA.ImagePathUrl + 'bluePlus.png')
       .css({
         'position': 'absolute',
@@ -51,7 +51,7 @@
 
     this.MenuAnnotationObject = undefined;
     this.Menu = $('<div>')
-      .appendTo(this.AnnotationLayer.GetCanvasDiv())
+      .appendTo(this.AnnotationLayer.GetParent())
       .hide()
       .mouseleave(function () { $(this).hide(); })
       .css({
@@ -420,7 +420,7 @@
 
     var self = this;
     var div = $('<div>')
-      .appendTo(this.AnnotationLayer.GetCanvasDiv())
+      .appendTo(this.AnnotationLayer.GetParent())
       .css({
         'position': 'absolute',
         'left': (3 * this.Radius) + 'px',

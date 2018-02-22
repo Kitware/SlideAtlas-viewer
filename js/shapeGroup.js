@@ -1,7 +1,7 @@
 // Originally to hold a set of polylines for the pencil widget.
 
 (function () {
-    // Depends on the CIRCLE widget
+  // Depends on the CIRCLE widget
   'use strict';
 
   function ShapeGroup () {
@@ -13,9 +13,9 @@
     return this.Bounds;
   };
 
-    // Returns 0 if is does not overlap at all.
-    // Returns 1 if part of the section is in the bounds.
-    // Returns 2 if all of the section is in the bounds.
+  // Returns 0 if is does not overlap at all.
+  // Returns 1 if part of the section is in the bounds.
+  // Returns 2 if all of the section is in the bounds.
   ShapeGroup.prototype.ContainedInBounds = function (bds) {
     if (this.Shapes.length === 0) { return 0; }
     var retVal = this.Shapes[0].ContainedInBounds(bds);
@@ -35,13 +35,31 @@
     return retVal;
   };
 
+  // Returns true if a shape was selected.
+  ShapeGroup.prototype.SingleSelect = function (pt, dist) {
+    var found = false;
+    for (var idx = 0; idx < this.Shapes.length; ++idx) {
+      var shape = this.Shapes[idx];
+      if (found || !shape.PointOnShape(pt, dist)) {
+        // A shape was already selected. Just unselect the rest.
+        shape.SetSelected(false);
+      } else {
+        shape.SetSelected(true);
+        found = true;
+      }
+    }
+    return found;
+  };
+
+  // Legacy?
+  // Returns the index of the shape selected,  -1 if None.
   ShapeGroup.prototype.PointOnShape = function (pt, dist) {
     for (var i = 0; i < this.Shapes.length; ++i) {
       if (this.Shapes[i].PointOnShape(pt, dist)) {
-        return true;
+        return i;
       }
     }
-    return false;
+    return -1;
   };
 
   ShapeGroup.prototype.UpdateBuffers = function (view) {
@@ -50,7 +68,25 @@
     }
   };
 
-    // Find a world location of a popup point given a camera.
+  ShapeGroup.prototype.DeleteSelected = function () {
+    var keepers = [];
+    for (var idx = 0; idx < this.Shapes.length; ++idx) {
+      if (!this.Shapes[idx].IsSelected()) {
+        keepers.push(this.Shapes[idx]);
+      }
+    }
+    if (keepers.length < this.Shapes.length) {
+      this.Shapes = keepers;
+      return true;
+    }
+    return false;
+  };
+
+  // Depreciates: TODO:  Remove this method.
+  // I decided I hate popups.  They are visual noise and
+  // when there are many annotations, you cannot get the one you want.
+  // They always got orphaned for some reason.  Not worth fixing.
+  // Find a world location of a popup point given a camera.
   ShapeGroup.prototype.FindPopupPoint = function (cam) {
     if (this.Shapes.length === 0) { return; }
     var roll = cam.GetWorldRoll();
@@ -91,10 +127,35 @@
     return this.Shapes.pop();
   };
 
-  ShapeGroup.prototype.SetActive = function (flag) {
+  ShapeGroup.prototype.DeleteChild = function (idx) {
+    return this.Shapes.splice(idx, 1);
+  };
+
+  // Set the all to the same selected state.
+  // Returns true if any selection changed.
+  ShapeGroup.prototype.SetSelected = function (flag) {
+    var changed = false;
     for (var i = 0; i < this.Shapes.length; ++i) {
-      this.Shapes[i].SetActive(flag);
+      if (this.Shapes[i].SetSelected(flag)) {
+        changed = true;
+      }
     }
+    return changed;
+  };
+
+  // Set only one child selected state
+  ShapeGroup.prototype.SetSelectedChild = function (idx, flag) {
+    this.Shapes[idx].SetSelected(flag);
+  };
+
+  // Returns true if any shapes are selected.
+  ShapeGroup.prototype.IsSelected = function () {
+    for (var i = 0; i < this.Shapes.length; ++i) {
+      if (this.Shapes[i].IsSelected()) {
+        return true;
+      }
+    }
+    return false;
   };
 
   ShapeGroup.prototype.SetLineWidth = function (lineWidth) {
@@ -103,7 +164,7 @@
     }
   };
 
-    // Just returns the first.
+  // Just returns the first.
   ShapeGroup.prototype.GetLineWidth = function () {
     if (this.Shapes.length !== 0) {
       return this.Shapes[0].GetLineWidth();
@@ -117,7 +178,7 @@
     }
   };
 
-    // Just returns the first.
+  // Just returns the first.
   ShapeGroup.prototype.GetOutlineColor = function () {
     if (this.Shapes.length !== 0) {
       return this.Shapes[0].OutlineColor;
@@ -127,19 +188,19 @@
 
   ShapeGroup.prototype.SetOrigin = function (origin) {
     for (var i = 0; i < this.Shapes.length; ++i) {
-            // Makes a copy of the array.
+      // Makes a copy of the array.
       this.Shapes[i].SetOrigin(origin);
     }
   };
 
-    // Adds origin to points and sets origin to 0.
+  // Adds origin to points and sets origin to 0.
   ShapeGroup.prototype.ResetOrigin = function () {
     for (var i = 0; i < this.Shapes.length; ++i) {
       this.Shapes[i].ResetOrigin();
     }
   };
 
-    // Just returns the first.
+  // Just returns the first.
   ShapeGroup.prototype.GetOrigin = function () {
     if (this.Shapes.length !== 0) {
       return this.Shapes[0].Origin;

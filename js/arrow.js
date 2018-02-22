@@ -13,19 +13,24 @@
   Arrow.prototype = new SAM.Shape();
 
   Arrow.prototype.destructor = function () {
-        // Get rid of the buffers?
+    // Get rid of the buffers?
   };
 
-    // Point origin is anchor and units pixels.
+  // This has to be in viewer (arrow) coordinates bedcause we do not have the camera.
+  // Point is in world coordinates.
+  // Point origin is anchor and units pixels.
   Arrow.prototype.PointInShape = function (x, y) {
-        // Rotate point so arrow lies along the x axis.
+    // Rotate point so arrow lies along the x axis.
     var tmp = -(this.Orientation * Math.PI / 180.0);
     var ct = Math.cos(tmp);
     var st = Math.sin(tmp);
     var xNew = x * ct + y * st;
     var yNew = -x * st + y * ct;
+
+    // Now we have to scale from global pixels to screen pixels.
+    console.log('Point on arrow ' + xNew + ', ' + yNew);
     tmp = this.Width / 2.0;
-        // Had to bump the y detection up by 3x because of unclickability on the iPad.
+    // Had to bump the y detection up by 3x because of unclickability on the iPad.
     if (xNew > 0.0 && xNew < this.Length * 1.3 && yNew < tmp * 3 && yNew > -tmp * 3) {
       return true;
     }
@@ -73,7 +78,7 @@
     this.PointBuffer.push(0.0);
 
     if (view.gl) {
-            // Now create the triangles
+      // Now create the triangles
       cellData.push(0);
       cellData.push(1);
       cellData.push(2);
@@ -106,6 +111,18 @@
       this.CellBuffer.itemSize = 1;
       this.CellBuffer.numItems = cellData.length;
     }
+  };
+
+  // TODO: Put these in the shape superclass.
+  Arrow.prototype.IsSelected = function () {
+    return this.Selected;
+  };
+
+  // Returns true if the selected state changed.
+  Arrow.prototype.SetSelected = function (f) {
+    if (f === this.Selected) { return false; }
+    this.Selected = f;
+    return true;
   };
 
   SAM.Arrow = Arrow;
