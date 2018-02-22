@@ -311,7 +311,6 @@
   };
 
   RectWidget.prototype.HandleDoubleClick = function (layer) {
-    var event = layer.Event;
     if (this.State === NEW) {
       this.Deactivate();
       // this widget was temporary, All rects created have been copied.

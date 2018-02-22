@@ -203,7 +203,7 @@
   NavigationWidget.prototype.ToggleVisibility = function () {
     this.SetVisibility(!this.Visibility);
   };
-  
+
   // Used on mobile.
   NavigationWidget.prototype.SetVisibility = function (v) {
     this.Visibility = v;
@@ -472,7 +472,7 @@
     }
     return this.GetChildArray().indexOf(this.ChildIterator.Note);
   };
-  
+
   // Get the parent note of the current note.
   // Notes do not keep a pointer to parents.
   // The iterator has this information for active notes.

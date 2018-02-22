@@ -1,7 +1,6 @@
 // Active is used for a single widget when we are drawing or editing.
 // Selected can be multiple widgets.
 
-
 // -Separating annotations from the viewer. They have their own canvas / layer now.
 // -This is more like a view than a viewer.
 // -Viewer still handles stack correlations crosses.
@@ -27,28 +26,28 @@
     var widget;
     switch (obj.type) {
       case 'lasso':
-      widget = new SAM.LassoWidget();
+        widget = new SAM.LassoWidget();
         break;
       case 'pencil':
-      widget = new SAM.PencilWidget();
+        widget = new SAM.PencilWidget();
         break;
       case 'text':
-      widget = new SAM.TextWidget();
+        widget = new SAM.TextWidget();
         break;
       case 'circle':
-      widget = new SAM.CircleWidget();
+        widget = new SAM.CircleWidget();
         break;
       case 'polyline':
-      widget = new SAM.PolylineWidget();
+        widget = new SAM.PolylineWidget();
         break;
       case 'rect':
-      widget = new SAM.RectWidget();
+        widget = new SAM.RectWidget();
         break;
       case 'rect_set':
-      widget = new SAM.RectSetWidget();
+        widget = new SAM.RectSetWidget();
         break;
       case 'grid':
-      widget = new SAM.GridWidget();
+        widget = new SAM.GridWidget();
         break;
     }
     widget.Load(obj);
@@ -56,7 +55,7 @@
     // This is the messy way of detecting widgets that did not load
     // properly.
     if (widget.Type === 'sections' && widget.IsEmpty()) {
-      //delete widget;
+      // delete widget;
       return undefined;
     }
     return widget;
@@ -673,12 +672,12 @@
 
     // Equivalent to editing.  Only one should be editing at a time.
     this.Active = false;
-    
+
     this.Visibility = true;
     // TODO: Get rid of this.  The layer should not enforce
     // a single active widget.
     this.ActiveWidget = null;
-    
+
     this.Parent = parent;
     this.LoadCallbacks = [];
     this.LayerDiv = $('<div>')
@@ -691,7 +690,7 @@
         'width': '100%',
         'height': '100%',
         'z-index': '1',
-        'box-sizing': 'border-box',
+        'box-sizing': 'border-box'
       })
             .addClass('sa-resize');
 
@@ -715,7 +714,7 @@
     // Scale widget is unique. Deal with it separately so it is not
     // saved with the notes.
     this.ScaleWidget = new SAM.ScaleWidget(this);
-  };
+  }
 
   // This gets called when a click causes as single widget in this layer
   // to be selected. The annotation panel, uses it to turn editing on for this layer.
@@ -723,7 +722,7 @@
     this.ActivatedCallback = callback;
   };
   AnnotationLayer.prototype.SetActive = function (flag) {
-    if (flag == this.Active) {
+    if (flag === this.Active) {
       return;
     }
     this.Active = flag;
@@ -731,7 +730,7 @@
       (this.ActivatedCallback)(this);
     }
   };
-  
+
   // This will be called anytime one of the widgets in this layer gets modified.
   // This layer is apssed as an argument (rethink this.  It is not necessary).
   AnnotationLayer.prototype.SetModifiedCallback = function (callback) {
@@ -744,7 +743,7 @@
   AnnotationLayer.prototype.SetSelectChangeCallback = function (callback) {
     this.SelectChangeCallback = callback;
   };
-  
+
   // Applies to all widgets in the layer.
   // Returns true if something changed.
   AnnotationLayer.prototype.SetSelected = function (flag) {
@@ -802,7 +801,7 @@
   // Get the div of the layer (main div).
   // It is used to append DOM GUI children.
   AnnotationLayer.prototype.GetParent = function () {
-    //return this.AnnotationView.Parent;
+    // return this.AnnotationView.Parent;
     return this.Parent;
   };
   // Get the current scale factor between pixels and world units.
@@ -823,11 +822,11 @@
     for (var i = 0; i < this.WidgetList.length; ++i) {
       this.WidgetList[i].Draw(this);
     }
-    //if (this.ScaleWidget) {
+    // if (this.ScaleWidget) {
       // Girder is not setting spacing correct.
       // But we still need the scale widget for the grid widget.
       // this.ScaleWidget.Draw(this.AnnotationView);
-    //}
+    // }
   };
 
   AnnotationLayer.prototype.GetView = function () {
@@ -853,7 +852,7 @@
     // This looks like an error LayerDiv is a jquery pointer
     // It was probably can = this.AnnotationView.Parent
     // which is the same thing as LayerDiv (unless AnnotationView was created without a parent arg)
-    //var can = this.LayerDiv.Parent;
+    // var can = this.LayerDiv.Parent;
     var can = this.LayerDiv;
     can.focus();
   };
@@ -912,8 +911,8 @@
 
   AnnotationLayer.prototype.GetMouseWorld = function () {
     return this.MouseWorld;
-  }
-  
+  };
+
   AnnotationLayer.prototype.ComputeMouseWorld = function (event) {
     this.MouseWorld = this.GetCamera().ConvertPointViewerToWorld(event.offsetX, event.offsetY);
     // Put this extra ivar in the even object.
@@ -998,11 +997,10 @@
 
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
-      if (widget.HandleTouchStart && ! widget.HandleTouchStart(this)) {
+      if (widget.HandleTouchStart && !widget.HandleTouchStart(this)) {
         return false;
       }
     }
-
   };
 
   AnnotationLayer.prototype.CheckForPencil = function (event) {
@@ -1036,8 +1034,8 @@
       }
       return undefined;
     }
-  };  
-  
+  };
+
   AnnotationLayer.prototype.HandleTouchMove = function (e) {
     if (!this.GetVisibility()) {
       return true;
@@ -1053,7 +1051,7 @@
     }
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
-      if (widget.HandleTouchMove && ! widget.HandleTouchMove(this)) {
+      if (widget.HandleTouchMove && !widget.HandleTouchMove(this)) {
         return false;
       }
     }
@@ -1152,12 +1150,12 @@
         if (widget.IsSelected()) {
           changed = true;
         }
-        if (widget.HandleSingleSelect(this) == false) {
+        if (widget.HandleSingleSelect(this) === false) {
           found = true;
           // Not perfect.  I think it will mark a change even if the
           // mark was reselected.
           changed = true;
-        }          
+        }
       }
     }
     if (found && !this.Active) {
@@ -1186,14 +1184,14 @@
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
       if (widget.IsSelected()) {
-        if (widgetType === undefined || widgetType === widget.Type){ 
+        if (widgetType === undefined || widgetType === widget.Type) {
           return this.WidgetList[i];
         }
       }
     }
     return undefined;
   };
-  
+
   AnnotationLayer.prototype.HandleMouseDown = function (event) {
     if (!this.GetVisibility()) {
       return true;
@@ -1204,7 +1202,7 @@
 
     // Trying to detect click
     // TODO: How to skip clicks when doubleclick occur.
-    //this.MouseClick = true;
+    // this.MouseClick = true;
     this.MouseDownX = this.MouseX;
     this.MouseDownY = this.MouseY;
     this.MouseDownTime = this.MouseTime;
@@ -1218,7 +1216,7 @@
 
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
-      if (widget.HandleMouseDown && ! widget.HandleMouseDown(this)) {
+      if (widget.HandleMouseDown && !widget.HandleMouseDown(this)) {
         return false;
       }
     }
@@ -1241,14 +1239,14 @@
       return true;
     }
 
-    //if (this.MouseClick) {
+    // if (this.MouseClick) {
     //  this.MouseClick = false;
     //  return this.HandleClick(event);
-    //}
+    // }
 
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
-      if (widget.HandleMouseUp && ! widget.HandleMouseUp(this)) {
+      if (widget.HandleMouseUp && !widget.HandleMouseUp(this)) {
         return false;
       }
     }
@@ -1267,7 +1265,7 @@
     // The event position is relative to the target which can be a tab on
     // top of the canvas.  Just skip these events.
     if ($(event.target).width() !== $(event.currentTarget).width()) {
-      console.log("child event " + event.MouseY);
+      console.log('child event ' + event.MouseY);
     }
 
     this.ComputeMouseWorld(event);
@@ -1282,7 +1280,7 @@
 
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
-      if (widget.HandleMouseMove && ! widget.HandleMouseMove(this)) {
+      if (widget.HandleMouseMove && !widget.HandleMouseMove(this)) {
         return false;
       }
     }
@@ -1310,12 +1308,13 @@
     // Handle delete as a first class event.
     // This is the first time I am by passing the "ActiveWidget".
     // That pattern only allows one widget to receive events.
-    // I want to select and delete a set of widgets / shapes. 
+    // I want to select and delete a set of widgets / shapes.
+    var widget;
     if (event.keyCode === 46) {
       var keepers = [];
       // Let every widget delete its selected components.
       for (var idx = 0; idx < this.WidgetList.length; ++idx) {
-        var widget = this.WidgetList[idx];
+        widget = this.WidgetList[idx];
         // Only deletes the selected widgets / shapes.
         if (widget.HandleDelete) {
           widget.HandleDelete(this);
@@ -1325,17 +1324,17 @@
         }
       }
       if (keepers.length < this.WidgetList.length) {
-        this.WidgetList =  keepers;
+        this.WidgetList = keepers;
       }
-      
+
       return false;
     }
-    
+
     this.Event = event;
 
     for (var i = 0; i < this.WidgetList.length; ++i) {
-      var widget = this.WidgetList[i];
-      if (widget.HandleKeyDown && ! widget.HandleKeyDown(this)) {
+      widget = this.WidgetList[i];
+      if (widget.HandleKeyDown && !widget.HandleKeyDown(this)) {
         return false;
       }
     }
@@ -1352,7 +1351,7 @@
     }
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
-      if (widget.HandleKeyDown && ! widget.HandleKeyDown(this)) {
+      if (widget.HandleKeyDown && !widget.HandleKeyDown(this)) {
         return false;
       }
     }
@@ -1377,7 +1376,7 @@
     this.WidgetList.push(widget);
     if (widget.SetModifiedCallback) {
       widget.SetModifiedCallback(
-        function (w) {self.WidgetModifiedCallback(w);});
+        function (w) { self.WidgetModifiedCallback(w); });
     }
 
     if (widget.UpdateBuffers) { widget.UpdateBuffers(this); }
@@ -1390,7 +1389,7 @@
       (this.ModifiedCallback)(this);
     }
   };
-  
+
   // Hmmmm.  Try to remove this.  It would be nice not to keep a pointer to an active widget.
   AnnotationLayer.prototype.ActivateWidget = function (widget) {
     if (widget !== this.ActiveWidget) {
@@ -1402,7 +1401,7 @@
       }
     }
   };
-  
+
   // TODO: Get rid of this depreciated methods.
   // A widget cannot call this if another widget is active.
   // The widget deals with its own activation and deactivation.
@@ -1424,7 +1423,7 @@
       this.WidgetList[idx].SetStateToInactive(this);
     }
   };
-  
+
   AnnotationLayer.prototype.GetActiveWidget = function () {
     return this.ActiveWidget;
   };

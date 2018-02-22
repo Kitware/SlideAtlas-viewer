@@ -620,11 +620,11 @@
     if (this.State === ACTIVE) {
       if (event.which === 0) {
         // Turn off the active vertex if the mouse moves away.
-        //if (!this.CheckActive(layer)) {
+        // if (!this.CheckActive(layer)) {
         //  layer.DeactivateWidget(this);
-        //} else {
+        // } else {
         //  this.UpdateActiveCircle(layer);
-        //}
+        // }
         return false;
       }
       if (this.State === ACTIVE && event.which === 1) {
@@ -641,6 +641,7 @@
   // ActiveEdge if true. Otherwise, it has no side effects.
   PolylineWidget.prototype.CheckActive = function (layer) {
     return false;
+    /*
     var event = layer.Event;
     var x = event.offsetX;
     var y = event.offsetY;
@@ -675,6 +676,7 @@
       }
     }
     return true;
+    */
   };
 
   // This does not handle the case where we want to highlight an edge

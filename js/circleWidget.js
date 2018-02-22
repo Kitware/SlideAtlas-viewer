@@ -111,7 +111,6 @@
     this.Shape.LineWidth = 5.0 * cam.Height / viewport[3];
     this.Shape.FixedSize = false;
 
-
     // Note: If the user clicks before the mouse is in the
     // canvas, this will behave odd.
 

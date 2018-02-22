@@ -28,9 +28,9 @@
 
   GroupWidget.prototype.HandleKeyPress = function (keyCode, shift) {
     for (var i = 0; i < this.Widgets.length; ++i) {
-      child = this.Widgets[i];
+      var child = this.Widgets[i];
       if (child.HandleKeyPress) {
-        if ( ! child.HandleKeyPress(keycode, shift)) {
+        if (!child.HandleKeyPress(keyCode, shift)) {
           return false;
         }
       }
@@ -43,9 +43,9 @@
       return;
     }
     for (var i = 0; i < this.Widgets.length; ++i) {
-      child = this.Widgets[i];
+      var child = this.Widgets[i];
       if (child.HandleMouseDown) {
-        if ( ! child.HandleMouseDown(event)) {
+        if (!child.HandleMouseDown(event)) {
           return false;
         }
       }
@@ -56,19 +56,19 @@
   // returns false when it is finished doing its work.
   GroupWidget.prototype.HandleMouseUp = function (event) {
     for (var i = 0; i < this.Widgets.length; ++i) {
-      child = this.Widgets[i];
+      var child = this.Widgets[i];
       if (child.HandleMouseDown) {
         child.HandleMouseUp(event);
       }
-    return true;
+      return true;
     }
   };
 
   GroupWidget.prototype.HandleMouseMove = function (event) {
     for (var i = 0; i < this.Widgets.length; ++i) {
-      child = this.Widgets[i];
+      var child = this.Widgets[i];
       if (child.HandleMouseMove) {
-        if ( ! child.HandleMouseMove(event)) {
+        if (!child.HandleMouseMove(event)) {
           return false;
         }
       }
@@ -78,7 +78,7 @@
 
   GroupWidget.prototype.CheckActive = function (event) {
     for (var i = 0; i < this.Widgets.length; ++i) {
-      child = this.Widgets[i];
+      var child = this.Widgets[i];
       if (child.CHeckActive) {
         if (child.CheckActive(event)) {
           this.Active = true;
@@ -98,7 +98,7 @@
   // Setting to active always puts state into "active".
   // It can move to other states and stay active.
   GroupWidget.prototype.SetActive = function (flag) {
-    alert("GroupWidget.SetActive not handled.");
+    alert('GroupWidget.SetActive not handled.');
   };
 
   SAM.GroupWidget = GroupWidget;

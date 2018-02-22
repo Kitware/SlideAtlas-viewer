@@ -2,7 +2,7 @@ var jsLibFiles = [
   'node_modules/jquery/dist/jquery.min.js',
   'node_modules/jquery-ui-dist/jquery-ui.min.js',
   'node_modules/spectrum-colorpicker/spectrum.js',
- 'node_modules/file-saver/FileSaver.min.js',
+  'node_modules/file-saver/FileSaver.min.js',
   'node_modules/gl-matrix/dist/gl-matrix-min.js',
   'node_modules/objectid-js/src/main/javascript/Objectid.js'
 ];

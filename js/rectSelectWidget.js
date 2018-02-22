@@ -6,11 +6,9 @@
 // Since the rectangle may not be axis aligned withthe world, I added
 // methods to check if a point is in the rectangle.
 
-
-
 (function () {
   'use strict';
-  
+
   var INACTIVE = 0;     // Normal inactive resting state.
   var START = 1;        // waiting for the first mouse down to place point1.
   var DRAG = 2;         // Mouse is down and user is dragging point2.
@@ -20,21 +18,22 @@
     SAM.Shape.call(this);
 
     this.State = INACTIVE;
-    
+
     this.Point1 = undefined;
     this.Point2 = undefined;
-    
+
     this.Rectangle = $('<div>')
-      .css({'position': 'absolute',
-            'border': '1px dashed #FF0'})
+      .css({
+        'position': 'absolute',
+        'border': '1px dashed #FF0'})
       .hide();
     this.FinishCallback = undefined;
     this.Camera = new SAM.Camera();
   }
 
-  RectSelectWidget.prototype.SetFinishCallback = function(callback) {
+  RectSelectWidget.prototype.SetFinishCallback = function (callback) {
     this.FinishCallback = callback;
-  }
+  };
 
   // Starts the process of dragging a rectangle (just changes the cursor.
   RectSelectWidget.prototype.SetStateToDrawing = function (layer) {
@@ -59,10 +58,10 @@
       var h = Math.abs(this.Point1[1] - this.Point2[1]);
       this.Rectangle
         .css({
-          'left': x.toString()+'px',
-          'top': y.toString()+'px',
-          'width': w.toString()+'px',
-          'height': h.toString()+'px'})
+          'left': x.toString() + 'px',
+          'top': y.toString() + 'px',
+          'width': w.toString() + 'px',
+          'height': h.toString() + 'px'})
         .show();
     }
   };
@@ -73,16 +72,16 @@
       return true;
     }
     this.State = DRAG;
-    this.Rectangle.appendTo(layer.GetParent());    
+    this.Rectangle.appendTo(layer.GetParent());
     var event = layer.Event;
     var x = event.offsetX;
     var y = event.offsetY;
-    this.Point1 = [x,y];
-    this.Point2 = [x,y];
+    this.Point1 = [x, y];
+    this.Point2 = [x, y];
     this.Draw();
     return false;
   };
-  
+
   RectSelectWidget.prototype.HandleMouseMove = function (layer) {
     if (this.State !== DRAG) {
       return true;
@@ -90,7 +89,7 @@
     var event = layer.Event;
     var x = event.offsetX;
     var y = event.offsetY;
-    this.Point2 = [x,y];
+    this.Point2 = [x, y];
     this.Draw();
     return false;
   };
@@ -126,6 +125,6 @@
     }
     return false;
   };
-  
+
   SAM.RectSelectWidget = RectSelectWidget;
 })();

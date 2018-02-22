@@ -8,17 +8,12 @@
 // Differences. The previous stroke does not deselect when a new stroke is started/
 // When a stroke ends,  A method is called to see if it can be merged with the selected stroke.
 
-
 (function () {
   // Depends on the CIRCLE widget
   'use strict';
 
   // Not receiving events. Nothing selected. Just drawing.
   var INACTIVE = 0;
-
-  // All or some of the strokes are selected, but not responding to events.
-  // TODO: Make delete events first class "HandleDelete", and selected can respont to those.
-  var SELECTED = 1;
 
   // Various states for drawing.
   // Pencil up and pencil down.
@@ -28,12 +23,11 @@
   var OPEN = 0;
   var CLOSED = 1;
 
-  
   function PencilWidget () {
     this.Mode = OPEN;
 
     this.State = INACTIVE;
-    
+
     // This method gets called if anything is added, deleted or moved.
     this.ModifiedCallback = undefined;
     // This method gets called if the active state of this widget turns on or off.
@@ -41,7 +35,7 @@
     this.StateChangeCallback = undefined;
     // This is used by the annotationPanel to transfer draing mode to a new selected widget.
     this.SelectedCallback = undefined;
-    
+
     this.Type = 'pencil';
     // True when this widget is dedicated to the apple pencil.
     this.StylusOnly = false;
@@ -87,7 +81,8 @@
 
     this.LineWidth = 0;
     // No way to set the defaults at the moment.
-    if (false && localStorage.PencilWidgetDefaults) {
+    /*
+    if (localStorage.PencilWidgetDefaults) {
       var defaults = JSON.parse(localStorage.PencilWidgetDefaults);
       if (defaults.Color) {
         this.Dialog.ColorInput.val(SAM.ConvertColorToHex(defaults.Color));
@@ -97,34 +92,34 @@
         this.Dialog.LineWidthInput.val(this.LineWidth);
       }
     }
-
+    */
     this.Shapes = new SAM.ShapeGroup();
   }
 
-  PencilWidget.prototype.SetModifiedCallback = function(callback) {
+  PencilWidget.prototype.SetModifiedCallback = function (callback) {
     this.ModifiedCallback = callback;
   };
 
-  PencilWidget.prototype.SetSelectedCallback = function(callback) {
+  PencilWidget.prototype.SetSelectedCallback = function (callback) {
     this.SelectedCallback = callback;
   };
 
   // This callback gets called when ever the active state changes,
   // even if caused by an external call. This widget is passed as a argument.
   // This is used to turn off the pencil button in the Panel.
-  PencilWidget.prototype.SetStateChangeCallback = function(callback) {
+  PencilWidget.prototype.SetStateChangeCallback = function (callback) {
     this.StateChangeCallback = callback;
   };
 
   // Called when the state changes.
-  PencilWidget.prototype.StateChanged = function() {
+  PencilWidget.prototype.StateChanged = function () {
     if (this.StateChangeCallback) {
       this.StateChangeCallback(this);
     }
-  }; 
-  
+  };
+
   // Can we delete this?
-  PencilWidget.prototype.IsEmpty = function() {
+  PencilWidget.prototype.IsEmpty = function () {
     for (var i = 0; i < this.Shapes.GetNumberOfShapes(); ++i) {
       var shape = this.Shapes.GetShape(i);
       if (!shape.IsEmpty()) {
@@ -133,16 +128,16 @@
     }
     return true;
   };
-  
+
   // TODO: CLean this up.
-  PencilWidget.prototype.SetModeToOpen = function(layer) {
+  PencilWidget.prototype.SetModeToOpen = function (layer) {
     // For new strokes
     this.Mode = OPEN;
     // For old selected strokes.
     for (var i = 0; i < this.Shapes.GetNumberOfShapes(); ++i) {
       var stroke = this.Shapes.GetShape(i);
       if (stroke.IsSelected()) {
-        if (stroke.Closed == true && this.ModifiedCallback()) {
+        if (stroke.Closed === true && this.ModifiedCallback()) {
           (this.ModifiedCallback)(this);
         }
         stroke.Closed = false;
@@ -150,14 +145,14 @@
       }
     }
   };
-  PencilWidget.prototype.SetModeToClosed = function(layer) {
+  PencilWidget.prototype.SetModeToClosed = function (layer) {
     // Used for future strokes.
     this.Mode = CLOSED;
     // For old selected strokes.
     for (var i = 0; i < this.Shapes.GetNumberOfShapes(); ++i) {
       var stroke = this.Shapes.GetShape(i);
       if (stroke.IsSelected()) {
-        if (stroke.Closed == false && this.ModifiedCallback()) {
+        if (stroke.Closed === false && this.ModifiedCallback()) {
           (this.ModifiedCallback)(this);
         }
         stroke.Closed = true;
@@ -165,21 +160,21 @@
       }
     }
   };
-  
+
   // Not used yet, but might be useful.
-  PencilWidget.prototype.SetCreationCamera = function(cam) {
+  PencilWidget.prototype.SetCreationCamera = function (cam) {
     // Lets save the zoom level (sort of).
     // Load will overwrite this for existing annotations.
     // This will allow us to expand annotations into notes.
     this.CreationCamera = cam.Serialize();
   };
-  
+
   PencilWidget.prototype.GetActive = function () {
     return this.State !== INACTIVE;
   };
 
   PencilWidget.prototype.SetStateToInactive = function (layer) {
-    if (this.State == INACTIVE) {
+    if (this.State === INACTIVE) {
       return;
     }
 
@@ -191,7 +186,7 @@
     // TODO:  Make the caller do this.
     layer.EventuallyDraw();
   };
-  
+
   PencilWidget.prototype.SetStateToDrawing = function (layer) {
     if (this.State === DRAWING_UP || this.State === DRAWING_DOWN) {
       return;
@@ -207,7 +202,7 @@
     }
     layer.EventuallyDraw();
   };
-  
+
   PencilWidget.prototype.Draw = function (layer) {
     this.Shapes.Draw(layer.GetView());
   };
@@ -256,7 +251,7 @@
       shape.SetOutlineColor(outlineColor);
       shape.FixedSize = false;
       shape.LineWidth = this.LineWidth;
-      if (this.Mode == CLOSED) {
+      if (this.Mode === CLOSED) {
         shape.Closed = true;
       }
       this.Shapes.AddShape(shape);
@@ -286,16 +281,15 @@
       return false;
     }
     // Delete all the selected strokes.
-    var num = this.Shapes.GetNumberOfShapes();
     if (this.Shapes.DeleteSelected()) {
       if (this.ModifiedCallback) {
         (this.ModifiedCallback)(this);
       }
       layer.EventuallyDraw();
       return true;
-    }        
+    }
   };
-  
+
   PencilWidget.prototype.HandleKeyDown = function (layer) {
     if (this.State === INACTIVE) {
       return true;
@@ -313,7 +307,7 @@
     }
     return true;
   };
-  
+
   /*
   PencilWidget.prototype.HandleDoubleClick = function (layer) {
     if (this.State === DRAWING_UP || this.State === DRAWING_DOWN) {
@@ -327,7 +321,7 @@
     return true;
   };
   */
-  
+
   PencilWidget.prototype.SetStateToDrawingDown = function (x, y, layer) {
     if (this.State === DRAWING_DOWN) {
       return;
@@ -337,14 +331,14 @@
       // Consider DRAWIN_UP and DRAWING_DOWN as a single state.
       this.StateChanged();
     }
-      
+
     this.State = DRAWING_DOWN;
     // Open: Unselect the last stroke.
     // Closed:  Keep the last selected because the two might be merged.
     if (this.Mode === OPEN) {
-      var numStrokes = this.Shapes.GetNumberOfShapes();      
+      var numStrokes = this.Shapes.GetNumberOfShapes();
       if (numStrokes > 0) {
-        this.Shapes.SetSelectedChild(numStrokes-1, false);
+        this.Shapes.SetSelectedChild(numStrokes - 1, false);
       }
     }
     // Start a new stroke
@@ -366,7 +360,6 @@
 
   PencilWidget.prototype.HandleSingleSelect = function (layer) {
     // Check to see if a stroke was clicked.
-    var event = layer.Event;
     var x = layer.MouseX;
     var y = layer.MouseY;
     var pt = layer.GetCamera().ConvertPointViewerToWorld(x, y);
@@ -382,10 +375,10 @@
       }
       return false;
     }
-    
+
     // TODO:  What should we do if the widget is drawing?
     // We want to new widget to start drawing.
-    
+
     return true;
   };
 
@@ -398,7 +391,6 @@
       return true;
     }
 
-    var event = layer.Event;
     var x = layer.MouseX;
     var y = layer.MouseY;
 
@@ -406,7 +398,7 @@
     var cam = layer.GetCamera();
     this.LastMouse = cam.ConvertPointViewerToWorld(x, y);
 
-    //if (event.which === 3) {
+    // if (event.which === 3) {
     //  // Right mouse was pressed.
     //  // Pop up the properties dialog.
     //  if (this.State === ACTIVE) {
@@ -419,12 +411,12 @@
     //   }
     //  }
     //  return false;
-    //}
+    // }
 
     return false;
   };
 
-  PencilWidget.prototype.HandleTouchStart = function (layer) { 
+  PencilWidget.prototype.HandleTouchStart = function (layer) {
     if (this.State === INACTIVE) {
       return true;
     }
@@ -449,7 +441,7 @@
   PencilWidget.prototype.HandleStop = function (layer) {
     // A stroke has just been finished.
     var last = this.Shapes.GetNumberOfShapes() - 1;
-    
+
     if (this.State === DRAWING_DOWN && last >= 0) {
       var spacing = layer.GetCamera().GetSpacing();
       // NOTE: This assume that the shapes are polylines.
@@ -495,7 +487,7 @@
   PencilWidget.prototype.HandleTouchEnd = function (layer) {
     if (this.StylusOnly && !layer.Event.pencil) {
       // The apple pencil needs to ignore viewer touch events.
-       return true;
+      return true;
     }
     if (this.State !== DRAWING_DOWN) {
       return true;
@@ -508,8 +500,8 @@
       this.SetStateToDrawingDown(x, y, layer);
     }
 
-    console.log("Handle move " + x + ", " + y);
-    
+    console.log('Handle move ' + x + ', ' + y);
+
     if (this.State === DRAWING_DOWN) {
       var last = this.Shapes.GetNumberOfShapes() - 1;
       var shape = this.Shapes.GetShape(last);
@@ -526,7 +518,7 @@
   PencilWidget.prototype.UpdateBuffers = function (layer) {
     this.Shapes.UpdateBuffers(layer.AnnotationView);
   };
-  
+
   PencilWidget.prototype.HandleMouseMove = function (layer) {
     if (this.State === INACTIVE) {
       return true;
@@ -554,7 +546,7 @@
     }
     if (this.StylusOnly && !layer.Event.pencil) {
       // The apple pencil needs to ignore viewer touch events.
-       return true;
+      return true;
     }
     if (layer.Touches.length !== 1) {
       return true;
@@ -577,7 +569,7 @@
   PencilWidget.prototype.IsSelected = function () {
     return this.Shapes.IsSelected();
   };
-  
+
   // Selects all strokes that match the selection
   // TODO: Check all the points in the stroke after the rough bounds check.
   PencilWidget.prototype.Select = function (selection) {
@@ -598,9 +590,8 @@
       }
     }
     return count;
-  }
+  };
 
-  
   // Can we bind the dialog apply callback to an objects method?
   PencilWidget.prototype.ShowPropertiesDialog = function () {
     this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Shapes.GetOutlineColor()));
@@ -608,7 +599,7 @@
 
     this.Dialog.Show(true);
   };
-  
+
   PencilWidget.prototype.DialogApplyCallback = function (layer) {
     /*
     var hexcolor = this.Dialog.ColorInput.val();
@@ -628,12 +619,12 @@
     */
   };
 
-  //====================================================================
+  // ====================================================================
   // Lasso merge logic.
-  
+
   // See if we can merge the last stroke with the selected stroke.
   PencilWidget.prototype.HandleLassoMerge = function (layer) {
-    var lastIdx = this.Shapes.GetNumberOfShapes()-1;
+    var lastIdx = this.Shapes.GetNumberOfShapes() - 1;
     // This is the one just drawn.
     var stroke2 = this.Shapes.GetShape(lastIdx);
     // Find the selected stroke.
@@ -645,7 +636,7 @@
         break;
       }
     }
-    if ( ! found) {
+    if (!found) {
       // We could not find a second stroke.
       // Just close the last stroke and return.
       stroke2.Closed = true;
@@ -663,14 +654,13 @@
     } else {
       // no intersection.  Keep them both, but leave the new one selected.
       stroke1.SetSelected(false);
-      if (this.Mode == CLOSED) {
+      if (this.Mode === CLOSED) {
         stroke2.Closed = true;
       }
       stroke2.UpdateBuffers(layer.AnnotationView);
     }
-    layer.EventuallyDraw()
+    layer.EventuallyDraw();
   };
-
 
   // Loop is the old, stroke is the new.
   PencilWidget.prototype.CombineStrokes = function (loop, stroke) {
@@ -711,7 +701,7 @@
     }
 
     var sanityCheck = 0;
-    
+
     // If we have two intersections, clip the loop with the stroke.
     if (intersection1 !== undefined) {
       // We will have two parts.

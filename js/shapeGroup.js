@@ -40,7 +40,7 @@
     var found = false;
     for (var idx = 0; idx < this.Shapes.length; ++idx) {
       var shape = this.Shapes[idx];
-      if (found || ! shape.PointOnShape(pt, dist)) {
+      if (found || !shape.PointOnShape(pt, dist)) {
         // A shape was already selected. Just unselect the rest.
         shape.SetSelected(false);
       } else {
@@ -71,7 +71,7 @@
   ShapeGroup.prototype.DeleteSelected = function () {
     var keepers = [];
     for (var idx = 0; idx < this.Shapes.length; ++idx) {
-      if ( ! this.Shapes[idx].IsSelected()) {
+      if (!this.Shapes[idx].IsSelected()) {
         keepers.push(this.Shapes[idx]);
       }
     }
@@ -157,7 +157,7 @@
     }
     return false;
   };
-  
+
   ShapeGroup.prototype.SetLineWidth = function (lineWidth) {
     for (var i = 0; i < this.Shapes.length; ++i) {
       this.Shapes[i].LineWidth = lineWidth;

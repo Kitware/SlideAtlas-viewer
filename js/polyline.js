@@ -17,7 +17,7 @@
   // }
 
   Polyline.prototype.IsEmpty = function () {
-    return this.Points.length == 0;
+    return this.Points.length === 0;
   };
 
   Polyline.prototype.SetLineWidth = function (lineWidth) {

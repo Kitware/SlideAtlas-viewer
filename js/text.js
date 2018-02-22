@@ -93,12 +93,12 @@
 
   Text.prototype.SetString = function (str) {
     this.String = str;
-  }
+  };
 
   Text.prototype.GetString = function () {
     return this.String;
-  }
-  
+  };
+
   Text.prototype.Draw = function (view) {
     // Place the anchor of the text.
     // First transform the world anchor to view.
@@ -168,7 +168,7 @@
     }
     ctx.fillStyle = '#fff';
     ctx.strokeStyle = '#666';
-    ctx.fillRect(x,y,width,height);
+    ctx.fillRect(x, y, width, height);
 
     /*
     ctx.beginPath();
@@ -184,7 +184,7 @@
     ctx.closePath();
     */
     ctx.stroke();
-    //ctx.fill();
+    // ctx.fill();
   }
 
   Text.prototype.UpdateBuffers = function (view) {
@@ -302,14 +302,14 @@
 
   // Point in text coordinates is over the text.
   Text.prototype.PointInText = function (xMouse, yMouse) {
-    if ( ! this.Visibility) { return false; }
+    if (!this.Visibility) { return false; }
     if (xMouse > this.PixelBounds[0] && xMouse < this.PixelBounds[1] &&
         yMouse > this.PixelBounds[2] && yMouse < this.PixelBounds[3]) {
       return true;
     }
     return false;
   };
-  
+
   Text.prototype.SetColor = function (c) {
     this.Color = SAM.ConvertColor(c);
   };
@@ -337,10 +337,10 @@
 
   // Returns true if the selected state changed.
   Text.prototype.SetSelected = function (f) {
-    if (f === this.Selected) {return false;}
+    if (f === this.Selected) { return false; }
     this.Selected = f;
     return true;
   };
-  
+
   SAM.Text = Text;
 })();

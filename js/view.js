@@ -37,12 +37,13 @@
 
     this.Canvas
       .appendTo(this.Parent)
-      .css({'position': 'absolute',
-            'left': '0%',
-            'top': '0%',
-            'width': '100%',
-            'height': '100%'});
-    
+      .css({
+        'position': 'absolute',
+        'left': '0%',
+        'top': '0%',
+        'width': '100%',
+        'height': '100%'});
+
     this.Parent
       .addClass('sa-view-canvas-div');
   }
@@ -132,17 +133,17 @@
 
   // TODO: Get rid of these since the user can manipulate the parent / canvas
   // div which can be passed into the constructor.
-  //View.prototype.appendTo = function (j) {
+  // View.prototype.appendTo = function (j) {
   //  return this.Parent.appendTo(j);
-  //};
+  // };
 
-  //View.prototype.remove = function (j) {
+  // View.prototype.remove = function (j) {
   //  return this.Parent.remove(j);
-  //};
+  // };
 
-  //View.prototype.css = function (j) {
+  // View.prototype.css = function (j) {
   //  return this.Parent.css(j);
-  //};
+  // };
 
   // TODO: Get rid of this.
   View.prototype.GetViewport = function () {

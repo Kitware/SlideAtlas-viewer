@@ -219,7 +219,6 @@
 
     this.Shape = new RectSet();
     if (layer) {
-      layer = layer;
       layer.AddWidget(this);
     }
     this.Active = false;
@@ -229,11 +228,9 @@
     return this.Shape.Widths.length;
   };
 
-
-
   // Prioritizing by confidence does not work because they all have such high (equal) confidences.
   // Lets prioritize by area instead
-  RectSetWidget.prototype.ComputeVisibilities = function () {
+  RectSetWidget.prototype.ComputeVisibilities = function (layer) {
     var rectSet = this.Shape;
     if (rectSet.Visibilities === undefined) {
       rectSet.Visibilities = Array(rectSet.Confidences.length);
@@ -249,11 +246,10 @@
       if (visibilities[i] === true && rectSet.Confidences[i] >= rectSet.Threshold) {
         var width = rectSet.Widths[i];
         var height = rectSet.Heights[i];
-        var area1 = width*height;
+        var area1 = width * height;
         var center = rectSet.GetCenter(i);
         // Get all the other rects overlapping this one.
         var indexes = rectSet.Hash.GetOverlapping(center, width, height, 0.3);
-        var alone = true;
         for (var j = 0; j < indexes.length; ++j) {
           var rect2Idx = indexes[j];
           if (rect2Idx !== i && visibilities[rect2Idx] &&
@@ -263,21 +259,21 @@
             if (area1 < area2) {
               visibilities[i] = false;
             } else {
-              visibilities[rect2Idx] = false;              
+              visibilities[rect2Idx] = false;
             }
           }
         }
       }
     }
   };
-  
+
   // note: this assumes rects are squares.
   // I assume that the annotations are fixed and do not change after this
   // is called.  This can be called multiple times
   // (when threshold or size changes).
   // Remove overlapping annoations (visibility = false).
   // greedy: first supresses later)
-  RectSetWidget.prototype.ComputeVisibilitiesConfidence = function () {
+  RectSetWidget.prototype.ComputeVisibilitiesConfidence = function (layer) {
     var rectSet = this.Shape;
     if (rectSet.Visibilities === undefined) {
       rectSet.Visibilities = Array(rectSet.Confidences.length);

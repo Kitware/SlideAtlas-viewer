@@ -2,18 +2,15 @@
 // Fast forward skips ahead/back 1/10 of folder.
 // However, I want to use callbacks to make this more general.
 
-
 (function () {
   'use strict';
 
-// ------------------------------------------------------------------------------
   function GirderNavigationWidget (parent, itemId) {
-
     this.InitializeItemId(itemId);
     this.ChangeItemCallback = undefined;
     this.ItemIndex = -1;
-    this.FolderItemIds = undefined;    
-    
+    this.FolderItemIds = undefined;
+
     var self = this;
     var size = '40px';
     if (SAM.detectMobile()) {
@@ -38,12 +35,13 @@
       this.Tab = new SA.Tab(parent, SA.ImagePathUrl + 'nav.png', 'navigationTab');
       // this.Tab.Div.prop('title', 'Navigation');
       this.Tab.Div
-        //.addClass('sa-view-navigation-div')
-        .css({'box-sizing': 'border-box',
-              'position': 'absolute',
-              'bottom': '0px',
-              'right': '150px',
-              'z-index': '200'});
+        // .addClass('sa-view-navigation-div')
+        .css({
+          'box-sizing': 'border-box',
+          '`position': 'absolute',
+          'bottom': '0px',
+          'right': '150px',
+          'z-index': '200'});
       this.Tab.Panel.addClass('sa-view-navigation-panel');
 
       // Put the stack display in the navigation button
@@ -52,7 +50,6 @@
             .addClass('sa-view-note')
             .html('');
     }
-
 
     this.PreviousSlideButton =
         $('<img>').appendTo(this.Tab.Panel)
@@ -90,9 +87,10 @@
 
     this.NameLabel = $('<div>')
       .appendTo(this.Tab.Panel)
-      .css({'font-size': '10px',
-            'position':'relative',
-            'top':'-3px'});
+      .css({
+        'font-size': '10px',
+        'position': 'relative',
+        'top': '-3px'});
 
     // TODO: Fix the main css file for mobile.  Hack this until fixed.
     if (SAM.MOBILE_DEVICE) {
@@ -121,7 +119,7 @@
               'opacity': '0.8'});
     }
 
-    //this.CopyrightWrapper =
+    // this.CopyrightWrapper =
     //    $('<div>').appendTo(parent)
     //    .css({
     //      'width': '100%',
@@ -132,30 +130,30 @@
   GirderNavigationWidget.prototype.SetChangeItemCallback = function (callback) {
     this.ChangeItemCallback = callback;
   };
-  
+
   GirderNavigationWidget.prototype.ChangeItem = function () {
     if (this.ChangeItemCallback) {
       (this.ChangeItemCallback)(this.ItemId);
     }
   };
-  
-  GirderNavigationWidget.prototype.InitializeItemId= function (itemId) {
+
+  GirderNavigationWidget.prototype.InitializeItemId = function (itemId) {
     // Get the item object so we can find the folder id.
     this.ItemId = itemId;
     var self = this;
     girder.rest.restRequest({
-      path: 'item/'+itemId,
+      path: 'item/' + itemId,
       method: 'GET'
     }).done(function (data) {
       if (data && data.folderId) {
         self.InitializeFolderId(data.folderId);
       } else {
-        console.log("Could not find item " + itemId);
+        console.log('Could not find item ' + itemId);
       }
     });
   };
-  
-  GirderNavigationWidget.prototype.InitializeFolderId= function (folderId) {
+
+  GirderNavigationWidget.prototype.InitializeFolderId = function (folderId) {
     // Load the folder so we can create a list to iterate over.
     var self = this;
     girder.rest.restRequest({
@@ -166,10 +164,10 @@
     });
   };
 
-  GirderNavigationWidget.prototype.LoadFolderItems= function (data) {
+  GirderNavigationWidget.prototype.LoadFolderItems = function (data) {
     this.ItemIndex = -1;
     this.FolderItemIds = [];
-    this.FolderItemNames = [];    
+    this.FolderItemNames = [];
     for (var i = 0; i < data.length; ++i) {
       var itemId = data[i]._id;
       if (itemId === this.ItemId) {
@@ -222,7 +220,7 @@
   GirderNavigationWidget.prototype.ToggleVisibility = function () {
     this.SetVisibility(!this.Visibility);
   };
-  
+
   // Used on mobile.
   GirderNavigationWidget.prototype.SetVisibility = function (v) {
     this.Visibility = v;
@@ -235,7 +233,7 @@
 
   // Change which buttons are active based on the current index.
   GirderNavigationWidget.prototype.Update = function () {
-    this.NameLabel.text(this.ItemIndex.toString() + ":" + this.ItemName);
+    this.NameLabel.text(this.ItemIndex.toString() + ':' + this.ItemName);
 
     // Disable and enable prev/next slide buttons so we cannot go past the end.
     if (!this.FolderItemIds || this.ItemIndex <= 0) {
@@ -255,9 +253,9 @@
   };
 
   GirderNavigationWidget.prototype.PreviousNote = function () {
-    if ( ! this.FolderItemIds) { return; }
+    if (!this.FolderItemIds) { return; }
     // Make sure user notw changes are not pending to be saved.
-    //if (SA.notesWidget) { SA.notesWidget.Flush(); }
+    // if (SA.notesWidget) { SA.notesWidget.Flush(); }
     if (this.ItemIndex <= 0) {
       return;
     }
@@ -268,16 +266,16 @@
   };
 
   GirderNavigationWidget.prototype.NextNote = function () {
-    if ( ! this.FolderItemIds) { return; }
+    if (!this.FolderItemIds) { return; }
     // Make sure user not changes are not pending to be saved.
-    //if (SA.notesWidget) { SA.notesWidget.Flush(); }
+    // if (SA.notesWidget) { SA.notesWidget.Flush(); }
     if (this.ItemIndex >= this.FolderItemIds.length) {
       return;
     }
 
     this.ItemIndex += 1;
     this.ItemId = this.FolderItemIds[this.ItemIndex];
-    this.ItemName = this.FolderItemNames[this.ItemIndex];   
+    this.ItemName = this.FolderItemNames[this.ItemIndex];
     this.ChangeItem();
     this.Update();
   };
@@ -287,23 +285,24 @@
     if (inc < 5) {
       return 5;
     }
-    for (var tmp = 10; tmp <= 50; tmp += 10) {
+    var tmp;
+    for (tmp = 10; tmp <= 50; tmp += 10) {
       if (inc < tmp) {
         return tmp;
       }
     }
-    for (var tmp = 100; tmp <= 500; tmp += 100) {
+    for (tmp = 100; tmp <= 500; tmp += 100) {
       if (inc < tmp) {
         return tmp;
       }
     }
     return 1000;
   };
-  
+
   GirderNavigationWidget.prototype.PreviousSlide = function () {
-    if ( ! this.FolderItemIds) { return; }
+    if (!this.FolderItemIds) { return; }
     // Make sure user notw changes are not pending to be saved.
-    //if (SA.notesWidget) { SA.notesWidget.Flush(); }
+    // if (SA.notesWidget) { SA.notesWidget.Flush(); }
 
     if (this.ItemIndex <= 0) {
       return;
@@ -317,12 +316,12 @@
     this.ItemId = this.FolderItemIds[this.ItemIndex];
     this.ChangeItem();
     this.Update();
-  }
+  };
 
   GirderNavigationWidget.prototype.NextSlide = function () {
-    if ( ! this.FolderItemIds) { return; }
+    if (!this.FolderItemIds) { return; }
     // Make sure user notw changes are not pending to be saved.
-    //if (SA.notesWidget) { SA.notesWidget.Flush(); }
+    // if (SA.notesWidget) { SA.notesWidget.Flush(); }
 
     if (this.ItemIndex >= this.FolderItemIds.length) {
       return;
@@ -336,7 +335,7 @@
     this.ItemId = this.FolderItemIds[this.ItemIndex];
     this.ChangeItem();
     this.Update();
-  }
+  };
 
   SA.GirderNavigationWidget = GirderNavigationWidget;
 })();

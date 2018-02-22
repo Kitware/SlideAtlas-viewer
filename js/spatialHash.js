@@ -202,7 +202,7 @@
     var width1 = Math.abs(rect1.point2[0] - rect1.point1[0]);
     var height1 = Math.abs(rect1.point2[1] - rect1.point1[1]);
     var area1 = width1 * height1;
-    
+
     // Loop over bins touching the input rectangle
     var x, y;
     x = rect1.point1[0];

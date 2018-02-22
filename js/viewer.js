@@ -31,24 +31,25 @@
     SA.VIEWER = this;
 
     // For debugging event propagation.
-    //this.SetupTestDivs(parent);
-    //return;
-    
+    // this.SetupTestDivs(parent);
+    // return;
+
     this.Div = $('<div>')
       .appendTo(this.Parent)
-      .css({'position': 'relative',
-            'border-width': '0px',
-            'width': '100%',
-            'height': '100%',
-            'box-sizing': 'border-box',
-            'z-index':'200'
-           })
-            .addClass('sa-resize');
+      .css({
+        'position': 'relative',
+        'border-width': '0px',
+        'width': '100%',
+        'height': '100%',
+        'box-sizing': 'border-box',
+        'z-index': '200'
+      })
+      .addClass('sa-resize');
     this.Div.saOnResize(
             function () {
               self.UpdateSize();
             });
-    this.Div.addClass("ViewerDiv");
+    this.Div.addClass('ViewerDiv');
     // So we can programatically set the keyboard focus
     this.Div.attr('tabindex', '1');
 
@@ -160,9 +161,9 @@
   }
 
   // I need to turn the bindins on and off, to make children "contentEditable".
-  Viewer.prototype.InteractionOn = function() {
+  Viewer.prototype.InteractionOn = function () {
     var self = this;
-    //var can = this.MainView.Parent;
+    // var can = this.MainView.Parent;
     var can = this.Div;
     can.on(
       'mousedown.viewer',
@@ -190,7 +191,7 @@
       function (event) {
         return self.HandleMouseWheel(event.originalEvent);
       });
-    
+
     // I am delaying getting event manager out of receiving touch events.
     // It has too many helper functions.
     can.on(
@@ -223,7 +224,7 @@
       });
 
     if (this.OverView) {
-      //can = this.OverView.Parent;
+      // can = this.OverView.Parent;
       can = this.OverViewDiv;
       can.on(
         'mousedown.viewer',
@@ -247,15 +248,15 @@
           return self.HandleOverViewMouseWheel(e.originalEvent);
         });
     }
-  }
-  
+  };
+
   // I need to turn the bindins on and off, to make children "contentEditable".
-  Viewer.prototype.InteractionOff = function() {
+  Viewer.prototype.InteractionOff = function () {
     // Options:
     // 1: Just use off to get rid of all bindings. This will remove outside bindings too.
     // 2: Remove them 1 by 1.
     // Lets be verbose but safe.
-    //var can = this.MainView.Parent;
+    // var can = this.MainView.Parent;
     var can = this.Div;
     can.off('mousedown.viewer');
     can.off('mousemove.viewer');
@@ -268,15 +269,15 @@
     can.off('keyup.viewer');
 
     if (this.OverView) {
-      //can = this.OverView.Parent;
+      // can = this.OverView.Parent;
       can = this.OverViewDiv;
       can.off('mousedown.viewer');
       can.off('mouseup.viewer');
       can.off('mousemove.viewer');
       can.off('mousewheel.viewer');
     }
-  }
-  
+  };
+
   // Allow the viewer to receive keyboard events.
   Viewer.prototype.Focus = function () {
     var can = this.MainView.Parent;
@@ -407,7 +408,7 @@
         this.UpdateCamera();
       }
     }
-    
+
     // TODO: Get rid of this hack.
     if (this.AnnotationWidget && viewerRecord.AnnotationVisibility !== undefined) {
       this.AnnotationWidget.SetVisibility(viewerRecord.AnnotationVisibility);
@@ -1378,19 +1379,19 @@
     this.LastMouseX = this.MouseX || 0;
     this.LastMouseY = this.MouseY || 0;
     this.LastMouseTime = this.MouseTime || 0;
-    if ( !this.SetMousePositionFromEvent(event)) {return false;}
+    if (!this.SetMousePositionFromEvent(event)) { return false; }
 
     // TODO:  Formalize a call back to make GUI disappear when
     // navigation starts.  I think I did this already but have not
     // converted this code yet.
     // Get rid of the favorites and the link divs if they are visible
-    //if (SA.LinkDiv && SA.LinkDiv.is(':visible')) {
+    // if (SA.LinkDiv && SA.LinkDiv.is(':visible')) {
     //  SA.LinkDiv.fadeOut();
-    //}
-    //if (typeof SA.FAVORITES_WIDGET !== 'undefined' &&
+    // }
+    // if (typeof SA.FAVORITES_WIDGET !== 'undefined' &&
     //       SA.FAVORITES_WIDGET.hidden === false) {
     //  SA.FAVORITES_WIDGET.ShowHideFavorites();
-    //}
+    // }
 
     var date = new Date();
     this.MouseDownTime = date.getTime();
@@ -1420,14 +1421,14 @@
     this.LastMouseX = this.MouseX;
     this.LastMouseY = this.MouseY;
     this.LastMouseTime = this.MouseTime;
-    if (!this.SetMousePositionFromEvent(event)) {return false;}
+    if (!this.SetMousePositionFromEvent(event)) { return false; }
     this.MouseDeltaX = this.MouseX - this.LastMouseX;
     this.MouseDeltaY = this.MouseY - this.LastMouseY;
     this.MouseDeltaTime = this.MouseTime - this.LastMouseTime;
     return this.MouseDeltaX !== 0 || this.MouseDeltaY !== 0;
   };
   Viewer.prototype.RecordMouseUp = function (event) {
-    if (!this.SetMousePositionFromEvent(event)) {return false;}
+    if (!this.SetMousePositionFromEvent(event)) { return false; }
     this.MouseDown = false;
 
     // Record time so we can detect double click.
@@ -1965,7 +1966,7 @@
     }
     return !found;
   };
-  
+
   Viewer.prototype.HandleMouseDown = function (event) {
     if (!this.InteractionEnabled) { return true; }
 
@@ -2044,7 +2045,7 @@
       this.InteractionState = INTERACTION_NONE;
       return this.HandleSingleSelect(event);
     }
-    
+
     this.FireFoxWhich = 0;
     this.RecordMouseUp(event);
 
@@ -2086,26 +2087,26 @@
     }
     return undefined;
   };
-  
+
   // Relative to the div receiving the event. I do not know why this is so hard.
   // The event has postiion relative to the local child, or top window.
   // I might consider adding a class to divs that are "transparent" to events.
   Viewer.prototype.GetMousePosition = function (event) {
     // Possibly a child.
     var pt = this.GetEventOffset(event);
-    if ( pt === undefined) {
+    if (pt === undefined) {
       return undefined;
     }
     var element = event.target;
-    if (element == this.Div[0]) {
+    if (element === this.Div[0]) {
       return pt;
     }
-    
+
     // look one parent up.
     pt[0] += element.offsetLeft;
     pt[1] += element.offsetTop;
     element = element.parentElement;
-    if (element == this.Div[0]) {
+    if (element === this.Div[0]) {
       return pt;
     }
 
@@ -2113,13 +2114,13 @@
     pt[0] += element.offsetLeft;
     pt[1] += element.offsetTop;
     element = element.parentElement;
-    if (element == this.Div[0]) {
+    if (element === this.Div[0]) {
       return pt;
     }
 
     return undefined;
   };
-  
+
   Viewer.prototype.HandleMouseMove = function (event) {
     if (!this.InteractionEnabled) { return true; }
 
@@ -2128,14 +2129,14 @@
       this.InteractionState = INTERACTION_NONE;
       return true;
     }
-    
+
     // I think we can do the same thing by setting the z-index (or returning false)
     // The event position is relative to the target which can be a tab on
     // top of the canvas.  Just skip these events.
-    //if ($(event.target).width() !== $(event.currentTarget).width()) {
+    // if ($(event.target).width() !== $(event.currentTarget).width()) {
     //  console.log("child");
-    //  //  return true;
-    //}
+    // //  return true;
+    // }
     var pt = this.GetMousePosition(event);
     if (pt === undefined) {
       return true;
@@ -2319,7 +2320,7 @@
     // Handle paste
     if (event.keyCode === 79) {
       // o to print out world mouse location for debugging.
-      var wPt = this.ConvertPointViewerToWorld(this.LastMouseX, this.LastMouseY);
+      // var wPt = this.ConvertPointViewerToWorld(this.LastMouseX, this.LastMouseY);
     }
 
     if (String.fromCharCode(event.keyCode) === 'R') {
@@ -2496,7 +2497,7 @@
     // Now that I do not drag the overview window tosize it,
     // This is simple.  TODO: Clean up modes and other leftover code.
     this.OverViewPlaceCamera(event);
-    
+
     return false;
   };
 
@@ -2526,13 +2527,12 @@
     }
   };
 
-  
   Viewer.prototype.HandleOverViewMouseWheel = function (event) {
     // This is needed to keep resizing the overview if the events
     // move tothe viewer proper.
-    //event.wheelDelta;
-    console.log("overview wheel");
-    //return false;
+    // event.wheelDelta;
+    console.log('overview wheel');
+    // return false;
 
     this.InteractionState = INTERACTION_OVERVIEW_WHEEL;
 
@@ -2542,7 +2542,7 @@
     } else if (event.wheelDelta) {
       tmp = event.wheelDelta;
     }
-    
+
     if (tmp > 0) {
       this.OverViewScale *= 1.2;
     } else if (tmp < 0) {
@@ -2559,7 +2559,7 @@
     // size of overview
     var h = Math.sqrt(area * this.OverViewScale / aspect);
     var w = h * aspect;
-    
+
     if (w < 60) {
       this.RotateIcon.hide();
     } else {
@@ -2567,10 +2567,10 @@
     }
 
     this.UpdateSize();
-    
+
     return false;
   };
-  
+
   Viewer.prototype.HandleOverViewMouseMove = function (event) {
     if (!this.InteractionEnabled) { return true; }
     if (this.RotateIconDrag) {
@@ -2579,7 +2579,6 @@
     }
 
     this.OverViewPlaceCamera(event);
-
 
     /*
     var w;
@@ -2659,7 +2658,7 @@
     if (idx < 0) {
       return;
     }
-    this.Layers.splice(idx,1);
+    this.Layers.splice(idx, 1);
   };
 
   Viewer.prototype.NewAnnotationLayer = function () {
