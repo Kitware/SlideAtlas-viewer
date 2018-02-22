@@ -10,7 +10,7 @@
 
   function CutoutWidget (parent, viewer) {
     this.Viewer = viewer;
-    this.Layer = viewer.GetAnnotationLayer();
+    // this.Layer = viewer.GetAnnotationLayer();
     var cam = this.Layer.GetCamera();
     var fp = cam.GetWorldFocalPoint();
 

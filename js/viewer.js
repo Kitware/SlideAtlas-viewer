@@ -160,6 +160,10 @@
     }
   }
 
+  Viewer.prototype.GetAnnotationLayer = function () {
+    alert('Deleted method "GetAnnotationLayer" called.');
+  };
+  
   // I need to turn the bindins on and off, to make children "contentEditable".
   Viewer.prototype.InteractionOn = function () {
     var self = this;
