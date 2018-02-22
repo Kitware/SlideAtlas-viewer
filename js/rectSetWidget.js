@@ -219,8 +219,8 @@
 
     this.Shape = new RectSet();
     if (layer) {
-      this.Layer = layer;
-      this.Layer.AddWidget(this);
+      layer = layer;
+      layer.AddWidget(this);
     }
     this.Active = false;
   }
@@ -238,7 +238,7 @@
     if (rectSet.Visibilities === undefined) {
       rectSet.Visibilities = Array(rectSet.Confidences.length);
       rectSet.Hash = new SAM.SpatialHash();
-      var bds = this.Layer.GetViewer().GetOverViewBounds();
+      var bds = layer.GetViewer().GetOverViewBounds();
       rectSet.Hash.Build(rectSet, bds);
     }
     var visibilities = rectSet.Visibilities;
@@ -282,7 +282,7 @@
     if (rectSet.Visibilities === undefined) {
       rectSet.Visibilities = Array(rectSet.Confidences.length);
       rectSet.Hash = new SAM.SpatialHash();
-      var bds = this.Layer.GetViewer().GetOverViewBounds();
+      var bds = layer.GetViewer().GetOverViewBounds();
       rectSet.Hash.Build(rectSet, bds);
     }
     var visibilities = rectSet.Visibilities;
@@ -462,35 +462,35 @@
     }
   };
 
-  RectSetWidget.prototype.HandleDoubleClick = function (event) {
+  RectSetWidget.prototype.HandleDoubleClick = function (layer) {
     return true;
   };
 
-  RectSetWidget.prototype.HandleMouseUp = function (event) {
+  RectSetWidget.prototype.HandleMouseUp = function (layer) {
     return true;
   };
 
-  RectSetWidget.prototype.HandleMouseMove = function (event) {
+  RectSetWidget.prototype.HandleMouseMove = function (layer) {
     return true;
   };
 
-  RectSetWidget.prototype.HandleMouseWheel = function (event) {
+  RectSetWidget.prototype.HandleMouseWheel = function (layer) {
     return true;
   };
 
-  RectSetWidget.prototype.HandleTouchPan = function (event) {
+  RectSetWidget.prototype.HandleTouchPan = function (layer) {
     return true;
   };
 
-  RectSetWidget.prototype.HandleTouchPinch = function (event) {
+  RectSetWidget.prototype.HandleTouchPinch = function (layer) {
     return true;
   };
 
-  RectSetWidget.prototype.HandleTouchEnd = function (event) {
+  RectSetWidget.prototype.HandleTouchEnd = function (layer) {
     return true;
   };
 
-  RectSetWidget.prototype.CheckActive = function (event) {
+  RectSetWidget.prototype.CheckActive = function (layer) {
     return this.Active;
   };
 
@@ -499,20 +499,20 @@
     return this.Active;
   };
 
-  RectSetWidget.prototype.RemoveFromLayer = function () {
-    if (this.Layer) {
-      this.Layer.RemoveWidget(this);
+  RectSetWidget.prototype.RemoveFromLayer = function (layer) {
+    if (layer) {
+      layer.RemoveWidget(this);
     }
-    this.Layer = null;
+    layer = null;
   };
 
-  RectSetWidget.prototype.Deactivate = function () {
+  RectSetWidget.prototype.Deactivate = function (layer) {
   };
 
-  RectSetWidget.prototype.PlacePopup = function () {
+  RectSetWidget.prototype.PlacePopup = function (layer) {
   };
 
-  RectSetWidget.prototype.ShowPropertiesDialog = function () {
+  RectSetWidget.prototype.ShowPropertiesDialog = function (layer) {
   };
 
   SAM.RectSetWidget = RectSetWidget;

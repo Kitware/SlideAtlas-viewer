@@ -40,7 +40,7 @@
     this.Circle = new SAM.Circle();
     this.Polyline = new SAM.Polyline();
 
-    this.InitializeDialog();
+    this.InitializeDialog(layer);
 
     // Get default properties.
     this.LineWidth = 10.0;
@@ -71,17 +71,14 @@
     this.Polyline.SetOutlineColor(this.Dialog.ColorInput.val());
     this.Polyline.FixedSize = false;
 
-    this.Layer = layer;
-    this.Popup = new SAM.WidgetPopup(this);
-
-    this.Layer.AddWidget(this);
+    layer.AddWidget(this);
 
     // Set line thickness using layer. (5 pixels).
     // The Line width of the shape switches to 0 (single line)
     // when the actual line with is too thin.
     this.Polyline.LineWidth = this.LineWidth;
     this.Circle.Radius = this.LineWidth;
-    this.Circle.UpdateBuffers(this.Layer.AnnotationView);
+    this.Circle.UpdateBuffers(layer.AnnotationView);
 
     // ActiveVertex and Edge are for placing the circle handle.
     this.ActiveVertex = -1;
@@ -91,9 +88,9 @@
 
     if (newFlag) {
       this.State = DRAWING;
-      this.SetCursorToDrawing();
+      this.SetCursorToDrawing(layer);
       // this.Polyline.Active = true;
-      this.Layer.ActivateWidget(this);
+      layer.ActivateWidget(this);
     } else {
       this.State = WAITING;
       this.Circle.Visibility = false;
@@ -107,12 +104,12 @@
     // Set to be the width of a pixel.
     this.MinLine = 1.0;
 
-    this.Layer.EventuallyDraw(false);
+    layer.EventuallyDraw(false);
   }
 
-  PolylineWidget.prototype.InitializeDialog = function () {
+  PolylineWidget.prototype.InitializeDialog = function (layer) {
     var self = this;
-    this.Dialog = new SAM.Dialog(function () { self.DialogApplyCallback(); });
+    this.Dialog = new SAM.Dialog(function () { self.DialogApplyCallback(layer); });
     // Customize dialog for a lasso.
     this.Dialog.Title.text('Lasso Annotation Editor');
     this.Dialog.Body.css({'margin': '1em 2em'});
@@ -214,7 +211,7 @@
   PolylineWidget.prototype.Draw = function (view) {
     // When the line is too thin, we can see nothing.
     // Change it to line drawing.
-    var cam = this.Layer.GetCamera();
+    var cam = view.GetCamera();
     this.MinLine = cam.GetSpacing();
     if (this.LineWidth < this.MinLine) {
       // Too thin. Use a single line.
@@ -231,7 +228,7 @@
     }
   };
 
-  PolylineWidget.prototype.PasteCallback = function (data, mouseWorldPt) {
+  PolylineWidget.prototype.PasteCallback = function (data, layer, mouseWorldPt) {
     this.Load(data);
     // Place the widget over the mouse.
     // This is more difficult than the circle.  Compute the shift.
@@ -246,10 +243,10 @@
       this.Polyline.Points[i][0] += xOffset;
       this.Polyline.Points[i][1] += yOffset;
     }
-    this.Polyline.UpdateBuffers(this.Layer.AnnotationView);
+    this.Polyline.UpdateBuffers(layer.AnnotationView);
     if (SAM.NotesWidget && !this.UserNoteFlag) { SAM.NotesWidget.MarkAsModified(); } // Hack
     if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
-    this.Layer.EventuallyDraw(true);
+    layer.EventuallyDraw(true);
   };
 
   PolylineWidget.prototype.Serialize = function () {
@@ -275,11 +272,11 @@
     return obj;
   };
 
-  PolylineWidget.prototype.InitializeText = function () {
+  PolylineWidget.prototype.InitializeText = function (layer) {
     if (this.Text) { return; }
     this.Text = new SAM.Text();
     this.Text.String = 'Hello';
-    this.Text.UpdateBuffers(this.Layer.AnnotationView); // Needed to get the bounds.
+    this.Text.UpdateBuffers(layer.AnnotationView); // Needed to get the bounds.
     this.Text.Color = [0.0, 0.0, 1.0];
     // position the middle of the text string
     this.Text.Anchor = [0.5 * (this.Text.PixelBounds[0] + this.Text.PixelBounds[1]),
@@ -298,7 +295,7 @@
 
   // Load a widget from a json object (origin MongoDB).
   // Object already json decoded.
-  PolylineWidget.prototype.Load = function (obj) {
+  PolylineWidget.prototype.Load = function (obj, layer) {
     if (obj.outlinecolor) {
       this.Polyline.OutlineColor[0] = parseFloat(obj.outlinecolor[0]);
       this.Polyline.OutlineColor[1] = parseFloat(obj.outlinecolor[1]);
@@ -317,12 +314,12 @@
       if (obj.closedloop !== undefined) {
         this.Polyline.Closed = obj.closedloop;
       }
-      this.Polyline.UpdateBuffers(this.Layer.AnnotationView);
+      this.Polyline.UpdateBuffers(layer.AnnotationView);
     }
 
     if (obj.text) {
       if (!this.Text) {
-        this.InitializeText();
+        this.InitializeText(layer);
       }
       this.Text.String = obj.text;
     }
@@ -337,12 +334,13 @@
     return Math.abs(p1[0] - p0[0]) + Math.abs(p1[1] - p0[1]);
   };
 
-  PolylineWidget.prototype.HandleKeyDown = function (event) {
+  PolylineWidget.prototype.HandleKeyDown = function (layer) {
     // 'r' reverses loop (and colors: Blue clockwise, Red counter clockwise)
+    var event = layer.Event;
     if (event.keyCode === 82) {
       this.Polyline.Points.reverse();
-      this.ColorByHandedness();
-      this.Layer.EventuallyDraw(true);
+      this.ColorByHandedness(layer);
+      layer.EventuallyDraw(true);
     }
 
     // Copy
@@ -359,7 +357,7 @@
     if (event.keyCode === 27 || event.keyCode === 32 || event.keyCode === 13) {
       // Last resort.  ESC key always deactivates the widget.
       // Deactivate.
-      this.Layer.DeactivateWidget(this);
+      layer.DeactivateWidget(this);
       if (SAM.NotesWidget && !this.UserNoteFlag) { SAM.NotesWidget.MarkAsModified(); } // Hack
       if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
       if (window.SA) { SA.RecordState(); }
@@ -369,17 +367,18 @@
     return true;
   };
 
-  PolylineWidget.prototype.HandleDoubleClick = function (event) {
+  PolylineWidget.prototype.HandleDoubleClick = function (layer) {
     if (this.State === DRAWING || this.State === DRAWING_EDGE) {
       this.Polyline.MergePoints(this.Circle.Radius);
-      this.Layer.DeactivateWidget(this);
+      layer.DeactivateWidget(this);
       return false;
     }
     // Handle: Restart drawing mode. Any point on the line can be used.
+    var event = layer.Event;
     if (this.State === ACTIVE) {
       var x = event.offsetX;
       var y = event.offsetY;
-      var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
+      var pt = layer.GetCamera().ConvertPointViewerToWorld(x, y);
       // Active => Double click starts drawing again.
       if (this.ActiveVertex !== -1) {
         this.Polyline.Points[this.ActiveVertex] = pt;
@@ -398,12 +397,12 @@
         console.log('No vertex or edge is active.');
         return false;
       }
-      this.Polyline.UpdateBuffers(this.Layer.AnnotationView);
-      this.SetCursorToDrawing();
+      this.Polyline.UpdateBuffers(layer.AnnotationView);
+      this.SetCursorToDrawing(layer);
       // Transition to drawing edge when we know which way the user
       // is dragging.
       this.State = DRAWING;
-      this.Layer.EventuallyDraw(false);
+      layer.EventuallyDraw(false);
       return false;
     }
   };
@@ -411,11 +410,11 @@
   // Because of double click:
   // Mouse should do nothing. Mouse move and mouse up should cause all
   // the changes.
-  PolylineWidget.prototype.HandleMouseDown = function (event) {
+  PolylineWidget.prototype.HandleMouseDown = function (layer) {
+    var event = layer.Event;
     // Only chnage handle properties.  Nothing permanent changes with mousedown.
     if (event.which === 1 && this.State === ACTIVE) {
       // User has started dragging a point with the mouse down.
-      this.Popup.Hide();
       // Change the circle color to the line color when dragging.
       this.Circle.FillColor = this.Polyline.OutlineColor;
       this.Circle.Active = false;
@@ -425,12 +424,14 @@
   };
 
   // Returns false when it is finished doing its work.
-  PolylineWidget.prototype.HandleClick = function (event) {
+  PolylineWidget.prototype.HandleClick = function (layer) {
+    var event = layer.Event;
     this.HandleMouseUp(event);
   };
 
   // Returns false when it is finished doing its work.
-  PolylineWidget.prototype.HandleMouseUp = function (event) {
+  PolylineWidget.prototype.HandleMouseUp = function (layer) {
+    var event = layer.Event;
     // Shop dialog with right click.  I could have a menu appear.
     if (event.which === 3) {
       // Right mouse was pressed.
@@ -457,7 +458,7 @@
 
     var x = event.offsetX;
     var y = event.offsetY;
-    var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
+    var pt = layer.GetCamera().ConvertPointViewerToWorld(x, y);
 
     if (this.State === DRAWING) {
       // handle the case where we restarted drawing and clicked again
@@ -479,15 +480,15 @@
         // Remove the temporary point at end used for drawing.
         this.Polyline.Points.pop();
         this.Polyline.Closed = true;
-        this.Layer.DeactivateWidget(this);
+        layer.DeactivateWidget(this);
         if (window.SA) { SA.RecordState(); }
         return false;
       }
       // Insert another point to drag around.
       this.DrawingVertex += 1;
       this.Polyline.Points.splice(this.DrawingVertex, 0, pt);
-      this.Polyline.UpdateBuffers(this.Layer.AnnotationView);
-      this.Layer.EventuallyDraw(true);
+      this.Polyline.UpdateBuffers(layer.AnnotationView);
+      layer.EventuallyDraw(true);
       return false;
     }
     if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
@@ -496,7 +497,7 @@
 
   //  Preconditions: State === ACTIVE, Mouse 1 is down.
   // ActiveVertex !== 1 or ActiveEdge === [p0,p1,k]
-  PolylineWidget.prototype.HandleDrag = function (pt) {
+  PolylineWidget.prototype.HandleDrag = function (pt, layer) {
     if (this.ActiveEdge) {
       // User is dragging an edge point that has not been
       // created yet.
@@ -507,7 +508,7 @@
       this.Polyline.Points.splice(this.ActiveEdge[1], 0, [x, y]);
       this.ActiveVertex = this.ActiveEdge[1];
       this.ActiveEdge = undefined;
-      this.HighlightVertex(this.ActiveVertex);
+      this.HighlightVertex(this.ActiveVertex, layer);
       // When dragging, circle is the same color as the line.
       this.Circle.Active = false;
     }
@@ -536,12 +537,12 @@
     this.Polyline.Points[this.ActiveVertex] = pt;
     // Move the hightlight circle with the vertex.
     this.Circle.Origin = pt;
-    this.Polyline.UpdateBuffers(this.Layer.AnnotationView);
+    this.Polyline.UpdateBuffers(layer.AnnotationView);
 
     // TODO: Fix this hack.
     if (SAM.NotesWidget && !this.UserNoteFlag) { SAM.NotesWidget.MarkAsModified(); } // Hack
     if (this.UserNoteFlag && SA.notesWidget) { SA.notesWidget.EventuallySaveUserNote(); }
-    this.Layer.EventuallyDraw(true);
+    layer.EventuallyDraw(true);
   };
 
   // precondition : State === DRAWING
@@ -590,10 +591,11 @@
     return false;
   };
 
-  PolylineWidget.prototype.HandleMouseMove = function (event) {
+  PolylineWidget.prototype.HandleMouseMove = function (layer) {
+    var event = layer.Event;
     var x = event.offsetX;
     var y = event.offsetY;
-    var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
+    var pt = layer.GetCamera().ConvertPointViewerToWorld(x, y);
 
     if (this.State === DRAWING) {
       this.StartDrawing(pt);
@@ -602,15 +604,15 @@
     if (this.State === DRAWING_EDGE) {
       // Move the active point to follor the cursor.
       this.Polyline.Points[this.DrawingVertex] = pt;
-      this.Polyline.UpdateBuffers(this.Layer.AnnotationView);
+      this.Polyline.UpdateBuffers(layer.AnnotationView);
 
       // This higlights the first vertex when a loop is possible.
       var idx = this.Polyline.PointOnVertex(pt, this.Circle.Radius);
       if (this.DrawingVertex === this.Polyline.GetNumberOfPoints() - 1 && idx === 0) {
         // Highlight first vertex to indicate potential loop closure.
-        this.HighlightVertex(0);
+        this.HighlightVertex(0, layer);
       } else {
-        this.HighlightVertex(-1);
+        this.HighlightVertex(-1, layer);
       }
       return false;
     }
@@ -618,11 +620,11 @@
     if (this.State === ACTIVE) {
       if (event.which === 0) {
         // Turn off the active vertex if the mouse moves away.
-        if (!this.CheckActive(event)) {
-          this.Layer.DeactivateWidget(this);
-        } else {
-          this.UpdateActiveCircle();
-        }
+        //if (!this.CheckActive(layer)) {
+        //  layer.DeactivateWidget(this);
+        //} else {
+        //  this.UpdateActiveCircle(layer);
+        //}
         return false;
       }
       if (this.State === ACTIVE && event.which === 1) {
@@ -630,23 +632,25 @@
         // drawing mode). Leave the circle highlighted.
         // Use ActiveVertex instead of DrawingVertex which is used
         // for drawing mode.
-        this.HandleDrag(pt);
+        this.HandleDrag(pt, layer);
       }
     }
   };
 
   // Just returns true and false.  It saves either ActiveVertex or
   // ActiveEdge if true. Otherwise, it has no side effects.
-  PolylineWidget.prototype.CheckActive = function (event) {
+  PolylineWidget.prototype.CheckActive = function (layer) {
+    return false;
+    var event = layer.Event;
     var x = event.offsetX;
     var y = event.offsetY;
-    var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
+    var pt = layer.GetCamera().ConvertPointViewerToWorld(x, y);
     var dist;
 
     this.ActiveEdge = undefined;
 
     // Check for mouse touching a vertex circle.
-    dist = VERTEX_RADIUS / this.Layer.GetPixelsPerUnit();
+    dist = VERTEX_RADIUS / layer.GetPixelsPerUnit();
     dist = Math.max(dist, this.Polyline.GetLineWidth());
     this.ActiveVertex = this.Polyline.PointOnVertex(pt, dist);
 
@@ -663,7 +667,7 @@
 
     if (this.ActiveVertex === -1) {
       // Tolerance: 5 screen pixels.
-      dist = EDGE_RADIUS / this.Layer.GetPixelsPerUnit();
+      dist = EDGE_RADIUS / layer.GetPixelsPerUnit();
       dist = Math.max(dist, this.Polyline.GetLineWidth() / 2);
       this.ActiveEdge = this.Polyline.PointOnShape(pt, dist);
       if (!this.ActiveEdge) {
@@ -675,31 +679,31 @@
 
   // This does not handle the case where we want to highlight an edge
   // point that has not been created yet.
-  PolylineWidget.prototype.HighlightVertex = function (vertexIdx) {
+  PolylineWidget.prototype.HighlightVertex = function (vertexIdx, layer) {
     if (vertexIdx < 0 || vertexIdx >= this.Polyline.GetNumberOfPoints()) {
       this.Circle.Visibility = false;
     } else {
       this.Circle.Visibility = true;
       this.Circle.Active = true;
-      this.Circle.Radius = VERTEX_RADIUS / this.Layer.GetPixelsPerUnit();
+      this.Circle.Radius = VERTEX_RADIUS / layer.GetPixelsPerUnit();
       this.CircleRadius = Math.max(this.CircleRadius,
                                          this.Polyline.GetLineWidth() * 1.5);
-      this.Circle.UpdateBuffers(this.Layer.AnnotationView);
+      this.Circle.UpdateBuffers(layer.AnnotationView);
       this.Circle.Origin = this.Polyline.Points[vertexIdx];
     }
     this.ActiveVertex = vertexIdx;
-    this.Layer.EventuallyDraw(true);
+    layer.EventuallyDraw(true);
   };
 
   // Use ActiveVertex and ActiveEdge iVars to place and size circle.
-  PolylineWidget.prototype.UpdateActiveCircle = function () {
+  PolylineWidget.prototype.UpdateActiveCircle = function (layer) {
     if (this.ActiveVertex !== -1) {
-      this.HighlightVertex(this.ActiveVertex);
+      this.HighlightVertex(this.ActiveVertex, layer);
       return;
     } else if (this.ActiveEdge) {
       this.Circle.Visibility = true;
       this.Circle.Active = true;
-      this.Circle.Radius = EDGE_RADIUS / this.Layer.GetPixelsPerUnit();
+      this.Circle.Radius = EDGE_RADIUS / layer.GetPixelsPerUnit();
       this.CircleRadius = Math.max(this.CircleRadius,
                                          this.Polyline.GetLineWidth());
       // Find the exact point on the edge (projection of
@@ -709,14 +713,14 @@
       var x = pt0[0] + this.ActiveEdge[2] * (pt1[0] - pt0[0]);
       var y = pt0[1] + this.ActiveEdge[2] * (pt1[1] - pt0[1]);
       this.Circle.Origin = [x, y, 0];
-      this.Circle.UpdateBuffers(this.Layer.AnnotationView);
+      this.Circle.UpdateBuffers(layer.AnnotationView);
     } else {
       // Not active.
       this.Circle.Visibility = false;
       // We never hightlight the whold polyline now.
       // this.Polyline.Active = false;
     }
-    this.Layer.EventuallyDraw(false);
+    layer.EventuallyDraw(false);
   };
 
   // Multiple active states. Active state is a bit confusing.
@@ -735,7 +739,7 @@
   // Vertexes are active for click and drag or double click into drawing
   // mode. Edges are active to insert a new vertex and drag or double
   // click to insert a new vertex and go into drawing mode.
-  PolylineWidget.prototype.SetActive = function (flag) {
+  PolylineWidget.prototype.SetActive = function (flag, layer) {
     if (flag === this.GetActive()) {
       // Nothing has changed.  Do nothing.
       return;
@@ -743,10 +747,8 @@
 
     if (flag) {
       this.State = ACTIVE;
-      this.UpdateActiveCircle();
-      this.PlacePopup();
+      this.UpdateActiveCircle(layer);
     } else {
-      this.Popup.StartHideTimer();
       this.State = WAITING;
       this.DrawingVertex = -1;
       this.ActiveVertex = -1;
@@ -757,37 +759,19 @@
       }
       // Remove invisible lines (with 0 or 1 points).
       if (this.Polyline.GetNumberOfPoints() < 2) {
-        if (this.Layer) {
-          this.Layer.RemoveWidget(this);
+        if (layer) {
+          layer.RemoveWidget(this);
         }
       }
     }
 
-    this.Layer.EventuallyDraw(false);
+    layer.EventuallyDraw(false);
   };
 
-  PolylineWidget.prototype.SetCursorToDrawing = function () {
-    this.Popup.Hide();
-    this.Layer.GetParent().css(
+  PolylineWidget.prototype.SetCursorToDrawing = function (layer) {
+    layer.GetParent().css(
             {'cursor': 'url(' + SAM.ImagePathUrl + 'dotCursor8.png) 4 4,crosshair'});
-    this.Layer.EventuallyDraw();
-  };
-
-  // This also shows the popup if it is not visible already.
-  PolylineWidget.prototype.PlacePopup = function () {
-    // The popup gets in the way when firt creating the line.
-    if (this.State === DRAWING_EDGE ||
-            this.State === DRAWING) {
-      return;
-    }
-
-    var pt = this.Polyline.FindPopupPoint(this.Layer.GetCamera());
-    pt = this.Layer.GetCamera().ConvertPointWorldToViewer(pt[0], pt[1]);
-
-    pt[0] += 20;
-    pt[1] -= 10;
-
-    this.Popup.Show(pt[0], pt[1]);
+    layer.EventuallyDraw();
   };
 
   PolylineWidget.prototype.ShowPropertiesDialog = function () {
@@ -832,7 +816,7 @@
     this.Dialog.Show(true);
   };
 
-  PolylineWidget.prototype.DialogApplyCallback = function () {
+  PolylineWidget.prototype.DialogApplyCallback = function (layer) {
     var hexcolor = this.Dialog.ColorInput.val();
     this.Polyline.SetOutlineColor(hexcolor);
     this.Polyline.Closed = this.Dialog.ClosedInput.prop('checked');
@@ -840,10 +824,10 @@
     // Cannot use the shap line width because it is set to zero (single pixel)
     // it the dialog value is too thin.
     this.LineWidth = parseFloat(this.Dialog.LineWidthInput.val());
-    this.Polyline.UpdateBuffers(this.Layer.AnnotationView);
-    this.SetActive(false);
+    this.Polyline.UpdateBuffers(layer.AnnotationView);
+    this.SetActive(false, layer);
     if (window.SA) { SA.RecordState(); }
-    this.Layer.EventuallyDraw(false);
+    layer.EventuallyDraw(false);
 
     localStorage.PolylineWidgetDefaults = JSON.stringify(
       {Color: hexcolor,
@@ -916,13 +900,13 @@
   // TODO: This will not work with Layer.  Move this to the viewer or a
   // helper object.
   // Save images with centers inside the polyline.
-  PolylineWidget.prototype.Sample = function (dim, spacing, skip, root, count) {
+  PolylineWidget.prototype.Sample = function (dim, spacing, skip, root, count, layer) {
     var bds = this.Polyline.GetBounds();
-    var ctx = this.Layer.Context2d;
+    var ctx = layer.Context2d;
     for (var y = bds[2]; y < bds[3]; y += skip) {
       for (var x = bds[0]; x < bds[1]; x += skip) {
         if (this.PointInside(x, y)) {
-          var ip = this.Layer.GetCamera().ConvertPointWorldToViewer(x, y);
+          var ip = layer.GetCamera().ConvertPointWorldToViewer(x, y);
           ip[0] = Math.round(ip[0] - dim / 2);
           ip[1] = Math.round(ip[1] - dim / 2);
           var data = ctx.getImageData(ip[0], ip[1], dim, dim);
@@ -934,7 +918,7 @@
   };
 
   // Convert to right handed loop
-  PolylineWidget.prototype.ColorByHandedness = function () {
+  PolylineWidget.prototype.ColorByHandedness = function (layer) {
     var area = this.Polyline.ComputeArea();
     if (area > 0) {
       // right handed
@@ -944,15 +928,15 @@
       this.Polyline.OutlineColor = [0.0, 0.0, 1.0];
     }
 
-    this.Layer.EventuallyDraw(true);
+    layer.EventuallyDraw(true);
   };
 
   /*
     // Saves images centered at spots on the edge.
     // Roll is set to put the edge horizontal.
     // Step is in screen pixel units
-    PolylineWidget.prototype.SampleEdge = function(dim, step, count, callback) {
-    this.Polyline.SampleEdge(this.Layer,dim,step,count,callback);
+    PolylineWidget.prototype.SampleEdge = function(dim, step, count, callback, layer) {
+    this.Polyline.SampleEdge(layer,dim,step,count,callback);
     }
 
     function DownloadTheano(widgetIdx, angleIdx) {
@@ -961,7 +945,8 @@
     64,4,EDGE_COUNT,
     function () {
     setTimeout(function(){ DownloadTheano2(widgetIdx, angleIdx); }, 1000);
-    });
+    },     layer
+    );
     }
 
     function DownloadTheano2(widgetIdx, angleIdx) {

@@ -9,7 +9,7 @@
   function NavigationWidget (parent, display) {
     this.Display = display;
 
-   // Load the session slides from the localStorage
+    // Load the session slides from the localStorage
     this.SlideIndex = 0;
     this.Session = [];
     this.NoteIterator = new SA.NoteIterator();
@@ -17,7 +17,7 @@
     var self = this;
     var size = '40px';
     if (SAM.detectMobile()) {
-        // fake a tab
+      // fake a tab
       this.Tab = {};
       this.Tab.Panel = $('<div>')
             .appendTo(display.GetViewer(0).GetDiv())
@@ -33,14 +33,14 @@
       this.Tab.hide = function () {
         panel.hide();
       };
-        // SA.OnStartInteraction( function () { panel.hide();} );
+      // SA.OnStartInteraction( function () { panel.hide();} );
     } else {
       this.Tab = new SA.Tab(parent, SA.ImagePathUrl + 'nav.png', 'navigationTab');
       // this.Tab.Div.prop('title', 'Navigation');
       this.Tab.Div.addClass('sa-view-navigation-div');
       this.Tab.Panel.addClass('sa-view-navigation-panel');
 
-        // Put the stack display in the navigation button
+      // Put the stack display in the navigation button
       this.NoteDisplay = $('<div>')
             .appendTo(this.Tab.Div)
             .addClass('sa-view-note')
@@ -190,9 +190,9 @@
         });
       }
     } else {
-        // Correct an error.  SessionId's are wrong because the
-        // notes sessionId is not being updated when a session is
-        // copied.
+      // Correct an error.  SessionId's are wrong because the
+      // notes sessionId is not being updated when a session is
+      // copied.
       note.SessionId = this.SessionId;
     }
 
@@ -203,8 +203,8 @@
   NavigationWidget.prototype.ToggleVisibility = function () {
     this.SetVisibility(!this.Visibility);
   };
-
-// Used on mobile.
+  
+  // Used on mobile.
   NavigationWidget.prototype.SetVisibility = function (v) {
     this.Visibility = v;
     if (v) {
@@ -227,7 +227,7 @@
       }
 
       if (note.Type === 'Stack') {
-            // Next note refers to ViewerRecords.
+        // Next note refers to ViewerRecords.
         if (note.StartIndex > 0) {
           note.ViewerRecords[note.StartIndex - 1].LoadTiles([0, 0, 200, 150]);
           this.PreviousNoteButton.addClass('sa-active');
@@ -240,7 +240,7 @@
           note.ViewerRecords[note.StartIndex + 2].LoadTiles([0, 0, 200, 150]);
         }
       } else {
-            // Next note refers to children.
+        // Next note refers to children.
         if (!this.NoteIterator.IsStart()) {
           this.PreviousNoteButton.addClass('sa-active');
         }
@@ -278,9 +278,8 @@
     var current = this.GetNote();
     if (current.Type === 'Stack') {
       if (current.StartIndex <= 0) { return; }
-
-        // Move camera
-        // Hardcoded for dual display
+      // Move camera
+      // Hardcoded for dual display
       var viewer1 = this.Display.GetViewer(1);
       var viewer0 = this.Display.GetViewer(0);
       var cam = viewer0.GetCamera();
@@ -290,20 +289,20 @@
 
       this.Display.RecordAnnotations();
       --current.StartIndex;
-        // It was too slow to request a long stack of user notes when the
-        // stack wasa first loaded.
+      // It was too slow to request a long stack of user notes when the
+      // stack wasa first loaded.
       current.ViewerRecords[current.StartIndex].RequestUserNote();
 
-        // We need to skip setting the camera.
+      // We need to skip setting the camera.
       SA.display = this.Display;
       SA.SetNote(current);
       SA.UpdateUserNotes();
-        // Set the camera after the note has been applied.
+      // Set the camera after the note has been applied.
       viewer1.SetCamera(fp, rot, height);
 
       current.DisplayStack(this.Display);
       this.Display.SynchronizeViews(1, current);
-        // activate or deactivate buttons.
+      // activate or deactivate buttons.
       this.Update();
       if (this.NoteDisplay) {
         this.NoteDisplay.html('' + current.StartIndex);
@@ -312,7 +311,7 @@
     }
 
     if (this.NoteIterator.IsStart()) {
-        // if not previous notes move to the previous slide
+      // if not previous notes move to the previous slide
       this.PreviousSlide();
       return;
     }
@@ -340,8 +339,8 @@
       if (current.StartIndex >= current.ViewerRecords.length - 1) {
         return;
       }
-        // Move camera
-        // Hard coded for dual display.
+      // Move camera
+      // Hard coded for dual display.
       var viewer0 = this.Display.GetViewer(0);
       var viewer1 = this.Display.GetViewer(1);
       var cam = viewer1.GetCamera();
@@ -351,19 +350,19 @@
 
       this.Display.RecordAnnotations();
       ++current.StartIndex;
-        // It was too slow to request a long stack of user notes when the
-        // stack wasa first loaded.
+      // It was too slow to request a long stack of user notes when the
+      // stack wasa first loaded.
       current.ViewerRecords[current.StartIndex].RequestUserNote();
 
-        // We need to skip setting the camera.
+      // We need to skip setting the camera.
       SA.display = this.Display;
       SA.SetNote(current);
       SA.UpdateUserNotes();
-        // Set the camera after the note has been applied.
+      // Set the camera after the note has been applied.
       viewer0.SetCamera(fp, rot, height);
       current.DisplayStack(this.Display);
       this.Display.SynchronizeViews(0, current);
-        // activate or deactivate buttons.
+      // activate or deactivate buttons.
       this.Update();
       if (this.NoteDisplay) {
         this.NoteDisplay.html('' + current.StartIndex);
@@ -405,7 +404,7 @@
       check = confirm('Unsaved edits will be lost.  Are you sure you want to move to the next slide?');
     }
     if (check) {
-        // TODO: Improve the API here.  Get rid of global access.
+      // TODO: Improve the API here.  Get rid of global access.
       if (SA.notesWidget) { SA.notesWidget.MarkAsNotModified(); }
       this.SlideIndex = prevSlideIdx;
       SA.SetNoteFromId(this.Session[this.SlideIndex].id);
@@ -456,8 +455,8 @@
     this.ChildIterator = null;
   }
 
-// Because of sorting, the child array gets reset on us.
-// I need a dynamic way to get the Children array based on the state.
+  // Because of sorting, the child array gets reset on us.
+  // I need a dynamic way to get the Children array based on the state.
   NoteIterator.prototype.GetChildArray = function () {
     if (!this.Note) {
       return [];
@@ -465,27 +464,27 @@
     return this.Note.Children;
   };
 
-// Because of sorting, I have to make the index dynamic
-// and it cannot be stored as an ivar.
+  // Because of sorting, I have to make the index dynamic
+  // and it cannot be stored as an ivar.
   NoteIterator.prototype.GetChildIndex = function () {
     if (this.ChildIterator === null) {
       return -1;
     }
     return this.GetChildArray().indexOf(this.ChildIterator.Note);
   };
-
-// Get the parent note of the current note.
-// Notes do not keep a pointer to parents.
-// The iterator has this information for active notes.
+  
+  // Get the parent note of the current note.
+  // Notes do not keep a pointer to parents.
+  // The iterator has this information for active notes.
   NoteIterator.prototype.GetParentNote = function () {
     if (this.ChildIterator === null) {
-        // We are at the current note.  Let the caller supply the parent.
+      // We are at the current note.  Let the caller supply the parent.
       return null;
     }
 
     var parent = this.ChildIterator.GetParentNote();
     if (parent === null) {
-        // This level contains the parent.
+      // This level contains the parent.
       parent = this.Note;
     }
 
@@ -529,13 +528,13 @@
 
     // Case 1:  Iterator is on its own node.
     if (this.ChildIterator === null) {
-        // Next check for children notes
+      // Next check for children notes
       if (this.Note.Children.length > 0 && this.Note.ChildrenVisibility) {
-            // Move to the first child.
+        // Move to the first child.
         this.ChildIterator = this.GetChildArray()[0].NewIterator();
         return this.ChildIterator.GetNote();
       }
-        // No answers or children: we are at the end.
+      // No answers or children: we are at the end.
       return this.Note;
     }
 
@@ -556,12 +555,12 @@
     return this.ChildIterator.GetNote();
   };
 
-// Move backward one step.  See "Next" method comments for description of tree traversal.
+  // Move backward one step.  See "Next" method comments for description of tree traversal.
   NoteIterator.prototype.Previous = function () {
     if (!this.Note) { return; }
 
     if (this.ChildIterator === null) {
-        // At start.
+      // At start.
       return this.Note;
     }
     if (!this.ChildIterator.IsStart()) {
@@ -581,14 +580,14 @@
     return this.Note;
   };
 
-// Move the iterator to the start.
+  // Move the iterator to the start.
   NoteIterator.prototype.ToStart = function () {
     if (this.ChildIterator) {
       this.ChildIterator = null;
     }
   };
 
-// Move the iterator to the end. Used in Previous method.
+  // Move the iterator to the end. Used in Previous method.
   NoteIterator.prototype.ToEnd = function () {
     if (!this.Note) { return; }
 
@@ -604,26 +603,26 @@
     return this.Note;
   };
 
-// If the note is not in the tree, Set the note as root.
-// Otherwise, point the iterator to the note in the tree.
+  // If the note is not in the tree, Set the note as root.
+  // Otherwise, point the iterator to the note in the tree.
   NoteIterator.prototype.SetNote = function (note) {
     if (this.GetNote() === note) { return; }
     // See if the note is in the tree.
     this.ToStart();
     while (true) {
       if (this.GetNote() === note) {
-            // Found the note in the tree.
+        // Found the note in the tree.
         return;
       }
       if (this.IsEnd()) {
-            // not found.  New tree.
+        // not found.  New tree.
         this.ToStart();
         this.Note = note;
-            // BIG Hack here.
-            // I got rid of a special SetRootNote call too soon.
-            // if (SA.notesWidget) {
-            //    SA.notesWidget.SetRootNote(note);
-            // }
+        // BIG Hack here.
+        // I got rid of a special SetRootNote call too soon.
+        // if (SA.notesWidget) {
+        //    SA.notesWidget.SetRootNote(note);
+        // }
         return;
       }
       this.Next();

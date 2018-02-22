@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  function Dialog (callback) {
+  function Dialog () {
     if (!SAM.DialogOverlay) {
       SAM.DialogOverlay = $('<div>')
                 .appendTo('body')
@@ -53,25 +53,30 @@
             .appendTo(this.ApplyButtonDiv)
             .addClass('sa-view-dialog-apply-button')
             .text('Apply');
-
-        // Closure to pass a stupid parameter to the callback
-    var self = this;
-    (function () {
-            // Return true needed to hide the spectrum color picker.
-      self.CloseButton.click(function (e) {
-                // hack
-        SA.ContentEditableHasFocus = false;
-        self.Hide();
-        return true;
-      });
-      self.ApplyButton.click(function (e) {
-                // hack
-        SA.ContentEditableHasFocus = false;
-        self.Hide();
-        (callback)(); return true;
-      });
-    })();
   }
+
+  Dialog.prototype.SetApplyCallback = function (layer, callback) {
+    var self = this;
+    // Return true needed to hide the spectrum color picker.
+    self.ApplyButton.click(function (e) {
+      // hack
+      SA.ContentEditableHasFocus = false;
+      self.Hide();
+      (callback)();
+      return true;
+    });
+  };
+
+  Dialog.prototype.SetCloseCallback = function (layer, callback) {
+    var self = this;
+    // Return true needed to hide the spectrum color picker.
+    this.CloseButton.click(function (e) {
+      SA.ContentEditableHasFocus = false;
+      self.Hide();
+      (callback)();
+      return true;
+    });
+  };
 
   Dialog.prototype.Show = function (modal) {
         // hack

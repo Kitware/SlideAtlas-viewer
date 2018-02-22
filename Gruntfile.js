@@ -30,6 +30,7 @@ var jsSrcFiles = [
   'js/imageWidget.js',
   'js/imageAnnotation.js',
   'js/rectWidget.js',
+  'js/rectSelectWidget.js',
   'js/rectSetWidget.js',
   'js/gridWidget.js',
   'js/scaleWidget.js',
@@ -42,6 +43,7 @@ var jsSrcFiles = [
   'js/view.js',
   // Core files
   'js/cookies.js',
+  'js/girderNavigationWidget.js',
   'js/init.js',
   'js/viewEditMenu.js',
   'js/viewBrowser.js',

@@ -12,9 +12,13 @@
   }
   Polyline.prototype = new SAM.Shape();
 
-    // Polyline.prototype.destructor=function() {
-        // Get rid of the buffers?
-    // }
+  // Polyline.prototype.destructor=function() {
+  // Get rid of the buffers?
+  // }
+
+  Polyline.prototype.IsEmpty = function () {
+    return this.Points.length == 0;
+  };
 
   Polyline.prototype.SetLineWidth = function (lineWidth) {
     this.LineWidth = lineWidth;
@@ -38,7 +42,7 @@
     return this.Points.length;
   };
 
-    // Internal bounds will ignore origin and orientation.
+  // Internal bounds will ignore origin and orientation.
   Polyline.prototype.GetBounds = function () {
     var bounds = this.Bounds.slice(0);
     bounds[0] += this.Origin[0];
@@ -48,14 +52,14 @@
     return bounds;
   };
 
-    // Returns 0 if is does not overlap at all.
-    // Returns 1 if part of the section is in the bounds.
-    // Returns 2 if all of the section is in the bounds.
+  // Returns 0 if is does not overlap at all.
+  // Returns 1 if part of the section is in the bounds.
+  // Returns 2 if all of the section is in the bounds.
   Polyline.prototype.ContainedInBounds = function (bds) {
-        // Need to get world bounds.
+    // Need to get world bounds.
     var myBds = this.GetBounds();
 
-        // Polyline does not cache bounds, so just look to the points.
+    // Polyline does not cache bounds, so just look to the points.
     if (bds[1] < myBds[0] || bds[0] > myBds[1] ||
             bds[3] < myBds[2] || bds[2] > myBds[3]) {
       return 0;
@@ -71,7 +75,7 @@
     this.Origin = origin.slice(0);
   };
 
-    // Adds origin to points and sets origin to 0.
+  // Adds origin to points and sets origin to 0.
   Polyline.prototype.ResetOrigin = function (view) {
     for (var i = 0; i < this.Points.length; ++i) {
       var pt = this.Points[i];
@@ -83,9 +87,9 @@
     this.UpdateBuffers(view);
   };
 
-    // Returns -1 if the point is not on a vertex.
-    // Returns the index of the vertex is the point is within dist of a the
-    // vertex.
+  // Returns -1 if the point is not on a vertex.
+  // Returns the index of the vertex is the point is within dist of a the
+  // vertex.
   Polyline.prototype.PointOnVertex = function (pt, dist) {
     dist = dist * dist;
     for (var i = 0; i < this.Points.length; ++i) {
@@ -129,7 +133,7 @@
     return undefined;
   };
 
-    // Find a world location of a popup point given a camera.
+  // Find a world location of a popup point given a camera.
   Polyline.prototype.FindPopupPoint = function (cam) {
     if (this.Points.length === 0) { return; }
     var roll = cam.GetWorldRoll();
@@ -205,50 +209,50 @@
     }
   };
 
-    // The real problem is aliasing.  Line is jagged with high frequency sampling artifacts.
-    // Pass in the spacing as a hint to get rid of aliasing.
+  // The real problem is aliasing.  Line is jagged with high frequency sampling artifacts.
+  // Pass in the spacing as a hint to get rid of aliasing.
   Polyline.prototype.Decimate = function (spacing, view) {
-        // Keep looping over the line removing points until the line does not change.
+    // Keep looping over the line removing points until the line does not change.
     var modified = true;
     while (modified) {
       modified = false;
       var newPoints = [];
       newPoints.push(this.Points[0]);
-            // Window of four points.
+      // Window of four points.
       var i = 3;
       while (i < this.Points.length) {
         var p0 = this.Points[i];
         var p1 = this.Points[i - 1];
         var p2 = this.Points[i - 2];
         var p3 = this.Points[i - 3];
-                // Compute the average of the center two.
+        // Compute the average of the center two.
         var cx = (p1[0] + p2[0]) * 0.5;
         var cy = (p1[1] + p2[1]) * 0.5;
-                // Find the perendicular normal.
+        // Find the perendicular normal.
         var nx = (p0[1] - p3[1]);
         var ny = -(p0[0] - p3[0]);
         var mag = Math.sqrt(nx * nx + ny * ny);
         nx = nx / mag;
         ny = ny / mag;
         mag = Math.abs(nx * (cx - this.Points[i - 3][0]) + ny * (cy - this.Points[i - 3][1]));
-                // Mag metric does not distinguish between line and a stroke that double backs on itself.
-                // Make sure the two point being merged are between the outer points 0 and 3.
+        // Mag metric does not distinguish between line and a stroke that double backs on itself.
+        // Make sure the two point being merged are between the outer points 0 and 3.
         var dir1 = (p0[0] - p1[0]) * (p3[0] - p1[0]) + (p0[1] - p1[1]) * (p3[1] - p1[1]);
         var dir2 = (p0[0] - p2[0]) * (p3[0] - p2[0]) + (p0[1] - p2[1]) * (p3[1] - p2[1]);
         if (mag < spacing && dir1 < 0.0 && dir2 < 0.0) {
-                    // Replace the two points with their average.
+          // Replace the two points with their average.
           newPoints.push([cx, cy]);
           modified = true;
-                    // Skip the next point the window will have one old merged point,
-                    // but that is ok because it is just used as reference and not altered.
+          // Skip the next point the window will have one old merged point,
+          // but that is ok because it is just used as reference and not altered.
           i += 2;
         } else {
-                    //  No modification.  Just move the window one.
+          //  No modification.  Just move the window one.
           newPoints.push(this.Points[i - 2]);
           ++i;
         }
       }
-            // Copy the remaing point / 2 points
+      // Copy the remaing point / 2 points
       i = i - 2;
       while (i < this.Points.length) {
         newPoints.push(this.Points[i]);
@@ -327,7 +331,7 @@
 
       if (end > 0) {
         var half = this.LineWidth / 2.0;
-                // 4 corners per point
+        // 4 corners per point
         var dx = edgeNormals[0][0] * half;
         var dy = edgeNormals[0][1] * half;
         this.PointBuffer.push(points[0][0] - dx);
@@ -477,8 +481,17 @@
     }
   };
 
-  Polyline.prototype.SetActive = function (flag) {
-    this.Active = flag;
+  // Returns true if the selection changed.
+  Polyline.prototype.SetSelected = function (flag) {
+    if (this.Selected === flag) {
+      return false;
+    }
+    this.Selected = flag;
+    return true;
+  };
+
+  Polyline.prototype.IsSelected = function () {
+    return this.Selected;
   };
 
   SAM.Polyline = Polyline;

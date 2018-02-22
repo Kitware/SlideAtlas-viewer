@@ -35,13 +35,31 @@
     return retVal;
   };
 
+  // Returns true if a shape was selected.
+  ShapeGroup.prototype.SingleSelect = function (pt, dist) {
+    var found = false;
+    for (var idx = 0; idx < this.Shapes.length; ++idx) {
+      var shape = this.Shapes[idx];
+      if (found || ! shape.PointOnShape(pt, dist)) {
+        // A shape was already selected. Just unselect the rest.
+        shape.SetSelected(false);
+      } else {
+        shape.SetSelected(true);
+        found = true;
+      }
+    }
+    return found;
+  };
+
+  // Legacy?
+  // Returns the index of the shape selected,  -1 if None.
   ShapeGroup.prototype.PointOnShape = function (pt, dist) {
     for (var i = 0; i < this.Shapes.length; ++i) {
       if (this.Shapes[i].PointOnShape(pt, dist)) {
-        return true;
+        return i;
       }
     }
-    return false;
+    return -1;
   };
 
   ShapeGroup.prototype.UpdateBuffers = function (view) {
@@ -50,6 +68,24 @@
     }
   };
 
+  ShapeGroup.prototype.DeleteSelected = function () {
+    var keepers = [];
+    for (var idx = 0; idx < this.Shapes.length; ++idx) {
+      if ( ! this.Shapes[idx].IsSelected()) {
+        keepers.push(this.Shapes[idx]);
+      }
+    }
+    if (keepers.length < this.Shapes.length) {
+      this.Shapes = keepers;
+      return true;
+    }
+    return false;
+  };
+
+  // Depreciates: TODO:  Remove this method.
+  // I decided I hate popups.  They are visual noise and
+  // when there are many annotations, you cannot get the one you want.
+  // They always got orphaned for some reason.  Not worth fixing.
   // Find a world location of a popup point given a camera.
   ShapeGroup.prototype.FindPopupPoint = function (cam) {
     if (this.Shapes.length === 0) { return; }
@@ -91,12 +127,37 @@
     return this.Shapes.pop();
   };
 
-  ShapeGroup.prototype.SetActive = function (flag) {
-    for (var i = 0; i < this.Shapes.length; ++i) {
-      this.Shapes[i].SetActive(flag);
-    }
+  ShapeGroup.prototype.DeleteChild = function (idx) {
+    return this.Shapes.splice(idx, 1);
   };
 
+  // Set the all to the same selected state.
+  // Returns true if any selection changed.
+  ShapeGroup.prototype.SetSelected = function (flag) {
+    var changed = false;
+    for (var i = 0; i < this.Shapes.length; ++i) {
+      if (this.Shapes[i].SetSelected(flag)) {
+        changed = true;
+      }
+    }
+    return changed;
+  };
+
+  // Set only one child selected state
+  ShapeGroup.prototype.SetSelectedChild = function (idx, flag) {
+    this.Shapes[idx].SetSelected(flag);
+  };
+
+  // Returns true if any shapes are selected.
+  ShapeGroup.prototype.IsSelected = function () {
+    for (var i = 0; i < this.Shapes.length; ++i) {
+      if (this.Shapes[i].IsSelected()) {
+        return true;
+      }
+    }
+    return false;
+  };
+  
   ShapeGroup.prototype.SetLineWidth = function (lineWidth) {
     for (var i = 0; i < this.Shapes.length; ++i) {
       this.Shapes[i].LineWidth = lineWidth;
