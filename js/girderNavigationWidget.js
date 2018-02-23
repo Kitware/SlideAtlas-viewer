@@ -132,6 +132,9 @@
   };
 
   GirderNavigationWidget.prototype.ChangeItem = function () {
+    window.history.pushState(this.ItemId, "SlideAtlas viewer " + this.ItemId,
+                             "/#item/" + this.ItemId);
+
     if (this.ChangeItemCallback) {
       (this.ChangeItemCallback)(this.ItemId);
     }

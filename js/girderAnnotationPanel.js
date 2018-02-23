@@ -286,7 +286,9 @@
         .attr('src', SA.ImagePathUrl + 'open_lasso.png');
       for (i = 0; i < layer.GetNumberOfWidgets(); ++i) {
         widget = layer.GetWidget(i);
-        widget.SetModeToOpen(layer);
+        if (widget.SetModeToOpen) {
+          widget.SetModeToOpen(layer);
+        }
       }
     } else {
       this.PencilOpenClosedState = CLOSED;
@@ -295,7 +297,9 @@
       // Hack reference to the widget.
       for (i = 0; i < layer.GetNumberOfWidgets(); ++i) {
         widget = layer.GetWidget(i);
-        widget.SetModeToClosed(layer);
+        if (widget.SetModeToOpen) {
+          widget.SetModeToClosed(layer);
+        }
       }
     }
     layer.EventuallyDraw();
@@ -1223,6 +1227,7 @@
           }
         ]
       };
+      /*
       girder.rest.restRequest({
         path: 'annotation/' + this.ImageItemId + '/access',
         method: 'PUT',
@@ -1231,6 +1236,7 @@
       }).done(function (retData) {
         console.log('PUT access seemed to work');
       });
+      */
     } else {
       // Indicate we are saving somehow.
       annotObj.Div.css({'border': '3px solid #000'});
