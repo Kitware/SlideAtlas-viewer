@@ -1,25 +1,26 @@
 (function () {
   'use strict';
 
-  function Dialog () {
+  function Dialog (parent) {
+    parent = parent || 'body';
     if (!SAM.DialogOverlay) {
       SAM.DialogOverlay = $('<div>')
-                .appendTo('body')
+                .appendTo(parent)
                 .css({
                   'position': 'fixed',
                   'left': '0px',
                   'width': '100%',
                   'background-color': '#AAA',
                   'opacity': '0.4',
-                  'z-index': '10010'})
+                  'z-index': '1010'})
                 .saFullHeight()
                 .hide();
     }
 
     this.Dialog =
             $('<div>')
-            .appendTo('body')
-            .css({'z-index': '10011'})
+            .appendTo(parent)
+            .css({'z-index': '1011'})
             .addClass('sa-view-dialog-div');
 
     this.Row1 = $('<div>')

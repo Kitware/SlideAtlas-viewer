@@ -12,6 +12,10 @@
   var DRAG_TEXT = 3;
   var DRAG_ARROW = 4;
 
+  var TEXT_ONLY = 0;
+  var HOVER = 1;
+  var TEXT_ARROW = 2;
+  
   // TODO: Get rid of this layer in the constructor.
   function TextWidget () {
     this.Type = 'text';
@@ -22,6 +26,8 @@
     this.ArrowModified = true;
     this.State = INACTIVE;
 
+    this.VisibilityMode = TExT_ONLY;
+    
     // This method gets called if anything is added, deleted or moved.
     this.ModifiedCallback = undefined;
     // This method gets called if the active state of this widget turns on or off.
@@ -253,15 +259,8 @@
       this.CreationCamera = obj.creation_camera;
     }
 
-    if (obj.anchorVisibility !== undefined) {
-      // Old schema.
-      if (obj.anchorVisibility) {
-        this.SetVisibilityMode(1);
-      } else {
-        this.SetVisibilityMode(0);
-      }
-    } else if (obj.visibility !== undefined) {
-      this.SetVisibilityMode(obj.visibility);
+    if (obj.visibility !== undefined) {
+      this.VisibilityMode = obj.visibility;
     }
 
     this.Arrow.SetFillColor(rgb);
@@ -287,18 +286,18 @@
   // 0: TextOnly
   // 1: hover
   // 2: text with arrow.
-  TextWidget.prototype.SetVisibilityMode = function (mode, layer) {
+  TextWidget.prototype.UpdateVisibilityMode = function (layer) {
     if (this.VisibilityMode === mode) { return; }
     this.VisibilityMode = mode;
 
-    if (mode === 2 || mode === 1) { // turn glyph on
+    if (mode === TEXT_ARROW || mode === HOVER) { // turn glyph on
       if (this.SavedTextAnchor === undefined) {
         this.SavedTextAnchor = [-30, 0];
       }
       this.Text.Anchor = this.SavedTextAnchor.slice(0);
       this.Arrow.Visibility = true;
       this.ArrowModified = true;
-    } else if (mode === 0) { // turn glyph off
+    } else if (mode === TEXT_ONLY) { // turn glyph off
       // save the old anchor incase glyph is turned back on.
       this.SavedTextAnchor = this.Text.Anchor.slice(0);
       // Put the new (invisible rotation point (anchor) in the middle bottom of the bounds.
@@ -519,7 +518,7 @@
   };
 
   TextWidget.prototype.InitializeDialog = function (layer) {
-    this.Dialog = new SAM.Dialog();
+    this.Dialog = new SAM.Dialog(layer.GetParent());
     this.Dialog.Title.text('Text Annotation Editor');
     this.Dialog.Body.css({'margin': '1em 2em'});
 
@@ -630,7 +629,7 @@
         this.Text.BackgroundFlag = defaults.BackgroundFlag;
       }
       if (defaults.VisibilityMode !== undefined) {
-        this.SetVisibilityMode(defaults.VisibilityMode, layer);
+        this.VisibilityMode = defaults.VisibilityMode;
       }
     }
 
@@ -703,16 +702,17 @@
     if (string !== this.Text.GetString()) { modified = true; }
     this.Text.SetString(string);
 
-    if (this.Dialog.VisibilityModeInputs[0].prop('checked')) {
-      if (this.VisibilityMode !== 0) { modified = true; }
-      this.SetVisibilityMode(0, layer);
-    } else if (this.Dialog.VisibilityModeInputs[1].prop('checked')) {
-      if (this.VisibilityMode !== 1) { modified = true; }
-      this.SetVisibilityMode(1, layer);
+    if (this.Dialog.VisibilityModeInputs[TEXT_ONLY].prop('checked')) {
+      if (this.VisibilityMode !== TEXT_ONLY) { modified = true; }
+      this.VisibilityMode = TEXT_ONLY;
+    } else if (this.Dialog.VisibilityModeInputs[HOVER].prop('checked')) {
+      if (this.VisibilityMode !== HOVER) { modified = true; }
+      this.VisibilityMode = HOVER;
     } else {
-      if (this.VisibilityMode !== 2) { modified = true; }
-      this.SetVisibilityMode(2, layer);
+      if (this.VisibilityMode !== TEXT_ARROW) { modified = true; }
+      this.VisibilityMode = TEXT_ARROW;
     }
+    this.UpdateVisibilityMode(layer);
     var backgroundFlag = this.Dialog.BackgroundInput.prop('checked');
     if (backgroundFlag !== this.Text.GetBackgroundFlag()) { modified = true; }
     this.Text.SetBackgroundFlag(backgroundFlag);
@@ -735,7 +735,12 @@
       this.SetPositionToDefault(layer);
       this.Uninitialized = false;
       var textHeight = this.Text.PixelBounds[3];
-      this.SetTextOffset(this.Text.GetFontSize(), -textHeight / 2);
+      var textWidth = this.Text.PixelBounds[1];
+      if (this.VisibilityMode === TEXT_ONLY) {
+        this.SetTextOffset(-textWidth / 2, -textHeight / 2);
+      } else {
+        this.SetTextOffset(this.Text.GetFontSize(), -textHeight / 2);
+      }
     }
     this.Text.UpdateBuffers(layer.GetView());
     this.Arrow.UpdateBuffers(layer.GetView());
