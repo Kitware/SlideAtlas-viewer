@@ -1399,10 +1399,11 @@
 
     var date = new Date();
     this.MouseDownTime = date.getTime();
-    var dTime = date.getTime() - this.MouseUpTime;
-    if (dTime < 200.0) { // 200 milliseconds
-      this.DoubleClick = true;
-    }
+    // Double click gets stuck on.  We do not really need it.
+    // var dTime = date.getTime() - this.MouseUpTime;
+    // if (dTime < 200.0) { // 200 milliseconds
+    //  this.DoubleClick = true;
+    // }
 
     // this.TriggerStartInteraction();
   };
@@ -1985,11 +1986,11 @@
       this.RotateIconDrag = false;
     }
 
-    if (this.DoubleClick) {
-      // Without this, double click selects sub elementes.
-      event.preventDefault();
-      return this.HandleDoubleClick(event);
-    }
+    // if (this.DoubleClick) {
+    //  // Without this, double click selects sub elementes.
+    //  event.preventDefault();
+    //  return this.HandleDoubleClick(event);
+    // }
 
     // Let the annotation layers have first dibs on processing the event.
     for (var i = 0; i < this.Layers.length; ++i) {
