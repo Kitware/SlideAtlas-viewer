@@ -302,11 +302,15 @@
       // save the old anchor incase glyph is turned back on.
       this.SavedTextAnchor = this.Text.Anchor.slice(0);
       // Put the new (invisible rotation point (anchor) in the middle bottom of the bounds.
-      this.Text.UpdateBuffers(layer.GetView()); // computes pixel bounds.
+      if (layer) {
+        this.Text.UpdateBuffers(layer.GetView()); // computes pixel bounds.
+      }
       this.Text.Anchor = [(this.Text.PixelBounds[0] + this.Text.PixelBounds[1]) * 0.5, this.Text.PixelBounds[2]];
       this.Arrow.Visibility = false;
     }
-    layer.EventuallyDraw();
+    if (layer) {
+      layer.EventuallyDraw();
+    }
   };
 
   // Change orientation and length of arrow based on the anchor location.
