@@ -577,24 +577,24 @@
             .css({'display': 'table-cell'});
 
     this.Dialog.VisibilityModeInputs = [];
-    this.Dialog.VisibilityModeInputs[0] =
+    this.Dialog.VisibilityModeInputs[TEXT_ONLY] =
             $('<input type="radio" name="visibilityoptions" value="0">Text only</input>')
             .appendTo(this.Dialog.VisibilityModeInputButtons)
-            .attr('checked', 'false');
+            .attr('checked', 'true');
 
     $('<br>').appendTo(this.Dialog.VisibilityModeInputButtons);
 
-    this.Dialog.VisibilityModeInputs[1] =
+    this.Dialog.VisibilityModeInputs[HOVER] =
             $('<input type="radio" name="visibilityoptions" value="1">Arrow only, text on hover</input>')
             .appendTo(this.Dialog.VisibilityModeInputButtons)
             .attr('checked', 'false');
 
     $('<br>').appendTo(this.Dialog.VisibilityModeInputButtons);
 
-    this.Dialog.VisibilityModeInputs[2] =
+    this.Dialog.VisibilityModeInputs[TEXT_ARROW] =
             $('<input type="radio" name="visibilityoptions" value="2">Arrow and text visible</input>')
             .appendTo(this.Dialog.VisibilityModeInputButtons)
-            .attr('checked', 'true');
+            .attr('checked', 'false');
 
     this.Dialog.BackgroundDiv =
             $('<div>')

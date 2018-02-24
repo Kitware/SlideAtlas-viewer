@@ -41,7 +41,28 @@
     this.StylusOnly = false;
 
     var self = this;
-    this.Dialog = new SAM.Dialog(function () { self.DialogApplyCallback(); });
+
+    this.LineWidth = 0;
+    // No way to set the defaults at the moment.
+    /*
+    if (localStorage.PencilWidgetDefaults) {
+      var defaults = JSON.parse(localStorage.PencilWidgetDefaults);
+      if (defaults.Color) {
+        this.Dialog.ColorInput.val(SAM.ConvertColorToHex(defaults.Color));
+      }
+      if (defaults.LineWidth !== undefined) {
+        this.LineWidth = defaults.LineWidth;
+        this.Dialog.LineWidthInput.val(this.LineWidth);
+      }
+    }
+    */
+    this.Shapes = new SAM.ShapeGroup();
+  }
+
+  PencilWidget.prototype.InitializeDialog = function (layer) {
+    this.Dialog = new SAM.Dialog(layer.GetParent());
+    var self = this;
+    this.Dialog.SetApplyCallback(function () { self.DialogApplyCallback(); });
     // Customize dialog for a pencil.
     this.Dialog.Title.text('Pencil Annotation Editor');
     this.Dialog.Body.css({'margin': '1em 2em'});
@@ -78,24 +99,8 @@
             .appendTo(this.Dialog.LineWidthDiv)
             .css({'display': 'table-cell'})
             .keypress(function (event) { return event.keyCode !== 13; });
-
-    this.LineWidth = 0;
-    // No way to set the defaults at the moment.
-    /*
-    if (localStorage.PencilWidgetDefaults) {
-      var defaults = JSON.parse(localStorage.PencilWidgetDefaults);
-      if (defaults.Color) {
-        this.Dialog.ColorInput.val(SAM.ConvertColorToHex(defaults.Color));
-      }
-      if (defaults.LineWidth !== undefined) {
-        this.LineWidth = defaults.LineWidth;
-        this.Dialog.LineWidthInput.val(this.LineWidth);
-      }
-    }
-    */
-    this.Shapes = new SAM.ShapeGroup();
-  }
-
+  };
+  
   PencilWidget.prototype.SetModifiedCallback = function (callback) {
     this.ModifiedCallback = callback;
   };
@@ -236,7 +241,9 @@
     if (obj.linewidth !== undefined) {
       this.LineWidth = parseFloat(obj.linewidth);
     }
-    var outlineColor = SAM.ConvertColor(this.Dialog.ColorInput.val());
+
+    //var outlineColor = SAM.ConvertColor(this.Dialog.ColorInput.val());
+    var outlineColor = [0, 0, 0.8];
     if (obj.outlinecolor) {
       outlineColor[0] = parseFloat(obj.outlinecolor[0]);
       outlineColor[1] = parseFloat(obj.outlinecolor[1]);
@@ -347,7 +354,10 @@
     shape.SetSelected(true);
     // shape.OutlineColor = [0.9, 1.0, 0.0];
     // Leave the new stroke open unti we stop.
-    shape.OutlineColor = [0.0, 0.0, 0.0];
+    shape.OutlineColor = [0.0, 0.0, 0.8];
+    if (!this.Dialog) {
+      this.InitializeDialog();
+    }
     shape.SetOutlineColor(this.Dialog.ColorInput.val());
     shape.FixedSize = false;
     shape.LineWidth = 0;
@@ -595,6 +605,9 @@
 
   // Can we bind the dialog apply callback to an objects method?
   PencilWidget.prototype.ShowPropertiesDialog = function () {
+    if (!this.Dialog) {
+      this.InitializeDialog(layer);
+    }
     this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Shapes.GetOutlineColor()));
     this.Dialog.LineWidthInput.val((this.Shapes.GetLineWidth()).toFixed(2));
 
