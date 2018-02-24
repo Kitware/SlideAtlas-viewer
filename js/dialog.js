@@ -19,7 +19,7 @@
     this.Dialog =
             $('<div>')
             .appendTo('body')
-            .css({'z-index': '1011'})
+            .css({'z-index': '10011'})
             .addClass('sa-view-dialog-div');
 
     this.Row1 = $('<div>')
