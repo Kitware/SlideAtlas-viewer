@@ -703,7 +703,7 @@
           obj.offset = element.points[1].slice(0);
           obj.offset[0] -= obj.position[0];
           obj.offset[1] -= obj.position[1];
-          obj.visibility = elements.points[0][2];
+          obj.visibility = element.points[0][2];
           annotObj.Layer.LoadWidget(obj);
         }
         if (element.type === 'rectanglegrid') {
