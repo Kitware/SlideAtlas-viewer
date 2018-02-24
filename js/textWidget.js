@@ -26,7 +26,7 @@
     this.ArrowModified = true;
     this.State = INACTIVE;
 
-    this.VisibilityMode = TExT_ONLY;
+    this.VisibilityMode = TEXT_ONLY;
     
     // This method gets called if anything is added, deleted or moved.
     this.ModifiedCallback = undefined;
