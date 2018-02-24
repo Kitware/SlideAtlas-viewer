@@ -158,7 +158,7 @@
       y = y + this.FontSize * LINE_SPACING;
     }
 
-    ctx.stroke();
+    //ctx.stroke();
     ctx.restore();
   };
 

@@ -284,6 +284,9 @@
   };
 
   // Anchor is in the middle of the bounds when the shape is not visible.
+  // 0: TextOnly
+  // 1: hover
+  // 2: text with arrow.
   TextWidget.prototype.SetVisibilityMode = function (mode, layer) {
     if (this.VisibilityMode === mode) { return; }
     this.VisibilityMode = mode;
@@ -445,7 +448,8 @@
 
   TextWidget.prototype.HandleMouseMove = function (layer) {
     var event = layer.Event;
-    if (this.State === DRAG_ARROW) {
+    if ((this.VisibilityMode === 0 && this.State === DRAG_TEXT) ||
+        this.State === DRAG_ARROW) {
       var cam = layer.GetCamera();
       var w0 = cam.ConvertPointViewerToWorld(this.LastMouse[0], this.LastMouse[1]);
       var w1 = cam.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
@@ -457,8 +461,7 @@
       this.ArrowModified = true;
       layer.EventuallyDraw();
       return false;
-    }
-    if (this.State === DRAG_TEXT) { // Just the text not the anchor glyph
+    } else if (this.State === DRAG_TEXT) { // Just the text not the anchor glyph
       var dx = event.offsetX - this.LastMouse[0];
       var dy = event.offsetY - this.LastMouse[1];
       this.LastMouse = [event.offsetX, event.offsetY];
