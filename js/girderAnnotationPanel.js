@@ -375,6 +375,10 @@
   // data is the lightweight version
   // Add a new annotation to the list
   GirderAnnotationPanel.prototype.AddAnnotationButton = function (metadata) {
+    // For now, users can only see their own annotations.
+    if (metadata.creatorId !== this.UserData._id) {
+      return;
+    }
     var self = this;
     var div = $('<div>')
       .appendTo(this.ButtonDiv)
