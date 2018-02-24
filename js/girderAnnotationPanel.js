@@ -172,52 +172,21 @@
   };
   GirderAnnotationPanel.prototype.InitializeTools = function () {
     var self = this;
-    // This turns on, only when a annotation is being edited.
-    this.RectSelectButton = $('<img>')
-      .appendTo(this.ToolDiv)
-      .addClass('sa-view-annotation-button sa-flat-button-active')
-      .addClass('sa-active')
-      .css({'border': '1px solid #aaa'})
-      .attr('type', 'image')
-      .attr('src', SA.ImagePathUrl + 'rect_select.png')
-      .on('click touchstart',
-          function () {
-            self.SelectStrokes();
-            return false;
-          })
-      .hide();
-    this.RectSelectButton.on('mousedown mousemove mouseup touchmove touchend',
-                             function () { return false; });
 
-    this.TextButton = $('<img>')
-      .appendTo(this.ToolDiv)
-      .addClass('sa-view-annotation-button sa-flat-button-active')
-      .addClass('sa-active')
-      .attr('type', 'image')
-      .attr('src', SA.ImagePathUrl + 'Text.gif')
-      .on('click touchstart',
-          function () {
-            self.TextButtonCallback();
-            return false;
-          });
-    this.TextButton.on('mousedown mousemove mouseup touchmove touchend',
-                       function () { return false; });
+    // Radio buttons for tools. (One active at a time).
+    this.CursorButton = AddToolRadioButton('cursor_arrow.png');
+    this.RectSelectButton = AddToolRadioButton('rectSelect.png', 'RectSelectOn', 'RectSelectOff');
+    this.TextButton = AddToolRadioButton('Text.gif', 'TextButtonOn', 'TextButtonOff');
+    this.PencilButton = AddToolRadioButton('Pencil-icon.gif', 'PencilButtonOn', 'PencilButtonOff');
+ 
+    // This is visibile, only when a annotation is being edited.
+    this.RectSelectButton.hide();
+    this.CursorButton.css({'border': '2px solid #333'});
+    
+    // Default just lets the viewer handle the events.
+    this.ActiveToolButton = this.CursorButton;
 
-    this.PencilButton = $('<img>')
-      .appendTo(this.ToolDiv)
-      .addClass('sa-view-annotation-button sa-flat-button-active')
-      .addClass('sa-active')
-      .css({'border': '1px solid #aaa'})
-      .attr('type', 'image')
-      .attr('src', SA.ImagePathUrl + 'Pencil-icon.jpg')
-      .on('click touchstart',
-          function () {
-            self.PencilButtonCallback();
-            return false;
-          });
-    this.PencilButton.on('mousedown mousemove mouseup touchmove touchend',
-                         function () { return false; });
-
+    // Not part of the radio group.  This is a sub option for pencils.
     this.PencilOpenClosedState = OPEN;
     this.PencilOpenClosedToggle = $('<img>')
       .appendTo(this.OptionsDiv)
@@ -239,6 +208,51 @@
                                    function () { return false; });
   };
 
+  GirderAnnotationPanel.prototype.AddToolRadioButton = function (imageFile, onCallbackName, offCallbackName) {
+    var self = this;
+    var button = $('<img>')
+        .appendTo(this.ToolDiv)
+        .css({'border': '2px solid #aaa',
+              'background-color':'#fff',
+              'width': '24px',
+              'height':'24px',
+             })
+        .attr('type', 'image')
+        .attr('src', SA.ImagePathUrl + imageFile)
+      .on('click touchstart',
+          function () {
+            self.ToolRadioButtonCallback(button);
+            return false;
+          })
+      // To block the viewer moving.
+      .on('mousedown mousemove mouseup touchmove touchend',
+          function () { return false; })
+      // On off functionality
+      .on('radio-on',
+          function () {
+            self.WithHighlightedCall(function (annotObj) { (self[onCallback])(annotObj); });
+          })
+      .on('radio-off',
+          function () {
+            (self[offCallback])();
+          });
+    return button;
+  };
+  
+  // General for the radio
+  // This assumes button is in the ToolRadioButtons list.
+  GirderAnnotationPanel.prototype.ToolRadioButtonCallback = function (pressedButton) {
+    if (pressedButton == this.ActiveToolButton) {
+      return false;
+    }
+    // Turn off the old one.
+    this.ActiveToolButton.trigger('radio-off');
+    this.ActiveToolButton.css({'border': '1px solid #aaa'});
+    pressedButton.trigger('radio-on');
+    pressedButton.css({'border': '1px solid #333'});
+    this.ActiveToolButton = pressedButton.trigger;
+  };
+  
   // When tools have nothing to modify, they disappear.
   // TODO: Help tool. to explain why a tool is not available.
   GirderAnnotationPanel.prototype.UpdateToolVisibility = function () {
@@ -272,7 +286,7 @@
     }
     // Some layer has to be being edited.
     if (this.Highlighted) {
-      if (this.PencilWidget || lineSelected) {
+      if (this.ActiveToolButton === this.PencilButton || lineSelected) {
         this.PencilOpenClosedToggle.show();
       } else {
         this.PencilOpenClosedToggle.hide();
@@ -916,173 +930,14 @@
     this.UpdateToolVisibility();
   };
 
-  // TextButton is really a toggle.
-  // Text buttonOn <=> dialog showing.
-  // Selecting a text automatically turns text button on and shows dialog.
-  GirderAnnotationPanel.prototype.TextButtonCallback = function () {
-    if (this.TextWidget) {
-      // The user pressed the button again (while it was active).
-      this.TextButtonOff();
-    } else {
-      var self = this;
-      // This makes sure an annotation layer is selected and editing
-      // before calling 'PencilButtonOn'.
-      this.WithHighlightedCall(function (annotObj) { self.TextButtonOn(annotObj); });
-    }
-  };
-
-  // Widget is an optional arguement.
-  GirderAnnotationPanel.prototype.TextButtonOn = function (annotObj, widget) {
-    // TODO: Try to generalize all this stuff and put in 'NewTool'
-    // If the text is already active,  just return.
-    if (widget && widget === this.TextWidget) {
-      return;
-    }
-
-    // The text button is already editing another widget. Turn it off.
-    if (this.TextWidget) {
-      this.TextButtonOff();
-    }
-
-    // Make the pencil button reflect its toggled on/off state.
-    var button = this.TextButton;
-    button.addClass('sa-active');
-
-    // The layer has to be in editing mode.
-    this.EditOn(annotObj);
-
-    // Get a text widget.
-    // Look for a selected widget to reuse.
-    var layer = annotObj.Layer;
-    if (!widget) {
-      widget = layer.GetASelectedWidget('text');
-    }
-    if (!widget) {
-      // A selected textWidget was not found. Make a new text widget.
-      widget = new SAM.TextWidget(layer);
-      layer.AddWidget(widget);
-      widget.SetCreationCamera(layer.GetCamera());
-      widget.SetStateToDialog(layer);
-    }
-    this.TextWidget = widget;
-
-    // Activate the widget to start drawing.
-    widget.SetStateToDrawing(layer);
-
-    // This will turn off the pencil button when the widget deactivates itself.
-    var self = this;
-    widget.SetStateChangeCallback(function () {
-      if (!widget.GetActive()) {
-        self.TextButtonOff();
-      }
-    });
-
-    // Show the open closed toggle.
-    this.UpdateToolVisibility();
-  };
-
-  GirderAnnotationPanel.prototype.TextButtonOff = function () {
-    if (!this.TextWidget) {
-      return;
-    }
-    var widget = this.TextWidget;
-    this.TextWidget = undefined;
-    var layer = this.Highlighted.Layer;
-    widget.SetStateToInactive(layer);
-    this.UpdateToolVisibility();
-  };
-
-  // PencilButton is really a toggle.
-  GirderAnnotationPanel.prototype.PencilButtonCallback = function () {
-    if (this.PencilWidget) {
-      // The user pressed the button again (while it was active).
-      this.PencilButtonOff();
-    } else {
-      var self = this;
-      // This makes sure an annotation layer is selected and editing
-      // before calling 'PencilButtonOn'.
-      this.WithHighlightedCall(function (annotObj) { self.PencilButtonOn(annotObj); });
-    }
-  };
-
-  // Widget is an optional arguement.
-  GirderAnnotationPanel.prototype.PencilButtonOn = function (annotObj, widget) {
-    // Pencil specific stuff.
-    // TODO: Try to generalize all this stuff and put in 'NewTool'
-    // If the pencil is already drawing in the selected widget.
-    if (widget && widget === this.PencilWidget) {
-      return;
-    }
-
-    // The pencil is already editing another layer. Turn it off.
-    if (this.PencilWidget) {
-      this.PencilButtonOff();
-    }
-
-    // Make the pencil button reflect its toggled on/off state.
-    var button = this.PencilButton;
-    button.addClass('sa-active');
-
-    // The layer has to be in editing mode.
-    this.EditOn(annotObj);
-
-    // Get a pencil widget.
-    // Look for a selected widget to reuse.
-    var layer = annotObj.Layer;
-    if (!widget) {
-      widget = layer.GetASelectedWidget('pencil');
-    }
-    if (!widget) {
-      // A selected pencilWidget was not found. Make a new pencil widget.
-      widget = new SAM.PencilWidget(layer);
-      // Allows drawing to transfer to a new widget.
-      widget.SetSelectedCallback(function (w) { self.WidgetSelected(annotObj, w); });
-      layer.AddWidget(widget);
-      widget.SetCreationCamera(layer.GetCamera());
-    }
-    this.PencilWidget = widget;
-
-    // Activate the widget to start drawing.
-    widget.SetStateToDrawing(layer);
-
-    // This will turn off the pencil button when the widget deactivates itself.
-    var self = this;
-    widget.SetStateChangeCallback(function () {
-      if (!widget.GetActive()) {
-        self.PencilButtonOff();
-      }
-    });
-
-    // Will it use open or closed strokes?
-    if (this.PencilOpenClosedState === OPEN) {
-      widget.SetModeToOpen(layer);
-    } else {
-      widget.SetModeToClosed(layer);
-    }
-
-    // Show the open closed toggle.
-    this.UpdateToolVisibility();
-  };
-
-  GirderAnnotationPanel.prototype.PencilButtonOff = function () {
-    if (!this.PencilWidget) {
-      return;
-    }
-    var widget = this.PencilWidget;
-    this.PencilWidget = undefined;
-    var layer = this.Highlighted.Layer;
-    widget.SetStateToInactive(layer);
-    this.UpdateToolVisibility();
-  };
-
-  // This gives the user the ability to shwitch drawing to a differernt widget.
+  // This gives the user the ability to switch drawing to a differernt widget.
   GirderAnnotationPanel.prototype.WidgetSelected = function (annotObj, widget) {
-    if (widget === this.PencilWidget) {
+    if (!widget || widget === this.ToolRadioButtonWidget) {
       return;
     }
-    if (this.PencilWidget && widget.Type === 'pencil') {
+    if (widget.Type === 'pencil') {
       // Activates the pencil with the new selected widget.
-      this.PencilButtonOn(annotObj, widget);
+      this.ToolRadioButtonCallback(annotObj, widget);
     }
   };
 
@@ -1407,20 +1262,23 @@
 
   // An annotation has to be selected for editing before this is called.
   // It starts a rectSelectWidget for the user.
-  GirderAnnotationPanel.prototype.SelectStrokes = function () {
+  GirderAnnotationPanel.prototype.RectSelectOn = function () {
     var self = this;
     var annotObj = this.Highlighted;
     // Anything being edited has to be loaded too.
     var layer = annotObj.Layer;
     var selectWidget = new SAM.RectSelectWidget();
-    selectWidget.SetFinishCallback(function (w) { self.FinishSelectStrokes(annotObj, w); });
+    selectWidget.SetFinishCallback(function (w) { self.ToolRadioButtonCallback(self.CursorButton); });
     layer.AddWidget(selectWidget);
     // Start receiving events.
     // Normally this happens as a call back when state changes to drawing.
     layer.ActivateWidget(selectWidget);
     selectWidget.SetStateToDrawing(layer);
+    this.ToolRadioButtonWidget = selectWidget;
   };
-  GirderAnnotationPanel.prototype.FinishSelectStrokes = function (annotObj, selectWidget) {
+  GirderAnnotationPanel.prototype.RectSelectOff = function () {
+    var annotObj = this.Highlighted;
+    var selectWidget = this.ToolRadioButtonWidget;
     var selectCount = 0;
     var layer = annotObj.Layer;
     for (var idx = 0; idx < layer.GetNumberOfWidgets(); ++idx) {
@@ -1436,7 +1294,149 @@
     layer.EventuallyDraw();
 
     this.UpdateToolVisibility();
+    this.ToolRadioButtonWidget = undefined;
   };
+
+  // TextButton is really a toggle (part of a radio group).
+  // Text buttonOn <=> dialog showing.
+  // Selecting a text automatically turns text button on and shows dialog.
+  // I do not know if any call actually passes a wiodget.
+  // Widget is an optional arguement. May not ever be called with a widget.
+  GirderAnnotationPanel.prototype.TextButtonOn = function (annotObj, widget) {
+    // TODO: Try to generalize all this stuff and put in 'NewTool'
+    // If the text is already active,  just return.
+    if (widget && widget === this.TextWidget) {
+      return;
+    }
+
+    // The text button is already editing another widget. Turn it off.
+    if (this.TextWidget) {
+      this.TextButtonOff();
+    }
+
+    // Make the pencil button reflect its toggled on/off state.
+    var button = this.TextButton;
+    button.addClass('sa-active');
+
+    // The layer has to be in editing mode.
+    this.EditOn(annotObj);
+
+    // Get a text widget.
+    // Look for a selected widget to reuse.
+    var layer = annotObj.Layer;
+    if (!widget) {
+      widget = layer.GetASelectedWidget('text');
+    }
+    if (!widget) {
+      // A selected textWidget was not found. Make a new text widget.
+      widget = new SAM.TextWidget(layer);
+      layer.AddWidget(widget);
+      widget.SetCreationCamera(layer.GetCamera());
+      widget.SetStateToDialog(layer);
+    }
+    this.TextWidget = widget;
+
+    // Activate the widget to start drawing.
+    widget.SetStateToDrawing(layer);
+
+    // This will turn off the pencil button when the widget deactivates itself.
+    var self = this;
+    widget.SetStateChangeCallback(function () {
+      if (!widget.GetActive()) {
+        self.TextButtonOff();
+      }
+    });
+
+    // Show the open closed toggle.
+    this.UpdateToolVisibility();
+    this.ToolRadioButtonWidget = widget;
+  };
+
+  GirderAnnotationPanel.prototype.TextButtonOff = function () {
+    if (!this.TextWidget) {
+      return;
+    }
+    var widget = this.ToolRadioButtonWidget;
+    var layer = this.Highlighted.Layer;
+    widget.SetStateToInactive(layer);
+    this.UpdateToolVisibility();
+    this.ToolRadioButtonWidget = undefined;
+  };
+
+
+  // Widget is an optional arguement.
+  GirderAnnotationPanel.prototype.PencilButtonOn = function (annotObj, widget) {
+    // Pencil specific stuff.
+    // TODO: Try to generalize all this stuff and put in 'NewTool'
+    // If the pencil is already drawing in the selected widget.
+    if (widget && widget === this.PencilWidget) {
+      return;
+    }
+
+    // The pencil is already editing another layer. Turn it off.
+    if (this.PencilWidget) {
+      this.PencilButtonOff();
+    }
+
+    // Make the pencil button reflect its toggled on/off state.
+    var button = this.PencilButton;
+    button.addClass('sa-active');
+
+    // The layer has to be in editing mode.
+    this.EditOn(annotObj);
+
+    // Get a pencil widget.
+    // Look for a selected widget to reuse.
+    var layer = annotObj.Layer;
+    if (!widget) {
+      widget = layer.GetASelectedWidget('pencil');
+    }
+    if (!widget) {
+      // A selected pencilWidget was not found. Make a new pencil widget.
+      widget = new SAM.PencilWidget(layer);
+      // Allows drawing to transfer to a new widget.
+      widget.SetSelectedCallback(function (w) { self.WidgetSelected(annotObj, w); });
+      layer.AddWidget(widget);
+      widget.SetCreationCamera(layer.GetCamera());
+    }
+    this.PencilWidget = widget;
+
+    // Activate the widget to start drawing.
+    widget.SetStateToDrawing(layer);
+
+    // This will turn off the pencil button when the widget deactivates itself.
+    var self = this;
+    widget.SetStateChangeCallback(function () {
+      if (!widget.GetActive()) {
+        self.PencilButtonOff();
+      }
+    });
+
+    // Will it use open or closed strokes?
+    if (this.PencilOpenClosedState === OPEN) {
+      widget.SetModeToOpen(layer);
+    } else {
+      widget.SetModeToClosed(layer);
+    }
+
+    // Show the open closed toggle.
+    this.UpdateToolVisibility();
+    this.ToolRadioButtonWidget = widget;
+  };
+
+  GirderAnnotationPanel.prototype.PencilButtonOff = function () {
+    if (!this.PencilWidget) {
+      return;
+    }
+    var widget = this.ToolRadioButtonWidget;
+    this.PencilWidget = undefined;
+    var layer = this.Highlighted.Layer;
+    widget.SetStateToInactive(layer);
+    this.UpdateToolVisibility();
+    this.ToolRadioButtonWidget = undefined;
+  };
+
+
 
   SAM.GirderAnnotationPanel = GirderAnnotationPanel;
 })();

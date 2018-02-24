@@ -830,8 +830,17 @@
 
   // Some widgets need access to the viewer.
   AnnotationLayer.prototype.GetViewer = function () {
-    return this.Viewer || SA.VIEWER1;
+    return this.Viewer;
   };
+
+  // I hate to do this, but .....
+  // The viewer bindings keeps any children divs from editing text.
+  // A second Solution is to make the text dialog a sibling of the viewer.
+  // Then full screen would have to be on their parent.
+  // TODO: Get rid of this reference.
+  AnnotationLayer.prototype.SetViewer = function (viewer) {
+    this.Viewer = viewer;
+  }
 
   // Load an array of anntoations into this layer.
   // It does not clear previous annotations. Call reset to do that.

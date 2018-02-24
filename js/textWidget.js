@@ -654,6 +654,9 @@
 
   // Can we bind the dialog apply callback to an objects method?
   TextWidget.prototype.ShowPropertiesDialog = function (layer) {
+    // View bindings keep dialog text input from working.
+    this.Viewer.InteractionOff();
+
     var self = this;
     this.Dialog.SetApplyCallback(layer, function () { self.DialogApplyCallback(layer); });
     this.Dialog.SetCloseCallback(layer, function () { self.DialogCloseCallback(layer); });
@@ -667,6 +670,8 @@
   };
 
   TextWidget.prototype.DialogCloseCallback = function (layer) {
+    // View bindings keep dialog text input from working.
+    this.Viewer.InteractionOn();
     if (this.Uninitialized) {
       // This will triger the layer to get rid of the text widget.
       this.Text.SetString('');
@@ -676,6 +681,8 @@
   };
 
   TextWidget.prototype.DialogApplyCallback = function (layer) {
+    // View bindings keep dialog text input from working.
+    this.Viewer.InteractionOn();
     this.SetStateToInactive(layer);
     this.ApplyLineBreaks();
 

@@ -2669,6 +2669,9 @@
   Viewer.prototype.NewAnnotationLayer = function () {
     // Create an annotation layer by default.
     var annotationLayer = new SAM.AnnotationLayer(this.Div);
+    // Only for the text widget (dialog).
+    // It needs to turn off events to make the text input work.
+    annotationLayer.SetViewer(this);
     // Lets just shallow copy the camera.
     annotationLayer.SetCamera(this.GetCamera());
 
