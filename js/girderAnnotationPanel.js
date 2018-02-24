@@ -1,3 +1,7 @@
+// Text arrow state not being saved.
+
+// Text dialog not on top when full screen
+
 // Text background flag does not toggle.
 
 // Test iPad
@@ -699,6 +703,7 @@
           obj.offset = element.points[1].slice(0);
           obj.offset[0] -= obj.position[0];
           obj.offset[1] -= obj.position[1];
+          obj.visibility = elements.points[0][2];
           annotObj.Layer.LoadWidget(obj);
         }
         if (element.type === 'rectanglegrid') {
@@ -1294,8 +1299,11 @@
         points = [widget.position, widget.offset];
         points[1][0] += widget.position[0];
         points[1][1] += widget.position[1];
-        points[0][2] = 0;
-        points[1][2] = 0;
+        // Have to add a z coordinate for the scheme
+        // Hacky way to save visibility state.
+        points[0][2] = this.Widget.visibility;
+        points[1][2] = this.Widget.visibility;
+          
         element = {
           'type': 'arrow',
           'lineWidth': 10,

@@ -11,7 +11,7 @@
                   'width': '100%',
                   'background-color': '#AAA',
                   'opacity': '0.4',
-                  'z-index': '1010'})
+                  'z-index': '10010'})
                 .saFullHeight()
                 .hide();
     }
