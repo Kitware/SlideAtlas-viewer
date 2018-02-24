@@ -358,6 +358,7 @@
     shape.Points.push([pt[0], pt[1]]); // avoid same reference.
   };
 
+  // Returns false (like all handlers) when a selection is found.
   PencilWidget.prototype.HandleSingleSelect = function (layer) {
     // Check to see if a stroke was clicked.
     var x = layer.MouseX;

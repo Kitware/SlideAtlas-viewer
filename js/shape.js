@@ -324,6 +324,10 @@
 
     // Rotate so the edge lies on the x axis.
     var length = Math.sqrt(vx * vx + vy * vy); // Avoid atan2 ... with clever use of complex numbers.
+    if (length === 0) {
+      return undefined;
+    }
+
     // Get the edge normal direction.
     vx = vx / length;
     vy = -vy / length;
