@@ -19,15 +19,16 @@
   // Pencil up and pencil down.
   var DRAWING_UP = 2;
   var DRAWING_DOWN = 3;
-
+  
   var OPEN = 0;
   var CLOSED = 1;
 
-  function PencilWidget () {
-    this.Mode = OPEN;
+  function PencilWidget (layer) {
+    this.Layer = layer;
+    
 
     this.State = INACTIVE;
-
+      
     // This method gets called if anything is added, deleted or moved.
     this.ModifiedCallback = undefined;
     // This method gets called if the active state of this widget turns on or off.
@@ -43,24 +44,34 @@
     var self = this;
 
     this.LineWidth = 0;
-    // No way to set the defaults at the moment.
-    /*
-    if (localStorage.PencilWidgetDefaults) {
-      var defaults = JSON.parse(localStorage.PencilWidgetDefaults);
-      if (defaults.Color) {
-        this.Dialog.ColorInput.val(SAM.ConvertColorToHex(defaults.Color));
-      }
-      if (defaults.LineWidth !== undefined) {
-        this.LineWidth = defaults.LineWidth;
-        this.Dialog.LineWidthInput.val(this.LineWidth);
-      }
-    }
-    */
+    this.Mode = OPEN;
+    this.Color = '#00c';
+    this.LoadDefaults();
+    
     this.Shapes = new SAM.ShapeGroup();
   }
 
-  PencilWidget.prototype.InitializeDialog = function (layer) {
-    this.Dialog = new SAM.Dialog(layer.GetParent());
+  PencilWidget.prototype.LoadDefaults = function () {
+    if (localStorage.PencilWidgetDefaults) {
+      var defaults = JSON.parse(localStorage.PencilWidgetDefaults);
+      if (defaults.Color) {
+        this.Color = defaults.Color;
+      }
+      if (defaults.LineWidth !== undefined) {
+        this.LineWidth = defaults.LineWidth;
+      }
+      if (defaults.Mode !== undefined) {
+        if (defaults.Mode === "open") {
+          this.Mode = OPEN;
+        } else {
+          this.Mode = CLOSED;
+        }
+      }
+    }
+  };
+  
+  PencilWidget.prototype.InitializeDialog = function () {
+    this.Dialog = new SAM.Dialog();
     var self = this;
     this.Dialog.SetApplyCallback(function () { self.DialogApplyCallback(); });
     // Customize dialog for a pencil.
@@ -68,37 +79,38 @@
     this.Dialog.Body.css({'margin': '1em 2em'});
     // Color
     this.Dialog.ColorDiv =
-            $('<div>')
-            .appendTo(this.Dialog.Body)
-            .css({'display': 'table-row'});
+      $('<div>')
+      .appendTo(this.Dialog.Body)
+      .css({'display': 'table-row'});
     this.Dialog.ColorLabel =
-            $('<div>')
-            .appendTo(this.Dialog.ColorDiv)
-            .text('Color:')
-            .css({'display': 'table-cell',
-              'text-align': 'left'});
+      $('<div>')
+      .appendTo(this.Dialog.ColorDiv)
+      .text('Color:')
+      .css({'display': 'table-cell',
+            'text-align': 'left'});
     this.Dialog.ColorInput =
-            $('<input type="color">')
-            .appendTo(this.Dialog.ColorDiv)
-            .val('#30ff00')
-            .css({'display': 'table-cell'});
+      $('<input type="color">')
+      .appendTo(this.Dialog.ColorDiv)
+      .val(this.Color)
+      .css({'display': 'table-cell'});
 
     // Line Width
     this.Dialog.LineWidthDiv =
-            $('<div>')
-            .appendTo(this.Dialog.Body)
-            .css({'display': 'table-row'});
+      $('<div>')
+      .appendTo(this.Dialog.Body)
+      .css({'display': 'table-row'});
     this.Dialog.LineWidthLabel =
-            $('<div>')
-            .appendTo(this.Dialog.LineWidthDiv)
-            .text('Line Width:')
-            .css({'display': 'table-cell',
-              'text-align': 'left'});
+      $('<div>')
+      .appendTo(this.Dialog.LineWidthDiv)
+      .text('Line Width:')
+      .css({'display': 'table-cell',
+            'text-align': 'left'});
     this.Dialog.LineWidthInput =
-            $('<input type="number">')
-            .appendTo(this.Dialog.LineWidthDiv)
-            .css({'display': 'table-cell'})
-            .keypress(function (event) { return event.keyCode !== 13; });
+      $('<input type="number">')
+      .appendTo(this.Dialog.LineWidthDiv)
+      .val(this.LineWidth)
+      .css({'display': 'table-cell'})
+      .keypress(function (event) { return event.keyCode !== 13; });
   };
   
   PencilWidget.prototype.SetModifiedCallback = function (callback) {
@@ -135,7 +147,7 @@
   };
 
   // TODO: CLean this up.
-  PencilWidget.prototype.SetModeToOpen = function (layer) {
+  PencilWidget.prototype.SetModeToOpen = function () {
     // For new strokes
     this.Mode = OPEN;
     // For old selected strokes.
@@ -146,11 +158,12 @@
           (this.ModifiedCallback)(this);
         }
         stroke.Closed = false;
-        stroke.UpdateBuffers(layer.AnnotationView);
+        stroke.Modified()
       }
     }
+    this.SaveDefaults();    
   };
-  PencilWidget.prototype.SetModeToClosed = function (layer) {
+  PencilWidget.prototype.SetModeToClosed = function () {
     // Used for future strokes.
     this.Mode = CLOSED;
     // For old selected strokes.
@@ -161,10 +174,14 @@
           (this.ModifiedCallback)(this);
         }
         stroke.Closed = true;
-        stroke.UpdateBuffers(layer.AnnotationView);
+        stroke.Modified();
       }
     }
+    this.SaveDefaults();    
   };
+  PencilWidget.prototype.IsModeClosed = function () {
+    return this.Mode === CLOSED;
+  }
 
   // Not used yet, but might be useful.
   PencilWidget.prototype.SetCreationCamera = function (cam) {
@@ -178,21 +195,26 @@
     return this.State !== INACTIVE;
   };
 
-  PencilWidget.prototype.SetStateToInactive = function (layer) {
+  PencilWidget.prototype.SetStateToInactive = function () {
     if (this.State === INACTIVE) {
       return;
     }
 
-    layer.GetParent().css({'cursor': ''});
+    this.Layer.GetParent().css({'cursor': ''});
     this.State = INACTIVE;
-    this.Shapes.SetSelected(false);
+    //this.Shapes.SetSelected(false);
     this.StateChanged();
 
     // TODO:  Make the caller do this.
-    layer.EventuallyDraw();
+    this.Layer.EventuallyDraw();
   };
 
-  PencilWidget.prototype.SetStateToDrawing = function (layer) {
+  PencilWidget.prototype.IsStateDrawingDown = function () {
+    return this.State === DRAWING_DOWN;
+  }
+
+  
+  PencilWidget.prototype.SetStateToDrawing = function () {
     if (this.State === DRAWING_UP || this.State === DRAWING_DOWN) {
       return;
     }
@@ -202,14 +224,14 @@
 
     if (!this.StylusOnly) {
       // Do not use the icon for the apple pencil
-      layer.GetParent().css(
+      this.Layer.GetParent().css(
         {'cursor': 'url(' + SAM.ImagePathUrl + 'Pencil-icon.png) 0 24,crosshair'});
     }
-    layer.EventuallyDraw();
+    this.Layer.EventuallyDraw();
   };
 
-  PencilWidget.prototype.Draw = function (layer) {
-    this.Shapes.Draw(layer.GetView());
+  PencilWidget.prototype.Draw = function () {
+    this.Shapes.Draw(this.Layer.GetView());
   };
 
   PencilWidget.prototype.Serialize = function () {
@@ -219,7 +241,7 @@
     // Hacky way to include closed flags.
     obj.closedFlags = [];
     for (var i = 0; i < this.Shapes.GetNumberOfShapes(); ++i) {
-            // NOTE: Assumes shape is a Polyline.
+      // NOTE: Assumes shape is a Polyline.
       var shape = this.Shapes.GetShape(i);
       var points = [];
       for (var j = 0; j < shape.Points.length; ++j) {
@@ -242,18 +264,22 @@
       this.LineWidth = parseFloat(obj.linewidth);
     }
 
-    //var outlineColor = SAM.ConvertColor(this.Dialog.ColorInput.val());
-    var outlineColor = [0, 0, 0.8];
+    // Shapes use [1,1,1] instead of hex color.
+    
+    var outlineColor = this.Color;
     if (obj.outlinecolor) {
-      outlineColor[0] = parseFloat(obj.outlinecolor[0]);
-      outlineColor[1] = parseFloat(obj.outlinecolor[1]);
-      outlineColor[2] = parseFloat(obj.outlinecolor[2]);
+      outlineColor = SAM.ConvertColorToHex(obj.outlinecolor);
     }
     for (var n = 0; n < obj.shapes.length; n++) {
       var points = obj.shapes[n];
       var shape = new SAM.Polyline();
       if (obj.closedFlags) {
         shape.Closed = obj.closedFlags[n];
+        if (shape.Closed) {
+          this.Mode = CLOSED;
+        } else {
+          this.Mode = OPEN;
+        }
       }
       shape.SetOutlineColor(outlineColor);
       shape.FixedSize = false;
@@ -273,31 +299,19 @@
     }
   };
 
-  // The delete key was pressed.
-  PencilWidget.prototype.HandleDelete = function (layer) {
-    // Delete during drawing.
-    // TODO: THink about merging this with just delteing the selected.
-    // We would have to propagate the selected stroke to the last in the list.
-    if (this.State === DRAWING_UP && this.Shapes.GetNumberOfShapes() > 1) {
-      // Undo a stroke
-      this.Shapes.PopShape();
-      layer.EventuallyDraw();
-      if (this.ModifiedCallback) {
-        (this.ModifiedCallback)(this);
-      }
-      return false;
-    }
+  // Returns true if something was deleted.
+  PencilWidget.prototype.DeleteSelected = function () {
     // Delete all the selected strokes.
     if (this.Shapes.DeleteSelected()) {
       if (this.ModifiedCallback) {
         (this.ModifiedCallback)(this);
       }
-      layer.EventuallyDraw();
       return true;
     }
+    return false;
   };
 
-  PencilWidget.prototype.HandleKeyDown = function (layer) {
+  PencilWidget.prototype.HandleKeyDown = function () {
     if (this.State === INACTIVE) {
       return true;
     }
@@ -308,7 +322,7 @@
     if (this.State === DRAWING_UP || this.State === DRAWING_DOWN) {
       // escape key (or space or enter) to turn off drawing
       if (event.keyCode === 27 || event.keyCode === 32 || event.keyCode === 13) {
-        this.SetStateToInactive(layer);
+        this.SetStateToInactive();
         return false;
       }
     }
@@ -316,20 +330,20 @@
   };
 
   /*
-  PencilWidget.prototype.HandleDoubleClick = function (layer) {
+  PencilWidget.prototype.HandleDoubleClick = function () {
     if (this.State === DRAWING_UP || this.State === DRAWING_DOWN) {
-      this.SetStateToInactive(layer);
+      this.SetStateToInactive();
       return false;
     }
     if (this.State === SELECTED) {
-      this.SetStateToDrawing(layer);
+      this.SetStateToDrawing();
       return false;
     }
     return true;
   };
   */
 
-  PencilWidget.prototype.SetStateToDrawingDown = function (x, y, layer) {
+  PencilWidget.prototype.SetStateToDrawingDown = function (x, y) {
     if (this.State === DRAWING_DOWN) {
       return;
     }
@@ -352,48 +366,52 @@
     var shape = new SAM.Polyline();
     // Select the current stroke.
     shape.SetSelected(true);
-    // shape.OutlineColor = [0.9, 1.0, 0.0];
     // Leave the new stroke open unti we stop.
-    shape.OutlineColor = [0.0, 0.0, 0.8];
     if (!this.Dialog) {
       this.InitializeDialog();
     }
-    shape.SetOutlineColor(this.Dialog.ColorInput.val());
+    shape.SetOutlineColor(this.Color);
     shape.FixedSize = false;
-    shape.LineWidth = 0;
-    shape.LineWidth = this.Shapes.GetLineWidth();
+    shape.LineWidth = this.LineWidth;
+    // Leave stroke open until it is finished.
+    shape.Closed = false;
     this.Shapes.AddShape(shape);
 
-    var pt = layer.GetCamera().ConvertPointViewerToWorld(x, y);
+    var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
     shape.Points.push([pt[0], pt[1]]); // avoid same reference.
   };
 
-  // Returns false (like all handlers) when a selection is found.
-  PencilWidget.prototype.HandleSingleSelect = function (layer) {
+  // Returns the selected stroke or undefined.
+  PencilWidget.prototype.SingleSelect = function () {
     // Check to see if a stroke was clicked.
-    var x = layer.MouseX;
-    var y = layer.MouseY;
-    var pt = layer.GetCamera().ConvertPointViewerToWorld(x, y);
+    var x = this.Layer.MouseX;
+    var y = this.Layer.MouseY;
+    var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
 
     var width = this.Shapes.GetLineWidth();
     // Tolerance: 5 screen pixels.
-    var minWidth = 10.0 / layer.GetPixelsPerUnit();
+    var minWidth = 20.0 / this.Layer.GetPixelsPerUnit();
     if (width < minWidth) { width = minWidth; }
 
-    if (this.Shapes.SingleSelect(pt, width)) {
+    var selectedShape = this.Shapes.SingleSelect(pt, width);
+    if (selectedShape) {
+      // Change the widget mode to match the selected stroke.
+      if (selectedShape.Closed) {
+        this.Mode = CLOSED;
+      } else {
+        this.Mode = OPEN;
+      }
+      // I do not this this is used anymore.
       if (this.SelectedCallback) {
         (this.SelectedCallback)(this);
       }
-      return false;
+      return selectedShape;
     }
 
-    // TODO:  What should we do if the widget is drawing?
-    // We want to new widget to start drawing.
-
-    return true;
+    return;
   };
 
-  PencilWidget.prototype.HandleMouseDown = function (layer) {
+  PencilWidget.prototype.HandleMouseDown = function () {
     if (this.State === INACTIVE) {
       return true;
     }
@@ -402,11 +420,11 @@
       return true;
     }
 
-    var x = layer.MouseX;
-    var y = layer.MouseY;
+    var x = this.Layer.MouseX;
+    var y = this.Layer.MouseY;
 
     // Anticipate dragging (might instead be a click or double click)
-    var cam = layer.GetCamera();
+    var cam = this.Layer.GetCamera();
     this.LastMouse = cam.ConvertPointViewerToWorld(x, y);
 
     // if (event.which === 3) {
@@ -418,7 +436,7 @@
     //    // Undo a stroke
     //    if (this.Shapes.GetNumberOfShapes() > 1) {
     //      this.Shapes.PopShape();
-    //      layer.EventuallyDraw();
+    //      this.Layer.EventuallyDraw();
     //   }
     //  }
     //  return false;
@@ -427,38 +445,40 @@
     return false;
   };
 
-  PencilWidget.prototype.HandleTouchStart = function (layer) {
+  PencilWidget.prototype.HandleTouchStart = function () {
     if (this.State === INACTIVE) {
       return true;
     }
-    if (this.StylusOnly && !layer.Event.pencil) {
+    if (this.StylusOnly && !this.Layer.Event.pencil) {
       // This allows viewer interaction with touches on the ipad pro..
       return true;
     }
 
-    if (layer.Touches.length !== 1) {
+    if (this.Layer.Touches.length !== 1) {
       // We pass one multiple touches
       return true;
     }
 
     if (this.State === DRAWING_UP) {
-      var x = layer.Touches[0][0];
-      var y = layer.Touches[0][1];
-      this.SetStateToDrawingDown(x, y, layer);
+      var x = this.Layer.Touches[0][0];
+      var y = this.Layer.Touches[0][1];
+      this.SetStateToDrawingDown(x, y);
     }
     return false;
   };
 
-  PencilWidget.prototype.HandleStop = function (layer) {
+  PencilWidget.prototype.HandleStop = function () {
     // A stroke has just been finished.
     var last = this.Shapes.GetNumberOfShapes() - 1;
 
     if (this.State === DRAWING_DOWN && last >= 0) {
-      var spacing = layer.GetCamera().GetSpacing();
+      var spacing = this.Layer.GetCamera().GetSpacing();
       // NOTE: This assume that the shapes are polylines.
-      this.Shapes.GetShape(last).Decimate(spacing * 0.5);
-      if (this.Shapes.Shapes[last].Points.length <= 1) {
-        this.Shapes.Shapes[last].Points.pop();
+      var stroke = this.Shapes.GetShape(last);
+      stroke.Decimate(spacing * 0.5);
+      stroke.Closed = this.Mode === CLOSED;
+      if (stroke.length <= 1) {
+        stroke.Points.pop();
         return false;
       }
       if (this.ModifiedCallback) {
@@ -470,13 +490,13 @@
       // When closed,  the interation is like a lasso.  The last
       // Can be merged with the selected stroke (if they overlap).
       if (this.Mode === CLOSED) {
-        this.HandleLassoMerge(layer);
+        this.HandleLassoMerge();
       }
     }
     return false;
   };
 
-  PencilWidget.prototype.HandleMouseUp = function (layer) {
+  PencilWidget.prototype.HandleMouseUp = function () {
     if (this.State === INACTIVE) {
       return true;
     }
@@ -485,52 +505,50 @@
       return true;
     }
     // Middle mouse deactivates the widget.
-    var event = layer.Event;
+    var event = this.Layer.Event;
     if (event.which === 2) {
       // Middle mouse was pressed.
-      this.SetStateToInactive(layer);
+      this.SetStateToInactive();
       return false;
     }
 
-    return this.HandleStop(layer);
+    return this.HandleStop();
   };
 
-  PencilWidget.prototype.HandleTouchEnd = function (layer) {
-    if (this.StylusOnly && !layer.Event.pencil) {
+  PencilWidget.prototype.HandleTouchEnd = function () {
+    if (this.StylusOnly && !this.Layer.Event.pencil) {
       // The apple pencil needs to ignore viewer touch events.
       return true;
     }
     if (this.State !== DRAWING_DOWN) {
       return true;
     }
-    return this.HandleStop(layer);
+    return this.HandleStop();
   };
 
-  PencilWidget.prototype.HandleMove = function (x, y, layer) {
+  PencilWidget.prototype.HandleMove = function (x, y) {
     if (this.State === DRAWING_UP) {
-      this.SetStateToDrawingDown(x, y, layer);
+      this.SetStateToDrawingDown(x, y);
     }
-
-    console.log('Handle move ' + x + ', ' + y);
 
     if (this.State === DRAWING_DOWN) {
       var last = this.Shapes.GetNumberOfShapes() - 1;
       var shape = this.Shapes.GetShape(last);
-      var pt = layer.GetCamera().ConvertPointViewerToWorld(x, y);
+      var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
       shape.Points.push([pt[0], pt[1]]); // avoid same reference.
-      shape.UpdateBuffers(layer.AnnotationView);
-      layer.EventuallyDraw();
+      shape.Modified();
+      this.Layer.EventuallyDraw();
       return false;
     }
 
     return true;
   };
 
-  PencilWidget.prototype.UpdateBuffers = function (layer) {
-    this.Shapes.UpdateBuffers(layer.AnnotationView);
+  PencilWidget.prototype.Modified = function () {
+    this.Shapes.Modified();
   };
 
-  PencilWidget.prototype.HandleMouseMove = function (layer) {
+  PencilWidget.prototype.HandleMouseMove = function () {
     if (this.State === INACTIVE) {
       return true;
     }
@@ -538,12 +556,12 @@
       // IPads do not have mice, so this is probably unecessary.
       return true;
     }
-    var event = layer.Event;
-    var x = layer.MouseX;
-    var y = layer.MouseY;
+    var event = this.Layer.Event;
+    var x = this.Layer.MouseX;
+    var y = this.Layer.MouseY;
 
     if (event.which === 1) {
-      if (this.HandleMove(x, y, layer) === false) {
+      if (this.HandleMove(x, y) === false) {
         return false;
       }
     }
@@ -551,22 +569,22 @@
     return false;
   };
 
-  PencilWidget.prototype.HandleTouchMove = function (layer) {
+  PencilWidget.prototype.HandleTouchMove = function () {
     if (this.State === INACTIVE) {
       return true;
     }
-    if (this.StylusOnly && !layer.Event.pencil) {
+    if (this.StylusOnly && !this.Layer.Event.pencil) {
       // The apple pencil needs to ignore viewer touch events.
       return true;
     }
-    if (layer.Touches.length !== 1) {
+    if (this.Layer.Touches.length !== 1) {
       return true;
     }
 
-    var x = layer.Touches[0][0];
-    var y = layer.Touches[0][1];
+    var x = this.Layer.Touches[0][0];
+    var y = this.Layer.Touches[0][1];
 
-    this.HandleMove(x, y, layer);
+    this.HandleMove(x, y);
     return false;
   };
 
@@ -606,38 +624,47 @@
   // Can we bind the dialog apply callback to an objects method?
   PencilWidget.prototype.ShowPropertiesDialog = function () {
     if (!this.Dialog) {
-      this.InitializeDialog(layer);
+      this.InitializeDialog();
     }
-    this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Shapes.GetOutlineColor()));
-    this.Dialog.LineWidthInput.val((this.Shapes.GetLineWidth()).toFixed(2));
+    this.Dialog.ColorInput.val(this.Color);
+    this.Dialog.LineWidthInput.val(this.LineWidth.toFixed(2));
 
     this.Dialog.Show(true);
   };
 
-  PencilWidget.prototype.DialogApplyCallback = function (layer) {
-    /*
-    var hexcolor = this.Dialog.ColorInput.val();
+  PencilWidget.prototype.DialogApplyCallback = function () {
+    this.color = this.Dialog.ColorInput.val();
     this.LineWidth = parseFloat(this.Dialog.LineWidthInput.val());
-    this.Shapes.SetOutlineColor(hexcolor);
+    this.Shapes.SetOutlineColor(this.color);
     this.Shapes.SetLineWidth(parseFloat(this.Dialog.LineWidthInput.val()));
-    this.Shapes.UpdateBuffers(layer.AnnotationView);
-    this.SetSelected(false, layer);
+    this.Shapes.UpdateBuffers(this.Layer.AnnotationView);
+    this.SetSelected(false);
     if (window.SA) { SA.RecordState(); }
-    layer.EventuallyDraw();
-
-    localStorage.PencilWidgetDefaults = JSON.stringify({Color: hexcolor,
-      LineWidth: this.LineWidth});
+    this.Layer.EventuallyDraw();
     if (this.ModifiedCallback) {
       (this.ModifiedCallback)(this);
     }
-    */
+    this.SaveDefaults();
+  };
+
+  PencilWidget.prototype.SaveDefaults = function () {
+    var hexcolor = this.Color;
+    var mode = "open";
+    if (this.Mode === CLOSED) {
+      mode = 'closed';
+    }
+    localStorage.PencilWidgetDefaults = JSON.stringify(
+      {Color: hexcolor,
+       LineWidth: this.LineWidth,
+       Mode: mode 
+      });
   };
 
   // ====================================================================
   // Lasso merge logic.
 
   // See if we can merge the last stroke with the selected stroke.
-  PencilWidget.prototype.HandleLassoMerge = function (layer) {
+  PencilWidget.prototype.HandleLassoMerge = function () {
     var lastIdx = this.Shapes.GetNumberOfShapes() - 1;
     // This is the one just drawn.
     var stroke2 = this.Shapes.GetShape(lastIdx);
@@ -654,8 +681,8 @@
       // We could not find a second stroke.
       // Just close the last stroke and return.
       stroke2.Closed = true;
-      stroke2.UpdateBuffers(layer.AnnotationView);
-      layer.EventuallyDraw();
+      stroke2.UpdateBuffers(this.Layer.AnnotationView);
+      this.Layer.EventuallyDraw();
       return;
     }
 
@@ -664,16 +691,16 @@
       // The last stroke has been merged.  Remove it.
       this.Shapes.DeleteChild(lastIdx);
       // Leave the other stroke selected.
-      stroke1.UpdateBuffers(layer.AnnotationView);
+      stroke1.UpdateBuffers(this.Layer.AnnotationView);
     } else {
       // no intersection.  Keep them both, but leave the new one selected.
       stroke1.SetSelected(false);
       if (this.Mode === CLOSED) {
         stroke2.Closed = true;
       }
-      stroke2.UpdateBuffers(layer.AnnotationView);
+      stroke2.UpdateBuffers(this.Layer.AnnotationView);
     }
-    layer.EventuallyDraw();
+    this.Layer.EventuallyDraw();
   };
 
   // Loop is the old, stroke is the new.
@@ -688,6 +715,8 @@
     // It is easier to temporarily add the extra point and them remove it, than change the algorithm.
     this.Loop.Points.push(this.Loop.Points[0]);
 
+    // TODO: Fix this.  I got in an infinite loop.
+    // Inserting points it the array we are iterating over.
     // Find the first and last intersection points between stroke and loop.
     var intersection0;
     var intersection1;

@@ -22,32 +22,32 @@
   window.SAM.MOBILE_DEVICE = false;
 
   // Widget factory.  Return a widget from its serialized metadata.
-  SAM.ConstructWidget = function (obj) {
+  SAM.ConstructWidget = function (obj, layer) {
     var widget;
     switch (obj.type) {
       case 'lasso':
-        widget = new SAM.LassoWidget();
+        widget = new SAM.LassoWidget(layer);
         break;
       case 'pencil':
-        widget = new SAM.PencilWidget();
+        widget = new SAM.PencilWidget(layer);
         break;
       case 'text':
-        widget = new SAM.TextWidget();
+        widget = new SAM.TextWidget(layer);
         break;
       case 'circle':
-        widget = new SAM.CircleWidget();
+        widget = new SAM.CircleWidget(layer);
         break;
       case 'polyline':
-        widget = new SAM.PolylineWidget();
+        widget = new SAM.PolylineWidget(layer);
         break;
       case 'rect':
-        widget = new SAM.RectWidget();
+        widget = new SAM.RectWidget(layer);
         break;
       case 'rect_set':
-        widget = new SAM.RectSetWidget();
+        widget = new SAM.RectSetWidget(layer);
         break;
       case 'grid':
-        widget = new SAM.GridWidget();
+        widget = new SAM.GridWidget(layer);
         break;
     }
     widget.Load(obj);
@@ -638,7 +638,7 @@
     // This will be called when a widget is selected by the user.
     // So the panel can put the layer into edit mode.
     this.ActivatedCallback = undefined;
-    this.SelectChangeCallback = undefined;
+    this.SelectionChangeCallback = undefined;
     this.ModifiedCallback = undefined;
 
     // Equivalent to editing.  Only one should be editing at a time.
@@ -708,11 +708,17 @@
     this.ModifiedCallback = callback;
   };
 
+  AnnotationLayer.prototype.Modified = function () {
+    if (this.ModifiedCallback) {
+      (this.ModifiedCallback)(this);
+    }
+  };
+
   // TODO: Not really select: Remove this (or change its name)
   // This will be called when a widget is selected by the user.
   // I am not sure about the usefulness of this method.
-  AnnotationLayer.prototype.SetSelectChangeCallback = function (callback) {
-    this.SelectChangeCallback = callback;
+  AnnotationLayer.prototype.SetSelectionChangeCallback = function (callback) {
+    this.SelectionChangeCallback = callback;
   };
 
   // Applies to all widgets in the layer.
@@ -724,8 +730,8 @@
         changed = true;
       }
     }
-    if (changed && this.SelectChangeCallback) {
-      (this.SelectChangeCallback)(this);
+    if (changed && this.SelectionChangeCallback) {
+      (this.SelectionChangeCallback)(this);
     }
     return changed;
   };
@@ -740,11 +746,41 @@
     return true;
   };
 
-  // Try to remove all global references to this viewer.
-  AnnotationLayer.prototype.Delete = function () {
-    this.AnnotationView.Delete();
+  AnnotationLayer.prototype.InactivateAll = function () {
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var widget = this.WidgetList[i];
+      if (widget.SetStateToInactive) {
+        widget.SetStateToInactive();
+      }
+    }
+    return true;
   };
 
+  // Returns true if something was deleted..
+  AnnotationLayer.prototype.DeleteSelected = function () {
+    var keepers = [];
+    var modified = false;
+    // Let every widget delete its selected components.
+    for (var idx = 0; idx < this.WidgetList.length; ++idx) {
+      var widget = this.WidgetList[idx];
+      // Only deletes the selected widgets / shapes.
+      if (widget.DeleteSelected) {
+        if (widget.DeleteSelected()) {
+          modified = true;
+        }
+      }
+      if (!widget.IsEmpty()) {
+        keepers.push(widget);
+      }
+    }
+    if (keepers.length < this.WidgetList.length) {
+      this.WidgetList = keepers;
+    }
+    // Some browser (safari?) was navigating when the delete key was pressed.
+    // (Even though we returned false here.
+    return modified;
+  };
+  
   AnnotationLayer.prototype.GetVisibility = function () {
     return this.Visibility;
   };
@@ -877,7 +913,7 @@
   // Load a widget from a json object (origin MongoDB).
   // Returns the widget if there was not an error.
   AnnotationLayer.prototype.LoadWidget = function (obj) {
-    var widget = SAM.ConstructWidget(obj);
+    var widget = SAM.ConstructWidget(obj, this);
     if (widget) {
       this.AddWidget(widget);
     }
@@ -946,14 +982,6 @@
     this.offsetX = this.MouseX;
     this.offsetY = this.MouseY;
 
-    // detect iPad pencil
-    event.pencil = false;
-    if (SAM.MOBILE_DEVICE === 'iPad' && event.touches && event.touches.length === 1) {
-      var touch = event.touches[0];
-      if (touch.force && !isNaN(touch.force) && touch.force !== 0 && touch.force !== 1) {
-        event.pencil = true;
-      }
-    }
     return true;
   };
 
@@ -965,54 +993,20 @@
 
     this.Event = event;
     this.InitializeTouch(event, true);
-    this.CheckForPencil(event);
 
-    // TODO: Just make the pencil widget active.
-    // This is for the iPad pro pencil, I think.
     if (event.pencil) {
-      if (this.Pencil.HandleTouchStart(this) === false) {
-        return false;
-      }
+      console.log("ipad pencil start");
+      var pencil = this.GetIPadPencilWidget();
+      pencil.SetStateToDrawing();
+      pencil.HandleTouchStart(this);
+      return false;
     }
-
+    
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
       if (widget.HandleTouchStart && !widget.HandleTouchStart(this)) {
         return false;
       }
-    }
-  };
-
-  AnnotationLayer.prototype.CheckForPencil = function (event) {
-    if (!event.pencil) {
-      return;
-    }
-
-    // Get a pencil widget if we do not already have one.
-    if (!this.Pencil) {
-      // Use the current widget if it is a pencil
-      var current = this.FindActivePencil();
-      if (current) {
-        this.Pencil = current;
-      } else {
-        // Code to make a new pencil
-        // Make a new widget (and make it active).
-        this.Pencil = new SAM.PencilWidget(this, false);
-        // I want this widget to only respond to pencil/stylus events
-        this.Pencil.StylusOnly = true;
-      }
-    }
-
-    this.Pencil.SetStateToDrawing(this);
-  };
-
-  AnnotationLayer.prototype.FindActivePencilWidget = function () {
-    for (var i = 0; i < this.WidgetList.lenght; ++i) {
-      var widget = this.WidgetList[i];
-      if (widget.Type === 'pencil' && widget.GetActive()) {
-        return widget;
-      }
-      return undefined;
     }
   };
 
@@ -1022,13 +1016,14 @@
     }
     // Put a throttle on events
     if (!this.InitializeTouch(e, false)) { return; }
-    this.CheckForPencil(e);
 
-    if (e.pencil) {
-      if (this.Pencil.HandleTouchMove(this) === false) {
-        return false;
-      }
+    if (event.pencil) {
+      console.log("ipad pencil move");
+      var pencil = this.GetIPadPencilWidget();
+      pencil.HandleTouchMove(this);
+      return false;
     }
+        
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
       if (widget.HandleTouchMove && !widget.HandleTouchMove(this)) {
@@ -1068,16 +1063,36 @@
   };
 
   AnnotationLayer.prototype.HandleTouchEnd = function (event) {
+    console.log("layer touch end");
     if (!this.GetVisibility()) {
       return true;
     }
     this.Event = event;
 
-    // End touch events have no touches so we cannot determine whether
-    // they are from a stylus (presure pencil).
-    if (this.Pencil && this.Pencil.HandleTouchEnd(this) === false) {
+    if (this.Pencil) {
+      console.log("pencil state = " + this.Pencil.State);
+    } else {
+      console.log("no pencil");
+    }
+    
+    // It seems that end events do not have a force (to indicate iPad pencil).
+    if (this.Pencil && this.Pencil.IsStateDrawingDown()) {
+      event.pencil = true;
+    }
+    
+    if (event.pencil) {
+      console.log("ipad pencil end");
+      var pencil = this.GetIPadPencilWidget();
+      pencil.HandleTouchEnd(this);
+      pencil.SetStateToInactive();
+      this.Modified();
+      // Tell the panel that this layer selection has changed.
+      if (this.SelectionChangedCallback) {
+        (this.SelectionChangedCallback)(this);
+      }
       return false;
     }
+    
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
       if (widget.HandleTouchEnd && !widget.HandleTouchEnd(this)) {
@@ -1103,11 +1118,11 @@
     this.MouseTime = new Date().getTime();
   };
 
-  // I use click to select (activate) widgets or widget components.
   // Click will only select one widget.
-  AnnotationLayer.prototype.HandleSingleSelect = function (event) {
+  // returns the widget selected or undefined.
+  AnnotationLayer.prototype.SingleSelect = function (event) {
     if (!this.GetVisibility()) {
-      return true;
+      return;
     }
     this.Event = event;
     this.SetMousePositionFromEvent(event);
@@ -1117,7 +1132,7 @@
 
     // Each widget can use the click to activate itself.
     // No cometition yet.  Just try the widgets one at a time.
-    var found = false;
+    var found;
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
       if (found) {
@@ -1126,12 +1141,13 @@
           // Assume the selection changed.
           changed = true;
         }
-      } else if (widget.HandleSingleSelect) {
+      } else if (widget.SingleSelect) {
         if (widget.IsSelected()) {
           changed = true;
         }
-        if (widget.HandleSingleSelect(this) === false) {
-          found = true;
+        found = widget.SingleSelect(this);
+        if (found) {
+          found = widget;
           // Not perfect.  I think it will mark a change even if the
           // mark was reselected.
           changed = true;
@@ -1143,12 +1159,12 @@
     }
     // This does not work when previously selected
     if (changed) {
-      if (this.SelectChangeCallback) {
-        (this.SelectChangeCallback)(this);
+      if (this.SelectionChangeCallback) {
+        (this.SelectionChangeCallback)(this);
       }
       this.EventuallyDraw();
     }
-    return !found;
+    return found;
   };
 
   AnnotationLayer.prototype.HasSelections = function () {
@@ -1163,7 +1179,7 @@
   AnnotationLayer.prototype.GetASelectedWidget = function (widgetType) {
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
-      if (widget.IsSelected()) {
+      if (widget.IsSelected && widget.IsSelected()) {
         if (widgetType === undefined || widgetType === widget.Type) {
           return this.WidgetList[i];
         }
@@ -1285,41 +1301,14 @@
     if (!this.GetVisibility()) {
       return true;
     }
-    // Handle delete as a first class event.
-    // This is the first time I am by passing the "ActiveWidget".
-    // That pattern only allows one widget to receive events.
-    // I want to select and delete a set of widgets / shapes.
-    var widget;
-    if (event.keyCode === 46) {
-      var keepers = [];
-      // Let every widget delete its selected components.
-      for (var idx = 0; idx < this.WidgetList.length; ++idx) {
-        widget = this.WidgetList[idx];
-        // Only deletes the selected widgets / shapes.
-        if (widget.HandleDelete) {
-          widget.HandleDelete(this);
-        }
-        if (!widget.IsEmpty()) {
-          keepers.push(widget);
-        }
-      }
-      if (keepers.length < this.WidgetList.length) {
-        this.WidgetList = keepers;
-      }
-
-      return false;
-    }
 
     this.Event = event;
 
     for (var i = 0; i < this.WidgetList.length; ++i) {
-      widget = this.WidgetList[i];
+      var widget = this.WidgetList[i];
       if (widget.HandleKeyDown && !widget.HandleKeyDown(this)) {
         return false;
       }
-    }
-    if (this.Pencil) {
-      return this.Pencil.HandleKeyDown(this);
     }
 
     return true;
@@ -1329,6 +1318,14 @@
     if (!this.GetVisibility()) {
       return true;
     }
+
+    if (event.keyCode === 46) { // delete key
+      // Some browser (safari?) was navigating when the delete key was pressed.
+      // (Even though we returned false here. Maybe it was triggered on the keyup.
+      event.preventDefault();
+      return false;
+    }
+
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
       if (widget.HandleKeyDown && !widget.HandleKeyDown(this)) {
@@ -1365,9 +1362,7 @@
   // Callback being used for to generally.
   AnnotationLayer.prototype.WidgetModifiedCallback = function (widget) {
     // Just forward the message on.
-    if (this.ModifiedCallback) {
-      (this.ModifiedCallback)(this);
-    }
+    this.Modified();
   };
 
   // Hmmmm.  Try to remove this.  It would be nice not to keep a pointer to an active widget.
@@ -1375,9 +1370,9 @@
     if (widget !== this.ActiveWidget) {
       this.LayerDiv.focus();
       this.ActiveWidget = widget;
-      // Tell the panel that this layer has been selected.
-      if (this.SelectedCallback) {
-        (this.SelectedCallback)(this);
+      // Tell the panel that this layer selection has changed.
+      if (this.SelectionChangedCallback) {
+        (this.SelectionChangedCallback)(this);
       }
     }
   };
@@ -1419,10 +1414,7 @@
     var idx = this.WidgetList.indexOf(widget);
     if (idx !== -1) {
       this.WidgetList.splice(idx, 1);
-    }
-    if (SAM.NotesWidget) {
-            // Hack.
-      SAM.NotesWidget.MarkAsModified();
+      this.Modified();
     }
   };
 
@@ -1523,6 +1515,39 @@
     }
   };
 
+  // Order of preference: 1: a selected widget, 2: IVar "Pencil", 3: Stylus only.
+  // 4: a new constructed pencil  Widget.
+  AnnotationLayer.prototype.GetIPadPencilWidget = function () {
+    // For efficiency.
+    if (this.Pencil && this.Pencil.IsSelected()) {
+      return this.Pencil;
+    }
+
+    // Look for a selected.
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var widget = this.WidgetList[i];
+      if (widget.StylusOnly) {
+        this.Pencil = widget;
+      }
+      if (widget.Type === 'pencil' && widget.IsSelected()) {
+        this.Pencil = widget;
+        return widget;
+      }
+    }
+
+    if (this.Pencil) {
+      return this.Pencil;
+    }
+
+    // Code to make a new pencil
+    // Make a new widget (and make it active).
+    this.Pencil = new SAM.PencilWidget(this, false);
+    // I want this widget to only respond to pencil/stylus events
+    this.Pencil.StylusOnly = true;
+    this.WidgetList.push(this.Pencil);
+    return this.Pencil;
+  };
+  
   SAM.AnnotationLayer = AnnotationLayer;
 })();
 

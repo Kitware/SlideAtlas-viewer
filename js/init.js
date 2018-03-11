@@ -120,12 +120,16 @@ window.SA = window.SA || {};
 
   // Firefox does not set which for mouse move events.
   SA.FirefoxWhich = function (event) {
+    if (event.which !== undefined) {
+      return;
+    }
     event.which = event.buttons;
     if (event.which === 2) {
       event.which = 3;
     } else if (event.which === 3) {
       event.which = 2;
     }
+    console.log("firefox which = " + event.which);
   };
 
   SA.Debug = function (msg) {

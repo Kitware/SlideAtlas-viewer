@@ -30,6 +30,10 @@
     this.ZOffset = 0.1;
   }
 
+  Shape.prototype.Modified = function() {
+    this.Matrix = undefined;
+  }
+  
   // Coordinate Systems
   Shape.SLIDE = 0; // Pixel of highest resolution level.
   Shape.VIEWER = 1; // Pixel of viewer canvas.

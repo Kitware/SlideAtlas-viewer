@@ -56,7 +56,7 @@
             .text('Apply');
   }
 
-  Dialog.prototype.SetApplyCallback = function (layer, callback) {
+  Dialog.prototype.SetApplyCallback = function (callback) {
     var self = this;
     // Return true needed to hide the spectrum color picker.
     self.ApplyButton.click(function (e) {
@@ -68,7 +68,7 @@
     });
   };
 
-  Dialog.prototype.SetCloseCallback = function (layer, callback) {
+  Dialog.prototype.SetCloseCallback = function (callback) {
     var self = this;
     // Return true needed to hide the spectrum color picker.
     this.CloseButton.click(function (e) {

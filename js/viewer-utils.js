@@ -2975,6 +2975,7 @@
   var SAFullScreenButton = function (parent) {
     var fullScreenFlag = false;
     var savedHeight = 'auto';
+    var savedParent = parent;
 
     var fullScreenButton = $('<img>')
         .appendTo(parent)
@@ -2999,10 +3000,14 @@
           fullScreenFlag = !fullScreenFlag;
           if (fullScreenFlag) {
             savedHeight = parent.css('height');
+            
             // just make the viewer fill the body.
             var height = window.innerHeight;
+            $(elem).appendTo('body')
             $(elem)
               .css({
+                'z-index':'100',
+                'background-color':'#fff',
                 'position': 'fixed',
                 'left': '0',
                 'top': '0',
@@ -3011,6 +3016,7 @@
             fullScreenButton.attr('src', SA.ImagePathUrl + 'fullScreenOff32.png');
           } else {
             $(elem)
+              .appendTo(savedParent)
               .css({
                 'position': 'static',
                 'height': savedHeight});

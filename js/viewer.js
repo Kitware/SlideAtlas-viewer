@@ -34,6 +34,7 @@
     // this.SetupTestDivs(parent);
     // return;
 
+    // This div is bound to all the events that propagate to the layers and widgets.
     this.Div = $('<div>')
       .appendTo(this.Parent)
       .css({
@@ -159,9 +160,13 @@
                   'z-index': '4'});
     }
   }
-
-  Viewer.prototype.GetAnnotationLayer = function () {
-    alert('Deleted method "GetAnnotationLayer" called.');
+  
+  Viewer.prototype.GetParentDiv = function () {
+    return this.Div;
+  };
+  
+  Viewer.prototype.GetParent = function () {
+    return this.Parent;
   };
   
   // I need to turn the bindins on and off, to make children "contentEditable".
@@ -187,6 +192,11 @@
     $(document.body).on(
       'mouseup.viewer',
       function (event) {
+          self.FirefoxOverviewWhich = 0;
+          self.FirefoxWhich = 0;
+          if (event.which === undefined) {
+            event.which = 0;
+          }
         self.HandleMouseUp(event);
         return true;
       });
@@ -232,24 +242,33 @@
       can = this.OverViewDiv;
       can.on(
         'mousedown.viewer',
-        function (e) {
-          return self.HandleOverViewMouseDown(e);
+        function (event) {
+          SA.FirefoxWhich(event);
+          self.FirefoxOverviewWhich = event.which;
+          return self.HandleOverViewMouseDown(event);
         });
 
       can.on(
         'mouseup.viewer',
-        function (e) {
-          return self.HandleOverViewMouseUp(e);
+        function (event) {
+          self.FirefoxOverviewWhich = 0;
+          self.FirefoxWhich = 0;
+          if (event.which === undefined) {
+            event.which = 0;
+          }
+          return self.HandleOverViewMouseUp(event);
         });
       can.on(
         'mousemove.viewer',
-        function (e) {
-          return self.HandleOverViewMouseMove(e);
+        function (event) {
+          //SA.FirefoxWhich(event);
+          event.which = self.FirefoxOverviewWhich;
+          return self.HandleOverViewMouseMove(event);
         });
       can.on(
         'mousewheel.viewer',
-        function (e) {
-          return self.HandleOverViewMouseWheel(e.originalEvent);
+        function (event) {
+          return self.HandleOverViewMouseWheel(event.originalEvent);
         });
     }
   };
@@ -1541,6 +1560,7 @@
     // Put a throttle on events
     if (!this.HandleTouch(e, false)) { return; }
 
+    /* the display global is no longer set.
     if (SA.display && SA.display.NavigationWidget &&
         SA.display.NavigationWidget.Visibility) {
       // No slide interaction with the interface up.
@@ -1554,7 +1574,8 @@
       // I had bad interaction with events going to browser.
       SA.MOBILE_ANNOTATION_WIDGET.ToggleVisibility();
     }
-
+    */
+    
     // Let the annotation layers have first dibs on processing the event.
     for (var i = 0; i < this.Layers.length; ++i) {
       var layer = this.Layers[i];
@@ -1567,7 +1588,6 @@
     // Cross the screen in 1/2 second.
     var viewerWidth = this.MainView.Parent.width();
     var dxdt = 1000 * (this.MouseX - this.LastMouseX) / ((this.Time - this.LastTime) * viewerWidth);
-        // console.log(dxdt);
     if (SA.display && SA.display.NavigationWidget) {
       if (dxdt > 4.0) {
         SA.display.NavigationWidget.PreviousNote();
@@ -1785,8 +1805,18 @@
   };
 
   Viewer.prototype.HandleTouchEnd = function (event) {
+    console.log("viewer touch end " + event.touches.length);
     if (!this.InteractionEnabled) { return true; }
-
+    
+    var date = new Date();
+    var dTime = date.getTime() - this.StartTouchTime;
+    if (dTime < 200.0) { // 200 milliseconds
+      // The mouse down sets the state to drag.
+      // Change it back.  We are not going to drag, only a click.
+      this.InteractionState = INTERACTION_NONE;
+      return this.HandleSingleSelect(event);
+    }
+    
     // Let the annotation layers have first dibs on processing the event.
     for (var i = 0; i < this.Layers.length; ++i) {
       var layer = this.Layers[i];
@@ -1973,9 +2003,12 @@
   };
 
   Viewer.prototype.HandleMouseDown = function (event) {
+    // Hack.  I am getting multiple mouse down and mouse up for a single click.
+    // This will make sure we only respond to one.
+    this.MouseDownFlag = true;
     if (!this.InteractionEnabled) { return true; }
 
-    this.FireFoxWhich = event.which;
+    this.FirefoxWhich = event.which;
     event.preventDefault(); // Keep browser from selecting images.
     this.RecordMouseDown(event);
 
@@ -2039,6 +2072,12 @@
   };
 
   Viewer.prototype.HandleMouseUp = function (event) {
+    // Hack.  I am getting multiple mouse down and mouse up for a single click.
+    // This will make sure we only respond to one.
+    if (!this.MouseDownFlag) {
+      return;
+    }
+    this.MouseDownFlag = false;
     if (!this.InteractionEnabled) { return true; }
     var date = new Date();
     this.MouseUpTime = date.getTime();
@@ -2051,7 +2090,7 @@
       return this.HandleSingleSelect(event);
     }
 
-    this.FireFoxWhich = 0;
+    this.FirefoxWhich = 0;
     this.RecordMouseUp(event);
 
     if (this.Rotatable && this.RotateIconDrag) {
@@ -2135,13 +2174,6 @@
       return true;
     }
 
-    // I think we can do the same thing by setting the z-index (or returning false)
-    // The event position is relative to the target which can be a tab on
-    // top of the canvas.  Just skip these events.
-    // if ($(event.target).width() !== $(event.currentTarget).width()) {
-    //  console.log("child");
-    // //  return true;
-    // }
     var pt = this.GetMousePosition(event);
     if (pt === undefined) {
       return true;
@@ -2417,13 +2449,14 @@
       }
     }
 
+    // Copy paste error?
     // Key events are not going first to layers like mouse events.
     // Give layers a change to process them.
-    for (i = 0; i < this.Layers.length; ++i) {
-      if (this.Layers[i].HandleKeyUp && !this.Layers[i].HandleKeyUp(event)) {
-        return false;
-      }
-    }
+    //for (i = 0; i < this.Layers.length; ++i) {
+    //  if (this.Layers[i].HandleKeyUp && !this.Layers[i].HandleKeyUp(event)) {
+    //    return false;
+    //  }
+    //}
     return true;
   };
 
@@ -2536,7 +2569,6 @@
     // This is needed to keep resizing the overview if the events
     // move tothe viewer proper.
     // event.wheelDelta;
-    console.log('overview wheel');
     // return false;
 
     this.InteractionState = INTERACTION_OVERVIEW_WHEEL;
@@ -2666,6 +2698,8 @@
     this.Layers.splice(idx, 1);
   };
 
+  // TODO:
+  // Get rid of this.
   Viewer.prototype.NewAnnotationLayer = function () {
     // Create an annotation layer by default.
     var annotationLayer = new SAM.AnnotationLayer(this.Div);

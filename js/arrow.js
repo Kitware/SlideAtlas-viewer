@@ -28,7 +28,6 @@
     var yNew = -x * st + y * ct;
 
     // Now we have to scale from global pixels to screen pixels.
-    console.log('Point on arrow ' + xNew + ', ' + yNew);
     tmp = this.Width / 2.0;
     // Had to bump the y detection up by 3x because of unclickability on the iPad.
     if (xNew > 0.0 && xNew < this.Length * 1.3 && yNew < tmp * 3 && yNew > -tmp * 3) {

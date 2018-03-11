@@ -76,9 +76,10 @@
 
     // The anchor point and position are the same point.
     // Position is in world coordinates.
-    // Anchor is in pixel coordinates of text (buffers).
+    // Offset is in pixel coordinates of text (buffers).
     // In pixel(text) coordinate system
-    this.Anchor = [0, 0];
+    // It is the position of the upper left corner relative to the postion / anchor.
+    this.Offset = [0, 0];
     this.Selected = false;
 
     // this.String = "Hello World";
@@ -113,9 +114,9 @@
       y = view.Viewport[3] * (0.5 * (1.0 - y));
     }
 
-    // Hacky attempt to mitigate the bug that randomly sends the Anchor values into the tens of thousands.
-    if (Math.abs(this.Anchor[0]) > 1000 || Math.abs(this.Anchor[1]) > 1000) {
-      this.Anchor = [-50, 0];
+    // Hacky attempt to mitigate the bug that randomly sends the Offset values into the tens of thousands.
+    if (Math.abs(this.Offset[0]) > 1000 || Math.abs(this.Offset[1]) > 1000) {
+      this.Offset = [-50, 0];
     }
 
     // (x,y) is the screen position of the text.
@@ -128,8 +129,8 @@
     var s = Math.sin(radians);
     var c = Math.cos(radians);
     ctx.setTransform(c, -s, s, c, x, y);
-    x = -this.Anchor[0];
-    y = -this.Anchor[1];
+    x = -this.Offset[0];
+    y = -this.Offset[1];
 
     ctx.font = this.FontSize + 'pt Calibri';
     var width = this.PixelBounds[1];
@@ -139,7 +140,10 @@
       // ctx.fillStyle = '#fff';
       // ctx.strokeStyle = '#000';
       // ctx.fillRect(x - 2, y - 2, this.PixelBounds[1] + 4, (this.PixelBounds[3] + this.FontSize/3)*1.4);
-      roundRect(ctx, x - 2, y - 2, width + 6, height + 2, this.FontSize / 2, true, false);
+      var radius = this.FontSize/2;
+      roundRect(ctx, x - radius, y - radius,
+                width + this.FontSize, height + this.FontSize,
+                radius, true, false);
     }
 
     // Choose the color for the text.
@@ -167,7 +171,7 @@
       radius = 2;
     }
     ctx.fillStyle = '#fff';
-    ctx.strokeStyle = '#666';
+    //ctx.strokeStyle = '#666';
     ctx.fillRect(x, y, width, height);
 
     /*
@@ -183,7 +187,7 @@
     ctx.quadraticCurveTo(x, y, x + radius, y);
     ctx.closePath();
     */
-    ctx.stroke();
+    //ctx.stroke();
     // ctx.fill();
   }
 
