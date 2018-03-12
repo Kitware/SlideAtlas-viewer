@@ -545,6 +545,8 @@
       .hide()
       .on('mousedown mousemove mouseup touchmove touchend',
           function () { return false; });
+
+    this.LoadDefaults();
   };
 
   GirderAnnotationPanel.prototype.AddToolRadioButton = function (imageFile, onCallbackName) {
@@ -674,6 +676,23 @@
     }
   };
 
+  GirderAnnotationPanel.prototype.LoadDefaults = function () {
+    if (localStorage.SaAnnotationPanelDefaults) {
+      var defaults = JSON.parse(localStorage.SaAnnotationPanelDefaults);
+      if (defaults.PencilMode === 'closed') {
+        this.SetPencilModeToClosed();
+      }
+    }
+  };
+
+  GirderAnnotationPanel.prototype.SaveDefaults = function () {
+    var defaults = {'PencilMode': 'open'};
+    if (this.PencilOpenClosedState === CLOSED) {
+      defaults.PencilMode = 'closed';
+    }
+    localStorage.SaAnnotationPanelDefaults = JSON.stringify(defaults);
+  };
+  
   GirderAnnotationPanel.prototype.TogglePencilOpenClosed = function () {
     var widget;
     var i;
@@ -704,6 +723,7 @@
         this.Highlighted.Layer.EventuallyDraw();
       }
     }
+    this.SaveDefaults();
   };
 
   GirderAnnotationPanel.prototype.SetPencilModeToClosed = function () {
@@ -723,7 +743,7 @@
         this.Highlighted.Layer.EventuallyDraw();
       }
     }
-
+    this.SaveDefaults();
   };
 
   GirderAnnotationPanel.prototype.InitializeButtons = function (parent, itemId) {

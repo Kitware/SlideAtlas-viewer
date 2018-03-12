@@ -704,146 +704,129 @@
   };
 
   // Loop is the old, stroke is the new.
-  PencilWidget.prototype.CombineStrokes = function (loop, stroke) {
-    this.Loop = loop;
-    this.Stroke = stroke;
+  // returns true if merged, false if not.;
+  PencilWidget.prototype.CombineStrokes = function (polyLineLoop, polyLineStroke) {
     var merged = false;
+
+    var loop = polyLineLoop.Points;
+    var stroke = polyLineStroke.Points;
 
     // This algorithm was desinged to have the first point be the same as the last point.
     // To generalize polylineWidgets and lassoWidgets, I changed this and put a closed
     // flag (which implicitely draws the last segment) in polyline.
     // It is easier to temporarily add the extra point and them remove it, than change the algorithm.
-    this.Loop.Points.push(this.Loop.Points[0]);
+    loop.push(loop[0]);
 
     // TODO: Fix this.  I got in an infinite loop.
     // Inserting points it the array we are iterating over.
     // Find the first and last intersection points between stroke and loop.
     var intersection0;
     var intersection1;
-    for (var i = 1; i < this.Stroke.Points.length; ++i) {
-      var pt0 = this.Stroke.Points[i - 1];
-      var pt1 = this.Stroke.Points[i];
-      var tmp = this.FindIntersection(pt0, pt1);
-      if (tmp) {
-        // I need to insert the intersection in the stroke so
-        // one stroke segment does not intersect loop twice.
-        this.Stroke.Points.splice(i, 0, tmp.Point);
+    for (var i = 1; i < stroke.length; ++i) {
+      var pt0 = stroke[i - 1];
+      var pt1 = stroke[i];
+      var intersections = this.FindSegmentLoopIntersections(pt0, pt1, loop);
+      // We are looking for the first and last interestions: so sort.
+      intersections.sort(function(a, b){return a.k - b.k});
+      if (intersections.length > 0) {
         if (intersection0 === undefined) {
-          intersection0 = tmp;
-          intersection0.StrokeIndex = i;
+          intersection0 = intersections[0];
+          intersection0.StrokeIdx0 = i-1;
+          intersection0.StrokeIdx1 = i;
         } else {
-          // If a point was added before first intersection,
-          // its index needs to be updated too.
-          if (tmp.LoopIndex < intersection0.LoopIndex) {
-            intersection0.LoopIndex += 1;
-          }
-          intersection1 = tmp;
-          intersection1.StrokeIndex = i;
+          var last = intersections.length - 1;
+          intersection1 = intersections[last];
+          intersection1.StrokeIdx0 = i-1;
+          intersection1.StrokeIdx1 = i;
         }
       }
     }
-
-    var sanityCheck = 0;
-
+    
     // If we have two intersections, clip the loop with the stroke.
-    if (intersection1 !== undefined) {
-      // We will have two parts.
-      // Build both loops keeing track of their lengths.
-      // Keep the longer part.
-      var points0 = [];
-      var len0 = 0.0;
-      var points1 = [];
-      var len1 = 0.0;
-      var dx;
-      var dy;
-      // Add the clipped stroke to both loops.
-      for (i = intersection0.StrokeIndex; i < intersection1.StrokeIndex; ++i) {
-        points0.push(this.Stroke.Points[i]);
-        points1.push(this.Stroke.Points[i]);
-      }
-      // Now the two new loops take different directions around the original loop.
-      // Decreasing
-      i = intersection1.LoopIndex;
-      while (i !== intersection0.LoopIndex) {
-        if (++sanityCheck > 1000000) {
-          alert('Combine loop 1 is taking too long.');
-          return;
-        }
-        points0.push(this.Loop.Points[i]);
-        dx = this.Loop.Points[i][0];
-        dy = this.Loop.Points[i][1];
-        // decrement around loop.  First and last loop points are the same.
-        if (--i === 0) {
-          i = this.Loop.Points.length - 1;
-        }
-        // Integrate distance.
-        dx -= this.Loop.Points[i][0];
-        dy -= this.Loop.Points[i][1];
-        len0 += Math.sqrt(dx * dx + dy * dy);
-      }
-      // Duplicate the first point in the loop
-      points0.push(intersection0.Point);
-
-      // Increasing
-      i = intersection1.LoopIndex;
-      while (i !== intersection0.LoopIndex) {
-        if (++sanityCheck > 1000000) {
-          alert('Combine loop 2 is taking too long.');
-          return;
-        }
-        points1.push(this.Loop.Points[i]);
-        dx = this.Loop.Points[i][0];
-        dy = this.Loop.Points[i][1];
-        // increment around loop.  First and last loop points are the same.
-        if (++i === this.Loop.Points.length - 1) {
-          i = 0;
-        }
-        // Integrate distance.
-        dx -= this.Loop.Points[i][0];
-        dy -= this.Loop.Points[i][1];
-        len1 += Math.sqrt(dx * dx + dy * dy);
-      }
-      // Duplicate the first point in the loop
-      points1.push(intersection0.Point);
-
-      if (len0 > len1) {
-        this.Loop.Points = points0;
-      } else {
-        this.Loop.Points = points1;
-      }
-
-      // The last stroke has been merged, delete it.
-      merged = true;
+    if (intersection1 === undefined) {
+      // Get rid of that extra duplicated point we added.
+      loop.pop();
+      return false;
     }
 
-    // Remove the extra point added at the begining of this method.
-    this.Loop.Points.pop();
+    // Crop the stroke and add the two new intersection points to the front and end.
+    var croppedStroke = [intersection0.Point];
+    croppedStroke = croppedStroke.concat(stroke.slice(intersection0.StrokeIdx1,
+                                                      intersection1.StrokeIdx1));
+    croppedStroke.push(intersection1.Point);
+      
+    // Do we need to reverse the cropped stroke?
+    var reverseCroppedStroke = true;
 
-    this.Stroke = undefined;
-    this.Loop = undefined;
-    return merged;
+    // Crop the loop into two parts.
+    // Build both loops keeing track of their lengths.
+    // Keep the longer part.
+    var tmp;
+    if (intersection1.LoopIdx1 < intersection0.LoopIdx1) {
+      tmp = intersection0;
+      intersection0 = intersection1;
+      intersection1 = tmp;
+      reverseCroppedStroke = !reverseCroppedStroke;
+    }
+    // The middle part.
+    var croppedLoop = loop.slice(intersection0.LoopIdx1, intersection1.LoopIdx1);
+    // The second part is the combination of the end and start pieces.
+    tmp = loop.slice(intersection1.LoopIdx1);
+    // Get rid of that extra duplicated point we added.
+    tmp.pop();
+    // Now add the start piece to the end piece. (it is a loop).
+    tmp = tmp.concat(loop.slice(0, intersection0.LoopIdx1));
+    if (this.ComputeStrokeLength(tmp) > this.ComputeStrokeLength(croppedLoop)) {
+      // If we keep the second part because it is longer, we have to reverse the stroke.
+      croppedLoop = tmp;
+      reverseCroppedStroke = !reverseCroppedStroke;
+    }
+    if (reverseCroppedStroke) {
+      croppedStroke.reverse();
+    }
+    polyLineLoop.Points = croppedLoop.concat(croppedStroke);
+    
+    return true;
   };
 
+  PencilWidget.prototype.ComputeStrokeLength = function (stroke) {
+    if (stroke.length === 0) {
+      return 0;
+    }
+    var pt0 = stroke[0];
+    var pt1, x, y;
+    var length = 0;
+    for (var i = 1; i < stroke.length; ++i) {
+      pt1 = stroke[i];
+      x = pt1[0] - pt0[0];
+      y = pt1[1] - pt0[1];
+      length += Math.sqrt(x * x + y * y);
+    }
+    return length;
+  };
+  
+  // Returns all te points that a loop intersects with a single stroke segment.
   // transform all points so p0 is origin and p1 maps to (1,0)
-  // Returns false if no intersection,
-  // If there is an intersection, it adds that point to the loop.
-  // It returns {Point: newPt, LoopIndex: i} .
-  PencilWidget.prototype.FindIntersection = function (p0, p1) {
-    var best = false;
+  // Returns an empty array if no intersection,
+  // It returns an array of intersections [{Point: newPt, LoopIndex: i}, ...] .
+  // (sorted starting with the ones closest to p0).
+  // It does not change the loop.
+  PencilWidget.prototype.FindSegmentLoopIntersections = function (p0, p1, loop) {
+    var intersections = [];
     var p = [(p1[0] - p0[0]), (p1[1] - p0[1])];
     var mag = Math.sqrt(p[0] * p[0] + p[1] * p[1]);
-    if (mag < 0.0) {
-      return false;
+    if (mag <= 0.0) {
+      return [];
     }
     p[0] = p[0] / mag;
     p[1] = p[1] / mag;
 
-    var m0 = this.Loop.Points[0];
+    var m0 = loop[0];
     var n0 = [(m0[0] - p0[0]) / mag, (m0[1] - p0[1]) / mag];
     var k0 = [(n0[0] * p[0] + n0[1] * p[1]), (n0[1] * p[0] - n0[0] * p[1])];
 
-    for (var i = 1; i < this.Loop.Points.length; ++i) {
-      var m1 = this.Loop.Points[i];
+    for (var i = 1; i < loop.length; ++i) {
+      var m1 = loop[i];
       // Avoid an infinite loop inserting points.
       if (p0 === m0 || p0 === m1) {
         continue;
@@ -855,38 +838,76 @@
         var x = k0[0] + k * (k1[0] - k0[0]);
         if (x > 0 && x <= 1) {
           var newPt = [(m0[0] + k * (m1[0] - m0[0])), (m0[1] + k * (m1[1] - m0[1]))];
-          if (!best || x < best.k) {
-            best = {Point: newPt, LoopIndex: i, k: x};
-          }
+          intersections.push({Point: newPt, LoopIdx0: i-1, LoopIdx1: i, k: x});
         }
       }
       m0 = m1;
       n0 = n1;
       k0 = k1;
     }
-    if (best) {
-      this.Loop.Points.splice(best.LoopIndex, 0, best.Point);
-    }
 
-    return best;
+    return intersections;
   };
 
   // This is not actually needed!  So it is not used.
-  PencilWidget.prototype.IsPointInsideLoop = function (x, y) {
+  PencilWidget.prototype.IsPointInsideLoop = function (x, y, loop) {
     // Sum up angles.  Inside poitns will sum to 2pi, outside will sum to 0.
     var angle = 0.0;
-    var pt0 = this.Loop.Points[this.Loop.length - 1];
-    for (var i = 0; i < this.Loop.length; ++i) {
-      var pt1 = this.Loop.Points[i];
+    var pt0 = loop[loop.length - 1];
+    for (var i = 0; i < loop.length; ++i) {
+      var pt1 = loop[i];
       var v0 = [pt0[0] - x, pt0[1] - y];
       var v1 = [pt1[0] - x, pt1[1] - y];
       var mag0 = Math.sqrt(v0[0] * v0[0] + v0[1] * v0[1]);
       var mag1 = Math.sqrt(v1[0] * v1[0] + v1[1] * v1[1]);
       angle += Math.arcsin((v0[0] * v1[1] - v0[1] * v1[0]) / (mag0 * mag1));
     }
-
     return (angle > 3.14 || angle < -3.14);
   };
 
+  // --------------------------------------------------------------------------------
+  // Stuff for eraser.
+
+  // We need a fat line. Handle one segment at a time.
+  // Output is an loop (array of points) around a thick line with rounded ends.
+  // The first and last points are the same.
+  PencilWidget.prototype.SegmentToLoop = function (pt1, pt2, radius) {
+    var divisions = 8;
+    loop = [];
+    // Compute a normal to the line segment.
+    var n = [pt2[0] - pt1[0], pt2[1] - pt1[1]];
+    var mag = Math.sqrt(n[0] * n[0] + n[1] * n[1]);
+    if (mag === 0.0) {
+      n = [0,1];
+      loop.concat(this.EndCap(pt1, n, radius, divisions));
+      // Do not duplicate the point in the middle of the circle.
+      loop.pop();
+      loop.concat(this.EndCap(pt1, n, -radius, divisions));
+      return loop;
+    }
+    loop.concat(this.EndCap(pt1, n, radius, divisions));
+    loop.concat(this.EndCap(pt2, n, -radius, divisions));
+    return loop;
+  };
+
+  // Return half a circle.
+  PencilWidget.prototype.EndCap = function (center, n, radius, divisions) {
+    points = [];
+    for (var i = 0; i <= divisions; ++i) {
+      var theta = Math.PI * i / divisions;
+      var c = Math.cos(theta);
+      var s = Math.sin(theta);
+      // Rotate
+      var x = center[0] + radius * (c * n[0] - s * n[1]);
+      var y = center[1] + radius * (c * n[1] + s * n[0]);
+      points.push([x, y]);
+    }
+    return points;
+  };
+
+
+
+
+  
   SAM.PencilWidget = PencilWidget;
 })();
