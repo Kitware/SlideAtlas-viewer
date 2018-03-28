@@ -168,6 +168,12 @@
   Viewer.prototype.GetParent = function () {
     return this.Parent;
   };
+
+  Viewer.prototype.ScaleOn = function () {
+    if (!this.ScaleWidget) {
+      this.ScaleWidget = new SAM.ScaleWidget();
+    }
+  };
   
   // I need to turn the bindins on and off, to make children "contentEditable".
   Viewer.prototype.InteractionOn = function () {
@@ -1254,6 +1260,12 @@
       }
     }
 
+    if (this.ScaleWidget) {
+      // Girder is not setting spacing correct.
+      // But we still need the scale widget for the grid widget.
+      this.ScaleWidget.Draw(this.MainView);
+    }
+    
     // TODO: Drawing correlations should not be embedded in a single
     // viewer. Maybe dualViewWidget or a new stack object should handle it.
 

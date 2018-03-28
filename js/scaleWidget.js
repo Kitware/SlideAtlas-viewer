@@ -64,39 +64,32 @@
     }
   };
 
-  function ScaleWidget (layer) {
-    if (layer === null) {
-      return;
-    }
-
-    this.Layer = layer;
+  function ScaleWidget () {
     this.PixelsPerMeter = 0;
     this.Shape = new Scale();
     this.Shape.OutlineColor = [0.0, 0.0, 0.0];
-    this.Shape.Origin = [30, 20];
+    this.Shape.Origin = [120, 15];
     this.Shape.BinLength = 200;
     this.Shape.FixedSize = true;
 
     this.Text = new SAM.Text();
     this.Text.PositionCoordinateSystem = SAM.Shape.VIEWER;
-    this.Text.Position = [30, 5];
+    this.Text.Position = [120, 0];
     this.Text.String = '';
     this.Text.Color = [0.0, 0.0, 0.0];
     // I want the anchor to be the center of the text.
     // This is a hackl estimate.
     this.Text.Anchor = [20, 0];
 
-    this.Update(layer.GetPixelsPerUnit());
-
     this.State = WAITING;
   }
 
-    // Change the length of the scale based on the camera.
-  ScaleWidget.prototype.Update = function () {
-    if (!this.View) { return; }
+  // Change the length of the scale based on the camera.
+  ScaleWidget.prototype.Update = function (view) {
+    if (!view) { return; }
     // Compute the number of screen pixels in a meter.
     var scale = Math.round(
-      this.View.GetPixelsPerUnit() / this.View.GetMetersPerUnit());
+      view.GetPixelsPerUnit() / view.GetMetersPerUnit());
     if (this.PixelsPerMeter === scale) {
       return;
     }
@@ -153,19 +146,19 @@
 
     // Update the label text and position
     this.Text.String = this.Label;
-    this.Text.UpdateBuffers(this.Layer.AnnotationView);
+    this.Text.UpdateBuffers(view);
     this.Text.Position = [this.Shape.Origin[0] + (scaleLengthViewer / 2),
       this.Shape.Origin[1] - 15];
 
-    this.Shape.UpdateBuffers(this.Layer.AnnotationView);
+    this.Shape.UpdateBuffers(view);
   };
 
   ScaleWidget.prototype.Draw = function (view) {
-    if (!this.View || !this.View.HasUnits()) {
+    if (!view || !view.HasUnits()) {
       return;
     }
     // Update the scale if zoom changed.
-    this.Update();
+    this.Update(view);
     this.Shape.Draw(view);
     this.Text.Draw(view);
   };
@@ -413,14 +406,14 @@
   };
 
   ScaleWidget.prototype.Deactivate = function () {
-    this.Layer.AnnotationView.Parent.css({'cursor': 'default'});
-    this.Popup.StartHideTimer();
+    //this.View.Parent.css({'cursor': 'default'});
+    //this.Popup.StartHideTimer();
     this.State = WAITING;
     this.Shape.Active = false;
-    this.Layer.DeactivateWidget(this);
-    if (this.DeactivateCallback) {
-      this.DeactivateCallback();
-    }
+    //this.Layer.DeactivateWidget(this);
+    //if (this.DeactivateCallback) {
+    //  this.DeactivateCallback();
+    //}
     this.Layer.EventuallyDraw();
   };
 
@@ -434,14 +427,13 @@
     if (flag) {
       this.State = ACTIVE;
       this.Shape.Active = true;
-      this.Layer.ActivateWidget(this);
-      this.Layer.EventuallyDraw();
+      //this.Layer.ActivateWidget(this);
+      //this.Layer.EventuallyDraw();
             // Compute the location for the pop up and show it.
-      this.PlacePopup();
     } else {
       this.Deactivate();
     }
-    this.Layer.EventuallyDraw();
+    //this.Layer.EventuallyDraw();
   };
 
   SAM.ScaleWidget = ScaleWidget;

@@ -53,7 +53,8 @@
     this.Parent = viewer.GetDiv();
     // Any new layers created have to know the viewer.
     this.Viewer = viewer;
-
+    viewer.ScaleOn();
+    
     this.InitializeHelp(this.Parent.parent());
     
     // The pannel should probably not be managing this navigation widget.
