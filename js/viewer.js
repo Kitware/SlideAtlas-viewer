@@ -183,6 +183,9 @@
     can.on(
       'mousedown.viewer',
       function (event) {
+        SA.FirefoxWhich(event);
+        self.FirefoxWhich = event.which;
+        console.log("Getting FF which " + event.which);
         return self.HandleMouseDown(event);
       });
     can.on(
@@ -190,19 +193,25 @@
       function (event) {
         // So key events go the the right viewer.
         this.focus();
-        // Firefox does not set which for mouse move events.
+        // Firefox does not define offsetX ...?
         SA.FirefoxWhich(event);
+        // Firefox does not set which for mouse move events.
+        if (event.which === undefined) {
+          event.which = self.FireFoxWhich;
+          console.log("Setting FF which " + event.which);
+        }
         return self.HandleMouseMove(event);
       });
     // We need to detect the mouse up even if it happens outside the canvas,
     $(document.body).on(
       'mouseup.viewer',
       function (event) {
-          self.FirefoxOverviewWhich = 0;
-          self.FirefoxWhich = 0;
-          if (event.which === undefined) {
-            event.which = 0;
-          }
+        SA.FirefoxWhich(event);
+        self.FirefoxOverviewWhich = 0;
+        self.FirefoxWhich = 0;
+        if (event.which === undefined) {
+          event.which = 0;
+        }
         self.HandleMouseUp(event);
         return true;
       });

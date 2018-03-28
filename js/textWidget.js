@@ -158,12 +158,18 @@
   TextWidget.prototype.SetPositionToDefault = function () {
     var view = this.Layer.GetView();
     this.Text.UpdateBuffers(view); // Needed to get the bounds.
-    this.Text.Offset = [
-      0.5 * (this.Text.PixelBounds[0] + this.Text.PixelBounds[1]),
-      0.5 * (this.Text.PixelBounds[2] + this.Text.PixelBounds[3])];
-    // SHort arrow pointing to the left.
-    this.SavedTextOffset = [(this.Text.PixelBounds[0] + this.Text.PixelBounds[1]) * 0.5,
-                            -this.Text.PixelBounds[3]];
+    // middle top(above) 
+    var offset = [(this.Text.PixelBounds[0] + this.Text.PixelBounds[1]) * 0.5,
+                  -this.Text.PixelBounds[3]];
+    var middle = [0.5 * (this.Text.PixelBounds[0] + this.Text.PixelBounds[1]),
+                  0.5 * (this.Text.PixelBounds[2] + this.Text.PixelBounds[3])];
+    if (this.VisibilityMode === TEXT_ONLY) {
+      this.Text.Offset = middle;
+      this.SavedTextOffset = offset;
+    } else {
+      this.Text.Offset = offset;
+      this.SavedTextOffset = offset;
+    }
 
     // I would like to setup the anchor in the middle of the screen,
     // And have the Anchor in the middle of the text.
