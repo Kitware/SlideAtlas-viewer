@@ -81,6 +81,8 @@
 
     this.StateChanged();
 
+    this.Text.SetSelected(false);
+    this.Arrow.SetSelected(false);
     this.Layer.GetParent().css({'cursor': ''});
     // TODO:  Make the caller do this.
     this.Layer.EventuallyDraw();
@@ -250,7 +252,7 @@
     var rgb = [parseFloat(obj.color[0]),
       parseFloat(obj.color[1]),
       parseFloat(obj.color[2])];
-    this.Text.Color = rgb;
+    this.Text.SetColor(rgb);
     this.Text.SetFontSize(parseFloat(obj.size));
     if (obj.backgroundFlag !== undefined) {
       this.Text.BackgroundFlag = obj.backgroundFlag;
@@ -521,7 +523,7 @@
 
   // This creates the dialog and sets all values to defaults (from local storage).
   TextWidget.prototype.InitializeDialog = function () {
-    this.Dialog = new SAM.Dialog();
+    this.Dialog = new SAM.Dialog(this.Layer.GetParent().parent());
     this.Dialog.Title.text('Text Annotation Editor');
     this.Dialog.Body.css({'margin': '1em 2em'});
 
@@ -621,7 +623,10 @@
       var defaults = JSON.parse(localStorage.TextWidgetDefaults);
       if (defaults.Color) {
         hexcolor = SAM.ConvertColorToHex(defaults.Color);
-        this.Text.Color = hexcolor;
+        this.Text.SetColor(hexcolor);
+        this.Arrow.SetFillColor(hexcolor);
+      } else {
+        this.Arrow.SetFillColor(this.Text.Color);
       }
       if (defaults.FontSize) {
         // font size was wrongly saved as a string.
@@ -649,6 +654,9 @@
     // Transfer properties fromt he dialog GUI to the widget.
     this.DialogPropertiesToWidget();
     // View bindings kept the dialog text input from working.
+    if (!this.Layer) {
+      return;
+    }
     this.SetStateToInactive();
     this.Layer.EventuallyDraw();
   };
@@ -682,7 +690,10 @@
     // remove any trailing white space.
     string = string.trim();
     if (string === '') {
-      alert('Empty String');
+      this.Layer.EventuallyDraw();
+      this.Layer.RemoveWidget(this);
+      // Trigger the changed callback  (should we have a delete callback?)
+      this.StateChanged();
       return;
     }
     if (string !== this.Text.GetString()) { modified = true; }

@@ -43,7 +43,7 @@
         'width': '100%',
         'height': '100%',
         'box-sizing': 'border-box',
-        'z-index': '200'
+        'z-index': '49'
       })
       .addClass('sa-resize');
     this.Div.saOnResize(
@@ -119,7 +119,7 @@
                 });
       // Try to make the overview be on top of the rotate icon
       // It should receive events before the rotate icon.
-      this.OverViewDiv.css({'z-index': '200'});
+      this.OverViewDiv.css({'z-index': '49'});
     }
     this.ZoomTarget = this.MainView.Camera.GetHeight();
     this.RollTarget = this.MainView.Camera.GetWorldRoll();
@@ -669,7 +669,7 @@
               'position': 'absolute',
               'bottom': '0px',
               'right': '7px',
-              'z-index': '200'});
+              'z-index': '49'});
     // .prop('title', 'Zoom scroll');
     this.ZoomTab.Panel
             .addClass('sa-view-zoom-panel');

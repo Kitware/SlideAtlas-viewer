@@ -67,7 +67,7 @@
   // All text object use the same texture map.
 
   function Text () {
-    this.Color = [0.5, 1.0, 1.0];
+    this.Color = [0.0, 0.1, 0.5];
     this.FontSize = 12; // Height in pixels
 
     // Position of the anchor in the world coordinate system.

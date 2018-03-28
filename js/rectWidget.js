@@ -208,10 +208,10 @@
     }
   };
 
-  RectWidget.prototype.Draw = function (view) {
+  RectWidget.prototype.Draw = function (layer) {
     // shape follows the cursor
     if (this.Visibility) {
-      this.Shape.Draw(view);
+      this.Shape.Draw(layer.GetView());
     }
   };
 

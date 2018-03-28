@@ -27,10 +27,6 @@
 
 // 3: undo.
 
-
-
-
-
 // Notes:  It was tricky getting two modes of activating tools:  1 radio button, 2 click to select widget.
 // Here is what happens for the two paths:
 // Click Tool button
@@ -75,7 +71,6 @@
       this.ButtonSize = '24px';
     }
     
-
     // Create a parent div to hold all of the annotation labels
     this.Margin = 6;
     this.ToolDivHeight = 70;
@@ -624,7 +619,11 @@
     if (!this.Highlighted || !this.SelectedWidget) {
       return;
     }
-    this.SelectedWidget.ShowPropertiesDialog();
+    if (this.SelectedWidget.SetStateToDialog) {
+      this.SelectedWidget.SetStateToDialog();
+    } else {
+      this.SelectedWidget.ShowPropertiesDialog();
+    }
   };
   
   // When tools have nothing to modify, they disappear.
@@ -660,7 +659,7 @@
       var layer = this.Highlighted.Layer;
       for (var idx = 0; idx < layer.GetNumberOfWidgets(); ++idx) {
         var widget = layer.GetWidget(idx);
-        if (widget.IsSelected && widget.IsSelected()) {
+        if (widget.Type === 'pencil' && widget.IsSelected && widget.IsSelected()) {
           lineSelected = true;
           break;
         }
@@ -1428,30 +1427,27 @@
     annotObj.Modified = true;
     // Change the background color of the edit toggle to show that is is modified.
     annotObj.EditToggle.css({'background-color': '#F55'});
-    // start a timer to actually save.
-    if (annotObj.SaveTimerId) {
-      clearTimeout(annotObj.SaveTimerId);
-      annotObj.SaveTimerId = undefined;
-    }
-    // Every minute
-    console.log('Save in 30 seconds');
-    annotObj.SaveTimerId = setTimeout(function () { self.RecordAndSave(annotObj); }, 30000);
 
+    // Save after 30 second pause in annotation.
+    // start a timer to actually save.
+    //if (annotObj.SaveTimerId) {
+    //  clearTimeout(annotObj.SaveTimerId);
+    //  annotObj.SaveTimerId = undefined;
+    //}
+    // Every minute
+    //console.log('Save in 30 seconds');
+    //annotObj.SaveTimerId = setTimeout(function () { self.RecordAndSave(annotObj); }, 30000);
+
+    // Save after 30 seconds regardless of additional markup.
+    if (!annotObj.SaveTimerId) {
+      console.log('Save in 30 seconds');
+      annotObj.SaveTimerId = setTimeout(function () { self.RecordAndSave(annotObj); }, 30000);
+    }
+    
     window.onbeforeunload = function (event) {
       console.log('Leaving page ' + self.ModifiedCount);
       return true;
-    };
-    // if (this.ModifiedCount === 0) {
-    //    return false;
-    //  }
-    //  for (var i = 0; i < self.AnnotationObjects.length; ++i) {
-    //    var annotObj = self.AnnotationObjects[i];
-    //    if (annotObj.Modified) {
-    //      self.RecordAndSave(annotObj);
-    //    }
-    //  }
-    //  event.returnValue = 'Saving work';
-    //  //return 'Changes are being saved. Are you sure you want to leave?';
+    }
   };
 
   // Called when the annotation is saved successfully..
@@ -1492,8 +1488,6 @@
         this.AnnotationSaved(annotObj);
         return;
       }
-      // Indicate we are saving somehow.
-      annotObj.Div.css({'border': '3px solid #000'});
       // A new annotation
       girder.rest.restRequest({
         path: 'annotation?itemId=' + this.ImageItemId,
@@ -1507,6 +1501,7 @@
         self.AnnotationSaved(annotObj);
       });
 
+      /*
       // Set up access to this annotation so that only I can see it.
       // But what if I wnt others to be able to read but not write?
       var access = {
@@ -1532,8 +1527,6 @@
       });
       */
     } else {
-      // Indicate we are saving somehow.
-      annotObj.Div.css({'border': '3px solid #000'});
       // Save a modified annotation.
       girder.rest.restRequest({
         path: 'annotation/' + annotObj.Data._id,
@@ -1765,16 +1758,21 @@
       widget.SetCreationCamera(layer.GetCamera());
       widget.SetStateToDialog();
     }
-    this.TextWidget = widget;
+    //this.TextWidget = widget; scheduled for delete.  Not used anywhere.
 
     // Activate the widget to start drawing.
     widget.SetStateToDrawing(layer);
 
-    // If the text is deactivated by clsing the dialog, this will turn off the
+    // If the text is deactivated by closing the dialog, this will turn off the
     // text button.
     var self = this;
     widget.SetStateChangeCallback(function () {
-      if (!widget.GetActive()) {
+      if (!widget.Layer) {
+        // string was empty.  TODO: find a better way to handle widget initiated delete.
+        self.SelectedWidget = undefined;
+        self.ToolRadioButtonCallback(self.CursorButton);
+        self.UpdateToolVisibility();            
+      } else if (!widget.GetActive()) {
         self.ToolRadioButtonCallback(self.CursorButton);
       }
     });
@@ -1951,7 +1949,7 @@
     // Handle the delete key special
     // Multiple widgets ( in the layer being edit) can be deleted.
     var widget;
-    if (this.Highlighted && event.keyCode === 46) {
+    if (this.Highlighted && event.keyCode === 46) { // delete key
       // TODO: Consider calling delete selected (the button callback).
       if (this.Highlighted.Layer.DeleteSelected()) {
         this.ToolRadioButtonCallback(this.CursorButton);

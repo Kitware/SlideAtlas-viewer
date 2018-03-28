@@ -726,7 +726,8 @@
   AnnotationLayer.prototype.SetSelected = function (flag) {
     var changed = false;
     for (var idx = 0; idx < this.WidgetList.length; ++idx) {
-      if (this.WidgetList[idx].SetSelected(flag)) {
+      var widget = this.WidgetList[idx];
+      if (widget.SetSelcted && widget.SetSelected(flag)) {
         changed = true;
       }
     }
@@ -1137,7 +1138,7 @@
       var widget = this.WidgetList[i];
       if (found) {
         // We already found one.  Unselect the rest.
-        if (widget.SetSelected(false)) {
+        if (widget.SetSelected && widget.SetSelected(false)) {
           // Assume the selection changed.
           changed = true;
         }

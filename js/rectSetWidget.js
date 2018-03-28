@@ -375,9 +375,9 @@
     this.Shape.Threshold = threshold;
   };
 
-  RectSetWidget.prototype.Draw = function (view) {
+  RectSetWidget.prototype.Draw = function (layer) {
     if (this.Visibility) {
-      this.Shape.Draw(view);
+      this.Shape.Draw(layer.GetView());
     }
   };
 

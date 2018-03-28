@@ -71,7 +71,7 @@
   };
   
   PencilWidget.prototype.InitializeDialog = function () {
-    this.Dialog = new SAM.Dialog();
+    this.Dialog = new SAM.Dialog(this.Layer.GetParent());
     var self = this;
     this.Dialog.SetApplyCallback(function () { self.DialogApplyCallback(); });
     // Customize dialog for a pencil.
@@ -706,8 +706,6 @@
   // Loop is the old, stroke is the new.
   // returns true if merged, false if not.;
   PencilWidget.prototype.CombineStrokes = function (polyLineLoop, polyLineStroke) {
-    var merged = false;
-
     var loop = polyLineLoop.Points;
     var stroke = polyLineStroke.Points;
 
@@ -868,12 +866,87 @@
   // --------------------------------------------------------------------------------
   // Stuff for eraser.
 
+  // Left turn.
+  // Returns "undefined" if zero length segment.
+  PencilWidget.prototype.ComputeSegmentNormal = function (pt0, pt1) {
+    var dx = pt1[0] - pt0[0];
+    var dy = pt1[1] - pt0[1];
+    var mag = Math.sqrt(dx * dx + dy * dy);
+    if (mag === 0) {
+      return;
+    }
+    return [-dy/mag, dx/mag];
+  };
+
   // We need a fat line. Handle one segment at a time.
   // Output is an loop (array of points) around a thick line with rounded ends.
   // The first and last points are the same.
   PencilWidget.prototype.SegmentToLoop = function (pt1, pt2, radius) {
     var divisions = 8;
     loop = [];
+    // Compute a normal to the line segment.
+    var n = this.ComputeSegmentNormal(pt1, pt2);
+    if (!n) {
+      n = [0,1];
+      loop.concat(this.EndCap(pt1, n, radius, divisions));
+      // Do not duplicate the point in the middle of the circle.
+      loop.pop();
+      loop.concat(this.EndCap(pt1, n, -radius, divisions));
+      return loop;
+    }
+    loop.concat(this.EndCap(pt1, n, radius, divisions));
+    loop.concat(this.EndCap(pt2, n, -radius, divisions));
+    return loop;
+  };
+
+  // I did not finish this method.
+  /*
+  // We need a fat line. 
+  // Output is an loop (array of points) around a thick line with rounded ends.
+  // The first and last points of the output are the same.
+  PencilWidget.prototype.StrokeToLoop = function (polyLineStroke, radius) {
+    var stroke = polyLineStroke.Points;
+    if (stroke.length === 0) {
+      return;
+    }
+    
+    // Compute normals for every segment in the loop.
+    // (and get rid of 0 length segments).
+    var normals = []; // One fewer normals than points.
+    var pt0 = stroke[0];
+    var points = [pt0]; // Only keep the non zero length segments.    
+    for (var i = 1; i < stroke.length; ++i) {
+      var pt1 = points[i];
+      n = this.ComputeSegmentNormal(pt0, pt1);
+      if (n) {
+        points.push(pt1);
+        normals.push(n);
+        pt0 = pt1;
+      }
+    }
+
+    
+    
+    pt0 = points[0];
+    // First the endcap.
+    var loop = this.EndCap(points[0], nommals[0], radius, divisions);
+    // Grow both ends of the loop as we add segments?  Maybe
+
+    //  .... Just compute all points niavely and then check inside/ outside of circle box set.
+    //  .... Will have to compute partial segments.
+    pt1 = points[1];
+
+
+
+
+    
+    var divisions = 8;
+    var dTheata = Math.PI / divisions;
+    
+  
+
+    
+
     // Compute a normal to the line segment.
     var n = [pt2[0] - pt1[0], pt2[1] - pt1[1]];
     var mag = Math.sqrt(n[0] * n[0] + n[1] * n[1]);
@@ -889,7 +962,8 @@
     loop.concat(this.EndCap(pt2, n, -radius, divisions));
     return loop;
   };
-
+  */
+  
   // Return half a circle.
   PencilWidget.prototype.EndCap = function (center, n, radius, divisions) {
     points = [];
@@ -905,6 +979,89 @@
     return points;
   };
 
+  // Loop is the old, stroke is the new eraser stroke.
+  // returns true if merged, false if not.;
+  PencilWidget.prototype.CombineEraserStroke = function (polyLineLoop, polyLineStroke) {
+    var loop = polyLineLoop.Points;
+    var stroke = polyLineStroke.Points;
+
+    // This algorithm was desinged to have the first point be the same as the last point.
+    // To generalize polylineWidgets and lassoWidgets, I changed this and put a closed
+    // flag (which implicitely draws the last segment) in polyline.
+    // It is easier to temporarily add the extra point and them remove it, than change the algorithm.
+    loop.push(loop[0]);
+
+    // TODO: Fix this.  I got in an infinite loop.
+    // Inserting points it the array we are iterating over.
+    // Find the first and last intersection points between stroke and loop.
+    var intersection0;
+    var intersection1;
+    for (var i = 1; i < stroke.length; ++i) {
+      var pt0 = stroke[i - 1];
+      var pt1 = stroke[i];
+      var intersections = this.FindSegmentLoopIntersections(pt0, pt1, loop);
+      // We are looking for the first and last interestions: so sort.
+      intersections.sort(function(a, b){return a.k - b.k});
+      if (intersections.length > 0) {
+        if (intersection0 === undefined) {
+          intersection0 = intersections[0];
+          intersection0.StrokeIdx0 = i-1;
+          intersection0.StrokeIdx1 = i;
+        } else {
+          var last = intersections.length - 1;
+          intersection1 = intersections[last];
+          intersection1.StrokeIdx0 = i-1;
+          intersection1.StrokeIdx1 = i;
+        }
+      }
+    }
+    
+    // If we have two intersections, clip the loop with the stroke.
+    if (intersection1 === undefined) {
+      // Get rid of that extra duplicated point we added.
+      loop.pop();
+      return false;
+    }
+
+    // Crop the stroke and add the two new intersection points to the front and end.
+    var croppedStroke = [intersection0.Point];
+    croppedStroke = croppedStroke.concat(stroke.slice(intersection0.StrokeIdx1,
+                                                      intersection1.StrokeIdx1));
+    croppedStroke.push(intersection1.Point);
+      
+    // Do we need to reverse the cropped stroke?
+    var reverseCroppedStroke = true;
+
+    // Crop the loop into two parts.
+    // Build both loops keeing track of their lengths.
+    // Keep the longer part.
+    var tmp;
+    if (intersection1.LoopIdx1 < intersection0.LoopIdx1) {
+      tmp = intersection0;
+      intersection0 = intersection1;
+      intersection1 = tmp;
+      reverseCroppedStroke = !reverseCroppedStroke;
+    }
+    // The middle part.
+    var croppedLoop = loop.slice(intersection0.LoopIdx1, intersection1.LoopIdx1);
+    // The second part is the combination of the end and start pieces.
+    tmp = loop.slice(intersection1.LoopIdx1);
+    // Get rid of that extra duplicated point we added.
+    tmp.pop();
+    // Now add the start piece to the end piece. (it is a loop).
+    tmp = tmp.concat(loop.slice(0, intersection0.LoopIdx1));
+    if (this.ComputeStrokeLength(tmp) > this.ComputeStrokeLength(croppedLoop)) {
+      // If we keep the second part because it is longer, we have to reverse the stroke.
+      croppedLoop = tmp;
+      reverseCroppedStroke = !reverseCroppedStroke;
+    }
+    if (reverseCroppedStroke) {
+      croppedStroke.reverse();
+    }
+    polyLineLoop.Points = croppedLoop.concat(croppedStroke);
+    
+    return true;
+  };
 
 
 
