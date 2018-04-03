@@ -71,7 +71,7 @@
   };
   
   PencilWidget.prototype.InitializeDialog = function () {
-    this.Dialog = new SAM.Dialog(this.Layer.GetParent());
+    this.Dialog = new SAM.Dialog(this.Layer.GetParent().parent());
     var self = this;
     this.Dialog.SetApplyCallback(function () { self.DialogApplyCallback(); });
     // Customize dialog for a pencil.
@@ -633,9 +633,9 @@
   };
 
   PencilWidget.prototype.DialogApplyCallback = function () {
-    this.color = this.Dialog.ColorInput.val();
+    this.Color = this.Dialog.ColorInput.val();
     this.LineWidth = parseFloat(this.Dialog.LineWidthInput.val());
-    this.Shapes.SetOutlineColor(this.color);
+    this.Shapes.SetOutlineColor(this.Color);
     this.Shapes.SetLineWidth(parseFloat(this.Dialog.LineWidthInput.val()));
     this.Shapes.UpdateBuffers(this.Layer.AnnotationView);
     this.SetSelected(false);
