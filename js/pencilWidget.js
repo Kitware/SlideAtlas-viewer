@@ -158,6 +158,7 @@
           (this.ModifiedCallback)(this);
         }
         stroke.Closed = false;
+        stroke.UpdateBuffers(this.Layer.AnnotationView);
         stroke.Modified()
       }
     }
@@ -170,10 +171,11 @@
     for (var i = 0; i < this.Shapes.GetNumberOfShapes(); ++i) {
       var stroke = this.Shapes.GetShape(i);
       if (stroke.IsSelected()) {
-        if (stroke.Closed === false && this.ModifiedCallback()) {
+        if (stroke.Closed === false && this.ModifiedCallback) {
           (this.ModifiedCallback)(this);
         }
         stroke.Closed = true;
+        stroke.UpdateBuffers(this.Layer.AnnotationView);
         stroke.Modified();
       }
     }
@@ -715,8 +717,6 @@
     // It is easier to temporarily add the extra point and them remove it, than change the algorithm.
     loop.push(loop[0]);
 
-    // TODO: Fix this.  I got in an infinite loop.
-    // Inserting points it the array we are iterating over.
     // Find the first and last intersection points between stroke and loop.
     var intersection0;
     var intersection1;
@@ -726,16 +726,18 @@
       var intersections = this.FindSegmentLoopIntersections(pt0, pt1, loop);
       // We are looking for the first and last interestions: so sort.
       intersections.sort(function(a, b){return a.k - b.k});
-      if (intersections.length > 0) {
-        if (intersection0 === undefined) {
-          intersection0 = intersections[0];
-          intersection0.StrokeIdx0 = i-1;
-          intersection0.StrokeIdx1 = i;
-        } else {
-          var last = intersections.length - 1;
-          intersection1 = intersections[last];
-          intersection1.StrokeIdx0 = i-1;
-          intersection1.StrokeIdx1 = i;
+      for (var j = 0; j < intersections.length; ++j) {
+        var intersection = intersections[j];
+        if (intersections.length > 0) {
+          if (intersection0 === undefined) {
+            intersection0 = intersection;
+            intersection0.StrokeIdx0 = i-1;
+            intersection0.StrokeIdx1 = i;
+          } else {
+            intersection1 = intersection;
+            intersection1.StrokeIdx0 = i-1;
+            intersection1.StrokeIdx1 = i;
+          }
         }
       }
     }
