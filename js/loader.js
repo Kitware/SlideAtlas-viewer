@@ -19,7 +19,8 @@
   SA.TimeStamp = 0;
   SA.NumberOfTiles = 0;
   SA.NumberOfTextures = 0;
-  SA.MaximumNumberOfTiles = 50000;
+  //SA.MaximumNumberOfTiles = 50000;
+  SA.MaximumNumberOfTiles = 1200;
   SA.MaximumNumberOfTextures = 5000;
   SA.PruneTimeTiles = 0;
   SA.PruneTimeTextures = 0;
@@ -72,7 +73,10 @@
       prune = true;
     }
 
+    console.log("Prune test " + SA.NumberOfTiles + ", limit " + SA.MaximumNumberOfTiles);
+    
     if (prune) {
+      console.log("prune !!!!!!")
       for (var i in SA.Caches) {
         var cache = SA.Caches[i];
         cache.PruneTiles();

@@ -52,7 +52,8 @@
     // dictionary to share caches when multiple sections on one slide
     this.Caches = {};
     this.Display = display;
-    this.Overlay = overlay;
+    // For debugging (place two section on top of each other to judge alignment.
+    //this.Overlay = overlay;
 
     var self = this;
     this.SliderDiv = $('<div>')
@@ -62,9 +63,9 @@
         // 'opacity': '0.2',
         'position': 'absolute',
         'left': '0px',
-        'bottom': '0px',
+        'bottom': '5px',
         'width': '100%',
-        'z-index': '10'})
+        'z-index': '1000'})
       .on('keyup', function (e) { self.HandleKeyUp(e); })
       .hover(
         function () {

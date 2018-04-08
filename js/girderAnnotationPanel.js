@@ -777,7 +777,11 @@
       path: 'user/me',
       method: 'GET'
     }).done(function (data) {
-      self.UserData = data;
+      if (!data) {
+        self.UserData = {_id:'0000', login:'guest'};
+      } else {
+        self.UserData = data;
+      }
       if (itemId) {
         self.ImageItemId = itemId;
         self.RequestGirderImageItem(itemId);
@@ -817,9 +821,9 @@
   // Add a new annotation to the list
   GirderAnnotationPanel.prototype.AddAnnotationButton = function (metadata) {
     // For now, users can only see their own annotations.
-    if (metadata.creatorId !== this.UserData._id) {
-      return;
-    }
+    //if (metadata.creatorId !== this.UserData._id) {
+    //  return;
+    //}
     var self = this;
     var div = $('<div>')
       .appendTo(this.ButtonDiv)
@@ -1427,8 +1431,9 @@
     var self = this;
     annotObj.Modified = true;
     // Change the background color of the edit toggle to show that is is modified.
-    annotObj.EditToggle.css({'background-color': '#F55'});
-
+    if (this.UserData.login !== "guest") {
+      annotObj.EditToggle.css({'background-color': '#F55'});
+    }
     // Save after 30 second pause in annotation.
     // start a timer to actually save.
     //if (annotObj.SaveTimerId) {
@@ -1466,6 +1471,9 @@
 
   // Records and saves an annotation. Will create a new one if annotObj has no id.
   GirderAnnotationPanel.prototype.RecordAndSave = function (annotObj) {
+    if (this.UserData.login === "guest") {
+      return;
+    }
     var self = this;
     if (annotObj.SaveTimerId) {
       clearTimeout(annotObj.SaveTimerId);

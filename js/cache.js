@@ -155,7 +155,13 @@
     return tile;
   };
   CacheLevel.prototype.GetTile = function (x, y) {
-    return this.Tiles[x + (y * this.GridDims[0])];
+    var idx = x + (y * this.GridDims[0]);
+    var tile = this.Tiles[idx];
+    if (tile && !tile.Matrix) {
+      this.Tiles[idx] = undefined;
+      return;
+    }
+    return tile;
   };
 
 // ==============================================================================
@@ -550,7 +556,7 @@
   Cache.prototype.PruneTiles = function () {
     for (var i = 0; i < this.Levels[0].Tiles.length; ++i) {
       var node = this.Levels[0].Tiles[i];
-      if (node !== null) {
+      if (node !== null && node.LoadState === 3) {
         if (node.BranchTimeStamp < SA.PruneTimeTiles || node.BranchTimeStamp < SA.PruneTimeTextures) {
           var count = this.RecursivePruneTiles(node);
           if (count > 0) {

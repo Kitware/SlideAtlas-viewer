@@ -76,7 +76,7 @@ window.SA = window.SA || {};
     this.Y = y;
     this.Z = z;
     this.Level = level;
-    this.Children = [];
+    this.Children = [null, null, null, null];
     this.Parent = null;
     this.LoadState = 0;
 
@@ -149,9 +149,12 @@ window.SA = window.SA || {};
     ++SA.NumberOfTiles;
   }
 
-  Tile.prototype.delete = function (gl) {
+  // It is upto the caller to clean up references to this tile.
+  Tile.prototype.destructor = function (gl) {
     --SA.NumberOfTiles;
-    this.DeleteTexture(gl);
+    if (gl) {
+      this.DeleteTexture(gl);
+    }
     delete this.Matrix;
     this.Matrix = null;
     if (this.Image) {
@@ -164,6 +167,9 @@ window.SA = window.SA || {};
         this.Children[i] = null;
       }
     }
+    delete this.Children;
+    delete this.Parent;
+    delete this.Cache;
   };
 
   // Youy have to call LoadQueueUpdate after adding tiles.
@@ -416,15 +422,16 @@ window.SA = window.SA || {};
   };
 
   Tile.prototype.DeleteTexture = function (gl) {
+    if (!this.Texture) {
+      return;
+    }
     if (!gl) {
       alert('Textures need a gl instance');
       return;
     }
-    if (this.Texture) {
-      --SA.NumberOfTextures; // To determine when to prune textures.
-      gl.deleteTexture(this.Texture);
-      this.Texture = null;
-    }
+    --SA.NumberOfTextures; // To determine when to prune textures.
+    gl.deleteTexture(this.Texture);
+    this.Texture = null;
   };
 
   SA.Tile = Tile;
