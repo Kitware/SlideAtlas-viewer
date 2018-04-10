@@ -20,7 +20,7 @@
   SA.NumberOfTiles = 0;
   SA.NumberOfTextures = 0;
   //SA.MaximumNumberOfTiles = 50000;
-  SA.MaximumNumberOfTiles = 1200;
+  SA.MaximumNumberOfTiles = 3000;
   SA.MaximumNumberOfTextures = 5000;
   SA.PruneTimeTiles = 0;
   SA.PruneTimeTextures = 0;
