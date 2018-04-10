@@ -377,14 +377,14 @@
       minLevel: 0,
       maxLevel: data.levels - 1,
       units: 'mm',
-      spacing: [this.mm_x, this.mm_y],
+      spacing: [data.mm_x, data.mm_y],
       getTileUrl: function (level, x, y, z) {
         // Drop the 'z' argument
         var apiroot = 'api/v1';
         return apiroot + '/item/' + itemId + '/tiles/zxy/' + level + '/' + x + '/' + y;
       }
     };
-    if (!this.mm_x) {
+    if (!data.mm_x) {
       // tileSource.units = 'pixels';
       tileSource.spacing = [1, 1];
     }
@@ -1958,11 +1958,13 @@
     // Handle the delete key special
     // Multiple widgets ( in the layer being edit) can be deleted.
     var widget;
-    if (this.Highlighted && event.keyCode === 46) { // delete key
-      // TODO: Consider calling delete selected (the button callback).
-      if (this.Highlighted.Layer.DeleteSelected()) {
-        this.ToolRadioButtonCallback(this.CursorButton);
-        this.Highlighted.Layer.EventuallyDraw();
+    if (event.keyCode === 46 || event.keyCode === 8) { // delete key
+      if (this.Highlighted) { // delete key
+        // TODO: Consider calling delete selected (the button callback).
+        if (this.Highlighted.Layer.DeleteSelected()) {
+          this.ToolRadioButtonCallback(this.CursorButton);
+          this.Highlighted.Layer.EventuallyDraw();
+        }
       }
       event.preventDefault();
       return false;
