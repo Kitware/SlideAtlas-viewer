@@ -430,10 +430,10 @@
     });
   };
   GirderAnnotationPanel.prototype.CheckFolderDataAccessTools = function (data) {
-    if (data._accessLevel > 0) {
+    //if (data._accessLevel > 0) {
       // We have access.  Go ahead and create the tools.
       this.InitializeTools();
-    }
+    //}
   };
   GirderAnnotationPanel.prototype.InitializeTools = function () {
     var self = this;
@@ -495,29 +495,6 @@
       .hide();
     this.PencilOpenClosedToggle.on('mousedown mousemove mouseup touchmove touchend',
                                    function () { return false; });
-
-    // A delete button that pops up when a markup is selected.
-    // Not part of the radio group.  This is a sub option for pencils.
-    this.SelectedDeleteButton = $('<img>')
-      .appendTo(this.OptionsDiv)
-      .addClass('sa-view-annotation-button sa-flat-button-active')
-      .addClass('sa-active')
-      .css({
-        'border': '1px solid #333',
-        'width': '28px',
-        'height':'28px',
-        'background-color': '#fff'})
-      .attr('type', 'image')
-      .prop('title', 'delete selected')
-      .attr('src', SA.ImagePathUrl + 'blueDelete32.png')
-      .on('click touchstart',
-          function () {
-            self.DeleteSelectedWidget();
-            return false;
-          })
-      .hide()
-      .on('mousedown mousemove mouseup touchmove touchend',
-          function () { return false; });
 
     // A menu button that pops up when a markup is selected.
     // Not part of the radio group.  This is a sub option for widgets.
@@ -631,10 +608,8 @@
   // TODO: Help tool. to explain why a tool is not available.
   GirderAnnotationPanel.prototype.UpdateToolVisibility = function () {
     if (this.SelectedWidget) {
-      this.SelectedDeleteButton.show();
       this.SelectedMenuButton.show();
     } else {
-      this.SelectedDeleteButton.hide();
       this.SelectedMenuButton.hide();
     }
 
@@ -1058,6 +1033,11 @@
   // This call back pattern is all because we load on demand.
   // Call a method after an annotation is loaded.
   GirderAnnotationPanel.prototype.AfterLoad = function (annotObj, callback) {
+    // guest annotation
+    if (annotObj.Id === undefined) {
+      (callback)();
+      return;
+    }
     if (annotObj.Data) {
       (callback)();
     } else {
@@ -1386,7 +1366,11 @@
 
   // Call back from deleteButton.
   GirderAnnotationPanel.prototype.DeleteCallback = function (annotObj) {
-    if (!confirm('Are you sure you want to delete anntoation ' + annotObj.Name)) {
+    if (this.DeleteSelectedWidget()) {
+      return;
+    }
+
+    if (!confirm('Do you want to delete the entire annotation group?' + annotObj.Name)) {
       return;
     }
 
@@ -1978,16 +1962,19 @@
   };
 
   // Called by the SelectedDeleteButton click event.
+  // Returns true if a widget was deleted.
   GirderAnnotationPanel.prototype.DeleteSelectedWidget = function () {
     if (!this.Highlighted) {
-      return;
+      return false;
     }
     if (this.Highlighted.Layer.DeleteSelected()) {
       this.SelectedWidget = undefined;
       this.ToolRadioButtonCallback(this.CursorButton);
       this.UpdateToolVisibility();
       this.Highlighted.Layer.EventuallyDraw();
+      return true;
     }
+    return false;
   };
   
   GirderAnnotationPanel.prototype.HandleKeyUp = function (event) {

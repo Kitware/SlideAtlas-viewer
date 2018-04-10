@@ -685,16 +685,19 @@
       stroke2.Closed = true;
       stroke2.UpdateBuffers(this.Layer.AnnotationView);
       this.Layer.EventuallyDraw();
+      console.log("first stroke not found");
       return;
     }
 
     // Now see if they overlap.
     if (this.CombineStrokes(stroke1, stroke2)) {
+      console.log("stroke merged");
       // The last stroke has been merged.  Remove it.
       this.Shapes.DeleteChild(lastIdx);
       // Leave the other stroke selected.
       stroke1.UpdateBuffers(this.Layer.AnnotationView);
     } else {
+      console.log("no intersection");
       // no intersection.  Keep them both, but leave the new one selected.
       stroke1.SetSelected(false);
       if (this.Mode === CLOSED) {

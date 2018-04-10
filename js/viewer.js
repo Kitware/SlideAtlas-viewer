@@ -185,7 +185,6 @@
       function (event) {
         //SA.FirefoxWhich(event);
         self.FirefoxWhich = event.which;
-        console.log("Getting FF which " + event.which);
         return self.HandleMouseDown(event);
       });
     can.on(
@@ -1823,7 +1822,6 @@
   };
 
   Viewer.prototype.HandleTouchEnd = function (event) {
-    console.log("viewer touch end " + event.touches.length);
     if (!this.InteractionEnabled) { return true; }
     
     var date = new Date();

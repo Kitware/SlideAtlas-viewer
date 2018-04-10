@@ -73,7 +73,7 @@
       prune = true;
     }
 
-    console.log("Prune test " + SA.NumberOfTiles + ", limit " + SA.MaximumNumberOfTiles);
+    //console.log("Prune test " + SA.NumberOfTiles + ", limit " + SA.MaximumNumberOfTiles);
     
     if (prune) {
       console.log("prune !!!!!!")
