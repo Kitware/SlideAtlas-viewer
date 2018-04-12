@@ -571,39 +571,39 @@
             .val('#30ff00')
             .css({'display': 'table-cell'});
 
-    this.Dialog.VisibilityModeDiv =
-            $('<div>')
-            .appendTo(this.Dialog.Body)
-            .css({'display': 'table-row'});
-    this.Dialog.VisibilityModeLabel =
-            $('<div>')
-            .appendTo(this.Dialog.VisibilityModeDiv)
-            .text('Visibility:')
-            .css({'display': 'table-cell',
-              'text-align': 'left'});
-    this.Dialog.VisibilityModeInputButtons =
-            $('<div>')
-            .appendTo(this.Dialog.VisibilityModeDiv)
-            .css({'display': 'table-cell'});
+    // this.Dialog.VisibilityModeDiv =
+    //        $('<div>')
+    //        .appendTo(this.Dialog.Body)
+    //        .css({'display': 'table-row'});
+    // this.Dialog.VisibilityModeLabel =
+    //        $('<div>')
+    //        .appendTo(this.Dialog.VisibilityModeDiv)
+    //        .text('Visibility:')
+    //        .css({'display': 'table-cell',
+    //          'text-align': 'left'});
+    // this.Dialog.VisibilityModeInputButtons =
+    //        $('<div>')
+    //        .appendTo(this.Dialog.VisibilityModeDiv)
+    //        .css({'display': 'table-cell'});
 
-    this.Dialog.VisibilityModeInputs = [];
-    this.Dialog.VisibilityModeInputs[TEXT_ONLY] =
-      $('<input type="radio" name="visibilityoptions" value="0">Text only</input>')
-      .appendTo(this.Dialog.VisibilityModeInputButtons);
+    // this.Dialog.VisibilityModeInputs = [];
+    // this.Dialog.VisibilityModeInputs[TEXT_ONLY] =
+    //  $('<input type="radio" name="visibilityoptions" value="0">Text only</input>')
+    //  .appendTo(this.Dialog.VisibilityModeInputButtons);
 
-    $('<br>').appendTo(this.Dialog.VisibilityModeInputButtons);
+    // $('<br>').appendTo(this.Dialog.VisibilityModeInputButtons);
 
-    this.Dialog.VisibilityModeInputs[HOVER] =
-      $('<input type="radio" name="visibilityoptions" value="1">Arrow only, text on hover</input>')
-      .appendTo(this.Dialog.VisibilityModeInputButtons);
+    // this.Dialog.VisibilityModeInputs[HOVER] =
+    //  $('<input type="radio" name="visibilityoptions" value="1">Arrow only, text on hover</input>')
+    //  .appendTo(this.Dialog.VisibilityModeInputButtons);
 
-    $('<br>').appendTo(this.Dialog.VisibilityModeInputButtons);
+    // $('<br>').appendTo(this.Dialog.VisibilityModeInputButtons);
 
-    this.Dialog.VisibilityModeInputs[TEXT_ARROW] =
-      $('<input type="radio" name="visibilityoptions" value="2">Arrow and text visible</input>')
-      .appendTo(this.Dialog.VisibilityModeInputButtons);
+    // this.Dialog.VisibilityModeInputs[TEXT_ARROW] =
+    //  $('<input type="radio" name="visibilityoptions" value="2">Arrow and text visible</input>')
+    //  .appendTo(this.Dialog.VisibilityModeInputButtons);
 
-    this.Dialog.VisibilityModeInputs[TEXT_ONLY].attr('checked', 'true')
+    // this.Dialog.VisibilityModeInputs[TEXT_ONLY].attr('checked', 'true')
 
     
     this.Dialog.BackgroundDiv =
@@ -622,7 +622,7 @@
             .css({'display': 'table-cell'});
 
     // Get default properties.
-    this.VisibilityMode = 2;
+    this.VisibilityMode = TEXT_ONLY;
     this.Dialog.BackgroundInput.prop('checked', true);
     var hexcolor = SAM.ConvertColorToHex(this.Dialog.ColorInput.val());
     if (localStorage.TextWidgetDefaults) {
@@ -641,9 +641,9 @@
       if (defaults.BackgroundFlag !== undefined) {
         this.Text.BackgroundFlag = defaults.BackgroundFlag;
       }
-      if (defaults.VisibilityMode !== undefined) {
-        this.VisibilityMode = defaults.VisibilityMode;
-      }
+      //if (defaults.VisibilityMode !== undefined) {
+      //  this.VisibilityMode = defaults.VisibilityMode;
+      //}
     }
   };
 
@@ -683,7 +683,7 @@
     this.Dialog.FontInput.val(this.Text.GetFontSize().toFixed(0));
     this.Dialog.BackgroundInput.prop('checked', this.Text.BackgroundFlag);
     this.Dialog.TextInput.val(this.Text.String);
-    this.Dialog.VisibilityModeInputs[this.VisibilityMode].attr('checked', true);
+    // this.Dialog.VisibilityModeInputs[this.VisibilityMode].attr('checked', true);
   };
  
   // Copy the properties of the dialog into the widget
@@ -722,21 +722,21 @@
 
     // Get the visibility mode
     var mode = TEXT_ONLY;
-    if (this.Dialog.VisibilityModeInputs[TEXT_ONLY].prop('checked')) {
-      if (this.VisibilityMode !== TEXT_ONLY) { modified = true; }
-      mode = TEXT_ONLY;
-    } else if (this.Dialog.VisibilityModeInputs[HOVER].prop('checked')) {
-      if (this.VisibilityMode !== HOVER) { modified = true; }
-      mode = HOVER;
-    } else {
-      if (this.VisibilityMode !== TEXT_ARROW) { modified = true; }
-      mode = TEXT_ARROW;
-    }
-    if (this.VisibilityMode !== mode) {
-      // This also changes the anchor if necessary.
-      this.SetVisibilityMode(mode);
-      modified = true;
-    }
+    // if (this.Dialog.VisibilityModeInputs[TEXT_ONLY].prop('checked')) {
+    //  if (this.VisibilityMode !== TEXT_ONLY) { modified = true; }
+    //  mode = TEXT_ONLY;
+    // } else if (this.Dialog.VisibilityModeInputs[HOVER].prop('checked')) {
+    //  if (this.VisibilityMode !== HOVER) { modified = true; }
+    //  mode = HOVER;
+    // } else {
+    //  if (this.VisibilityMode !== TEXT_ARROW) { modified = true; }
+    //  mode = TEXT_ARROW;
+    // }
+    // if (this.VisibilityMode !== mode) {
+    //  // This also changes the anchor if necessary.
+    //  this.SetVisibilityMode(mode);
+    //  modified = true;
+    // }
 
     // Background flag is not working for some reasop.
     var backgroundFlag = this.Dialog.BackgroundInput.prop('checked');
@@ -749,7 +749,7 @@
     localStorage.TextWidgetDefaults = JSON.stringify({
       Color: hexcolor,
       FontSize: this.Text.GetFontSize(),
-      VisibilityMode: this.VisibilityMode,
+      //VisibilityMode: this.VisibilityMode,
       BackgroundFlag: backgroundFlag});
 
     if (modified) {

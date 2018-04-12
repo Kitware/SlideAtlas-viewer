@@ -1309,8 +1309,10 @@
     for (var i = 0; i < this.Layers.length; ++i) {
       if (this.Layers[i].Reset) {
         this.Layers[i].Reset();
+        this.Layers[i].Remove();
       }
     }
+    this.Layers = [];
   };
 
   // A list of shapes to render in the viewer
@@ -2184,12 +2186,6 @@
   Viewer.prototype.HandleMouseMove = function (event) {
     if (!this.InteractionEnabled) { return true; }
 
-    // We no longer have any action for moving the mouse when no button is pressed.
-    if (event.which === 0) {
-      this.InteractionState = INTERACTION_NONE;
-      return true;
-    }
-
     var pt = this.GetMousePosition(event);
     if (pt === undefined) {
       return true;
@@ -2210,6 +2206,13 @@
       if (layer.HandleMouseMove && !layer.HandleMouseMove(event)) {
         return false;
       }
+    }
+
+    // Arrow now tracks the mouse when first created (and no button pressed).
+    // We no longer have any action for moving the mouse when no button is pressed.
+    if (event.which === 0) {
+      this.InteractionState = INTERACTION_NONE;
+      return true;
     }
 
     if (this.InteractionState === INTERACTION_OVERVIEW ||

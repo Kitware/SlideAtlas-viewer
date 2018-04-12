@@ -207,6 +207,19 @@
       .css({'display':'inline-block'})
       .text('Text tool: Click on text to drag it.');
 
+    var arrowDiv = $('<div>')
+        .appendTo(helpDiv)
+        .css({'width':'100%'});
+    $('<img>')
+      .appendTo(arrowDiv)
+      .addClass('sa-view-button')
+      .attr('src', SA.ImagePathUrl + 'Arrow.gif')
+      .css({'height': '24px'});
+    $('<p>')
+      .appendTo(arrowDiv)
+      .css({'display':'inline-block'})
+      .text('Arrow tool: draw an arrow on the slide. Click the arrow to select and modify it.');
+
     var pencilDiv = $('<div>')
         .appendTo(helpDiv)
         .css({'width':'100%'});
@@ -247,20 +260,6 @@
       .appendTo(closedDiv)
       .css({'display':'inline-block'})
       .text('Closed pencil mode: Draw closed loops that can be modified with subsequent strokes.');
-
-    var deleteDiv = $('<div>')
-        .appendTo(helpDiv)
-        .css({'width':'100%'});
-    $('<img>')
-      .appendTo(deleteDiv)
-      .addClass('sa-view-button')
-      .attr('src', SA.ImagePathUrl + 'blueDelete32.png')
-      .css({'height': '24px',
-            'margin-left':'24px'});
-    $('<p>')
-      .appendTo(deleteDiv)
-      .css({'display':'inline-block'})
-      .text('The delete button or the delete key will remove the selected markup.');
 
     var propertiesDiv = $('<div>')
         .appendTo(helpDiv)
@@ -330,6 +329,20 @@
       .appendTo(editDiv)
       .css({'display':'inline-block'})
       .text('The edit toggle selects a single annotation group for editing.');
+
+    var deleteDiv = $('<div>')
+        .appendTo(helpDiv)
+        .css({'width':'100%'});
+    $('<img>')
+      .appendTo(editDiv)
+      .addClass('sa-view-button')
+      .attr('src', SA.ImagePathUrl + 'remove.png')
+      .css({'height': '24px',
+            'margin-left':'24px'});
+    $('<p>')
+      .appendTo(editDiv)
+      .css({'display':'inline-block'})
+      .text('Delete a selected annotation. If no annotation is selected, this deletes the whole annotation group.');
 
     // Toggle the help window on and off.
     var helpButton = $('<img>')
@@ -442,6 +455,7 @@
     this.CursorButton = this.AddToolRadioButton('cursor_arrow.png', 'CursorOn');
     this.RectSelectButton = this.AddToolRadioButton('rect_select.png', 'RectSelectOn');
     this.TextButton = this.AddToolRadioButton('Text.gif', 'TextButtonOn');
+    this.ArrowButton = this.AddToolRadioButton('Arrow.gif', 'ArrowButtonOn');
     this.PencilButton = this.AddToolRadioButton('Pencil-icon.png', 'PencilButtonOn');
  
     // This is visibile, only when a annotation is being edited.
@@ -1137,17 +1151,39 @@
           w = this.Viewer;
         }
         if (element.type === 'arrow') {
-          obj.type = 'text';
-          obj.string = element.label.value;
-          obj.color = SAM.ConvertColor(element.fillColor);
-          obj.size = element.label.fontSize;
-          obj.position = element.points[0].slice(0);
-          obj.offset = element.points[1].slice(0);
-          obj.offset[0] -= obj.position[0];
-          obj.offset[1] -= obj.position[1];
-          obj.visibility = element.points[0][2];
-          var w = annotObj.Layer.LoadWidget(obj);
-          w = this.Viewer;
+          if (element.label) {
+            obj.type = 'text';
+            obj.string = element.label.value;
+            obj.color = SAM.ConvertColor(element.fillColor);
+            obj.size = element.label.fontSize;
+            obj.position = element.points[0].slice(0);
+            obj.offset = element.points[1].slice(0);
+            obj.offset[0] -= obj.position[0];
+            obj.offset[1] -= obj.position[1];
+            obj.visibility = element.points[0][2];
+            var w = annotObj.Layer.LoadWidget(obj);
+            w = this.Viewer;
+          } else {
+            obj.type = 'arrow';
+            obj.origin = element.points[1].slice(0);
+            obj.fillcolor = SAM.ConvertColor(element.fillColor);
+            obj.outlinecolor = SAM.ConvertColor(element.lineColor);
+            var dx = element.points[1][0] - element.points[0][0];
+            var dy = element.points[1][1] - element.points[0][1];
+            var length = Math.sqrt(dx*dx + dy*dy);
+            obj.length = length;
+            //obj.width = ;
+            obj.orientation = Math.atan2(dy/length,dx/length) * 180 / Math.PI;
+            if (element.lineWidth !== undefined) {
+              obj.width = element.lineWidth;
+            } else {
+              obj.width = 10;
+            }
+            obj.fixedsize = 'true';
+            obj.fixedorientation = 'true';
+            var w = annotObj.Layer.LoadWidget(obj);
+            w = this.Viewer;
+          }
         }
         if (element.type === 'rectanglegrid') {
           obj.type = 'grid';
@@ -1586,6 +1622,21 @@
           'fontSize': widget.size,
           'color': SAM.ConvertColorToHex(widget.color)};
       }
+      if (widget.type === 'arrow') {
+        // Will not keep scale feature..
+        var pt1 = [widget.origin[0], widget.origin[1], 0]
+        var pt2 = [widget.origin[0], widget.origin[1], 0]
+        var theta = widget.orientation * Math.PI / 180.0;
+        pt2[0] += widget.length * Math.cos(theta);
+        pt2[1] += widget.length * Math.sin(theta);        
+        points = [pt1, pt2];
+        element = {
+          'type': 'arrow',
+          'lineWidth': widget.width, 
+          'fillColor': SAM.ConvertColorToHex(widget.fillcolor),
+          'lineColor': SAM.ConvertColorToHex(widget.outlinecolor),
+          'points': points};
+      }
       if (widget.type === 'grid') {
         element = {
           'type': 'rectanglegrid',
@@ -1770,6 +1821,43 @@
       }
     });
 
+    this.SelectedWidget = widget;
+  };
+
+  // Widget is an optional arguement.
+  GirderAnnotationPanel.prototype.ArrowButtonOn = function (annotObj) {
+    // The layer has to be in editing mode.
+    this.EditOn(annotObj);
+
+    var widget;
+    // Get an arrow widget.
+    // Look for a selected widget to reuse.
+    var layer = annotObj.Layer;
+    if (!widget) {
+      widget = layer.GetASelectedWidget('arrow');
+    }
+    if (!widget) {
+      // A selected arrowWidget was not found. Make a new arrow widget.
+      widget = new SAM.ArrowWidget(layer);
+      // Dialog needs tu turn off and on bindings.
+      // TODO: REmove dialogs from widget and manage them here.
+      // Widgets can share a dialog.
+      layer.AddWidget(widget);
+      widget.SetCreationCamera(layer.GetCamera());
+    }
+
+    // Activate the widget to start drawing.
+    widget.SetStateToDrawing(layer);
+
+    // If the arrow is deactivated with a key stroke, this will turn off the
+    // arrow button when the widget deactivates itself.
+    var self = this;
+    widget.SetStateChangeCallback(function () {
+      if (!widget.GetActive()) {
+        self.ToolRadioButtonCallback(self.CursorButton);
+      }
+    });
+      
     this.SelectedWidget = widget;
   };
 

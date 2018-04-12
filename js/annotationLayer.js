@@ -34,6 +34,9 @@
       case 'text':
         widget = new SAM.TextWidget(layer);
         break;
+      case 'arrow':
+        widget = new SAM.ArrowWidget(layer);
+        break;
       case 'circle':
         widget = new SAM.CircleWidget(layer);
         break;
@@ -687,6 +690,12 @@
     this.ScaleWidget = new SAM.ScaleWidget(this);
   }
 
+  // Like jquery remove.  Remove elements and events.
+  AnnotationLayer.prototype.Remove = function () {
+    this.LayerDiv.remove();
+    this.Parent = undefined;
+  };
+  
   // This gets called when a click causes as single widget in this layer
   // to be selected. The annotation panel, uses it to turn editing on for this layer.
   AnnotationLayer.prototype.SetActivatedCallback = function (callback) {
@@ -923,6 +932,7 @@
 
   // Return to initial state.
   AnnotationLayer.prototype.Reset = function () {
+    this.Clear();
     this.WidgetList = [];
   };
 
@@ -1262,7 +1272,7 @@
     // The event position is relative to the target which can be a tab on
     // top of the canvas.  Just skip these events.
     if ($(event.target).width() !== $(event.currentTarget).width()) {
-      console.log('child event ' + event.MouseY);
+      //console.log('child event ' + event.MouseY);
     }
 
     this.ComputeMouseWorld(event);
