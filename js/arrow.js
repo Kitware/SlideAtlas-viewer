@@ -16,7 +16,7 @@
     // Get rid of the buffers?
   };
 
-  // This has to be in viewer (arrow) coordinates bedcause we do not have the camera.
+  // This has to be in viewer coordinates bedcause we do not have the camera.
   // Point is in world coordinates.
   // Point origin is anchor and units pixels.
   Arrow.prototype.PointInShape = function (x, y) {

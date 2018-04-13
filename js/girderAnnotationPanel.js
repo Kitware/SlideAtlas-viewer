@@ -192,7 +192,7 @@
     $('<p>')
       .appendTo(fullScreenOffDiv)
       .css({'display':'inline-block'})
-      .text('Turn off fullscreen');
+      .text('Exit fullscreen');
 
     var textDiv = $('<div>')
         .appendTo(helpDiv)
@@ -218,7 +218,7 @@
     $('<p>')
       .appendTo(arrowDiv)
       .css({'display':'inline-block'})
-      .text('Arrow tool: draw an arrow on the slide. Click the arrow to select and modify it.');
+      .text('Arrow tool: draw an arrow. Mouse press places the tip. Mouse drag places the end.');
 
     var pencilDiv = $('<div>')
         .appendTo(helpDiv)
@@ -259,7 +259,28 @@
     $('<p>')
       .appendTo(closedDiv)
       .css({'display':'inline-block'})
-      .text('Closed pencil mode: Draw closed loops that can be modified with subsequent strokes.');
+      .text('Closed pencil mode: Draw closed loops that can be modified with subsequent strokes. Editing strokes must cross the loop twice.');
+
+    // Selection -------------------------------------------------------------------
+    $('<hr>')
+      .appendTo(helpDiv);
+    $('<p>')
+      .appendTo(helpDiv)
+      .css({'display':'inline-block'})
+      .text("Click on any annotation to select it. The delete key deletes selected annotations. When one annotation is selected it can be edited.");
+
+    var rectSelectDiv = $('<div>')
+        .appendTo(helpDiv)
+        .css({'width':'100%'});
+    $('<img>')
+      .appendTo(rectSelectDiv)
+      .addClass('sa-view-button')
+      .attr('src', SA.ImagePathUrl + 'rect_select.png')
+      .css({'height': '24px'});
+    $('<p>')
+      .appendTo(rectSelectDiv)
+      .css({'display':'inline-block'})
+      .text("The rectancle selection tool allows multiple annotations to be selected at once.");
 
     var propertiesDiv = $('<div>')
         .appendTo(helpDiv)
@@ -268,14 +289,13 @@
       .appendTo(propertiesDiv)
       .addClass('sa-view-button')
       .attr('src', SA.ImagePathUrl + 'Menu.jpg')
-      .css({'height': '24px',
-            'margin-left':'24px'});
+      .css({'height': '24px'});
     $('<p>')
       .appendTo(propertiesDiv)
       .css({'display':'inline-block'})
-      .text("Show the selected markup's property dialog.");
+      .text("Show the selected annotation's property dialog.");
 
-    // Annotation buttons
+    // Annotation buttons ---------------------------------------------------------
     $('<hr>')
       .appendTo(helpDiv);
 
@@ -334,15 +354,15 @@
         .appendTo(helpDiv)
         .css({'width':'100%'});
     $('<img>')
-      .appendTo(editDiv)
+      .appendTo(deleteDiv)
       .addClass('sa-view-button')
       .attr('src', SA.ImagePathUrl + 'remove.png')
       .css({'height': '24px',
             'margin-left':'24px'});
     $('<p>')
-      .appendTo(editDiv)
+      .appendTo(deleteDiv)
       .css({'display':'inline-block'})
-      .text('Delete a selected annotation. If no annotation is selected, this deletes the whole annotation group.');
+      .text('Delete a selected annotation. If no annotation is selected, the whole annotation group will be deleted.');
 
     // Toggle the help window on and off.
     var helpButton = $('<img>')

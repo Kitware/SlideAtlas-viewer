@@ -42,6 +42,10 @@
     this.Layer.GetParent().css({'cursor': 'nw-resize'});
   };
 
+  RectSelectWidget.prototype.IsEmpty = function () {
+    return true;
+  }
+  
   // Starts the process of dragging a rectangle (just changes the cursor.
   RectSelectWidget.prototype.SetStateToInactive = function () {
     if (this.State === INACTIVE) {
