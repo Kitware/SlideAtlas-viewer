@@ -13,7 +13,7 @@
   var NEW = 0;
   var DRAG = 1; // The whole arrow is being dragged.
   var DRAG_TAIL = 3;
-  var WAITING = 4; // The normal (resting) state.
+  var INACTIVE = 4; // The normal (resting) state.
   var ACTIVE = 5; // Mouse is over the widget and it is receiving events.
   var PROPERTIES_DIALOG = 6; // Properties dialog is up
 
@@ -24,7 +24,8 @@
     }
     this.Layer = layer;
     this.Type = 'arrow';
-
+    this.State = INACTIVE;
+    
     // This method gets called if the active state of this widget turns on or off.
     // This is used to turn off the pencil button in the Panel.
     this.StateChangeCallback = undefined;
@@ -93,15 +94,15 @@
       this.State = NEW;
       return;
     }
-    this.State = WAITING;
+    this.State = INACTIVE;
   };
 
   ArrowWidget.prototype.SetStateToInactive = function () {
-    if (this.State === WAITING) {
+    if (this.State === INACTIVE) {
       return;
     }
     this.StateChanged();
-    this.State = WAITING;
+    this.State = INACTIVE;
   };
 
   ArrowWidget.prototype.Draw = function () {
@@ -173,13 +174,37 @@
     this.Layer.EventuallyDraw();
   };
 
+  // Selects the widget if the arrow is fuly contained in the selection rectangle.
+  ArrowWidget.prototype.ApplySelect = function (selection) {
+    var viewPts = this.GetViewPoints();
+    if (selection.ViewerPointInSelection(viewPts[0][0], viewPts[0][1]) &&
+        selection.ViewerPointInSelection(viewPts[1][0], viewPts[1][1])) {
+      this.SetSelected(true);
+      return true;
+    }
+    this.SetSelected(false);
+    return false;
+  };
+
+  // Returns true if the mouse is over the arrow.
+  ArrowWidget.prototype.SetSelected = function (flag) {
+    this.Shape.SetSelected(flag);
+    if (flag && this.SelectedCallback) {
+      (this.SelectedCallback)(this);
+    }
+    if (!flag && this.State != INACTIVE) {
+      this.State = INACTIVE;
+      this.StateChanged();
+    }
+  };
+  
   // Returns true if the mouse is over the arrow.
   ArrowWidget.prototype.SingleSelect = function () {
     return this.CheckActive();
   };
 
   ArrowWidget.prototype.HandleMouseDown = function (layer) {
-    if (this.State === WAITING) {
+    if (this.State === INACTIVE) {
       return true;
     }
     var event = layer.Event;
@@ -207,11 +232,11 @@
 
   // returns false when it is finished doing its work.
   ArrowWidget.prototype.HandleMouseUp = function (layer) {
-    if (this.State === WAITING) {
+    if (this.State === INACTIVE) {
       return true;
     }
     if (this.State === DRAG_TAIL) {
-      this.State = WAITING;
+      this.State = INACTIVE;
       this.StateChanged();
       this.Modified();
       return false;
@@ -231,7 +256,7 @@
   };
 
   ArrowWidget.prototype.HandleMouseMove = function (layer) {
-    if (this.State === WAITING) {
+    if (this.State === INACTIVE) {
       return true;
     }
     var event = layer.Event;    
@@ -262,6 +287,20 @@
       this.Layer.EventuallyDraw();
     }
     return false;
+  };
+
+  // Return points 1 and 2 in view (screen) coordinates.
+  ArrowWidget.prototype.GetViewPoints = function () {
+    var cam = this.Layer.GetCamera();
+    var pt1 = this.Shape.Origin;
+    pt1 = cam.ConvertPointWorldToViewer(pt1[0], pt1[1]);
+    
+    var tmp = -this.Shape.Orientation * Math.PI / 180.0;
+    var dx = this.Shape.Length * Math.cos(tmp);
+    var dy = this.Shape.Length * Math.sin(tmp);
+
+    var pt2 = [pt1[0] + dx, pt1[1] + dy];
+    return [pt1, pt2];
   };
 
   // TODO: Repurpose for dragging
@@ -473,6 +512,6 @@
       this.Shape.UpdateBuffers(this.Layer.AnnotationView);
     }
   };  
-
+  
   SAM.ArrowWidget = ArrowWidget;
 })();

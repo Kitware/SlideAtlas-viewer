@@ -52,7 +52,7 @@
         .addClass('sa-view-annotation-button sa-flat-button-active')
         .addClass('sa-active')
         .attr('type', 'image')
-        .attr('src', SA.ImagePathUrl + 'Text.gif')
+        .attr('src', SA.ImagePathUrl + 'Text.png')
         // .prop('title', 'Text')
         .on('click touchstart', function () { self.NewText(); });
     this.CircleButton = $('<img>')

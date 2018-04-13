@@ -200,12 +200,12 @@
     $('<img>')
       .appendTo(textDiv)
       .addClass('sa-view-button')
-      .attr('src', SA.ImagePathUrl + 'Text.gif')
+      .attr('src', SA.ImagePathUrl + 'Text.png')
       .css({'height': '24px'});
     $('<p>')
       .appendTo(textDiv)
       .css({'display':'inline-block'})
-      .text('Text tool: Click on text to drag it.');
+      .text('Text tool: Select text to drag it.');
 
     var arrowDiv = $('<div>')
         .appendTo(helpDiv)
@@ -213,7 +213,7 @@
     $('<img>')
       .appendTo(arrowDiv)
       .addClass('sa-view-button')
-      .attr('src', SA.ImagePathUrl + 'Arrow.gif')
+      .attr('src', SA.ImagePathUrl + 'Arrow.png')
       .css({'height': '24px'});
     $('<p>')
       .appendTo(arrowDiv)
@@ -454,14 +454,14 @@
     // Radio buttons for tools. (One active at a time).
     this.CursorButton = this.AddToolRadioButton('cursor_arrow.png', 'CursorOn');
     this.RectSelectButton = this.AddToolRadioButton('rect_select.png', 'RectSelectOn');
-    this.TextButton = this.AddToolRadioButton('Text.gif', 'TextButtonOn');
-    this.ArrowButton = this.AddToolRadioButton('Arrow.gif', 'ArrowButtonOn');
+    this.TextButton = this.AddToolRadioButton('Text.png', 'TextButtonOn');
+    this.ArrowButton = this.AddToolRadioButton('Arrow.png', 'ArrowButtonOn');
     this.PencilButton = this.AddToolRadioButton('Pencil-icon.png', 'PencilButtonOn');
  
     // This is visibile, only when a annotation is being edited.
     this.RectSelectButton.hide();
-      this.CursorButton.css({'border': '2px solid #333',
-			     'background-color':'#bcf'});
+    this.CursorButton.css({'border': '2px solid #333',
+			                     'background-color':'#bcf'});
     
     // Default just lets the viewer handle the events.
     this.ActiveToolButton = this.CursorButton;
@@ -512,7 +512,7 @@
 
     // A menu button that pops up when a markup is selected.
     // Not part of the radio group.  This is a sub option for widgets.
-    this.SelectedMenuButton = $('<img>')
+    this.ProperiesDialogButton = $('<img>')
       .appendTo(this.OptionsDiv)
       .addClass('sa-view-annotation-button sa-flat-button-active')
       .addClass('sa-active')
@@ -606,7 +606,7 @@
     this.UpdateToolVisibility();    
   };
 
-  // Called by the SelectedMenuButton click event.
+  // Called by the ProperiesDialogButton click event.
   GirderAnnotationPanel.prototype.ShowSelectedWidgetMenu = function () {
     if (!this.Highlighted || !this.SelectedWidget) {
       return;
@@ -622,9 +622,9 @@
   // TODO: Help tool. to explain why a tool is not available.
   GirderAnnotationPanel.prototype.UpdateToolVisibility = function () {
     if (this.SelectedWidget) {
-      this.SelectedMenuButton.show();
+      this.ProperiesDialogButton.show();
     } else {
-      this.SelectedMenuButton.hide();
+      this.ProperiesDialogButton.hide();
     }
 
     // Pencil is always visible. If a layer is not being edit, one is created and set to editon.
@@ -1746,33 +1746,35 @@
     // Anything being edited has to be loaded too.
     var layer = annotObj.Layer;
     layer.SetSelected(false);
-    var selectWidget = new SAM.RectSelectWidget(layer);
-    selectWidget.SetFinishCallback(function (w) { self.RectSelectOff(); });
-    layer.AddWidget(selectWidget);
+    var rectSelectWidget = new SAM.RectSelectWidget(layer);
+    rectSelectWidget.SetFinishCallback(function (w) { self.RectSelectOff(rectSelectWidget); });
+    layer.AddWidget(rectSelectWidget);
     // Start receiving events.
     // Normally this happens as a call back when state changes to drawing.
-    layer.ActivateWidget(selectWidget);
-    selectWidget.SetStateToDrawing(layer);
-    this.SelectedWidget = selectWidget;
+    layer.ActivateWidget(rectSelectWidget);
+    rectSelectWidget.SetStateToDrawing(layer);
   };
-  GirderAnnotationPanel.prototype.RectSelectOff = function () {
+  // This is called when the selection has been made by the user.
+  GirderAnnotationPanel.prototype.RectSelectOff = function (selector) {
     var annotObj = this.Highlighted;
-    var selectWidget = this.SelectedWidget;
-    var selectCount = 0;
+    var selectedWidgets = [];
     var layer = annotObj.Layer;
     for (var idx = 0; idx < layer.GetNumberOfWidgets(); ++idx) {
       var w = layer.GetWidget(idx);
-      if (w.Select) {
-        selectCount += w.Select(selectWidget);
+      if (w.ApplySelect && w.ApplySelect(selector)) {
+        selectedWidgets.push(w);
       }
     }
-    layer.RemoveWidget(selectWidget);
+    layer.RemoveWidget(selector);
     layer.EventuallyDraw();
 
-    // Se if we can move this to CursorOn
-    this.SelectedWidget = undefined;
-    this.HighlightRadioToolButton(this.CursorButton);
-
+    if (selectedWidgets.length === 1){
+      this.SetSelectedWidget(selectedWidgets[0]);
+    } else {
+      // See if we can move this to CursorOn
+      this.SelectedWidget = undefined;
+      this.HighlightRadioToolButton(this.CursorButton);
+    }
     this.UpdateToolVisibility();
   };
 
@@ -1802,10 +1804,9 @@
       widget.SetCreationCamera(layer.GetCamera());
       widget.SetStateToDialog();
     }
-    //this.TextWidget = widget; scheduled for delete.  Not used anywhere.
 
     // Activate the widget to start drawing.
-    widget.SetStateToDrawing(layer);
+    widget.SetStateToActive();
 
     // If the text is deactivated by closing the dialog, this will turn off the
     // text button.
@@ -2122,7 +2123,7 @@
     // Turn off previous tool widgets. (deactivate)
     if (this.Highlighted) {
       var layer = this.Highlighted.Layer;
-      layer.InactivateAll();
+      layer.UnselectAll();
     }
 
     // First one to consume the click wins the selection.
@@ -2160,13 +2161,18 @@
       }
     }
 
-    // TODO: This ivar is only really needed for the properties dialog.
-    // We could just find the first selected widget ....
-    this.SelectedWidget = undefined;
+    this.SetSelectedWidget(selectedWidget);    
+    return false;
+  };
 
-    // Change the panel to reflect a selection change.
+  // If only one widget is selected, we make it active (and show the properties button.
+  // You can call this with selectedWidget = undefined to unset it.
+  // The annot object is the one that contains the widget.
+  GirderAnnotationPanel.prototype.SetSelectedWidget = function(selectedWidget, selectedAnnotObj) {
+    // No widget: Go back to the cursor mode.
     if (!selectedWidget) {
-      // Nothing was selected with that click.
+      this.SelectedWidget = undefined;
+      // Nothing was selected.
       // Change the state back to cursor
       this.HighlightRadioToolButton(this.CursorButton);
       // See if we can move this to CursorOn
@@ -2175,11 +2181,38 @@
       return true;
     }
 
+    // Trying to unify single select and region select (when only one is selected)
+    // This is ugly.  Caller shoudl supply the annot obj.
+    // I not sure that you can select an widget that is not in the editing annotObj anyway.
+    if (selectedAnnotObj === undefined) {
+      // Find the annotObj for this widget.
+      for (var i = 0; i < this.AnnotationObjects.length && !selectedAnnotObj; ++i) {
+        var annotObj = this.AnnotationObjects[i];
+        if (annotObj.Layer !== undefined) {
+          var layer = annotObj.Layer;
+          for (var j = 0; j < layer.GetNumberOfWidgets(); ++j) {
+            if (selectedWidget === layer.GetWidget(j)) {
+              selectedAnnotObj = annotObj;
+              break;
+            }
+          }
+        }
+      }
+    }
+    if (selectedAnnotObj === undefined) {
+      return;
+    }
+
+    // TODO: This ivar is only really needed for the properties dialog.
+    // We could just find the first selected widget ....
+    this.SelectedWidget = undefined;
+
     // Make the layer editable.
     if (selectedAnnotObj) {
-      this.EditOn(selectedAnnotObj)
+      this.EditOn(selectedAnnotObj);
     }
-    
+
+    // TODO: Try to get rid of this case statement.
     // Change the tool radio to reflect the widget choosen.
     if (selectedWidget.Type == 'pencil') {
       // Make the open-closed toggle button match the state of the selected widget.
@@ -2194,19 +2227,22 @@
       // I am trying to avoid triggering the button. It has caused headaches in the past.
       // This might miss setting up a callback on the widget.
       this.HighlightRadioToolButton(this.PencilButton);
+      // Should we change this to SetStateToActive?
       selectedWidget.SetStateToDrawing(selectedAnnotObj.Layer);
     }
     if (selectedWidget.Type == 'text') {
+      selectedWidget.SetStateToActive();
       this.HighlightRadioToolButton(this.TextButton);
-      selectedWidget.SetStateToDrawing(selectedAnnotObj.Layer);
+    }
+    if (selectedWidget.Type == 'arrow') {
+      this.HighlightRadioToolButton(this.ArrowButton);
+      //selectedWidget.SetStateToDrawing(selectedAnnotObj.Layer);
     }
     
     // TODO: This ivar is only really needed for the properties dialog.
     // We could just find the first selected widget ....
     this.SelectedWidget = selectedWidget;
     this.UpdateToolVisibility();
-    
-    return false;
   };
 
   // This adds a pencil ivar (= true) for events generated by the iPad pencil.

@@ -204,7 +204,6 @@
 
     this.Layer.GetParent().css({'cursor': ''});
     this.State = INACTIVE;
-    //this.Shapes.SetSelected(false);
     this.StateChanged();
 
     // TODO:  Make the caller do this.
@@ -593,7 +592,17 @@
   // Selects or unselects all strokes.
   // Returns true if any selection changed.
   PencilWidget.prototype.SetSelected = function (flag) {
-    return this.Shapes.SetSelected(flag);
+    var ret = this.Shapes.SetSelected(flag);
+  
+    if (flag && this.SelectedCallback) {
+      (this.SelectedCallback)(this);
+    }
+    if (!flag) {
+      // We can be selected without being active, but we cannot be
+      // active without being selected.
+      this.SetStateToInactive();
+    }
+    return ret;
   };
 
   // Returns true if any strokes are selected.
@@ -603,8 +612,8 @@
 
   // Selects all strokes that match the selection
   // TODO: Check all the points in the stroke after the rough bounds check.
-  PencilWidget.prototype.Select = function (selection) {
-    var count = 0;
+  PencilWidget.prototype.ApplySelect = function (selection) {
+    var selected = false;
     for (var idx = 0; idx < this.Shapes.GetNumberOfShapes(); ++idx) {
       var shape = this.Shapes.GetShape(idx);
       // first check the bounds (xmin,xmax,ymin,ymax].
@@ -615,12 +624,12 @@
           selection.WorldPointInSelection(bds[1], bds[3])) {
         // Good enough for now
         shape.SetSelected(true);
-        count += 1;
+        selected = true;
       } else {
         shape.SetSelected(false);
       }
     }
-    return count;
+    return selected;;
   };
 
   // Can we bind the dialog apply callback to an objects method?

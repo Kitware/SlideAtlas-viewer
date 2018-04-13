@@ -118,13 +118,17 @@
     return false;
   };
 
-  RectSelectWidget.prototype.WorldPointInSelection = function (x, y) {
-    var viewerPt = this.Camera.ConvertPointWorldToViewer(x, y);
-    if (viewerPt[0] > this.Point1[0] && viewerPt[0] < this.Point2[0] &&
-        viewerPt[1] > this.Point1[1] && viewerPt[1] < this.Point2[1]) {
+  RectSelectWidget.prototype.ViewerPointInSelection = function (x, y) {
+    if (x > this.Point1[0] && x < this.Point2[0] &&
+        y > this.Point1[1] && y < this.Point2[1]) {
       return true;
     }
     return false;
+  };
+
+  RectSelectWidget.prototype.WorldPointInSelection = function (x, y) {
+    var viewerPt = this.Camera.ConvertPointWorldToViewer(x, y);
+    return this.ViewerPointInSelection(viewerPt[0], viewerPt[1]);
   };
 
   SAM.RectSelectWidget = RectSelectWidget;

@@ -736,7 +736,7 @@
     var changed = false;
     for (var idx = 0; idx < this.WidgetList.length; ++idx) {
       var widget = this.WidgetList[idx];
-      if (widget.SetSelcted && widget.SetSelected(flag)) {
+      if (widget.SetSelected && widget.SetSelected(flag)) {
         changed = true;
       }
     }
@@ -764,6 +764,15 @@
       }
     }
     return true;
+  };
+
+  AnnotationLayer.prototype.UnselectAll = function () {
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var widget = this.WidgetList[i];
+      if (widget.SetSelected) {
+        widget.SetSelected(false);
+      }
+    }
   };
 
   // Returns true if something was deleted..

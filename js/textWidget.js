@@ -5,13 +5,21 @@
     // Depends on the CIRCLE widget
   'use strict';
 
+  // Not receiving events
   var INACTIVE = 0;
-  var DIALOG = 1;
+  // Receiving events but not clickable
+  var ACTIVE = 1;
+  // Mouse over widget and clickable
+  var HOVER = 2;
+  // Dialog window is up.
+  var DIALOG = 2;
+  // Dragging the text but not the arrow point
   var DRAG_TEXT = 3;
-  var DRAG_ARROW = 4;
+  // Draggind the text and arrow.
+  var DRAG = 4;
 
   var TEXT_ONLY = 0;
-  var HOVER = 1;
+  var ARROW_HOVER = 1;
   var TEXT_ARROW = 2;
   
   // TODO: Get rid of this layer in the constructor.
@@ -48,6 +56,32 @@
     this.SelectedCallback = callback;
   };
 
+  // Selects the widget if the text is fuly contained in the selection rectangle.
+  TextWidget.prototype.ApplySelect = function (selection) {
+    var bds = this.Text.PixelBounds;
+    var cam = this.Layer.GetCamera();
+    var p = cam.ConvertPointWorldToViewer(this.Text.Position[0], this.Text.Position[1]);
+    
+    if (selection.ViewerPointInSelection(p[0] + bds[0], p[1] + bds[2]) &&
+        selection.ViewerPointInSelection(p[0] + bds[0], p[1] + bds[3]) &&
+        selection.ViewerPointInSelection(p[0] + bds[1], p[1] + bds[2]) &&
+        selection.ViewerPointInSelection(p[0] + bds[1], p[1] + bds[3])) {
+      this.Text.SetSelected(true);
+      this.Arrow.SetSelected(true);
+      return true;
+    }
+    this.Text.SetSelected(false);
+    this.Arrow.SetSelected(false);
+    return false;
+  };
+  
+  TextWidget.prototype.SetCreationCamera = function (cam) {
+    // Lets save the zoom level (sort of).
+    // Load will overwrite this for existing annotations.
+    // This will allow us to expand annotations into notes.
+    this.CreationCamera = cam.Serialize();
+  };
+  
   // This callback gets called when ever the active state changes,
   // even if caused by an external call. This widget is passed as a argument.
   // This is used to turn off the pencil button in the Panel.
@@ -75,15 +109,38 @@
     }
 
     this.State = INACTIVE;
-    // I want active and selected to be independant.
-    //this.Text.SetSelected(false);
-    //this.Arrow.SetSelected(false);
-
     this.StateChanged();
-
     this.Text.SetSelected(false);
     this.Arrow.SetSelected(false);
-    this.Layer.GetParent().css({'cursor': ''});
+
+    // TODO:  Make the caller do this.
+    this.Layer.EventuallyDraw();
+  };
+
+  // I am not sure if this is used.  We have multiple selected states.
+  // Default to the whole widget selected.
+  TextWidget.prototype.SetSelected = function (flag) {
+    this.Text.SetSelected(flag);
+    this.Arrow.SetSelected(flag);
+  
+    if (flag && this.SelectedCallback) {
+      (this.SelectedCallback)(this);
+    }
+    if (!flag) {
+      // We can be selected without being active, but we cannot be
+      // active without being selected.
+      this.SetStateToInactive();
+    }
+  };
+
+  TextWidget.prototype.SetStateToActive = function () {
+    if (this.State === ACTIVE) {
+      return;
+    }
+
+    this.State = ACTIVE;
+    this.StateChanged();
+
     // TODO:  Make the caller do this.
     this.Layer.EventuallyDraw();
   };
@@ -101,38 +158,6 @@
     this.ShowPropertiesDialog();
   };
 
-  TextWidget.prototype.SetStateToDragText = function () {
-    if (this.State === DRAG_TEXT) {
-      return;
-    }
-    this.State = DRAG_TEXT;
-    this.Text.SetSelected(true);
-    this.Arrow.SetSelected(false);
-    this.Layer.GetParent().css({'cursor': 'move'});
-    this.StateChanged();
-    // TODO:  Make the caller do this.
-    this.Layer.EventuallyDraw();
-  };
-
-  TextWidget.prototype.SetStateToDragArrow = function () {
-    if (this.State === DRAG_ARROW) {
-      return;
-    }
-    this.State = DRAG_ARROW;
-    this.Text.SetSelected(false);
-    this.Arrow.SetSelected(true);
-    this.Layer.GetParent().css({'cursor': 'move'});
-    this.StateChanged();
-    // TODO:  Make the caller do this.
-    this.Layer.EventuallyDraw();
-  };
-
-  // Selects or unselects all strokes.
-  // Returns true if any selection changed.
-  TextWidget.prototype.SetSelected = function (flag) {
-    return this.Text.SetSelected(flag) || this.Arrow.SetSelected(flag);
-  };
-
   // Can we delete this?
   TextWidget.prototype.IsEmpty = function () {
     if (this.Text.GetString() === '') {
@@ -143,16 +168,6 @@
 
   TextWidget.prototype.IsSelected = function () {
     return this.Text.IsSelected() || this.Arrow.IsSelected();
-  };
-  TextWidget.prototype.SetSelected = function (flag) {
-    return this.Text.SetSelected(flag) || this.Arrow.SetSelected(flag);
-  };
-
-  TextWidget.prototype.SetCreationCamera = function (cam) {
-    // Lets save the zoom level (sort of).
-    // Load will overwrite this for existing annotations.
-    // This will allow us to expand annotations into notes.
-    this.CreationCamera = cam.Serialize();
   };
 
   TextWidget.prototype.SetPositionToDefault = function () {
@@ -178,14 +193,6 @@
     this.Text.Position = [fp[0], fp[1], 0];
     this.ArrowModified = true;
     this.Uninitialized = false;
-  };
-
-  // TODO: Change annotation panne so this is not necessary.
-  TextWidget.prototype.SetStateToDrawing = function () {
-    // Odd  TODO: resolve this method.
-    //if (this.State === DIALOG) {
-    //  this.SetStateToDialog();
-    //}
   };
 
   // Three state visibility so text can be hidden during calss questions.
@@ -225,7 +232,7 @@
 
   TextWidget.prototype.PasteCallback = function (data, mouseWorldPt) {
     this.Load(data);
-        // Place the tip of the arrow at the mose location.
+    // Place the tip of the arrow at the mose location.
     this.Text.Position[0] = mouseWorldPt[0];
     this.Text.Position[1] = mouseWorldPt[1];
     this.ArrowModified = true;
@@ -364,10 +371,6 @@
   };
 
   // Returns this widget if it is selected, undefined otherwise.
-  // TODO: Fix:
-  // Mixed behaviors.  Some widgets change their state when selected (like this one).
-  // Others jsut change selected states of componennts and leave it to the panel to
-  // change their state.
   TextWidget.prototype.SingleSelect = function () {
     if (this.State === DIALOG) {
       return;
@@ -376,19 +379,19 @@
     var tMouse = this.ScreenPixelToTextPixelPoint(event.offsetX, event.offsetY);
 
     if (this.Text.PointInText(tMouse[0], tMouse[1])) {
+      this.Text.SetSelected(true);
+      this.Arrow.SetSelected(false);
       // A second click brings up the dialog to exit the text.
       if (this.State === DRAG_TEXT) {
         this.SetStateToDialog();
         return this;
       }
-      this.SetStateToDragText();
-      this.Text.SetSelected(true);
       return this;
     }
     var anchor = this.Text.Offset;
     if (this.Arrow.PointInShape(tMouse[0] - anchor[0], tMouse[1] - anchor[1])) {
-      this.SetStateToDragArrow();
       this.Text.SetSelected(true);
+      this.Arrow.SetSelected(true);
       return this;
     }
     this.SetStateToInactive();
@@ -429,16 +432,27 @@
     if (this.State === INACTIVE) {
       return true;
     }
+
     var event = this.Layer.Event;
     if (event.which === 1) {
-      // LastMouse necessary for dragging.
       var x = event.offsetX;
       var y = event.offsetY;
-      console.log("set last mouse (on down)");
       this.LastMouse = [x, y];
-      return false;
+      var tMouse = this.ScreenPixelToTextPixelPoint(x, y);
+      if (this.State === HOVER) {
+        if (this.Arrow.IsSelected()) {
+          this.State = DRAG;
+        } else if (this.Text.IsSelected()) {
+          if (this.VisibilityMode === TEXT_ONLY) {
+            this.State = DRAG;
+          } else {
+            this.State = DRAG_TEXT;
+          }
+        }
+      }
     }
-    return true;
+    
+    return this.State === ACTIVE;
   };
 
   // returns false when it is finished doing its work.
@@ -446,7 +460,8 @@
     if (this.State === INACTIVE) {
       return true;
     }
-    if (this.State === DRAG_TEXT || this.State === DRAG_ARROW) {
+    if (this.State === DRAG_TEXT || this.State === DRAG) {
+      this.SetStateToActive();
       this.Modified();
     }
     return false;
@@ -469,27 +484,45 @@
   };
 
   TextWidget.prototype.HandleMouseMove = function () {
+    if (this.State === INACTIVE) {
+      return true;
+    }
+    
     var event = this.Layer.Event;
+    var x = event.offsetX;
+    var y = event.offsetY;
+    if (this.State === ACTIVE || this.State === HOVER) {
+      var cursor = '';
+      var tMouse = this.ScreenPixelToTextPixelPoint(x, y);
+      if (this.Text.IsSelected() && this.Text.PointInText(tMouse[0], tMouse[1])) {
+        cursor = 'move';
+        this.State = HOVER;
+      } else if (this.Arrow.IsSelected() && this.Arrow.PointInShape(tMouse[0], tMouse[1])) {
+        cursor = 'move';
+        this.State = HOVER;
+      } else {
+        this.State = ACTIVE;
+      } 
+      this.Layer.GetParent().css({'cursor': cursor});
+    }
+    
     if ((this.VisibilityMode === 0 && this.State === DRAG_TEXT) ||
-        this.State === DRAG_ARROW) {
+        this.State === DRAG) {
       var cam = this.Layer.GetCamera();
       var w0 = cam.ConvertPointViewerToWorld(this.LastMouse[0], this.LastMouse[1]);
-      var w1 = cam.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
+      var w1 = cam.ConvertPointViewerToWorld(x, y);
       var wdx = w1[0] - w0[0];
       var wdy = w1[1] - w0[1];
-      console.log("set last mouse (on drag arrow)");
-      this.LastMouse = [event.offsetX, event.offsetY];
       this.Text.Position[0] += wdx;
       this.Text.Position[1] += wdy;
       this.ArrowModified = true;
       this.Layer.EventuallyDraw();
+      this.LastMouse = [x, y];
       return false;
     } else if (this.State === DRAG_TEXT) { // Just the text not the anchor glyph
       var dx = event.offsetX - this.LastMouse[0];
       var dy = event.offsetY - this.LastMouse[1];
-      console.log("set last mouse (on drag text)");
       this.LastMouse = [event.offsetX, event.offsetY];
-
       // TODO: Get the Mouse Deltas out of the layer.
       this.Text.Offset[0] -= dx;
       this.Text.Offset[1] -= dy;
@@ -571,39 +604,38 @@
             .val('#30ff00')
             .css({'display': 'table-cell'});
 
-    // this.Dialog.VisibilityModeDiv =
-    //        $('<div>')
-    //        .appendTo(this.Dialog.Body)
-    //        .css({'display': 'table-row'});
-    // this.Dialog.VisibilityModeLabel =
-    //        $('<div>')
-    //        .appendTo(this.Dialog.VisibilityModeDiv)
-    //        .text('Visibility:')
-    //        .css({'display': 'table-cell',
-    //          'text-align': 'left'});
-    // this.Dialog.VisibilityModeInputButtons =
-    //        $('<div>')
-    //        .appendTo(this.Dialog.VisibilityModeDiv)
-    //        .css({'display': 'table-cell'});
+    this.Dialog.VisibilityModeDiv =
+            $('<div>')
+            .appendTo(this.Dialog.Body)
+            .css({'display': 'table-row'});
+    this.Dialog.VisibilityModeLabel =
+            $('<div>')
+            .appendTo(this.Dialog.VisibilityModeDiv)
+            .text('Visibility:')
+            .css({'display': 'table-cell',
+              'text-align': 'left'});
+    this.Dialog.VisibilityModeInputButtons =
+            $('<div>')
+            .appendTo(this.Dialog.VisibilityModeDiv)
+            .css({'display': 'table-cell'});
+    this.Dialog.VisibilityModeInputs = [];
+    this.Dialog.VisibilityModeInputs[TEXT_ONLY] =
+      $('<input type="radio" name="visibilityoptions" value="0">Text only</input>')
+      .appendTo(this.Dialog.VisibilityModeInputButtons);
 
-    // this.Dialog.VisibilityModeInputs = [];
-    // this.Dialog.VisibilityModeInputs[TEXT_ONLY] =
-    //  $('<input type="radio" name="visibilityoptions" value="0">Text only</input>')
-    //  .appendTo(this.Dialog.VisibilityModeInputButtons);
+    $('<br>').appendTo(this.Dialog.VisibilityModeInputButtons);
 
-    // $('<br>').appendTo(this.Dialog.VisibilityModeInputButtons);
+    this.Dialog.VisibilityModeInputs[ARROW_HOVER] =
+      $('<input type="radio" name="visibilityoptions" value="1">Arrow only, text on hover</input>')
+      .appendTo(this.Dialog.VisibilityModeInputButtons);
 
-    // this.Dialog.VisibilityModeInputs[HOVER] =
-    //  $('<input type="radio" name="visibilityoptions" value="1">Arrow only, text on hover</input>')
-    //  .appendTo(this.Dialog.VisibilityModeInputButtons);
+    $('<br>').appendTo(this.Dialog.VisibilityModeInputButtons);
 
-    // $('<br>').appendTo(this.Dialog.VisibilityModeInputButtons);
+    this.Dialog.VisibilityModeInputs[TEXT_ARROW] =
+      $('<input type="radio" name="visibilityoptions" value="2">Arrow and text visible</input>')
+      .appendTo(this.Dialog.VisibilityModeInputButtons);
 
-    // this.Dialog.VisibilityModeInputs[TEXT_ARROW] =
-    //  $('<input type="radio" name="visibilityoptions" value="2">Arrow and text visible</input>')
-    //  .appendTo(this.Dialog.VisibilityModeInputButtons);
-
-    // this.Dialog.VisibilityModeInputs[TEXT_ONLY].attr('checked', 'true')
+    this.Dialog.VisibilityModeInputs[TEXT_ONLY].attr('checked', 'true')
 
     
     this.Dialog.BackgroundDiv =
@@ -641,9 +673,9 @@
       if (defaults.BackgroundFlag !== undefined) {
         this.Text.BackgroundFlag = defaults.BackgroundFlag;
       }
-      //if (defaults.VisibilityMode !== undefined) {
-      //  this.VisibilityMode = defaults.VisibilityMode;
-      //}
+      if (defaults.VisibilityMode !== undefined) {
+        this.VisibilityMode = defaults.VisibilityMode;
+      }
     }
   };
 
@@ -673,6 +705,15 @@
       // This will triger the layer to get rid of the text widget.
       this.Text.SetString('');
     }
+    // Why doen't the layer do this?
+    if (this.IsEmpty()) {
+      this.Layer.EventuallyDraw();
+      this.Layer.RemoveWidget(this);
+      // Trigger the changed callback  (should we have a delete callback?)
+      this.StateChanged();
+      return;
+    }
+
     this.SetStateToInactive();
     this.Layer.EventuallyDraw();
   };
@@ -722,21 +763,21 @@
 
     // Get the visibility mode
     var mode = TEXT_ONLY;
-    // if (this.Dialog.VisibilityModeInputs[TEXT_ONLY].prop('checked')) {
-    //  if (this.VisibilityMode !== TEXT_ONLY) { modified = true; }
-    //  mode = TEXT_ONLY;
-    // } else if (this.Dialog.VisibilityModeInputs[HOVER].prop('checked')) {
-    //  if (this.VisibilityMode !== HOVER) { modified = true; }
-    //  mode = HOVER;
-    // } else {
-    //  if (this.VisibilityMode !== TEXT_ARROW) { modified = true; }
-    //  mode = TEXT_ARROW;
-    // }
-    // if (this.VisibilityMode !== mode) {
-    //  // This also changes the anchor if necessary.
-    //  this.SetVisibilityMode(mode);
-    //  modified = true;
-    // }
+    if (this.Dialog.VisibilityModeInputs[TEXT_ONLY].prop('checked')) {
+      if (this.VisibilityMode !== TEXT_ONLY) { modified = true; }
+      mode = TEXT_ONLY;
+    } else if (this.Dialog.VisibilityModeInputs[ARROW_HOVER].prop('checked')) {
+      if (this.VisibilityMode !== ARROW_HOVER) { modified = true; }
+      mode = ARROW_HOVER;
+    } else {
+      if (this.VisibilityMode !== TEXT_ARROW) { modified = true; }
+      mode = TEXT_ARROW;
+    }
+    if (this.VisibilityMode !== mode) {
+      // This also changes the anchor if necessary.
+      this.SetVisibilityMode(mode);
+      modified = true;
+    }
 
     // Background flag is not working for some reasop.
     var backgroundFlag = this.Dialog.BackgroundInput.prop('checked');
@@ -749,7 +790,7 @@
     localStorage.TextWidgetDefaults = JSON.stringify({
       Color: hexcolor,
       FontSize: this.Text.GetFontSize(),
-      //VisibilityMode: this.VisibilityMode,
+      VisibilityMode: this.VisibilityMode,
       BackgroundFlag: backgroundFlag});
 
     if (modified) {
@@ -760,18 +801,6 @@
   // Function to apply line breaks to textarea text.
   TextWidget.prototype.ApplyLineBreaks = function () {
     var oTextarea = this.Dialog.TextInput[0];
-
-    /*
-      if (oTextarea.wrap) {
-      oTextarea.setAttribute("wrap", "off");
-      } else {
-      oTextarea.setAttribute("wrap", "off");
-      var newArea = oTextarea.cloneNode(true);
-      newArea.value = oTextarea.value;
-      oTextarea.parentNode.replaceChild(newArea, oTextarea);
-      oTextarea = newArea;
-      }
-    */
 
     oTextarea.setAttribute('wrap', 'off');
     var strRawValue = oTextarea.value;
