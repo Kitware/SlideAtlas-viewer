@@ -391,8 +391,7 @@
 
   // Returns true if modified.
   TextWidget.prototype.DeleteSelected = function () {
-    if (this.State !== INACTIVE) {
-      // layer will see this as an empty widget and delete it.
+    if (this.Text.IsSelected()) {
       this.Text.SetString('');
       return true;
     }
@@ -485,10 +484,11 @@
     if (this.State === ACTIVE || this.State === HOVER) {
       var cursor = '';
       var tMouse = this.ScreenPixelToTextPixelPoint(x, y);
+      var anchor = this.Text.Offset;
       if (this.Text.IsSelected() && this.Text.PointInText(tMouse[0], tMouse[1])) {
         cursor = 'move';
         this.State = HOVER;
-      } else if (this.Arrow.IsSelected() && this.Arrow.PointInShape(tMouse[0], tMouse[1])) {
+      } else if (this.Arrow.IsSelected() && this.Arrow.PointInShape(tMouse[0] - anchor[0], tMouse[1] - anchor[1])) {
         cursor = 'move';
         this.State = HOVER;
       } else {
@@ -666,6 +666,7 @@
       }
       if (defaults.VisibilityMode !== undefined) {
         this.VisibilityMode = defaults.VisibilityMode;
+        this.Dialog.VisibilityModeInputs[this.VisibilityMode].attr('checked', 'true')
       }
     }
   };
