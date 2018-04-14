@@ -760,7 +760,7 @@
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
       if (widget.SetStateToInactive) {
-        widget.SetStateToInactive();
+        widget.SetActive(false);
       }
     }
     return true;
@@ -1104,7 +1104,7 @@
       console.log("ipad pencil end");
       var pencil = this.GetIPadPencilWidget();
       pencil.HandleTouchEnd(this);
-      pencil.SetStateToInactive();
+      pencil.SetActive(false);
       this.Modified();
       // Tell the panel that this layer selection has changed.
       if (this.SelectionChangedCallback) {

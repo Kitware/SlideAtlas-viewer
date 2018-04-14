@@ -1806,7 +1806,7 @@
     }
 
     // Activate the widget to start drawing.
-    widget.SetStateToActive();
+    widget.SetActive(true);
 
     // If the text is deactivated by closing the dialog, this will turn off the
     // text button.
@@ -2171,6 +2171,9 @@
   GirderAnnotationPanel.prototype.SetSelectedWidget = function(selectedWidget, selectedAnnotObj) {
     // No widget: Go back to the cursor mode.
     if (!selectedWidget) {
+      if (this.SelectedWidget) {
+        this.SelectedWidget.SetActive(false);
+      }
       this.SelectedWidget = undefined;
       // Nothing was selected.
       // Change the state back to cursor
@@ -2227,15 +2230,16 @@
       // I am trying to avoid triggering the button. It has caused headaches in the past.
       // This might miss setting up a callback on the widget.
       this.HighlightRadioToolButton(this.PencilButton);
-      // Should we change this to SetStateToActive?
+      // Should we change this to SetActive(true)?
       selectedWidget.SetStateToDrawing(selectedAnnotObj.Layer);
     }
     if (selectedWidget.Type == 'text') {
-      selectedWidget.SetStateToActive();
+      selectedWidget.SetActive(true);
       this.HighlightRadioToolButton(this.TextButton);
     }
     if (selectedWidget.Type == 'arrow') {
       this.HighlightRadioToolButton(this.ArrowButton);
+      selectedWidget.SetActive(true);
       //selectedWidget.SetStateToDrawing(selectedAnnotObj.Layer);
     }
     

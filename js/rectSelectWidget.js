@@ -36,6 +36,7 @@
     this.FinishCallback = callback;
   };
 
+  // TODO: GET RID OF THIS (USE SetActive instead)
   // Starts the process of dragging a rectangle (just changes the cursor.
   RectSelectWidget.prototype.SetStateToDrawing = function () {
     this.State = START;
@@ -43,12 +44,15 @@
   };
 
   // Starts the process of dragging a rectangle (just changes the cursor.
-  RectSelectWidget.prototype.SetStateToInactive = function () {
-    if (this.State === INACTIVE) {
-      return;
+  RectSelectWidget.prototype.SetActive = function (flag) {
+    if (!flag && this.State !== INACTIVE) {
+      this.State = INACTIVE;
+      this.Layer.GetParent().css({'cursor': ''});
     }
-    this.State = INACTIVE;
-    this.Layer.GetParent().css({'cursor': ''});
+    if (flag && this.State === INACTIVE) {
+      this.State = START;
+      this.Layer.GetParent().css({'cursor': 'nw-resize'});
+    }
   };
 
   RectSelectWidget.prototype.Draw = function () {

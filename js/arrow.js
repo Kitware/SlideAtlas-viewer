@@ -112,6 +112,28 @@
     }
   };
 
+  // Polar is a pain.
+  // This positions the tail a point in viewer coordinates.
+  // This only works for world coordinat system, constant size, constant orientation.
+  Arrow.prototype.SetTailViewer = function(x, y, cam) {
+    var tipViewer = cam.ConvertPointWorldToViewer(this.Origin[0], this.Origin[1]);
+    var dx = x - tipViewer[0];
+    var dy = y - tipViewer[1];
+    this.Length = Math.sqrt(dx * dx + dy * dy);
+    this.Orientation = -Math.atan2(dy, dx) * 180.0 / Math.PI;
+  };
+  
+  // Polar is a pain.
+  // This positions the tail a point in viewer coordinates.
+  // This only works for world coordinat system, constant size, constant orientation.
+  Arrow.prototype.GetTailViewer = function(cam) {
+    var tipViewer = cam.ConvertPointWorldToViewer(this.Origin[0], this.Origin[1]);
+    var theta = -this.Orientation * Math.PI / 180.0;
+    var x = tipViewer[0] + this.Length * Math.cos(theta);
+    var y = tipViewer[1] + this.Length * Math.sin(theta);
+    return [x, y];
+  };
+  
   // TODO: Put these in the shape superclass.
   Arrow.prototype.IsSelected = function () {
     return this.Selected;

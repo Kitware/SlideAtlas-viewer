@@ -103,20 +103,22 @@
     }
   };
 
-  TextWidget.prototype.SetStateToInactive = function () {
-    if (this.State === INACTIVE) {
-      return;
+  TextWidget.prototype.SetActive = function (flag) {
+    if (flag && this.State !== ACTIVE) {
+      this.State = ACTIVE;
+      this.StateChanged();
     }
-
-    this.State = INACTIVE;
-    this.StateChanged();
-    this.Text.SetSelected(false);
-    this.Arrow.SetSelected(false);
-
-    // TODO:  Make the caller do this.
+    if (!flag && this.State === ACTIVE) {
+      this.State = INACTIVE;
+      this.StateChanged();
+      // I should just let te caller do this.
+      this.Text.SetSelected(false);
+      this.Arrow.SetSelected(false);
+    }
+    // And this.
     this.Layer.EventuallyDraw();
   };
-
+  
   // I am not sure if this is used.  We have multiple selected states.
   // Default to the whole widget selected.
   TextWidget.prototype.SetSelected = function (flag) {
@@ -129,20 +131,8 @@
     if (!flag) {
       // We can be selected without being active, but we cannot be
       // active without being selected.
-      this.SetStateToInactive();
+      this.SetActive(false);
     }
-  };
-
-  TextWidget.prototype.SetStateToActive = function () {
-    if (this.State === ACTIVE) {
-      return;
-    }
-
-    this.State = ACTIVE;
-    this.StateChanged();
-
-    // TODO:  Make the caller do this.
-    this.Layer.EventuallyDraw();
   };
 
   TextWidget.prototype.SetStateToDialog = function () {
@@ -394,7 +384,8 @@
       this.Arrow.SetSelected(true);
       return this;
     }
-    this.SetStateToInactive();
+    // Not really necesary, but it cannot hurt.
+    this.SetActive(false);
     return;
   };
 
@@ -461,7 +452,7 @@
       return true;
     }
     if (this.State === DRAG_TEXT || this.State === DRAG) {
-      this.SetStateToActive();
+      this.SetActive(true);
       this.Modified();
     }
     return false;
@@ -695,7 +686,7 @@
     if (!this.Layer) {
       return;
     }
-    this.SetStateToInactive();
+    this.SetActive(false);
     this.Layer.EventuallyDraw();
   };
     
@@ -714,7 +705,7 @@
       return;
     }
 
-    this.SetStateToInactive();
+    this.SetActive(false);
     this.Layer.EventuallyDraw();
   };
 

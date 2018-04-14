@@ -197,23 +197,20 @@
     return this.State !== INACTIVE;
   };
 
-  PencilWidget.prototype.SetStateToInactive = function () {
-    if (this.State === INACTIVE) {
-      return;
+  PencilWidget.prototype.SetActive = function (flag) {
+    if (flag && this.State === INACTIVE) {
+      this.State = DRAWING_UP;
+      this.StateChanged();
     }
-
-    this.Layer.GetParent().css({'cursor': ''});
-    this.State = INACTIVE;
-    this.StateChanged();
-
-    // TODO:  Make the caller do this.
-    this.Layer.EventuallyDraw();
+    if (!flag &&  this.State !== INACTIVE) {
+      this.State = INACTIVE;
+      this.StateChanged();
+    }
   };
 
   PencilWidget.prototype.IsStateDrawingDown = function () {
     return this.State === DRAWING_DOWN;
-  }
-
+  };
   
   PencilWidget.prototype.SetStateToDrawing = function () {
     if (this.State === DRAWING_UP || this.State === DRAWING_DOWN) {
@@ -323,7 +320,7 @@
     if (this.State === DRAWING_UP || this.State === DRAWING_DOWN) {
       // escape key (or space or enter) to turn off drawing
       if (event.keyCode === 27 || event.keyCode === 32 || event.keyCode === 13) {
-        this.SetStateToInactive();
+        this.SetActive(false);
         return false;
       }
     }
@@ -333,7 +330,7 @@
   /*
   PencilWidget.prototype.HandleDoubleClick = function () {
     if (this.State === DRAWING_UP || this.State === DRAWING_DOWN) {
-      this.SetStateToInactive();
+      this.SetActive(false);
       return false;
     }
     if (this.State === SELECTED) {
@@ -509,7 +506,7 @@
     var event = this.Layer.Event;
     if (event.which === 2) {
       // Middle mouse was pressed.
-      this.SetStateToInactive();
+      this.SetActive(false);
       return false;
     }
 
@@ -600,7 +597,7 @@
     if (!flag) {
       // We can be selected without being active, but we cannot be
       // active without being selected.
-      this.SetStateToInactive();
+      this.SetActive(false);
     }
     return ret;
   };
