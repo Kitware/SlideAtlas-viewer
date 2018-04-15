@@ -759,7 +759,7 @@
   AnnotationLayer.prototype.InactivateAll = function () {
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
-      if (widget.SetStateToInactive) {
+      if (widget.SetActive(false)) {
         widget.SetActive(false);
       }
     }
@@ -1410,12 +1410,12 @@
     // The cursor does not change immediatly.  Try to flush.
     this.EventuallyDraw();
     this.ActiveWidget = null;
-    widget.SetStateToInactive(this);
+    widget.SetActive(false);
   };
   // Deactivate all widgets (should the layer have an active state?)
   AnnotationLayer.prototype.Deactivate = function () {
     for (var idx = 0; idx < this.WidgetList.length; ++idx) {
-      this.WidgetList[idx].SetStateToInactive(this);
+      this.WidgetList[idx].SetActive(false);
     }
   };
 

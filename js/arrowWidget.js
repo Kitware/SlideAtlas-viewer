@@ -10,7 +10,8 @@
   // I have to differentiate from DRAG because
   // dragging while just created cannot be relative.  It places the tip on the mouse.
   var NEW = 0;
-  var DRAG = 1; // The whole arrow is being dragged.
+  var NEW_DRAG_TAIL = 1;
+  var DRAG = 2; // The whole arrow is being dragged.
   var DRAG_TIP = 3;
   var DRAG_TAIL = 4;
   var INACTIVE = 5; // The normal (resting) state.
@@ -133,7 +134,7 @@
   ArrowWidget.prototype.Draw = function () {
     var view = this.Layer.GetView();
     this.Arrow.Draw(view);
-    if (this.State !== INACTIVE) {
+    if (this.State !== INACTIVE && this.State !== NEW && this.State !== DRAG) {
       var pts = this.GetViewPoints();
       this.CircleTip.Origin = pts[0]; 
       this.CircleTail.Origin = pts[1];
@@ -249,7 +250,11 @@
     }
     if (this.State === NEW) {
       this.TipPosition = [this.Layer.MouseX, this.Layer.MouseY];
-      this.State = DRAG_TAIL;
+      // Creation behaves differently.  It is not selected.
+      // When finished, it goes in active.
+      this.State = NEW_DRAG_TAIL;
+      this.CircleTail.Selected = true;
+      this.CircleTail.SetFillColor([1,1,0]);
     }
     if (this.State === HOVER) {
       if (this.CircleTip.Selected) {
@@ -271,6 +276,12 @@
     if (this.State === INACTIVE) {
       return true;
     }
+    if (this.State === NEW_DRAG_TAIL) {
+      this.State = INACTIVE;
+      this.StateChanged();
+      return false;
+    }
+    
     var event = layer.Event;
     if (this.State === ACTIVE && event.which === 3) {
       // Right mouse was pressed.
@@ -329,22 +340,26 @@
       return false;
     }
 
-    if (event.which != 1) {
-      return false;
-    }
-    
     var cam = this.Layer.GetCamera();
     var mouseWorld = cam.ConvertPointViewerToWorld(x, y);
     if (this.State === NEW) {
       // Just have the tip follow the mouse.
       this.Arrow.Origin = mouseWorld;
-    } else if (this.State === DRAG) {
+      this.Layer.EventuallyDraw();
+      return false;
+    }
+
+    if (event.which != 1) {
+      return false;
+    }
+    
+    if (this.State === DRAG) {
       // Tip follows its relative position to the mouse.
       var dx = mouseWorld[0] - this.LastMouseWorld[0];
       var dy = mouseWorld[1] - this.LastMouseWorld[1];
       this.Arrow.Origin[0] += dx;
       this.Arrow.Origin[1] += dy;
-    } else if (this.State === DRAG_TAIL) {
+    } else if (this.State === DRAG_TAIL || this.State === NEW_DRAG_TAIL) {
       // Tail follows mouse, but tip stays fixed.
       this.Arrow.SetTailViewer(x, y, cam);
       this.Arrow.UpdateBuffers(this.Layer.AnnotationView);
@@ -372,7 +387,6 @@
 
     var pt2 = [pt1[0] + dx, pt1[1] + dy];
 
-    console.log("arrow (" + pt1[0] + ", " + pt1[1] + "), (" + pt2[0] + ", " + pt2[1] + ")");
     return [pt1, pt2];
   };
 
