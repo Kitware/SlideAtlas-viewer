@@ -279,6 +279,7 @@
     if (this.State === NEW_DRAG_TAIL) {
       this.State = INACTIVE;
       this.StateChanged();
+      this.Modified();
       return false;
     }
     

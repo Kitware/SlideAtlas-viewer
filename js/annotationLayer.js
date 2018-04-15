@@ -839,10 +839,58 @@
     return this.AnnotationView.GetMetersPerUnit();
   };
 
+  AnnotationLayer.prototype.TestDrawingOnImage= function () {
+    if (!this.TestImageLoading) {
+      // Load the test image
+      var self = this;
+      var test = new Image();
+      test.onload = function () {
+        self.TestImage = test;
+        var width = 1024;
+        var height = 512;
+        var canvas = $('<canvas>')
+          .attr('width', width.toString())
+          .attr('height', height.toString())
+          .hide();
+        var ctx = canvas[0].getContext('2d');
+        // ----- Image canvas.
+        ctx.drawImage(self.TestImage,0,0);
+        //self.TestImage.style.display = 'none';
+        // ----- Canvas to data
+        var imageData = ctx.getImageData(0, 0, width, height);
+        var data = imageData.data;
+        for (var y = 0; y < height; y += 1) {
+          for (var x = 512; x < width; x += 1) {
+            var idx = 4*(x + y * width);
+            data[idx]     = 255 - data[idx];     // red
+            //data[idx + 1] = 255 - data[idx + 1]; // green
+            data[idx + 2] = 255 - data[idx + 2]; // blue
+            data[idx + 3] = 255 - data[idx + 3]; // alpha
+          }
+        }
+        // ----- data back to canvas.
+        ctx.putImageData(imageData, 0, 0);
+        // ----- canvas to image.
+        self.TestImage2 = new Image();
+        self.TestImage2.src = canvas[0].toDataURL("image/png");
+
+      };
+      test.src = SA.ImagePathUrl + 'imageTest.png';
+      this.TestImageLoading = true;
+    }
+
+    if (this.TestImage2) {
+      var ctx=this.AnnotationView.Context2d;
+      ctx.drawImage(this.TestImage2,10,10);
+    } 
+  };
+  
   // the view arg is necessary for rendering into a separate canvas for
   // saving large images.
   AnnotationLayer.prototype.Draw = function () {
     this.AnnotationView.Clear();
+    //this.TestDrawingOnImage();
+    
     if (!this.Visibility) { return; }
 
     for (var i = 0; i < this.WidgetList.length; ++i) {

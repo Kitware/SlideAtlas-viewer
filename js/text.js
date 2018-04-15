@@ -140,9 +140,9 @@
       // ctx.fillStyle = '#fff';
       // ctx.strokeStyle = '#000';
       // ctx.fillRect(x - 2, y - 2, this.PixelBounds[1] + 4, (this.PixelBounds[3] + this.FontSize/3)*1.4);
-      var radius = this.FontSize/2;
+      var radius = this.FontSize/4;
       roundRect(ctx, x - radius, y - radius,
-                width + this.FontSize, height + this.FontSize,
+                width + 2 * radius, height + 2 * radius,
                 radius, true, false);
     }
 
@@ -307,8 +307,17 @@
   // Point in text coordinates is over the text.
   Text.prototype.PointInText = function (xMouse, yMouse) {
     if (!this.Visibility) { return false; }
-    if (xMouse > this.PixelBounds[0] && xMouse < this.PixelBounds[1] &&
-        yMouse > this.PixelBounds[2] && yMouse < this.PixelBounds[3]) {
+
+    var bds = this.PixelBounds.slice(0);
+    if (this.BackgroundFlag) {
+      var radius = this.FontSize/4;
+      bds[0] -= radius;
+      bds[1] += radius;
+      bds[2] -= radius;
+      bds[3] += radius;
+    }
+    if (xMouse > bds[0] && xMouse < bds[1] &&
+        yMouse > bds[2] && yMouse < bds[3]) {
       return true;
     }
     return false;

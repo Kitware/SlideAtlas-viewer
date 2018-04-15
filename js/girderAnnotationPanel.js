@@ -310,7 +310,7 @@
     $('<p>')
       .appendTo(annotationButtonDiv)
       .css({'display':'inline-block'})
-      .text("Annotation buttons represent markup collections.");
+      .text("Annotation buttons represent markup collections. YOu can click the name to change it.");
 
     var visibilityDiv = $('<div>')
         .appendTo(helpDiv)
@@ -1003,6 +1003,12 @@
         });
     }
 
+    // Make te default user annotation visible.
+    // Race condition?
+    if (annotObj.Name === this.UserData.login) {
+      this.AfterLoad(annotObj, function () { self.VisibilityOn(annotObj); });
+    }
+    
     return annotObj;
   };
 
@@ -1817,6 +1823,7 @@
     if (!widget) {
       // A selected textWidget was not found. Make a new text widget.
       widget = new SAM.TextWidget(layer);
+      //widget.State = 3; // hack hack TODO: fix (text chowing up before dialog closes.
       // Dialog needs tu turn off and on bindings.
       // TODO: REmove dialogs from widget and manage them here.
       // Widgets can share a dialog.
@@ -1826,7 +1833,8 @@
     }
 
     // Activate the widget to start drawing.
-    widget.SetActive(true);
+    // TODO: Fix the Text dialog cration process.  THis is not right but necvessary it seems.
+    //widget.SetActive(true);
 
     // If the text is deactivated by closing the dialog, this will turn off the
     // text button.

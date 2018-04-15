@@ -12,11 +12,11 @@
   // Mouse over widget and clickable
   var HOVER = 2;
   // Dialog window is up.
-  var DIALOG = 2;
+  var DIALOG = 3;
   // Dragging the text but not the arrow point
-  var DRAG_TEXT = 3;
+  var DRAG_TEXT = 4;
   // Draggind the text and arrow.
-  var DRAG = 4;
+  var DRAG = 5;
 
   var TEXT_ONLY = 0;
   var ARROW_HOVER = 1;
@@ -105,10 +105,10 @@
 
   TextWidget.prototype.SetActive = function (flag) {
     if (flag && this.State !== ACTIVE) {
-      this.State = ACTIVE;
+      this.State = HOVER;
       this.StateChanged();
     }
-    if (!flag && this.State === ACTIVE) {
+    if (!flag && this.State !== INACTIVE) {
       this.State = INACTIVE;
       this.StateChanged();
       // I should just let te caller do this.
@@ -212,12 +212,12 @@
     if (this.VisibilityMode !== 0) {
       this.Arrow.Draw(view);
     }
-    if (this.VisibilityMode !== 1 || this.Arrow.IsSelected()) {
+    //if (this.VisibilityMode !== ARROW_HOVER || this.Arrow.IsSelected()) {
       this.Text.Draw(view);
       this.Text.Visibility = true;
-    } else {
-      this.Text.Visibility = false;
-    }
+    //} else {
+    //  this.Text.Visibility = false;
+    //}
   };
 
   TextWidget.prototype.PasteCallback = function (data, mouseWorldPt) {
@@ -371,17 +371,16 @@
     if (this.Text.PointInText(tMouse[0], tMouse[1])) {
       this.Text.SetSelected(true);
       this.Arrow.SetSelected(false);
-      // A second click brings up the dialog to exit the text.
-      if (this.State === DRAG_TEXT) {
-        this.SetStateToDialog();
-        return this;
-      }
+      this.Layer.GetParent().css({'cursor': 'move'});
+      this.State = HOVER;
       return this;
     }
     var anchor = this.Text.Offset;
     if (this.Arrow.PointInShape(tMouse[0] - anchor[0], tMouse[1] - anchor[1])) {
       this.Text.SetSelected(true);
       this.Arrow.SetSelected(true);
+      this.Layer.GetParent().css({'cursor': 'move'});
+      this.State = DRAG;
       return this;
     }
     // Not really necesary, but it cannot hurt.
@@ -477,7 +476,9 @@
     if (this.State === INACTIVE) {
       return true;
     }
-    
+
+    // Handle the hovering feature.
+    // Indicates that clicking will drag by changing the cursor.
     var event = this.Layer.Event;
     var x = event.offsetX;
     var y = event.offsetY;
