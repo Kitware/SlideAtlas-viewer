@@ -135,6 +135,13 @@
     }
   };
 
+  // Called when the state changes.
+  PencilWidget.prototype.SelectionChanged = function () {
+    if (this.SelectedCallback) {
+      (this.SelectedCallback)(this);
+    }
+  };
+
   // Can we delete this?
   PencilWidget.prototype.IsEmpty = function () {
     for (var i = 0; i < this.Shapes.GetNumberOfShapes(); ++i) {
@@ -206,6 +213,11 @@
       this.State = INACTIVE;
       this.StateChanged();
     }
+    // TODO: Fix: Single select must be setting the state to inactive without calling this method.
+    // Cursor was not changing back.
+    if (!flag) {
+      this.Layer.GetParent().css({'cursor': ''});
+    }
   };
 
   PencilWidget.prototype.IsStateDrawingDown = function () {
@@ -267,6 +279,7 @@
     var outlineColor = this.Color;
     if (obj.outlinecolor) {
       outlineColor = SAM.ConvertColorToHex(obj.outlinecolor);
+      this.Color = outlineColor;
     }
     for (var n = 0; n < obj.shapes.length; n++) {
       var points = obj.shapes[n];
@@ -357,7 +370,8 @@
     if (this.Mode === OPEN) {
       var numStrokes = this.Shapes.GetNumberOfShapes();
       if (numStrokes > 0) {
-        this.Shapes.SetSelectedChild(numStrokes - 1, false);
+        // Trying out cut feature
+        //this.Shapes.SetSelectedChild(numStrokes - 1, false);
       }
     }
     // Start a new stroke
@@ -400,9 +414,7 @@
         this.Mode = OPEN;
       }
       // I do not this this is used anymore.
-      if (this.SelectedCallback) {
-        (this.SelectedCallback)(this);
-      }
+      this.SelectionChanged();
       return selectedShape;
     }
 
@@ -489,6 +501,9 @@
       // Can be merged with the selected stroke (if they overlap).
       if (this.Mode === CLOSED) {
         this.HandleLassoMerge();
+      } else {
+        // use intersecting stroke to cut a line.
+        this.HandleOpenCut();
       }
     }
     return false;
@@ -591,14 +606,15 @@
   PencilWidget.prototype.SetSelected = function (flag) {
     var ret = this.Shapes.SetSelected(flag);
   
-    if (flag && this.SelectedCallback) {
-      (this.SelectedCallback)(this);
+    if (flag) {
+      this.SelectionChanged();
     }
     if (!flag) {
       // We can be selected without being active, but we cannot be
       // active without being selected.
       this.SetActive(false);
     }
+    
     return ret;
   };
 
@@ -1074,8 +1090,48 @@
     return true;
   };
 
+  // ====================================================================
+  // opne cut logic
 
+  //  If stroke crosses selected line, cut it.
+  PencilWidget.prototype.HandleOpenCut = function () {
+    var lastIdx = this.Shapes.GetNumberOfShapes() - 1;
+    // This is the one just drawn.
+    var stroke2 = this.Shapes.GetShape(lastIdx);
+    // Find the selected stroke.
+    var found = false;
+    for (var stroke1Idx = 0; stroke1Idx < lastIdx; ++stroke1Idx) {
+      var stroke1 = this.Shapes.GetShape(stroke1Idx);
+      if (stroke1.IsSelected()) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      // We could not find a second stroke.
+      return;
+    }
 
+    // Now see if they overlap.
+    for (var i = 1; i < stroke1.Points.length; ++i) {
+      var pt0 = stroke1.Points[i - 1];
+      var pt1 = stroke1.Points[i];
+      var intersections = this.FindSegmentLoopIntersections(pt0, pt1, stroke2.Points);
+      if (intersections.length > 0) {
+        // Cut the line here.
+        stroke2.Points = stroke1.Points.slice(i);
+        stroke2.UpdateBuffers(this.Layer.AnnotationView);
+        stroke1.Points = stroke1.Points.slice(0,i);
+        stroke1.UpdateBuffers(this.Layer.AnnotationView);
+        this.Layer.EventuallyDraw();
+        this.SelectionChanged();
+        return;
+      }
+    }
+    stroke1.SetSelected(false);
+    this.Layer.EventuallyDraw();
+    this.SelectionChanged();
+  };
   
   SAM.PencilWidget = PencilWidget;
 })();

@@ -1188,7 +1188,7 @@
 
   // Click will only select one widget.
   // returns the widget selected or undefined.
-  AnnotationLayer.prototype.SingleSelect = function (event) {
+  AnnotationLayer.prototype.SingleSelect = function (event, shift) {
     if (!this.GetVisibility()) {
       return;
     }
@@ -1205,7 +1205,7 @@
       var widget = this.WidgetList[i];
       if (found) {
         // We already found one.  Unselect the rest.
-        if (widget.SetSelected && widget.SetSelected(false)) {
+        if (!shift && widget.SetSelected && widget.SetSelected(false)) {
           // Assume the selection changed.
           changed = true;
         }
@@ -1223,6 +1223,7 @@
       }
     }
     if (found && !this.Active) {
+      // TODO: Select should not make active by default.
       this.SetActive(true);
     }
     // This does not work when previously selected
@@ -1370,6 +1371,46 @@
       return true;
     }
 
+    if (event.keyCode === 77) {
+      // Hack to merge tracks for timelapse
+      var strokes = [];
+      for (var i = 0; i < this.WidgetList.length; ++i) {
+        var w = this.WidgetList[i];
+        if (w.IsSelected()) {
+          strokes.push(w);
+        }
+      }
+      if (strokes.length > 1) {
+        var s0 = strokes[0].Shapes.Shapes[0];
+        var s1 = strokes[1].Shapes.Shapes[0];
+        // This only works for single strokes.
+        // TODO: Get rid of "Shapes".  The correct way to do this is to
+        // Just keep polylines (not widgets).
+        // A widget drawing can still keep its list of polylines, but the layer
+        // does not (has only polylines).  This is a significant change, but not huge.
+        // Connect the closest ends.
+        var pt0 = s0.Points[s0.Points.length - 1];
+        var pt1 = s1.Points[0];
+        var dx = pt1[0] - pt0[0];
+        var dy = pt1[1] - pt0[1];
+        var dist01 = Math.sqrt(dx * dx + dy * dy);
+        pt0 = s0.Points[0];
+        pt1 = s1.Points[s1.Points.length - 1];
+        dx = pt1[0] - pt0[0];
+        dy = pt1[1] - pt0[1];
+        var dist10 = Math.sqrt(dx * dx + dy * dy);
+        if (dist01 < dist10) {
+          s0.Points = s0.Points.concat(s1.Points);
+        } else {
+          s0.Points = s1.Points.concat(s0.Points);
+        }          
+        s0.UpdateBuffers(this.AnnotationView);
+        this.RemoveWidget(strokes[1]);
+        this.EventuallyDraw();
+        return false;
+      }
+    }
+    
     this.Event = event;
 
     for (var i = 0; i < this.WidgetList.length; ++i) {

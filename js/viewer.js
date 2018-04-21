@@ -2012,7 +2012,7 @@
       } else {
         // We even give inactive layers a chance to claim the selection.
         // It is a way to find which group a mark belongs to.
-        if (layer.HandleSingleSelect && !layer.HandleSingleSelect(event)) {
+        if (layer.HandleSingleSelect && !layer.HandleSingleSelect(event, this.Shift)) {
           found = true;
         }
       }
@@ -2021,6 +2021,7 @@
   };
 
   Viewer.prototype.HandleMouseDown = function (event) {
+    this.Shift = event.shiftKey;
     // Hack.  I am getting multiple mouse down and mouse up for a single click.
     // This will make sure we only respond to one.
     this.MouseDownFlag = true;

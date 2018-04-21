@@ -54,6 +54,8 @@
     // Any new layers created have to know the viewer.
     this.Viewer = viewer;
     viewer.ScaleOn();
+
+    this.SelectedWidgets = [];
     
     this.InitializeHelp(this.Parent.parent());
     
@@ -628,20 +630,22 @@
 
   // Called by the ProperiesDialogButton click event.
   GirderAnnotationPanel.prototype.ShowSelectedWidgetMenu = function () {
-    if (!this.Highlighted || !this.SelectedWidget) {
+    if (!this.Highlighted || !this.SelectedWidgets.length === 1) {
       return;
     }
-    if (this.SelectedWidget.SetStateToDialog) {
-      this.SelectedWidget.SetStateToDialog();
+
+    var widget = this.SelectedWidgets[0];
+    if (widget.SetStateToDialog) {
+      widget.SetStateToDialog();
     } else {
-      this.SelectedWidget.ShowPropertiesDialog();
+      widget.ShowPropertiesDialog();
     }
   };
   
   // When tools have nothing to modify, they disappear.
   // TODO: Help tool. to explain why a tool is not available.
   GirderAnnotationPanel.prototype.UpdateToolVisibility = function () {
-    if (this.SelectedWidget) {
+    if (this.SelectedWidgets.length === 1) {
       this.ProperiesDialogButton.show();
     } else {
       this.ProperiesDialogButton.hide();
@@ -724,9 +728,10 @@
     this.PencilOpenClosedToggle
         .attr('src', SA.ImagePathUrl + 'open_lasso.png');
 
-    if (this.SelectedWidget) {
-      if (this.SelectedWidget.SetModeToOpen) {
-        this.SelectedWidget.SetModeToOpen();
+    for (var i = 0; i < this.SelectedWidgets.length; ++i) {
+      var widget = this.SelectedWidgets[i];
+      if (widget.SetModeToOpen) {
+        widget.SetModeToOpen();
       }
       if (this.Highlighted) {
         this.Highlighted.Layer.EventuallyDraw();
@@ -744,9 +749,10 @@
     this.PencilOpenClosedToggle
         .attr('src', SA.ImagePathUrl + 'select_lasso.png');
 
-    if (this.SelectedWidget) {
-      if (this.SelectedWidget.SetModeToClosed) {
-        this.SelectedWidget.SetModeToClosed();
+    for (var i = 0; i < this.SelectedWidgets.length; ++i) {
+      var widget = this.SelectedWidgets[i];
+      if (widget.SetModeToClosed) {
+        widget.SetModeToClosed();
       }
       if (this.Highlighted) {
         this.Highlighted.Layer.EventuallyDraw();
@@ -1428,7 +1434,7 @@
 
   // Call back from deleteButton.
   GirderAnnotationPanel.prototype.DeleteCallback = function (annotObj) {
-    if (this.DeleteSelectedWidget()) {
+    if (this.DeleteSelectedWidgets()) {
       return;
     }
 
@@ -1761,7 +1767,8 @@
     }
     this.Viewer.GetParentDiv().css({'cursor': ''});
     this.ActiveToolButton = this.CursorButton;
-    this.SelectedWidget = undefined;
+    // Is this thie correct behavior?
+    this.SelectedWidgets = [];
   };
 
   // An annotation has to be selected for editing before this is called.
@@ -1798,7 +1805,7 @@
       this.SetSelectedWidget(selectedWidgets[0]);
     } else {
       // See if we can move this to CursorOn
-      this.SelectedWidget = undefined;
+      this.SelectedWidgets = selectedWidgets;
       this.HighlightRadioToolButton(this.CursorButton);
     }
     this.UpdateToolVisibility();
@@ -1842,7 +1849,7 @@
     widget.SetStateChangeCallback(function () {
       if (!widget.Layer) {
         // string was empty.  TODO: find a better way to handle widget initiated delete.
-        self.SelectedWidget = undefined;
+        self.SelectedWidgets = [];
         self.ToolRadioButtonCallback(self.CursorButton);
         self.UpdateToolVisibility();            
       } else if (!widget.GetActive()) {
@@ -1850,7 +1857,7 @@
       }
     });
 
-    this.SelectedWidget = widget;
+    this.SelectedWidgets = [widget];
   };
 
   // Widget is an optional arguement.
@@ -1887,7 +1894,7 @@
       }
     });
       
-    this.SelectedWidget = widget;
+    this.SelectedWidgets = [widget];
   };
 
   // Widget is an optional arguement.
@@ -1931,7 +1938,7 @@
       widget.SetModeToClosed(layer);
     }
 
-    this.SelectedWidget = widget;
+    this.SelectedWidgets = [widget];
   };
 
 
@@ -1976,7 +1983,7 @@
       // User is drawing with a pencil.  Make sure a layer is editable.
 		  this.WithHighlightedCall(function (annotObj) {
         // A small hack.
-        self.SelectedWidget = annotObj.Layer.GetIPadPencilWidget();
+        self.SelectedWidgets = [annotObj.Layer.GetIPadPencilWidget()];
         annotObj.Layer.HandleTouchStart(event);
       });
       return false;
@@ -2082,12 +2089,12 @@
 
   // Called by the SelectedDeleteButton click event.
   // Returns true if a widget was deleted.
-  GirderAnnotationPanel.prototype.DeleteSelectedWidget = function () {
+  GirderAnnotationPanel.prototype.DeleteSelectedWidgets = function () {
     if (!this.Highlighted) {
       return false;
     }
     if (this.Highlighted.Layer.DeleteSelected()) {
-      this.SelectedWidget = undefined;
+      this.SelectedWidgets = [];
       this.ToolRadioButtonCallback(this.CursorButton);
       this.UpdateToolVisibility();
       this.Highlighted.Layer.EventuallyDraw();
@@ -2147,9 +2154,9 @@
   // Event propagation will turn anyones off in the early layers.
   // After event propagation is stoped,  Loop through the rest
   // un selecting them.
-  GirderAnnotationPanel.prototype.HandleSingleSelect = function (event) {
+  GirderAnnotationPanel.prototype.HandleSingleSelect = function (event, shift) {
     // Turn off previous tool widgets. (deactivate)
-    if (this.Highlighted) {
+    if (this.Highlighted && !shift) {
       var layer = this.Highlighted.Layer;
       layer.UnselectAll();
     }
@@ -2175,13 +2182,15 @@
         continue;
       }
       if (selectedWidget) {
-        // Just unselect remaining layers.
-        layer.SetSelected(false);
+        if (!shift) {
+          // Just unselect remaining layers.
+          layer.SetSelected(false);
+        }
       } else {
         // We even give inactive layers a chance to claim the selection.
         // It is a way to find which group a mark belongs to.
         if (layer.SingleSelect) {
-          var selectedWidget = layer.SingleSelect(event);
+          var selectedWidget = layer.SingleSelect(event, shift);
           if (selectedWidget) {
             selectedAnnotObj = annotObj;
           }
@@ -2199,10 +2208,11 @@
   GirderAnnotationPanel.prototype.SetSelectedWidget = function(selectedWidget, selectedAnnotObj) {
     // No widget: Go back to the cursor mode.
     if (!selectedWidget) {
-      if (this.SelectedWidget) {
-        this.SelectedWidget.SetActive(false);
+      for (var i = 0; i < this.SelectedWidgets.length; ++i) {
+        var widget = this.SelectedWidgets[i];
+        widget.SetActive(false);
       }
-      this.SelectedWidget = undefined;
+      this.SelectedWidgets = [];
       // Nothing was selected.
       // Change the state back to cursor
       this.HighlightRadioToolButton(this.CursorButton);
@@ -2236,7 +2246,7 @@
 
     // TODO: This ivar is only really needed for the properties dialog.
     // We could just find the first selected widget ....
-    this.SelectedWidget = undefined;
+    this.SelectedWidgets = [];
 
     // Make the layer editable.
     if (selectedAnnotObj) {
@@ -2273,7 +2283,7 @@
     
     // TODO: This ivar is only really needed for the properties dialog.
     // We could just find the first selected widget ....
-    this.SelectedWidget = selectedWidget;
+    this.SelectedWidgets = [selectedWidget];
     this.UpdateToolVisibility();
   };
 

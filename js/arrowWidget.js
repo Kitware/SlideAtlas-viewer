@@ -60,6 +60,18 @@
     this.CircleTail.SetOutlineColor([0.0, 0.0, 0.0]);
     this.CircleTail.Radius = 5;
     this.CircleTail.PositionCoordinateSystem = 1; //Shape.VIEWER;
+
+
+    // Get default properties.
+    if (localStorage.ArrowWidgetDefaults) {
+      var defaults = JSON.parse(localStorage.ArrowWidgetDefaults);
+      if (defaults.Color) {
+        this.Arrow.SetFillColor(defaults.Color);
+      }
+      if (defaults.Width) {
+        this.Arrow.Width = defaults.Width;
+      }
+    }
   }
 
   // Not used yet, but might be useful.
@@ -521,16 +533,6 @@
             .addClass('sa-view-annotation-modal-input')
             .keypress(function (event) { return event.keyCode !== 13; });
 
-    // Get default properties.
-    if (localStorage.ArrowWidgetDefaults) {
-      var defaults = JSON.parse(localStorage.ArrowWidgetDefaults);
-      if (defaults.Color) {
-        this.Dialog.ColorInput.val(SAM.ConvertColorToHex(defaults.Color));
-      }
-      if (defaults.Width) {
-        this.Dialog.WidthInput.val(defaults.Width);
-      }
-    }
   };
 
   // Can we bind the dialog apply callback to an objects method?
