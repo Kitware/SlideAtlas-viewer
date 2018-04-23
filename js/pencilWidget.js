@@ -49,6 +49,12 @@
     this.LoadDefaults();
     
     this.Shapes = new SAM.ShapeGroup();
+
+    // Temporary way of showing time
+    this.Circle = new SAM.Circle();
+    this.Circle.Radius = 5;
+    this.Circle.FixedSize = true;
+    this.Circle.UpdateBuffers(layer.AnnotationView);
   }
 
   PencilWidget.prototype.LoadDefaults = function () {
@@ -241,7 +247,21 @@
   };
 
   PencilWidget.prototype.Draw = function () {
-    this.Shapes.Draw(this.Layer.GetView());
+    var view = this.Layer.GetView();
+    this.Shapes.Draw(view);
+    this.Circle.FillColor = this.Color;
+    if (this.Layer.Time != undefined) {
+      // Find the time in the list of points
+      var pts = this.Shapes.Shapes[0].Points;
+      for (var i = 0; i < pts.length; ++i) {
+        var pt = pts[i];
+        if (pt.length === 3 && pt[2] === this.Layer.Time) {
+          this.Circle.Origin = pt;
+          this.Circle.Draw(view);
+          break;
+        }
+      }
+    }
   };
 
   PencilWidget.prototype.Serialize = function () {
@@ -253,10 +273,7 @@
     for (var i = 0; i < this.Shapes.GetNumberOfShapes(); ++i) {
       // NOTE: Assumes shape is a Polyline.
       var shape = this.Shapes.GetShape(i);
-      var points = [];
-      for (var j = 0; j < shape.Points.length; ++j) {
-        points.push([shape.Points[j][0], shape.Points[j][1]]);
-      }
+      var points = shape.Points.slice(0);
       obj.shapes.push(points);
       obj.closedFlags.push(shape.Closed);
       obj.outlinecolor = shape.OutlineColor;
@@ -299,8 +316,14 @@
         shape.Closed = true;
       }
       this.Shapes.AddShape(shape);
-      for (var m = 0; m < points.length; ++m) {
-        shape.Points[m] = [points[m][0], points[m][1]];
+      // A copy of the points array is probably not necesary.
+      shape.Points = points.slice(0);
+      // Make sure they all have 3 coordinates
+      for (var i = 0; i < shape.Points.length; ++i) {
+        var pt = shape.Points[i];
+        if (pt.length === 2) {
+          shape.Points[i] = [pt[0], pt[1], 0.0];
+        }
       }
     }
 
@@ -390,7 +413,7 @@
     this.Shapes.AddShape(shape);
 
     var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
-    shape.Points.push([pt[0], pt[1]]); // avoid same reference.
+    shape.Points.push([pt[0], pt[1], 0.0]); // avoid same reference.
   };
 
   // Returns the selected stroke or undefined.
@@ -400,6 +423,38 @@
     var y = this.Layer.MouseY;
     var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
 
+    // Hack in click to add a point to the line.
+    if (SAM.ControlKey) {
+      if (this.IsSelected()) {
+        var stroke = this.Shapes.Shapes[0];
+        var p0 = stroke.Points[0];
+        var p1 = stroke.Points[stroke.Points.length-1]
+        var dx = pt[0] - p0[0];
+        var dy = pt[1] - p0[1];
+        var dist0 = dx*dx + dy*dy;
+        dx = pt[0] - p1[0];
+        dy = pt[1] - p1[1];
+        var dist1 = dx*dx + dy*dy;
+        pt = [pt[0], pt[1], this.Layer.Time];
+        console.log(pt.toString());
+        if (dist1 < dist0) {
+          // add point to the end.
+          stroke.Points.push(pt);
+        } else {
+          // Add point to the beginning.
+          stroke.Points = [pt].concat(stroke.Points);
+        }
+        if (this.ModifiedCallback) {
+          (this.ModifiedCallback)(this);
+        }
+        stroke.UpdateBuffers(this.Layer.AnnotationView);
+        this.Layer.EventuallyDraw();
+        return this;
+      } else {
+        return false;
+      }
+    }
+    
     var width = this.Shapes.GetLineWidth();
     // Tolerance: 5 screen pixels.
     var minWidth = 20.0 / this.Layer.GetPixelsPerUnit();
@@ -548,7 +603,7 @@
       var last = this.Shapes.GetNumberOfShapes() - 1;
       var shape = this.Shapes.GetShape(last);
       var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
-      shape.Points.push([pt[0], pt[1]]); // avoid same reference.
+      shape.Points.push([pt[0], pt[1], 0.0]); // avoid same reference.
       shape.Modified();
       this.Layer.EventuallyDraw();
       return false;
@@ -891,7 +946,7 @@
   };
 
   // --------------------------------------------------------------------------------
-  // Stuff for eraser.
+  // Stuff for eraser. Never finihsed.
 
   // Left turn.
   // Returns "undefined" if zero length segment.
@@ -1091,7 +1146,7 @@
   };
 
   // ====================================================================
-  // opne cut logic
+  // open cut logic
 
   //  If stroke crosses selected line, cut it.
   PencilWidget.prototype.HandleOpenCut = function () {
@@ -1119,10 +1174,26 @@
       var intersections = this.FindSegmentLoopIntersections(pt0, pt1, stroke2.Points);
       if (intersections.length > 0) {
         // Cut the line here.
-        stroke2.Points = stroke1.Points.slice(i);
-        stroke2.UpdateBuffers(this.Layer.AnnotationView);
-        stroke1.Points = stroke1.Points.slice(0,i);
+        var part1 = stroke1.Points.slice(i);
+        var part2 = stroke1.Points.slice(0,i);
+        if (part1.length < 2) {
+          part1 = part2;
+          part2 = undefined;
+        }
+        stroke1.Points = part1;
         stroke1.UpdateBuffers(this.Layer.AnnotationView);
+        // The last stroke either gets moved to a new widget or deleted.
+        this.Shapes.DeleteChild(lastIdx);
+
+        if (part2) {        
+          stroke2.Points = part2;
+          stroke2.UpdateBuffers(this.Layer.AnnotationView);
+          // Problems with multiple strokes in one widget.  Make a new widget.
+          var widget2 = new PencilWidget(this.Layer);
+          widget2.Shapes.AddShape(stroke2);
+          widget2.Color = this.Color;
+          this.Layer.AddWidget(widget2);
+        }
         this.Layer.EventuallyDraw();
         this.SelectionChanged();
         return;

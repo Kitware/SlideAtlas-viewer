@@ -827,7 +827,9 @@
     this.MainView.DrawShapes();
 
     for (var i = 0; i < this.Layers.length; ++i) {
-      this.Layers[i].Draw(view);
+      if (this.Layers[i].Draw) {
+        this.Layers[i].Draw(view);
+      }
     }
 
     console.log(JSON.stringify(this.GetCamera().Serialize()));
@@ -1245,7 +1247,9 @@
     }
 
     for (var i = 0; i < this.Layers.length; ++i) {
-      this.Layers[i].Draw(this.MainView);
+      if (this.Layers[i].Draw) {
+        this.Layers[i].Draw(this.MainView);
+      }
     }
 
     // This is not used anymore
@@ -1309,6 +1313,8 @@
     for (var i = 0; i < this.Layers.length; ++i) {
       if (this.Layers[i].Reset) {
         this.Layers[i].Reset();
+      }
+      if (this.Layers[i].Remove) {
         this.Layers[i].Remove();
       }
     }
@@ -2008,7 +2014,9 @@
       var layer = this.Layers[i];
       if (found) {
         // Just unselect remaining layers.
-        layer.SetSelected(false);
+        if (layer.SetSelected) {
+          layer.SetSelected(false);
+        }
       } else {
         // We even give inactive layers a chance to claim the selection.
         // It is a way to find which group a mark belongs to.
@@ -2334,6 +2342,9 @@
   // returns false if the event was "consumed" (browser convention).
   // Returns true if nothing was done with the event.
   Viewer.prototype.HandleKeyDown = function (event) {
+    SAM.ShiftKey = event.shiftKey;
+    SAM.ControlKey = event.ctrlKey;
+    
     if (!this.InteractionEnabled) { return true; }
 
     // Key events are not going first to layers like mouse events.
@@ -2458,6 +2469,9 @@
   // returns false if the event was "consumed" (browser convention).
   // Returns true if nothing was done with the event.
   Viewer.prototype.HandleKeyUp = function (event) {
+    SAM.ShiftKey = event.shiftKey;
+    SAM.ControlKey = event.ctrlKey;
+
     if (!this.InteractionEnabled) { return true; }
 
     // Let the annotation layers have first dibs on processing the event.

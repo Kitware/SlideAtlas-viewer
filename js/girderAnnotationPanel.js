@@ -1705,20 +1705,12 @@
         element = undefined;
       }
       if (widget.type === 'polyline') {
-        // add the z coordinate
-        for (j = 0; j < widget.points.length; ++j) {
-          widget.points[j][2] = 0;
-        }
         element = {
           'type': 'polyline',
           'closed': widget.closedloop,
           'points': widget.points};
       }
       if (widget.type === 'lasso') {
-                // add the z coordinate
-        for (j = 0; j < widget.points.length; ++j) {
-          widget.points[j][2] = 0;
-        }
         element = {
           'type': 'polyline',
           'closed': true,
@@ -1728,10 +1720,6 @@
       if (widget.type === 'pencil') {
         for (k = 0; k < widget.shapes.length; ++k) {
           points = widget.shapes[k];
-          // Add the z coordinate.
-          for (j = 0; j < points.length; ++j) {
-            points[j][2] = 0;
-          }
           element = {
             'type': 'polyline',
             'closed': widget.closedFlags[k],
@@ -2156,7 +2144,7 @@
   // un selecting them.
   GirderAnnotationPanel.prototype.HandleSingleSelect = function (event, shift) {
     // Turn off previous tool widgets. (deactivate)
-    if (this.Highlighted && !shift) {
+    if (this.Highlighted && !shift && !SAM.ControlKey) {
       var layer = this.Highlighted.Layer;
       layer.UnselectAll();
     }
@@ -2182,7 +2170,7 @@
         continue;
       }
       if (selectedWidget) {
-        if (!shift) {
+        if (!shift && ! SAM.ControlKey) {
           // Just unselect remaining layers.
           layer.SetSelected(false);
         }
@@ -2314,5 +2302,15 @@
     return false;
   };
 
+  GirderAnnotationPanel.prototype.SetTime = function (time) {
+    for (var i = 0; i < this.AnnotationObjects.length; ++i) {
+      var annotObj = this.AnnotationObjects[i];
+      var layer = annotObj.Layer;
+      if (layer) {
+        layer.Time = time;
+      }
+    }
+  };
+  
   SAM.GirderAnnotationPanel = GirderAnnotationPanel;
 })();

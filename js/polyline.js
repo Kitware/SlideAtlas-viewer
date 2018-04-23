@@ -125,7 +125,7 @@
     }
     if (this.Closed) {
       k = this.IntersectPointLine(pt, this.Points[this.Points.length - 1],
-                                            this.Points[0], dist);
+                                  this.Points[0], dist);
       if (k !== undefined) {
         return [this.Points.length - 1, 0, k];
       }
@@ -241,7 +241,7 @@
         var dir2 = (p0[0] - p2[0]) * (p3[0] - p2[0]) + (p0[1] - p2[1]) * (p3[1] - p2[1]);
         if (mag < spacing && dir1 < 0.0 && dir2 < 0.0) {
           // Replace the two points with their average.
-          newPoints.push([cx, cy]);
+          newPoints.push([cx, cy, 0]);
           modified = true;
           // Skip the next point the window will have one old merged point,
           // but that is ok because it is just used as reference and not altered.
@@ -425,7 +425,7 @@
     var remaining = step / 2;
     // Recursive to serialize asynchronous cutouts.
     this.RecursiveSampleEdge(this.Points.length - 1, 0, remaining, step, count,
-                                 cache, dimensions, scale, callback);
+                             cache, dimensions, scale, callback);
   };
   Polyline.prototype.RecursiveSampleEdge = function (i0, i1, remaining, step, count,
                                                       cache, dimensions, scale, callback) {
@@ -494,5 +494,9 @@
     return this.Selected;
   };
 
+  // Polyline.prototype.Draw = function (view) {
+  //  SAM.Shape.prototype.Draw.call(this, view);
+  //};
+  
   SAM.Polyline = Polyline;
 })();

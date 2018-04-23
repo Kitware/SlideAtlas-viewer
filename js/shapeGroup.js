@@ -51,7 +51,9 @@
       var shape = this.Shapes[idx];
       if (found || !shape.PointOnShape(pt, dist)) {
         // A shape was already selected. Just unselect the rest.
-        shape.SetSelected(false);
+        if (!SAM.ShiftKey) {
+          shape.SetSelected(false);
+        }
       } else {
         shape.SetSelected(true);
         found = shape;
@@ -136,6 +138,7 @@
     return this.Shapes.pop();
   };
 
+  // Should be called remove child
   ShapeGroup.prototype.DeleteChild = function (idx) {
     return this.Shapes.splice(idx, 1);
   };
