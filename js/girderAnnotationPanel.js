@@ -374,7 +374,7 @@
         .attr('src', SA.ImagePathUrl + 'question32.png')
         .css({
           'position': 'absolute',
-          'left': '40px',
+          'left': '35px',
           'top': '2px',
           'height': '24px',
           'z-index': '300'})
@@ -475,10 +475,12 @@
 
     // Radio buttons for tools. (One active at a time).
     this.CursorButton = this.AddToolRadioButton('cursor_arrow.png', 'CursorOn');
-    this.RectSelectButton = this.AddToolRadioButton('rect_select.png', 'RectSelectOn');
     this.TextButton = this.AddToolRadioButton('Text.png', 'TextButtonOn');
     this.ArrowButton = this.AddToolRadioButton('Arrow.png', 'ArrowButtonOn');
+    this.CircleButton = this.AddToolRadioButton('Circle.png', 'CircleButtonOn');
+    this.RectangleButton = this.AddToolRadioButton('rectangle.gif', 'RectangleButtonOn');
     this.PencilButton = this.AddToolRadioButton('Pencil-icon.png', 'PencilButtonOn');
+    this.RectSelectButton = this.AddToolRadioButton('rect_select.png', 'RectSelectOn');
  
     // This is visibile, only when a annotation is being edited.
     this.RectSelectButton.hide();
@@ -1182,6 +1184,16 @@
           var w = annotObj.Layer.LoadWidget(obj);
           w = this.Viewer;
         }
+        if (element.type === 'rect') {
+          obj.type = element.type;
+          obj.outlinecolor = SAM.ConvertColor(element.lineColor);
+          obj.linewidth = element.lineWidth;
+          obj.origin = element.center;
+          obj.radius = element.radius;
+          obj.orientation = element.orientation;
+          var w = annotObj.Layer.LoadWidget(obj);
+          w = this.Viewer;
+        }
         if (element.type === 'arrow') {
           if (element.label) {
             obj.type = 'text';
@@ -1197,7 +1209,13 @@
             w = this.Viewer;
           } else {
             obj.type = 'arrow';
-            obj.origin = element.points[1].slice(0);
+            obj.origin = element.points[0].slice(0);
+            if (SAM.HACK) {
+              var dx = element.points[1][0] - element.points[0][0];
+              var dy = element.points[1][1] - element.points[0][1];
+              obj.origin[0] -= dx;
+              obj.origin[1] -= dy;
+            }
             obj.fillcolor = SAM.ConvertColor(element.fillColor);
             obj.outlinecolor = SAM.ConvertColor(element.lineColor);
             var dx = element.points[1][0] - element.points[0][0];
@@ -1211,8 +1229,8 @@
             } else {
               obj.width = 10;
             }
-            obj.fixedsize = 'true';
-            obj.fixedorientation = 'true';
+            obj.fixedsize = 'false';
+            obj.fixedorientation = 'false';
             var w = annotObj.Layer.LoadWidget(obj);
             w = this.Viewer;
           }
@@ -1231,7 +1249,7 @@
         }
         if (element.type === 'rectangle') {
           // Switch to rect set versus individual rects. if false
-          if (element.type === 'rectangle') { // switch behavior to ....
+          if (false && element.type === 'rectangle') { // switch behavior to ....
             setObj.widths.push(element.width);
             setObj.heights.push(element.height);
             setObj.centers.push(element.center[0]);
@@ -1434,35 +1452,39 @@
 
   // Call back from deleteButton.
   GirderAnnotationPanel.prototype.DeleteCallback = function (annotObj) {
-    if (this.DeleteSelectedWidgets()) {
+    if (! this.Highlighted) {
       return;
     }
+    this.DeleteAnnotationObject(this.Highlighted);
+  };
+    
+  GirderAnnotationPanel.prototype.DeleteAnnotationObject = function (annotObj) {
+    if (!this.Highlighted.Layer.IsSelected()) {
+      if (!confirm('Do you want to delete the entire annotation group?' + annotObj.Name)) {
+        return;
+      }    
+      if (annotObj.SaveTimerId) {
+        clearTimeout(annotObj.SaveTimerId);
+        annotObj.SaveTimerId = undefined;
+      }
+      // Visibility and editing off.
+      this.VisibilityOff(annotObj);
 
-    if (!confirm('Do you want to delete the entire annotation group?' + annotObj.Name)) {
-      return;
+      if (!annotObj.Id) {
+        this.DeleteAnnotationGUI(annotObj);
+        return;
+      }
+
+      // Delete it from the database before deleting the GUI.
+      var self = this;
+      girder.rest.restRequest({
+        path: 'annotation/' + annotObj.Id,
+        method: 'DELETE',
+        contentType: 'application/json'
+      }).done(function (ret) {
+        self.DeleteAnnotationGUI(annotObj);
+      });
     }
-
-    if (annotObj.SaveTimerId) {
-      clearTimeout(annotObj.SaveTimerId);
-      annotObj.SaveTimerId = undefined;
-    }
-    // Visibility and editing off.
-    this.VisibilityOff(annotObj);
-
-    if (!annotObj.Id) {
-      this.DeleteAnnotationGUI(annotObj);
-      return;
-    }
-
-    // Delete it from the database before deleting the GUI.
-    var self = this;
-    girder.rest.restRequest({
-      path: 'annotation/' + annotObj.Id,
-      method: 'DELETE',
-      contentType: 'application/json'
-    }).done(function (ret) {
-      self.DeleteAnnotationGUI(annotObj);
-    });
   };
 
   GirderAnnotationPanel.prototype.DeleteAnnotationGUI = function (annotObj) {
@@ -1635,6 +1657,15 @@
           'type': 'circle',
           'center': widget.origin,
           'radius': widget.radius};
+      }
+      if (widget.type === 'rect') {
+        widget.origin[2] = 0; // z coordinate
+        element = {
+          'type': 'rect',
+          'center': widget.origin,
+          'width': widget.width,
+          'height': widget.height,
+          'orientation': widget.orientation};
       }
       if (widget.type === 'text') {
         // Will not keep scale feature..
@@ -1885,6 +1916,78 @@
     this.SelectedWidgets = [widget];
   };
 
+  GirderAnnotationPanel.prototype.CircleButtonOn = function (annotObj) {
+    // The layer has to be in editing mode.
+    this.EditOn(annotObj);
+
+    var widget;
+    // Get an arrow widget.
+    // Look for a selected widget to reuse.
+    var layer = annotObj.Layer;
+    if (!widget) {
+      widget = layer.GetASelectedWidget('circle');
+    }
+    if (!widget) {
+      // A selected arrowWidget was not found. Make a new arrow widget.
+      widget = new SAM.CircleWidget(layer);
+      // Dialog needs tu turn off and on bindings.
+      // TODO: REmove dialogs from widget and manage them here.
+      // Widgets can share a dialog.
+      layer.AddWidget(widget);
+      widget.SetCreationCamera(layer.GetCamera());
+    }
+
+    // Activate the widget to start drawing.
+    widget.SetStateToDrawing(layer);
+
+    // If the arrow is deactivated with a key stroke, this will turn off the
+    // arrow button when the widget deactivates itself.
+    var self = this;
+    widget.SetStateChangeCallback(function () {
+      if (!widget.GetActive()) {
+        self.ToolRadioButtonCallback(self.CursorButton);
+      }
+    });
+      
+    this.SelectedWidgets = [widget];
+  };
+
+  GirderAnnotationPanel.prototype.RectangleButtonOn = function (annotObj) {
+    // The layer has to be in editing mode.
+    this.EditOn(annotObj);
+
+    var widget;
+    // Get an arrow widget.
+    // Look for a selected widget to reuse.
+    var layer = annotObj.Layer;
+    if (!widget) {
+      widget = layer.GetASelectedWidget('rect');
+    }
+    if (!widget) {
+      // A selected arrowWidget was not found. Make a new arrow widget.
+      widget = new SAM.RectWidget(layer);
+      // Dialog needs to turn off and on bindings.
+      // TODO: REmove dialogs from widget and manage them here.
+      // Widgets can share a dialog.
+      layer.AddWidget(widget);
+      widget.SetCreationCamera(layer.GetCamera());
+    }
+
+    // Activate the widget to start drawing.
+    widget.SetStateToDrawing(layer);
+
+    // If the rectangle is deactivated with a key stroke, this will turn off the
+    // rectangle button when the widget deactivates itself.
+    var self = this;
+    widget.SetStateChangeCallback(function () {
+      if (!widget.GetActive()) {
+        self.ToolRadioButtonCallback(self.CursorButton);
+      }
+    });
+      
+    this.SelectedWidgets = [widget];
+  };
+
   // Widget is an optional arguement.
   GirderAnnotationPanel.prototype.PencilButtonOn = function (annotObj) {
     // The layer has to be in editing mode.
@@ -2055,12 +2158,10 @@
     // Multiple widgets ( in the layer being edit) can be deleted.
     var widget;
     if (event.keyCode === 46 || event.keyCode === 8) { // delete key
+
       if (this.Highlighted) { // delete key
-        // TODO: Consider calling delete selected (the button callback).
-        if (this.Highlighted.Layer.DeleteSelected()) {
-          this.ToolRadioButtonCallback(this.CursorButton);
-          this.Highlighted.Layer.EventuallyDraw();
-        }
+        this.DeleteSelected();
+        this.Highlighted.Layer.EventuallyDraw();
       }
       event.preventDefault();
       return false;
@@ -2077,18 +2178,27 @@
 
   // Called by the SelectedDeleteButton click event.
   // Returns true if a widget was deleted.
-  GirderAnnotationPanel.prototype.DeleteSelectedWidgets = function () {
-    if (!this.Highlighted) {
+  GirderAnnotationPanel.prototype.DeleteSelected = function () {
+    var annotObj = this.Highlighted;
+    if (!annotObj) {
       return false;
     }
-    if (this.Highlighted.Layer.DeleteSelected()) {
-      this.SelectedWidgets = [];
-      this.ToolRadioButtonCallback(this.CursorButton);
-      this.UpdateToolVisibility();
-      this.Highlighted.Layer.EventuallyDraw();
-      return true;
+    if (! annotObj.Layer.IsSelected()) {
+      this.DeleteAnnotationObject(annotObj);
+      return;
     }
-    return false;
+    if (annotObj.Layer.DeleteSelected()) {
+      this.AnnotationModified(annotObj);     
+      if (annotObj.Layer.IsEmpty()) {
+        this.DeleteAnnotationObject(annotObj);
+      }
+    }
+    this.SelectedWidgets = [];
+    this.ToolRadioButtonCallback(this.CursorButton);
+    this.UpdateToolVisibility();
+    if (this.Highlighted) {
+      this.Highlighted.Layer.EventuallyDraw();
+    }
   };
   
   GirderAnnotationPanel.prototype.HandleKeyUp = function (event) {
@@ -2134,6 +2244,38 @@
     }
   };
 */
+
+  // I am going to use click / tap to select markup.
+  // How can we enforce only one selected at a time (for click)?
+  // First one to consume the click stops propagation.
+  // The problem is:  What should we do if one is already selected?
+  // Event propagation will turn anyones off in the early layers.
+  // After event propagation is stoped,  Loop through the rest
+  // un selecting them.
+  GirderAnnotationPanel.prototype.HandleMouseClick = function (event, shift) {
+    /*
+    // First one to consume the click wins the selection.
+    // TODO: Change this to voting if annotations start to overlap.
+    var found = false;
+    for (var i = 0; i < this.Layers.length; ++i) {
+      var layer = this.Layers[i];
+      if (found) {
+        // Just unselect remaining layers.
+        if (layer.SetSelected) {
+          layer.SetSelected(false);
+        }
+      } else {
+        // We even give inactive layers a chance to claim the selection.
+        // It is a way to find which group a mark belongs to.
+        if (layer.HandleSingleSelect && !layer.HandleSingleSelect(event, this.Shift)) {
+          found = true;
+        }
+      }
+    }
+    return !found;
+    */
+    this.HandleSingleSelect(event, SAM.ShiftKey);
+  };
 
   // I am going to use click / tap to select markup.
   // How can we enforce only one selected at a time (for click)?
@@ -2266,7 +2408,14 @@
     if (selectedWidget.Type == 'arrow') {
       this.HighlightRadioToolButton(this.ArrowButton);
       selectedWidget.SetActive(true);
-      //selectedWidget.SetStateToDrawing(selectedAnnotObj.Layer);
+    }
+    if (selectedWidget.Type == 'circle') {
+      this.HighlightRadioToolButton(this.CircleButton);
+      selectedWidget.SetActive(true);
+    }
+    if (selectedWidget.Type == 'rect') {
+      this.HighlightRadioToolButton(this.RectangleButton);
+      selectedWidget.SetActive(true);
     }
     
     // TODO: This ivar is only really needed for the properties dialog.

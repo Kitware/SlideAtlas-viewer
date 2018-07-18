@@ -68,13 +68,13 @@
     this.PixelsPerMeter = 0;
     this.Shape = new Scale();
     this.Shape.OutlineColor = [0.0, 0.0, 0.0];
-    this.Shape.Origin = [120, 15];
+    this.Shape.Origin = [200, 15];
     this.Shape.BinLength = 200;
     this.Shape.FixedSize = true;
 
     this.Text = new SAM.Text();
     this.Text.PositionCoordinateSystem = SAM.Shape.VIEWER;
-    this.Text.Position = [120, 0];
+    this.Text.Position = [200, 0];
     this.Text.String = '';
     this.Text.Color = [0.0, 0.0, 0.0];
     // I want the anchor to be the center of the text.

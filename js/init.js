@@ -239,8 +239,6 @@ window.SA = window.SA || {};
     if (SA.ContentEditableHasFocus) { return true; }
 
     if (event.keyCode === 16) {
-      // Shift key modifier.
-      SA.ShiftKeyPressed = true;
       // Do not forward modifier keys events to objects that consume keypresses.
       return true;
     }
@@ -305,11 +303,10 @@ window.SA = window.SA || {};
     }
 
     if (event.keyCode === 16) {
-            // Shift key modifier.
-      SA.ShiftKeyPressed = false;
-            // SA.StackCursorFlag = false;
+      // Shift key modifier.
+      // SA.StackCursorFlag = false;
     } else if (event.keyCode === 17) {
-            // Control key modifier.
+      // Control key modifier.
       SA.ControlKeyPressed = false;
     }
 

@@ -684,6 +684,12 @@
       .saOnResize(function () { self.UpdateCanvasSize(); });
 
     this.WidgetList = [];
+    // TODO:
+    // I want to move away from having each shape have its own interaction (dialog).
+    // Instead, I want to keep the shapes, and then have helper objects for interaction.
+    // Right now this is used for non interactive annotation.
+    // In the future I will add interaction helper object to manipulate shapes.. 
+    //this.ShapeList = []; // Not needed quite yet.
 
     // Scale widget is unique. Deal with it separately so it is not
     // saved with the notes.
@@ -746,6 +752,7 @@
     return changed;
   };
 
+  // Returns true if the annotation layer is completely empty.
   AnnotationLayer.prototype.IsEmpty = function () {
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
@@ -754,7 +761,7 @@
       }
     }
     return true;
-  };
+  }
 
   AnnotationLayer.prototype.InactivateAll = function () {
     for (var i = 0; i < this.WidgetList.length; ++i) {
@@ -775,28 +782,28 @@
     }
   };
 
-  // Returns true if something was deleted..
-  AnnotationLayer.prototype.DeleteSelected = function () {
+  // Returns true if any widget was deleted.
+  // This Also prunes empty widgets.
+  AnnotationLayer.prototype.DeleteSelected = function () { 
+   var modified = false;
     var keepers = [];
-    var modified = false;
     // Let every widget delete its selected components.
     for (var idx = 0; idx < this.WidgetList.length; ++idx) {
       var widget = this.WidgetList[idx];
       // Only deletes the selected widgets / shapes.
-      if (widget.DeleteSelected) {
-        if (widget.DeleteSelected()) {
-          modified = true;
+      if (widget.DeleteSelected()) {
+        modified = true;
+        if (!widget.IsEmpty()) {
+          keepers.push(widget);
         }
-      }
-      if (!widget.IsEmpty()) {
-        keepers.push(widget);
+      } else {
+          keepers.push(widget);
       }
     }
-    if (keepers.length < this.WidgetList.length) {
+    if (this.WidgetList.length != keepers.length) {
       this.WidgetList = keepers;
     }
-    // Some browser (safari?) was navigating when the delete key was pressed.
-    // (Even though we returned false here.
+    
     return modified;
   };
   
@@ -840,7 +847,7 @@
   };
 
   AnnotationLayer.prototype.TestDrawingOnImage= function () {
-    if (!this.TestImageLoading) {
+    if (false && !this.TestImageLoading) {
       // Load the test image
       var self = this;
       var test = new Image();
@@ -872,10 +879,12 @@
         ctx.putImageData(imageData, 0, 0);
         // ----- canvas to image.
         self.TestImage2 = new Image();
+        SA.GirderView.uploadImage(canvas[0].toDataURL("image/png"), '5990fc973f24e54cbd1469b9');
         self.TestImage2.src = canvas[0].toDataURL("image/png");
 
       };
       test.src = SA.ImagePathUrl + 'imageTest.png';
+      test.src = "http://lemon/api/v1/file/5ad3eb243f24e55361fb4fd9/download?contentDisposition=inline";
       this.TestImageLoading = true;
     }
 
@@ -889,7 +898,7 @@
   // saving large images.
   AnnotationLayer.prototype.Draw = function () {
     this.AnnotationView.Clear();
-    //this.TestDrawingOnImage();
+    this.TestDrawingOnImage();
     
     if (!this.Visibility) { return; }
 
@@ -1186,6 +1195,16 @@
     this.MouseTime = new Date().getTime();
   };
 
+  // Is any part of the layer selected.
+  AnnotationLayer.prototype.IsSelected = function () {
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var widget = this.WidgetList[i];
+      if (widget.IsSelected()) {
+        return true;
+      }
+    }
+  };
+  
   // Click will only select one widget.
   // returns the widget selected or undefined.
   AnnotationLayer.prototype.SingleSelect = function (event, shift) {
@@ -1264,6 +1283,7 @@
     this.Event = event;
     this.LastMouseDownTime = this.MouseDownTime || 1;
     this.SetMousePositionFromEvent(event);
+    this.ComputeMouseWorld(event);
 
     // Trying to detect click
     // TODO: How to skip clicks when doubleclick occur.

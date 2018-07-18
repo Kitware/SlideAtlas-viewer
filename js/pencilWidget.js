@@ -24,9 +24,7 @@
   var CLOSED = 1;
 
   function PencilWidget (layer) {
-    this.Layer = layer;
-    
-
+    this.Layer = layer;    
     this.State = INACTIVE;
       
     // This method gets called if anything is added, deleted or moved.
@@ -119,19 +117,19 @@
       .keypress(function (event) { return event.keyCode !== 13; });
   };
   
+  // This callback gets called when ever the active state changes,
+  // even if caused by an external call. This widget is passed as a argument.
+  // This is used to turn off the pencil button in the Panel.
+  PencilWidget.prototype.SetStateChangeCallback = function (callback) {
+    this.StateChangeCallback = callback;
+  };
+
   PencilWidget.prototype.SetModifiedCallback = function (callback) {
     this.ModifiedCallback = callback;
   };
 
   PencilWidget.prototype.SetSelectedCallback = function (callback) {
     this.SelectedCallback = callback;
-  };
-
-  // This callback gets called when ever the active state changes,
-  // even if caused by an external call. This widget is passed as a argument.
-  // This is used to turn off the pencil button in the Panel.
-  PencilWidget.prototype.SetStateChangeCallback = function (callback) {
-    this.StateChangeCallback = callback;
   };
 
   // Called when the state changes.
@@ -142,6 +140,16 @@
   };
 
   // Called when the state changes.
+  PencilWidget.prototype.Modified = function () {
+    if (this.ModifiedCallback) {
+      (this.ModifiedCallback)(this);
+    }
+  };
+  //PencilWidget.prototype.Modified = function () {
+  //  this.Shapes.Modified();
+  //};  
+
+  // Called when the state changes.
   PencilWidget.prototype.SelectionChanged = function () {
     if (this.SelectedCallback) {
       (this.SelectedCallback)(this);
@@ -150,13 +158,7 @@
 
   // Can we delete this?
   PencilWidget.prototype.IsEmpty = function () {
-    for (var i = 0; i < this.Shapes.GetNumberOfShapes(); ++i) {
-      var shape = this.Shapes.GetShape(i);
-      if (!shape.IsEmpty()) {
-        return false;
-      }
-    }
-    return true;
+    return this.Shapes.IsEmpty()
   };
 
   // TODO: CLean this up.
@@ -167,8 +169,8 @@
     for (var i = 0; i < this.Shapes.GetNumberOfShapes(); ++i) {
       var stroke = this.Shapes.GetShape(i);
       if (stroke.IsSelected()) {
-        if (stroke.Closed === true && this.ModifiedCallback()) {
-          (this.ModifiedCallback)(this);
+        if (stroke.Closed === true) {
+          this.Modified();
         }
         stroke.Closed = false;
         stroke.UpdateBuffers(this.Layer.AnnotationView);
@@ -184,8 +186,8 @@
     for (var i = 0; i < this.Shapes.GetNumberOfShapes(); ++i) {
       var stroke = this.Shapes.GetShape(i);
       if (stroke.IsSelected()) {
-        if (stroke.Closed === false && this.ModifiedCallback) {
-          (this.ModifiedCallback)(this);
+        if (stroke.Closed === false) {
+          this.Modified();
         }
         stroke.Closed = true;
         stroke.UpdateBuffers(this.Layer.AnnotationView);
@@ -335,14 +337,8 @@
 
   // Returns true if something was deleted.
   PencilWidget.prototype.DeleteSelected = function () {
-    // Delete all the selected strokes.
-    if (this.Shapes.DeleteSelected()) {
-      if (this.ModifiedCallback) {
-        (this.ModifiedCallback)(this);
-      }
-      return true;
-    }
-    return false;
+    // Delete is handled by the caller.
+    return this.Shapes.DeleteSelected();
   };
 
   PencilWidget.prototype.HandleKeyDown = function () {
@@ -444,9 +440,7 @@
           // Add point to the beginning.
           stroke.Points = [pt].concat(stroke.Points);
         }
-        if (this.ModifiedCallback) {
-          (this.ModifiedCallback)(this);
-        }
+        this.Modified();
         stroke.UpdateBuffers(this.Layer.AnnotationView);
         this.Layer.EventuallyDraw();
         return this;
@@ -546,9 +540,7 @@
         stroke.Points.pop();
         return false;
       }
-      if (this.ModifiedCallback) {
-        (this.ModifiedCallback)(this);
-      }
+      this.Modified();
       // Do not trigger a state change event on drawing up/down transistions.
       this.State = DRAWING_UP;
 
@@ -610,10 +602,6 @@
     }
 
     return true;
-  };
-
-  PencilWidget.prototype.Modified = function () {
-    this.Shapes.Modified();
   };
 
   PencilWidget.prototype.HandleMouseMove = function () {
@@ -720,9 +708,7 @@
     this.SetSelected(false);
     if (window.SA) { SA.RecordState(); }
     this.Layer.EventuallyDraw();
-    if (this.ModifiedCallback) {
-      (this.ModifiedCallback)(this);
-    }
+    this.Modified();
     this.SaveDefaults();
   };
 

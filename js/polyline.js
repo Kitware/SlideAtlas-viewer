@@ -16,10 +16,23 @@
   // Get rid of the buffers?
   // }
 
+  
+  // A single point is considered empty.
   Polyline.prototype.IsEmpty = function () {
-    return this.Points.length === 0;
+    if (this.Points.length < 2) {
+      return true;
+    }
+    return false;
   };
 
+  Polyline.prototype.DeleteSelected = function () {
+    if (this.IsSelected()) {
+      this.Points = [];
+      return true;
+    }
+    return false;
+  };
+  
   Polyline.prototype.SetLineWidth = function (lineWidth) {
     this.LineWidth = lineWidth;
   };
@@ -118,7 +131,7 @@
     var k;
     for (var i = 1; i < this.Points.length; ++i) {
       k = this.IntersectPointLine(pt, this.Points[i - 1],
-                                            this.Points[i], dist);
+                                  this.Points[i], dist);
       if (k !== undefined) {
         return [i - 1, i, k];
       }

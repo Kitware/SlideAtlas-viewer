@@ -1838,7 +1838,7 @@
       // The mouse down sets the state to drag.
       // Change it back.  We are not going to drag, only a click.
       this.InteractionState = INTERACTION_NONE;
-      return this.HandleSingleSelect(event);
+      return this.HandleMouseClick(event);
     }
     
     // Let the annotation layers have first dibs on processing the event.
@@ -1998,35 +1998,19 @@
     }
   };
 
-  // I am going to use click / tap to select markup.
-  // How can we enforce only one selected at a time (for click)?
-  // First one to consume the click stops propagation.
-  // The problem is:  What should we do if one is already selected?
-  // Event propagation will turn anyones off in the early layers.
-  // After event propagation is stoped,  Loop through the rest
-  // un selecting them.
-  Viewer.prototype.HandleSingleSelect = function (event) {
+  Viewer.prototype.HandleMouseClick = function (event) {
     if (!this.InteractionEnabled) { return true; }
-    // First one to consume the click wins the selection.
-    // TODO: Change this to voting if annotations start to overlap.
-    var found = false;
+
+    // Let the annotation layers have first dibs on processing the event.
     for (var i = 0; i < this.Layers.length; ++i) {
       var layer = this.Layers[i];
-      if (found) {
-        // Just unselect remaining layers.
-        if (layer.SetSelected) {
-          layer.SetSelected(false);
-        }
-      } else {
-        // We even give inactive layers a chance to claim the selection.
-        // It is a way to find which group a mark belongs to.
-        if (layer.HandleSingleSelect && !layer.HandleSingleSelect(event, this.Shift)) {
-          found = true;
-        }
+      if (layer.HandleMouseClick && !layer.HandleMouseClick(event)) {
+        return false;
       }
     }
-    return !found;
+    return true;
   };
+
 
   Viewer.prototype.HandleMouseDown = function (event) {
     this.Shift = event.shiftKey;
@@ -2114,7 +2098,7 @@
       // The mouse down sets the state to drag.
       // Change it back.  We are not going to drag, only a click.
       this.InteractionState = INTERACTION_NONE;
-      return this.HandleSingleSelect(event);
+      return this.HandleMouseClick(event);
     }
 
     this.FirefoxWhich = 0;

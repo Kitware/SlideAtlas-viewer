@@ -92,6 +92,17 @@
     this.BackgroundFlag = false;
   }
 
+  Text.prototype.DeleteSelected = function() {
+    if (this.IsSelected()) {
+      this.SetString("");
+      return true;
+    }
+  };
+
+  Text.prototype.IsEmpty = function() {
+    return this.String === undefined || this.String === "";
+  }
+  
   Text.prototype.SetString = function (str) {
     this.String = str;
   };

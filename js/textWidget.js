@@ -150,10 +150,7 @@
 
   // Can we delete this?
   TextWidget.prototype.IsEmpty = function () {
-    if (this.Text.GetString() === '') {
-      return true;
-    }
-    return false;
+    return this.Text.IsEmpty();
   };
 
   TextWidget.prototype.IsSelected = function () {
@@ -390,11 +387,7 @@
 
   // Returns true if modified.
   TextWidget.prototype.DeleteSelected = function () {
-    if (this.Text.IsSelected()) {
-      this.Text.SetString('');
-      return true;
-    }
-    return false;
+    return this.Text.DeleteSelected();
   };
 
   TextWidget.prototype.HandleKeyDown = function () {

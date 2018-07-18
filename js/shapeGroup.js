@@ -79,18 +79,33 @@
     }
   };
 
+  // Return true if any shape was deleted.
   ShapeGroup.prototype.DeleteSelected = function () {
+    var modified = false;
     var keepers = [];
     for (var idx = 0; idx < this.Shapes.length; ++idx) {
-      if (!this.Shapes[idx].IsSelected()) {
+      var shape = this.Shapes[idx];
+      if (this.Shapes[idx].DeleteSelected()) {
+        // Something was deleted.
+        modified = true;
+      }
+      if (!shape.IsEmpty()) {
         keepers.push(this.Shapes[idx]);
       }
     }
     if (keepers.length < this.Shapes.length) {
       this.Shapes = keepers;
+    }
+    return modified;
+  };
+
+  ShapeGroup.prototype.IsEmpty = function () {
+    for (var idx = 0; idx < this.Shapes.length; ++idx) {
+      if (!this.Shapes[idx].IsEmpty()) {
+        return false;
+      }
       return true;
     }
-    return false;
   };
 
   // Depreciates: TODO:  Remove this method.
