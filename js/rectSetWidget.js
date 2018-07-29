@@ -228,6 +228,10 @@
     return this.Shape.Widths.length;
   };
 
+  RectSetWidget.prototype.IsEmpty = function () {
+    return this.GetLength() === 0;
+  };
+  
   // Prioritizing by confidence does not work because they all have such high (equal) confidences.
   // Lets prioritize by area instead
   RectSetWidget.prototype.ComputeVisibilities = function (layer) {
@@ -495,6 +499,18 @@
     return this.Active;
   };
 
+  // Does notning now.
+  RectSetWidget.prototype.SetActive = function (flag, layer) {
+    if (!this.Visibility) {
+      this.Visibility = true;
+    }
+    if (flag === this.GetActive()) {
+      return;
+    }
+    this.Active = flag;
+    layer.EventuallyDraw();
+  };
+  
   RectSetWidget.prototype.RemoveFromLayer = function (layer) {
     if (layer) {
       layer.RemoveWidget(this);

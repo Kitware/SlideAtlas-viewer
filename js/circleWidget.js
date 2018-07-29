@@ -529,7 +529,7 @@
       layer.EventuallyDraw();
     }
 
-    if (this.State === DRAG_RADIUS) {
+    if (this.State === DRAG_RADIUS || this.State === NEW_DRAG_RADIUS) {
       var viewport = layer.GetViewport();
       cam = layer.GetCamera();
       var dx = x - this.OriginViewer[0];

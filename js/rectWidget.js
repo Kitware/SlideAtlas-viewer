@@ -5,14 +5,17 @@
   // Depends on the CIRCLE widget
   'use strict';
 
-  // Bits for WhichDrag
-  var DRAG_X = 1;
-  var DRAG_Y = 2;
-  var SYMMETRIC = 4; // Lock the position of the center
-  var ASPECT = 8;    // Lock the aspect ratio
+  // Bits for WhichDrag (not the best way to encode this state).
+  var DRAG_X0 = 1;
+  var DRAG_X1 = 2;
+  var DRAG_Y0 = 4;
+  var DRAG_Y1 = 8;
+  var SYMMETRIC = 16; // Lock the position of the center
+  var ASPECT = 32;    // Lock the aspect ratio
   // These two are only used alone.  However, they are drag features.
-  var CENTER = 16;
-  var ROTATE = 32;
+  var CENTER = 64;
+  var ROTATE = 128;
+  
   
   var NEW = 0;         // Newly created and waiting to be placed.
   var INACTIVE = 1;    // Not resposnsive tp mouse events
@@ -387,7 +390,7 @@
       return true;
     }
     if (this.State === NEW) {
-      this.WhichDrag = DRAG_X + DRAG_Y + SYMMETRIC;
+      this.WhichDrag = DRAG_X0 + DRAG_Y0 + SYMMETRIC;
     }
     if (this.State === HOVER) {
       var part = this.PointOnWhichPart();
@@ -448,15 +451,15 @@
             break;
           case 1:
             this.Layer.GetParent().css({'cursor': 'ne-resize'});
-            this.WhichDrag = DRAG_X + DRAG_Y;
+            this.WhichDrag = DRAG_X1 + DRAG_Y0;
             break;
           case 2:
             this.Layer.GetParent().css({'cursor': 'se-resize'});
-            this.WhichDrag = DRAG_X + DRAG_Y;
+            this.WhichDrag = DRAG_X1 + DRAG_Y1;
             break;
           case 3:
             this.Layer.GetParent().css({'cursor': 'sw-resize'});
-            this.WhichDrag = DRAG_X + DRAG_Y;
+            this.WhichDrag = DRAG_X0 + DRAG_Y1;
             break;
           case 4:
             this.Layer.GetParent().css({'cursor': 'move'});
@@ -467,19 +470,19 @@
           switch(part[1]) {
           case 0:
             this.Layer.GetParent().css({'cursor': 'ns-resize'});
-            this.WhichDrag = DRAG_Y;
+            this.WhichDrag = DRAG_Y0;
             break;
           case 1:
             this.Layer.GetParent().css({'cursor': 'ew-resize'});
-            this.WhichDrag = DRAG_X;
+            this.WhichDrag = DRAG_X1;
             break;
           case 2:
             this.Layer.GetParent().css({'cursor': 'ns-resize'});
-            this.WhichDrag = DRAG_Y;
+            this.WhichDrag = DRAG_Y1;
             break;
           case 3:
             this.Layer.GetParent().css({'cursor': 'ew-resize'});
-            this.WhichDrag = DRAG_X;
+            this.WhichDrag = DRAG_X0;
             break;
           }
         }
@@ -520,38 +523,37 @@
       if (this.WhichDrag & SYMMETRIC) {
         var rx = c * x - s * y;
         var ry = s * x + c * y;
-        if (this.WhichDrag & DRAG_X) {
+        if (this.WhichDrag & (DRAG_X1 + DRAG_X0)) {
           this.Shape.Width = 2 * rx;
         }
-        if (this.WhichDrag & DRAG_Y) {
+        if (this.WhichDrag & (DRAG_Y1 + DRAG_Y0)) {
           this.Shape.Height = 2 * ry;
         }
-      }
-
-      // Draging when not symmetric is a pain.
-      // ------ This is not finihsed. -----------
-      // Rotate mouse vector to be in rectangles coordinate system.
-      // Position of the mouse in box coordinates.
-      // Constrain the mouse vector based on axes being modified.
-      var rdx = 0;
-      if (this.WhichDrag & DRAG_X) {
-        rdx = c*dx - s*dy;
-      }
-      var rdy = 0;
-      if (this.WhichDrag & DRAG_Y) {
-        rdy = s*dx + c*dy;
-      }
-      // Approach: Drag only one corner but allow negative width an height.
-      // Make these positive again when interaction stops.
-      // Ignore aspect lock for now.
-      if (this.WhichDrag & SYMMETRIC) {
-        // Both sides are expanding, center stays fixed.
-        this.Shape.Width += 2 * rdx;
-        this.Shape.Height += 2 * rdy;
       } else {
-        // One side is exapnding.
-        this.Shape.Width += rdx;
-        this.Shape.Height += rdy;
+        // Draging when not symmetric is a pain.
+        // ------ This is not finihsed. -----------
+        // Rotate mouse vector to be in rectangles coordinate system.
+        // Position of the mouse in box coordinates.
+        // Constrain the mouse vector based on axes being modified.
+        // Transform the detla mouse to rectangle coordinate system.
+        var rdx = c*dx - s*dy;
+        var rdy = s*dx + c*dy;
+        if (this.WhichDrag & DRAG_X1) {
+          this.Shape.Width += rdx;
+        } else if (this.WhichDrag & DRAG_X0) {
+          this.Shape.Width -= rdx;
+        } else {
+          // This axis is not being maodified.  Ignore it.
+          rdx = 0;
+        }
+        if (this.WhichDrag & DRAG_Y1) {
+          this.Shape.Height += rdy;
+        } else if (this.WhichDrag & DRAG_Y0) {
+          this.Shape.Height -= rdy;
+        } else {
+          // This axis is not being maodified.  Ignore it.
+          rdy = 0;
+        }
         // Rotate the constrained mouse back to world coordinate system.
         dx = c*rdx + s*rdy;
         dy = -s*rdx + c*rdy;

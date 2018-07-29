@@ -288,7 +288,7 @@
 
   // Load a widget from a json object (origin MongoDB).
   PencilWidget.prototype.Load = function (obj) {
-    this.LineWidth = parseFloat(obj.linewidth);
+    this.LineWidth = 0;
     if (obj.linewidth !== undefined) {
       this.LineWidth = parseFloat(obj.linewidth);
     }
@@ -903,7 +903,7 @@
         var k = k0[1] / (k0[1] - k1[1]);
         var x = k0[0] + k * (k1[0] - k0[0]);
         if (x > 0 && x <= 1) {
-          var newPt = [(m0[0] + k * (m1[0] - m0[0])), (m0[1] + k * (m1[1] - m0[1]))];
+          var newPt = [(m0[0] + k * (m1[0] - m0[0])), (m0[1] + k * (m1[1] - m0[1])), 0.0];
           intersections.push({Point: newPt, LoopIdx0: i-1, LoopIdx1: i, k: x});
         }
       }
