@@ -638,6 +638,11 @@
   function AnnotationLayer (parent) {
     var self = this;
 
+    // For stack.  Z = 0 is default for single images.
+    // Annotations use this to decide whether to draw or not.
+    // It is changed when the GirderStackWidget changes frame.
+    this.ZTime = 0;
+    
     // This will be called when a widget is selected by the user.
     // So the panel can put the layer into edit mode.
     this.ActivatedCallback = undefined;

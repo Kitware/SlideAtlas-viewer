@@ -252,14 +252,14 @@
     var view = this.Layer.GetView();
     this.Shapes.Draw(view);
     this.Circle.FillColor = this.Color;
-    if (this.Layer.Time != undefined) {
+    if (this.Layer.ZTime != undefined &&  this.Shapes.Shapes.length > 0) {
       // Find the time in the list of points
       var pts = this.Shapes.Shapes[0].Points;
       for (var i = 0; i < pts.length; ++i) {
         var pt = pts[i];
-        if (pt.length === 3 && pt[2] === this.Layer.Time) {
+        if (pt.length === 3 && pt[2] === this.Layer.ZTime) {
           this.Circle.Origin = pt;
-          this.Circle.Draw(view);
+          //this.Circle.Draw(view);
           break;
         }
       }
@@ -431,7 +431,7 @@
         dx = pt[0] - p1[0];
         dy = pt[1] - p1[1];
         var dist1 = dx*dx + dy*dy;
-        pt = [pt[0], pt[1], this.Layer.Time];
+        pt = [pt[0], pt[1], this.Layer.ZTime];
         console.log(pt.toString());
         if (dist1 < dist0) {
           // add point to the end.

@@ -38,7 +38,7 @@
     this.Width = 50;
     this.Height = 50;
     this.Orientation = 0; // Angle with respect to x axis ?
-    this.Origin = [10000, 10000]; // Center in world coordinates.
+    this.Origin = [10000, 10000, 0]; // Center in world coordinates.
     this.OutlineColor = [0, 0, 0];
     this.PointBuffer = [];
   }
@@ -259,6 +259,11 @@
     // Check to see if a stroke was clicked.
     var x = this.Layer.MouseX;
     var y = this.Layer.MouseY;
+    var z = this.Layer.ZTime;
+    if (this.Shape.Origin.length > 2 && this.Shape.Origin[2] != z) {
+      return false;
+    }
+
     var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
 
     var part = this.PointOnWhichPart();
@@ -279,6 +284,11 @@
 
   RectWidget.prototype.Draw = function () {
     var view = this.Layer.GetView();
+    if (this.Layer.ZTime != undefined && this.Shape.Origin.length > 2) {
+      if (this.Layer.ZTime != this.Shape.Origin[2]) {
+        return;
+      }
+    }
     this.Shape.Draw(view);
     if (this.State !== INACTIVE && this.State !== NEW && this.State !== DRAG) {
       var pts = this.GetCornerPoints();
@@ -305,7 +315,6 @@
     obj.type = 'rect';
     obj.user_note_flag = this.UserNoteFlag;
     obj.origin = this.Shape.Origin;
-    obj.origin[2] = 0.0;
     obj.outlinecolor = this.Shape.OutlineColor;
     obj.height = this.Shape.Height;
     obj.width = this.Shape.Width;
@@ -320,6 +329,10 @@
     this.UserNoteFlag = obj.user_note_flag;
     this.Shape.Origin[0] = parseFloat(obj.origin[0]);
     this.Shape.Origin[1] = parseFloat(obj.origin[1]);
+    if (obj.origin.length > 2) {
+      this.Shape.Origin[2] = parseFloat(obj.origin[2]);
+    }
+
     if (obj.outlinecolor) {
       this.Shape.OutlineColor[0] = parseFloat(obj.outlinecolor[0]);
       this.Shape.OutlineColor[1] = parseFloat(obj.outlinecolor[1]);
@@ -501,6 +514,7 @@
         // Special case with no modifiers.  Just translate the whole rectangle.
         this.Shape.Origin = worldPt1;
         this.Layer.EventuallyDraw();
+        this.Modified();
         return false;
       }
       if (this.WhichDrag & ROTATE) {
@@ -518,6 +532,7 @@
         var s = v0[0] * v1[1] - v0[1] * v1[0];
         this.Shape.Orientation = -Math.atan2(s, c) * 180 / Math.PI;
         this.Layer.EventuallyDraw();
+        this.Modified();
         return false;
       }
       if (this.WhichDrag & SYMMETRIC) {
@@ -668,7 +683,7 @@
       // Save values in local storage as defaults for next time.
       localStorage.RectWidgetDefaults = JSON.stringify({
         Color: hexcolor,
-        Width: width});
+        Width: this.Shape.LineWidth});
       this.Modified();
       this.Shape.UpdateBuffers(this.Layer.AnnotationView);
     }

@@ -78,7 +78,14 @@
     this.Cross.LineWidth = 1;
     this.Cross.Radius = 10;
     this.Cross.PositionCoordinateSystem = 1; //Shape.VIEWER;
-    
+
+    this.Cross = new SAM.Circle();
+    this.Cross.SetFillColor([1,1,0]);
+    this.Cross.SetOutlineColor([0.0, 0.0, 0.0]);
+    this.Cross.Radius = 5;
+    this.Cross.LineWidth = 1;
+    this.Cross.PositionCoordinateSystem = 1;
+      
     this.State = INACTIVE;
   }
 
@@ -350,7 +357,9 @@
       this.Circle.Draw(view);
       if (this.State === ACTIVE || this.State === HOVER) {
         var origin = this.Circle.Origin;
-        this.Cross.Origin = [origin[0], origin[1]]; 
+        var cam = this.Layer.GetCamera();
+        var pt = cam.ConvertPointWorldToViewer(origin[0], origin[1]);
+        this.Cross.Origin = [pt[0], pt[1]]; 
         this.Cross.Draw(view);
       }
     }
@@ -467,6 +476,7 @@
     if (this.State === DRAG || this.State === DRAG_RADIUS) {
       this.State = HOVER;
       this.Modified();
+      this.Layer.EventuallyDraw();
     }
 
     var event = layer.Event;

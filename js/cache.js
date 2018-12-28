@@ -59,7 +59,7 @@
       return null;
     }
 
-    idx = this.IteratorIndex;
+    var idx = this.IteratorIndex;
     while (this.Tiles[idx] === null) {
       idx += 1
       if (idx >= this.Tiles.length) {
@@ -609,14 +609,12 @@
   // SA.PruneTimeTiles and SA.PruneTimeTextures are compared with used time of tile.
   Cache.prototype.PruneTiles = function () {
     this.Levels[0].StartIteration();
-    node = this.Levels[0].Next()
-    while (node !== null) {
-      if (node.LoadState === 3) {
-        if (node.BranchTimeStamp < SA.PruneTimeTiles || node.BranchTimeStamp < SA.PruneTimeTextures) {
-          var count = this.RecursivePruneTiles(node);
-          if (count > 0) {
-            console.log('prune ' + count + ' from ' + this.Image.label);
-          }
+    var node = this.Levels[0].Next()
+    if (node.LoadState === 3) {
+      if (node.BranchTimeStamp < SA.PruneTimeTiles || node.BranchTimeStamp < SA.PruneTimeTextures) {
+        var count = this.RecursivePruneTiles(node);
+        if (count > 0) {
+          console.log('prune ' + count + ' from ' + this.Image.label);
         }
       }
     }

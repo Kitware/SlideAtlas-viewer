@@ -2030,11 +2030,11 @@
       this.RotateIconDrag = false;
     }
 
-    // if (this.DoubleClick) {
-    //  // Without this, double click selects sub elementes.
-    //  event.preventDefault();
-    //  return this.HandleDoubleClick(event);
-    // }
+    if (this.DoubleClick) {
+      // Without this, double click selects sub elementes.
+      event.preventDefault();
+      return this.HandleDoubleClick(event);
+    }
 
     // Let the annotation layers have first dibs on processing the event.
     for (var i = 0; i < this.Layers.length; ++i) {

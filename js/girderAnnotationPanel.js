@@ -1210,12 +1210,12 @@
           } else {
             obj.type = 'arrow';
             obj.origin = element.points[0].slice(0);
-            if (SAM.HACK) {
-              var dx = element.points[1][0] - element.points[0][0];
-              var dy = element.points[1][1] - element.points[0][1];
-              obj.origin[0] -= dx;
-              obj.origin[1] -= dy;
-            }
+            //if (SAM.HACK) {
+            //  var dx = element.points[1][0] - element.points[0][0];
+            //  var dy = element.points[1][1] - element.points[0][1];
+            //  obj.origin[0] -= dx;
+            //  obj.origin[1] -= dy;
+            //}
             obj.fillcolor = SAM.ConvertColor(element.fillColor);
             obj.outlinecolor = SAM.ConvertColor(element.lineColor);
             var dx = element.points[1][0] - element.points[0][0];
@@ -1223,7 +1223,8 @@
             var length = Math.sqrt(dx*dx + dy*dy);
             obj.length = length;
             //obj.width = ;
-            obj.orientation = Math.atan2(dy/length,dx/length) * 180 / Math.PI;
+            // The upper left origin causes orientation to be negative.
+            obj.orientation = -Math.atan2(dy/length,dx/length) * 180 / Math.PI;
             if (element.lineWidth !== undefined) {
               obj.width = element.lineWidth;
             } else {
@@ -1689,7 +1690,7 @@
         // Will not keep scale feature..
         var pt1 = [widget.origin[0], widget.origin[1], 0]
         var pt2 = [widget.origin[0], widget.origin[1], 0]
-        var theta = widget.orientation * Math.PI / 180.0;
+        var theta = -widget.orientation * Math.PI / 180.0;
         pt2[0] += widget.length * Math.cos(theta);
         pt2[1] += widget.length * Math.sin(theta);        
         points = [pt1, pt2];
@@ -2456,7 +2457,7 @@
       var annotObj = this.AnnotationObjects[i];
       var layer = annotObj.Layer;
       if (layer) {
-        layer.Time = time;
+        layer.ZTime = time;
       }
     }
   };
