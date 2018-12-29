@@ -124,6 +124,8 @@
     this.CenterCircle.LineWidth = 1;
     this.CenterCircle.PositionCoordinateSystem = 1;
 
+    this.Rotatable = false;
+
     // Circle is a handle for rotation.
     this.RotateCircle = new SAM.Circle();
     this.RotateCircle.SetFillColor([1,1,0]);
@@ -131,7 +133,7 @@
     this.RotateCircle.Radius = 5;
     this.RotateCircle.LineWidth = 1;
     this.RotateCircle.PositionCoordinateSystem = 1;
-
+    
     // Get default properties.
     if (localStorage.RectWidgetDefaults) {
       var defaults = JSON.parse(localStorage.RectWidgetDefaults);
@@ -292,11 +294,13 @@
     this.Shape.Draw(view);
     if (this.State !== INACTIVE && this.State !== NEW && this.State !== DRAG) {
       var pts = this.GetCornerPoints();
-      this.CenterCircle.Origin = pts[0];
+      this.CenterCircle.Origin = pts[4];
       this.CenterCircle.Draw(view);
-      var cam = this.Layer.GetCamera();
-      this.RotateCircle.Origin = pts[4];
-      this.RotateCircle.Draw(view);
+      // var cam = this.Layer.GetCamera();
+      if (this.Rotatable) {
+        this.RotateCircle.Origin = pts[0];
+        this.RotateCircle.Draw(view);
+      }
     }
   };
 
@@ -459,8 +463,13 @@
         if (part[0] === CORNER) {
           switch(part[1]) {
           case 0:
-            this.Layer.GetParent().css({'cursor': 'pointer'});
-            this.WhichDrag = ROTATE;
+            if (this.Rotatable) {
+              this.Layer.GetParent().css({'cursor': 'pointer'});
+              this.WhichDrag = ROTATE;
+            } else {
+              this.Layer.GetParent().css({'cursor': 'nw-resize'});
+              this.WhichDrag = DRAG_X0 + DRAG_Y0;
+            }
             break;
           case 1:
             this.Layer.GetParent().css({'cursor': 'ne-resize'});
