@@ -310,7 +310,7 @@
     // This would be better as an argument.
     this.Shape.Origin = [mouseWorldPt[0], mouseWorldPt[1]];
     layer.EventuallyDraw();
-     this.Modified();
+    this.Modified();
   };
 
   RectWidget.prototype.Serialize = function () {
@@ -586,7 +586,9 @@
         this.Shape.Origin[1] += dy / 2.0;
       }
     }
-      
+
+    DEFAULT_WIDTH = this.Shape.Width;
+    DEFAULT_HEIGHT = this.Shape.Height;
     this.Modified();
     this.Shape.UpdateBuffers();
     this.Layer.EventuallyDraw();
@@ -610,6 +612,19 @@
     this.Layer.EventuallyDraw();
  
     return false;
+  };
+
+  // returns false when it is finished doing its work.
+  RectWidget.prototype.HandleMouseClick = function () {
+    if (!this.Visibility || this.State === INACTIVE) {
+      return true;
+    }
+    if (this.State === NEW) {
+      this.SetActive(false);
+      this.Modified();
+      return false;
+    }
+    return true;
   };
 
   // Multiple active states. Active state is a bit confusing.

@@ -1324,6 +1324,20 @@
     return true;
   };
 
+  AnnotationLayer.prototype.HandleMouseClick = function (event) {
+    if (!this.GetVisibility()) {
+      return true;
+    }
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var widget = this.WidgetList[i];
+      if (widget.HandleMouseClick && !widget.HandleMouseClick(this)) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   AnnotationLayer.prototype.HandleMouseUp = function (event) {
     if (!this.GetVisibility()) {
       return true;

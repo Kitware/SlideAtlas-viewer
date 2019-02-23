@@ -25,6 +25,11 @@
   function CircleWidget (layer) {
     this.Layer = layer;
 
+    // Get default properties.
+    if (localStorage.CircleWidgetDefaults) {
+      this.Defaults = JSON.parse(localStorage.CircleWidgetDefaults);
+    }
+    
     // This method gets called if anything is added, deleted or moved.
     this.ModifiedCallback = undefined;
     // This method gets called if the active state of this widget turns on or off.
@@ -60,6 +65,31 @@
     this.Circle.SetOutlineColor('#00ff00');
     this.Circle.Radius = 50 * cam.Height / viewport[3];
     this.Circle.LineWidth = 5.0 * cam.Height / viewport[3];
+
+    if (this.Defaults) {
+      if (this.Defaults.Color) {
+        this.Circle.OutlineColor = this.Defaults.Color;
+      }
+      if (this.Defaults.LineWidth != undefined) {
+        // Only use the default if it is reasonable.
+        if (this.Defaults.LineWidth == 0) {
+          this.Circle.LineWidth = this.Defaults.LineWidth;
+        } else {
+          var tmp = this.Circle.LineWidth / this.Defaults.LineWidth;
+          if (Math.max(tmp, 1/tmp) < 10) {
+            this.Circle.LineWidth = this.Defaults.LineWidth;
+          }
+        }
+      }
+      if (this.Defaults.Radius) {
+        // Only use the default if it is reasonable.
+        var tmp = this.Circle.Radius / this.Defaults.Radius;
+        if (Math.max(tmp, 1/tmp) < 10) {
+          this.Circle.Radius = this.Defaults.Radius;
+        }
+      }
+    }
+
     this.Circle.FixedSize = false;
 
     // Note: If the user clicks before the mouse is in the
@@ -87,6 +117,7 @@
     this.Cross.PositionCoordinateSystem = 1;
       
     this.State = INACTIVE;
+
   }
 
   CircleWidget.prototype.SetModifiedCallback = function (callback) {
@@ -124,6 +155,7 @@
   
   // Called when the state changes.
   CircleWidget.prototype.Modified = function () {
+    this.SaveDefaults();
     if (this.ModifiedCallback) {
       (this.ModifiedCallback)(this);
     }
@@ -342,14 +374,19 @@
     }
 
     if (modified) {
-      // Save values in local storage as defaults for next time.
-      localStorage.CircleWidgetDefaults = JSON.stringify({
-        Color: hexcolor,
-        LineWidth: lineWidth});
       this.Modified();
       this.Circle.UpdateBuffers(this.Layer.AnnotationView);
     }
   };  
+
+  CircleWidget.prototype.SaveDefaults = function () {
+    // Save values in local storage as defaults for next time.
+    this.Defaults.Color = this.Circle.GetOutlineColor();
+    this.Defaults.LineWidth = this.Circle.LineWidth;
+    this.Defaults.Radius = this.Circle.Radius;
+    
+    localStorage.CircleWidgetDefaults = JSON.stringify(this.Defaults);
+  };
   
   CircleWidget.prototype.Draw = function () {
     if (this.State !== NEW_HIDDEN && this.Circle) {
@@ -405,7 +442,7 @@
       this.CreationCamera = obj.CreationCamera;
     }
   };
-
+  
   CircleWidget.prototype.HandleKeyDown = function (keyCode) {
     if (this.State === INACTIVE) {
       return true;
@@ -416,6 +453,16 @@
       return false;
     }
 
+    // Escape key
+    if (event.keyCode === 27) {
+      if (this.State === NEW_DRAG) {
+        // Circle has not been placed. Delete the circle.
+        this.Layer.DeleteSelected();
+      }
+      this.SetActive(false);
+      return false;
+    }
+    
     // Copy
     if (event.keyCode === 67 && event.ctrlKey) {
       // control-c for copy
@@ -489,6 +536,25 @@
     }
     
     return false;
+  };
+
+  // returns false when it is finished doing its work.
+  CircleWidget.prototype.HandleMouseClick = function () {
+    if (this.State === INACTIVE) {
+      return true;
+    }
+    if (this.State === NEW_DRAG || this.State === NEW_DRAG_RADIUS) {
+      this.SetActive(false);
+      this.Modified();
+      // A click to place bring up another circle for automatic / fast annotation.
+      var widget = new SAM.CircleWidget(this.Layer);
+      this.Layer.AddWidget(widget);
+      widget.SetCreationCamera(this.Layer.GetCamera());
+      widget.SetStateToDrawing();
+
+      return false;
+    }
+    return true;
   };
 
   CircleWidget.prototype.HandleMouseMove = function (layer) {

@@ -1,3 +1,6 @@
+// This class is not used anywhere.
+
+
 // ==============================================================================
 // Collection widget, No serialize or load.
 // Manage 3 annotation sets,  detection, positives (ground truth) and false positives.

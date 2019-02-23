@@ -1114,6 +1114,11 @@
     this.MainView.Camera.SetWorldFocalPoint([center[0], center[1]]);
     this.MainView.Camera.SetWorldRoll(rotation * 3.14159265359 / 180.0);
 
+    this.ZoomTarget = height;
+    this.TranslateTarget[0] = center[0];
+    this.TranslateTarget[1] = center[1];
+    this.RollTarget = rotation;
+    
     this.UpdateCamera();
     this.EventuallyRender(true);
   };

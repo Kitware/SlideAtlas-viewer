@@ -346,6 +346,10 @@
     this.OutlineColor = SAM.ConvertColor(c);
   };
 
+  Shape.prototype.GetOutlineColor = function (c) {
+    return this.OutlineColor;
+  };
+
   Shape.prototype.SetFillColor = function (c) {
     this.FillColor = SAM.ConvertColor(c);
   };

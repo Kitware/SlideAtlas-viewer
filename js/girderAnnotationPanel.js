@@ -1,3 +1,5 @@
+// This is not used internally, but is created/setup by the Girder plugin.
+
 // Get iPad pencil automatically triggering pecil tool (transiently)
 
 // Get an eraser pencil option working.
@@ -27,6 +29,11 @@
 
 // 3: undo.
 
+
+// Added: currently visible annotations names to the "localStorage" so they remain open when stepping
+// through images with the navigator.
+
+
 // Notes:  It was tricky getting two modes of activating tools:  1 radio button, 2 click to select widget.
 // Here is what happens for the two paths:
 // Click Tool button
@@ -50,6 +57,11 @@
 
   // Parent is the viewer.Div
   function GirderAnnotationPanel (viewer, itemId) {
+    // Because of loading on demand, the easiest way to restore
+    // visibile annotations from local storage is to load a list
+    // here.
+    this.RestoreVisibilityFromLocalStorage();
+
     this.Parent = viewer.GetDiv();
     // Any new layers created have to know the viewer.
     this.Viewer = viewer;
@@ -61,8 +73,9 @@
     
     // The pannel should probably not be managing this navigation widget.
     // I am putting it here as a temporary home.
-    this.InitializeNavigation(viewer.GetDiv(), itemId);
-
+    if (itemId) {
+      this.InitializeNavigation(viewer.GetDiv(), itemId);
+    }
     // To get event calls from the viewer.
     viewer.AddLayer(this);
     
@@ -115,11 +128,11 @@
     this.OptionsDiv = $('<div>')
       .appendTo(this.ToolPanel)
       .attr('id', 'saAnnotationTools');
-    this.CheckItemIdAccessTools(itemId);
-
-    // This makes a button for each annotation in the item.
-    this.InitializeButtons(this.Div, itemId);
-
+    if (itemId) {
+      this.CheckItemIdAccessTools(itemId);
+      // This makes a button for each annotation in the item.
+      this.InitializeButtons(this.Div, itemId);
+    }
     this.Radius = 7;
 
     this.AnnotationObjects = [];
@@ -395,8 +408,17 @@
       self.LoadItemToViewer(itemId, data);
     });
 
+    // There is contention trying to restore annotation visibility in the next item.
+    // Deleting Annotation Buttons erases local storage of the visible names.
+    // Probably a better solution than this is to have two set visibility methods.
+    // Only the one used by the gui changes local storage values.
+    // For now, save and restore the cached names.
+    var savedNames = this.LocalStorageVisibleAnnotationNames;
+    
     // Now for the annotation stuff.
     this.DeleteAnnotationButtons();
+    this.LocalStorageVisibleAnnotationNames = savedNames;
+
     this.InitializeButtons(this.Div, itemId);
   };
 
@@ -536,7 +558,7 @@
 
     // A menu button that pops up when a markup is selected.
     // Not part of the radio group.  This is a sub option for widgets.
-    this.ProperiesDialogButton = $('<img>')
+    this.PropertiesDialogButton = $('<img>')
       .appendTo(this.OptionsDiv)
       .addClass('sa-view-annotation-button sa-flat-button-active')
       .addClass('sa-active')
@@ -630,7 +652,7 @@
     this.UpdateToolVisibility();    
   };
 
-  // Called by the ProperiesDialogButton click event.
+  // Called by the PropertiesDialogButton click event.
   GirderAnnotationPanel.prototype.ShowSelectedWidgetMenu = function () {
     if (!this.Highlighted || !this.SelectedWidgets.length === 1) {
       return;
@@ -648,12 +670,12 @@
   // TODO: Help tool. to explain why a tool is not available.
   GirderAnnotationPanel.prototype.UpdateToolVisibility = function () {
     if (this.SelectedWidgets.length === 1) {
-      this.ProperiesDialogButton.show();
+      this.PropertiesDialogButton.show();
     } else {
-      this.ProperiesDialogButton.hide();
+      this.PropertiesDialogButton.hide();
     }
 
-    // Pencil is always visible. If a layer is not being edit, one is created and set to editon.
+    // Pencil is always visible. If a layer is not being edited, one is created and set to editon.
 
     // RectangleSelect is only active when a layer is being edited and it has marks.
     //     An alternitive single select with mouseclick can always select and mark.
@@ -1013,7 +1035,12 @@
 
     // Make te default user annotation visible.
     // Race condition?
-    if (annotObj.Name === this.UserData.login) {
+    //if (annotObj.Name === this.UserData.login) {
+    //  this.AfterLoad(annotObj, function () { self.VisibilityOn(annotObj); });
+    //}
+
+    // Restore any visible annotations from a previous session.
+    if (this.LocalStorageVisibleAnnotationNames.indexOf(annotObj.Name) > -1) {
       this.AfterLoad(annotObj, function () { self.VisibilityOn(annotObj); });
     }
     
@@ -1375,6 +1402,31 @@
     this.UpdateToolVisibility();
   };
 
+
+  GirderAnnotationPanel.prototype.RestoreVisibilityFromLocalStorage = function() {
+    this.LocalStorageVisibleAnnotationNames = [];
+    var str = localStorage.getItem("SAAnnotationVisibility");
+    if (str) {
+      this.LocalStorageVisibleAnnotationNames = JSON.parse(str);
+    } 
+  };
+
+  
+  GirderAnnotationPanel.prototype.SaveVisibilityInLocalStorage = function() {
+    // Assemble a list of visible names.
+    var names = [];
+    for (var idx = 0; idx < this.AnnotationObjects.length; ++idx) {
+      var annotObj = this.AnnotationObjects[idx];
+      if (annotObj.Visible) {
+        names.push(annotObj.Name)
+      }
+    }
+    
+    localStorage.setItem("SAAnnotationVisibility", JSON.stringify(names));
+    this.LocalStorageVisibleAnnotationNames = names;
+  }
+
+  
   GirderAnnotationPanel.prototype.VisibilityOn = function (annotObj) {
     if (!annotObj || annotObj.Visible) {
       return;
@@ -1383,7 +1435,11 @@
     annotObj.VisToggle
       .attr('src', SA.ImagePathUrl + 'eyeOpen32.png');
     this.DisplayAnnotation(annotObj);
+
+    // Record the visibility of this annotation in local storage.
+    this.SaveVisibilityInLocalStorage();
   };
+  
   GirderAnnotationPanel.prototype.VisibilityOff = function (annotObj) {
     if (!annotObj || !annotObj.Visible) {
       return;
@@ -1395,6 +1451,8 @@
 
     // Editing annots must be visible.
     this.EditOff(annotObj);
+    // Record the visibility of this annotation in local storage.
+    this.SaveVisibilityInLocalStorage();
   };
 
   // This call back pattern is all because we load on demand.
@@ -2254,28 +2312,16 @@
   // After event propagation is stoped,  Loop through the rest
   // un selecting them.
   GirderAnnotationPanel.prototype.HandleMouseClick = function (event, shift) {
-    /*
-    // First one to consume the click wins the selection.
-    // TODO: Change this to voting if annotations start to overlap.
-    var found = false;
-    for (var i = 0; i < this.Layers.length; ++i) {
-      var layer = this.Layers[i];
-      if (found) {
-        // Just unselect remaining layers.
-        if (layer.SetSelected) {
-          layer.SetSelected(false);
-        }
-      } else {
-        // We even give inactive layers a chance to claim the selection.
-        // It is a way to find which group a mark belongs to.
-        if (layer.HandleSingleSelect && !layer.HandleSingleSelect(event, this.Shift)) {
-          found = true;
-        }
+    // See if any widgets want to handle this evenr.
+    // For example: a rectWidget is creagging a new rect and a single click will place it.
+    if (this.Highlighted) {
+      var layer = this.Highlighted.Layer;
+      if (layer && layer.HandleMouseClick && !layer.HandleMouseClick(event)) {
+        return false;
       }
     }
-    return !found;
-    */
-    this.HandleSingleSelect(event, SAM.ShiftKey);
+
+    return this.HandleSingleSelect(event, SAM.ShiftKey);
   };
 
   // I am going to use click / tap to select markup.
@@ -2337,13 +2383,15 @@
   // You can call this with selectedWidget = undefined to unset it.
   // The annot object is the one that contains the widget.
   GirderAnnotationPanel.prototype.SetSelectedWidget = function(selectedWidget, selectedAnnotObj) {
+    // Unselect previous selected widgets.
+    for (var i = 0; i < this.SelectedWidgets.length; ++i) {
+      var widget = this.SelectedWidgets[i];
+      widget.SetActive(false);
+    }
+    this.SelectedWidgets = [];
+
     // No widget: Go back to the cursor mode.
     if (!selectedWidget) {
-      for (var i = 0; i < this.SelectedWidgets.length; ++i) {
-        var widget = this.SelectedWidgets[i];
-        widget.SetActive(false);
-      }
-      this.SelectedWidgets = [];
       // Nothing was selected.
       // Change the state back to cursor
       this.HighlightRadioToolButton(this.CursorButton);
