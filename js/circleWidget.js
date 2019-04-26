@@ -43,9 +43,9 @@
     // permission.
     this.Type = 'circle';
 
-    this.Tolerance = 0.05;
+    this.Tolerance = 3.0;
     if (SAM.MOBILE_DEVICE) {
-      this.Tolerance = 0.1;
+      this.Tolerance = 15.0;
     }
 
     if (layer === null) {
@@ -183,7 +183,7 @@
     }
     var radius = this.Circle.Radius;
     var cam = this.Layer.GetCamera();
-    var p = cam.ConvertPointWorldToViewer(this.Circle.Origin);
+    var p = cam.ConvertPointWorldToViewer(this.Circle.Origin[0], this.Circle.Origin[1]);
     
     if (selection.ViewerPointInSelection(p[0] - radius, p[1] - radius) &&
         selection.ViewerPointInSelection(p[0] - radius, p[1] + radius) &&
@@ -429,11 +429,20 @@
   CircleWidget.prototype.Load = function (obj) {
     this.Circle.Origin[0] = parseFloat(obj.origin[0]);
     this.Circle.Origin[1] = parseFloat(obj.origin[1]);
-    this.Circle.OutlineColor[0] = parseFloat(obj.outlinecolor[0]);
-    this.Circle.OutlineColor[1] = parseFloat(obj.outlinecolor[1]);
-    this.Circle.OutlineColor[2] = parseFloat(obj.outlinecolor[2]);
+    if (obj['outlinecolor'] !== undefined) {
+      this.Circle.OutlineColor[0] = parseFloat(obj.outlinecolor[0]);
+      this.Circle.OutlineColor[1] = parseFloat(obj.outlinecolor[1]);
+      this.Circle.OutlineColor[2] = parseFloat(obj.outlinecolor[2]);
+    } else {
+      this.Circle.OutlineColor[0] = 0.0;
+      this.Circle.OutlineColor[1] = 1.0;
+      this.Circle.OutlineColor[2] = 1.0;
+    }
     this.Circle.Radius = parseFloat(obj.radius);
-    this.Circle.LineWidth = parseFloat(obj.linewidth);
+    this.Circle.LineWidth = 0;
+    if (obj.lineWidth) {
+      this.Circle.LineWidth = parseFloat(obj.linewidth);
+    }
     this.Circle.FixedSize = false;
     this.Circle.UpdateBuffers(this.Layer.AnnotationView);
 
@@ -690,24 +699,29 @@
   // Returns true or false.  Point is in viewer coordinates.
   CircleWidget.prototype.MouseOverWhichPart = function (event) {
     var pt = [event.offsetX, event.offsetY];
+    var c = this.Circle.Origin;
+    var r = this.Circle.Radius;
+    var lineWidth = this.Circle.LineWidth;
+    // Do the comparison in view coordinates.
     if ( ! this.FixedSize) {
-      pt = this.Layer.GetCamera().ConvertPointViewerToWorld(pt[0], pt[1]);
+      var cam = this.Layer.GetCamera();
+      c = cam.ConvertPointWorldToViewer(c[0], c[1]);
+      r = cam.ConvertScaleWorldToViewer(r);
+      lineWidth = cam.ConvertScaleWorldToViewer(lineWidth);
     }
     
-    var dx = pt[0] - this.Circle.Origin[0];
-    var dy = pt[1] - this.Circle.Origin[1];
+    var dx = pt[0] - c[0]
+    var dy = pt[1] - c[1]
 
-    var d = Math.sqrt(dx * dx + dy * dy) / this.Circle.Radius;
-    var lineWidth = this.Circle.LineWidth / this.Circle.Radius;
-    this.NormalizedActiveDistance = d;
+    var d = Math.sqrt(dx * dx + dy * dy);
 
-    if ((d < (1.0 + this.Tolerance + lineWidth) && d > (1.0 - this.Tolerance))) {
+    if (Math.abs(d-r) < this.Tolerance + lineWidth) {
       return CIRCUMFERENCE;
     }
-    if (d < (this.Tolerance + lineWidth)) {
+    if (d < (2*this.Tolerance + lineWidth)) {
         return CENTER;
     }
-    if (d < 1.0) {
+    if (d < r) {
       return INSIDE;
     }
     return 0;

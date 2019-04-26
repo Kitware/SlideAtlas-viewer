@@ -248,6 +248,13 @@ window.SAM = window.SAM || {};
     return dist * 2.0 * m[15] / this.ViewportWidth;
   };
 
+  Camera.prototype.ConvertScaleWorldToViewer = function (dist) {
+    // It looks like ImageMatrix is scaled to width so to keep things
+    // simple ....
+    var m = this.WorldMatrix;
+    return dist * this.ViewportWidth / (2.0 * m[15]);
+  };
+
   // dx, dy are in view coordinates [-0.5,0.5].
   // The camera world matrix converts world to view.
   Camera.prototype.HandleTranslate = function (dx, dy) {

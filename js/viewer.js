@@ -1,5 +1,18 @@
 // ==============================================================================
 
+//The magic code to add show/hide custom event triggers
+(function ($) {
+	  $.each(['show', 'hide'], function (i, ev) {
+	    var el = $.fn[ev];
+	    $.fn[ev] = function () {
+	      this.trigger(ev);
+	      return el.apply(this, arguments);
+	    };
+	  });
+	})(jQuery);
+
+
+
 (function () {
   'use strict';
 
@@ -671,6 +684,42 @@
   };
 
   Viewer.prototype.InitializeZoomGui = function () {
+    // Links: URL for the current view, and url to a highres cutout.
+    this.ShareTab = new SA.Tab(this.GetDiv(),
+                               SA.ImagePathUrl + 'share.png',
+                               'shareTab');
+    this.ShareTab.Div
+      .css({'box-sizing': 'border-box',
+            'position': 'absolute',
+            'bottom': '0px',
+            'right': '47px',
+            'z-index': '49'});
+    this.ShareTab.Panel
+      .css({'box-sizing': 'border-box',
+            'left': '-300px',
+            'width': '380px',
+            'z-index': '500',
+            //'height': '45px',
+            'padding': '0 2px'});
+    var self = this;
+    // TODO: Separate the share update from EndInteraction.
+    this.ShareTab.Panel.on('show', function () {
+      self.TriggerEndInteraction();
+      self.ShareDisplay.focus();
+    });
+    this.ShareDisplay = $('<textarea>')
+      .appendTo(this.ShareTab.Panel)
+      .addClass('sa-view-share-text')
+      .html('')
+      .attr('contenteditable', 'true')
+      .css({'tabindex': '1',
+            'z-index': '501',
+            'width': '100%',
+            '-webkit-user-select': 'all',
+            'user-select' : 'all'});
+
+
+    
     // Put the zoom bottons in a tab.
     this.ZoomTab = new SA.Tab(this.GetDiv(),
                                SA.ImagePathUrl + 'mag.png',
@@ -684,7 +733,6 @@
     // .prop('title', 'Zoom scroll');
     this.ZoomTab.Panel
             .addClass('sa-view-zoom-panel');
-
     // Put the magnification factor inside the magnify glass icon.
     this.ZoomDisplay = $('<div>')
             .appendTo(this.ZoomTab.Div)
@@ -1351,11 +1399,7 @@
         this.OverView.Camera.SetWorldRoll(0);
         this.OverView.Camera.ComputeMatrix();
       }
-      this.UpdateZoomGui();
-      // Save the state when the animation is finished.
-      if (SA.RECORDER_WIDGET) {
-        SA.RECORDER_WIDGET.RecordState();
-      }
+      this.TriggerEndInteraction()
     } else {
       // Interpolate
       var currentHeight = this.MainView.Camera.GetHeight();
@@ -1948,11 +1992,8 @@
       this.MomentumTimerId = 0;
       if (this.InteractionState !== INTERACTION_NONE) {
         this.InteractionState = INTERACTION_NONE;
-        if (SA.RECORDER_WIDGET) {
-          SA.RECORDER_WIDGET.RecordState();
-        }
+        this.TriggerEndInteraction()
       }
-      this.UpdateZoomGui();
     } else {
       this.MomentumTimerId = window.requestAnimationFrame(function () { self.HandleMomentum(); });
     }
@@ -2130,9 +2171,7 @@
 
     if (this.InteractionState !== INTERACTION_NONE) {
       this.InteractionState = INTERACTION_NONE;
-      if (SA.RECORDER_WIDGET) {
-        SA.RECORDER_WIDGET.RecordState();
-      }
+      this.TriggerEndInteraction()
     }
 
     return false; // trying to keep the browser from selecting images
@@ -2752,6 +2791,31 @@
     return viewLayer;
   };
 
+  
+  Viewer.prototype.TriggerEndInteraction = function () {
+    this.UpdateZoomGui();
+
+    // Save the state when the animation is finished.
+    if (SA.RECORDER_WIDGET) {
+      SA.RECORDER_WIDGET.RecordState();
+    }
+
+    // Update the url to the current view.
+    var cam = this.GetCamera();
+    var fp = cam.GetWorldFocalPoint()
+    var width = Math.round(cam.GetWidth());
+    var height = Math.round(cam.GetHeight());
+    var left = Math.round(fp[0] - width/2)
+    var top = Math.round(fp[1] - height/2)
+    var imageId = this.GetCache().Image._id;
+    var url = window.location.href
+    var end = url.indexOf('item/');
+    url = url.substr(0,end+4);
+    url = url + "#item/" + imageId + "?bounds=" + left + "," + (left+width) + "," + top + "," + (top+width);
+
+    this.ShareDisplay.text(url)
+  };
+  
   // ------------------------------------------------------
 
   SA.Viewer = Viewer;
