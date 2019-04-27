@@ -563,7 +563,7 @@
     // the viewer never has a chance to set this
     SA.FirefoxWhich(event);
     this.FirefoxOverviewWhich = event.which;
-    
+
     return false;
   };
   Viewer.prototype.RollMove = function (e) {
