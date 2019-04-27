@@ -120,12 +120,16 @@ window.SA = window.SA || {};
 
   // Firefox does not set which for mouse move events.
   SA.FirefoxWhich = function (event) {
+    if (event.which !== undefined) {
+      return;
+    }
     event.which = event.buttons;
     if (event.which === 2) {
       event.which = 3;
     } else if (event.which === 3) {
       event.which = 2;
     }
+    console.log('firefox which = ' + event.which);
   };
 
   SA.Debug = function (msg) {
@@ -235,8 +239,6 @@ window.SA = window.SA || {};
     if (SA.ContentEditableHasFocus) { return true; }
 
     if (event.keyCode === 16) {
-      // Shift key modifier.
-      SA.ShiftKeyPressed = true;
       // Do not forward modifier keys events to objects that consume keypresses.
       return true;
     }
@@ -301,11 +303,10 @@ window.SA = window.SA || {};
     }
 
     if (event.keyCode === 16) {
-            // Shift key modifier.
-      SA.ShiftKeyPressed = false;
-            // SA.StackCursorFlag = false;
+      // Shift key modifier.
+      // SA.StackCursorFlag = false;
     } else if (event.keyCode === 17) {
-            // Control key modifier.
+      // Control key modifier.
       SA.ControlKeyPressed = false;
     }
 

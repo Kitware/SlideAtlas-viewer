@@ -14,7 +14,8 @@
   var DRAG = 2;         // Mouse is down and user is dragging point2.
   var FINISH = 3;       // Mouse is up and the rectangle is finished.
 
-  function RectSelectWidget () {
+  function RectSelectWidget (layer) {
+    this.Layer = layer;
     SAM.Shape.call(this);
 
     this.State = INACTIVE;
@@ -35,22 +36,30 @@
     this.FinishCallback = callback;
   };
 
+  // TODO: GET RID OF THIS (USE SetActive instead)
   // Starts the process of dragging a rectangle (just changes the cursor.
-  RectSelectWidget.prototype.SetStateToDrawing = function (layer) {
+  RectSelectWidget.prototype.SetStateToDrawing = function () {
     this.State = START;
-    layer.GetParent().css({'cursor': 'nw-resize'});
+    this.Layer.GetParent().css({'cursor': 'nw-resize'});
+  };
+
+  RectSelectWidget.prototype.IsEmpty = function () {
+    return true;
   };
 
   // Starts the process of dragging a rectangle (just changes the cursor.
-  RectSelectWidget.prototype.SetStateToInactive = function (layer) {
-    if (this.State === INACTIVE) {
-      return;
+  RectSelectWidget.prototype.SetActive = function (flag) {
+    if (!flag && this.State !== INACTIVE) {
+      this.State = INACTIVE;
+      this.Layer.GetParent().css({'cursor': ''});
     }
-    this.State = INACTIVE;
-    layer.GetParent().css({'cursor': ''});
+    if (flag && this.State === INACTIVE) {
+      this.State = START;
+      this.Layer.GetParent().css({'cursor': 'nw-resize'});
+    }
   };
 
-  RectSelectWidget.prototype.Draw = function (layer) {
+  RectSelectWidget.prototype.Draw = function () {
     if (this.State === DRAG) {
       var x = Math.min(this.Point1[0], this.Point2[0]);
       var y = Math.min(this.Point1[1], this.Point2[1]);
@@ -66,14 +75,14 @@
     }
   };
 
-  RectSelectWidget.prototype.HandleMouseDown = function (layer) {
+  RectSelectWidget.prototype.HandleMouseDown = function () {
     // Should we allow multiple selections, or a single use?
     if (this.State !== START) {
       return true;
     }
     this.State = DRAG;
-    this.Rectangle.appendTo(layer.GetParent());
-    var event = layer.Event;
+    this.Rectangle.appendTo(this.Layer.GetParent());
+    var event = this.Layer.Event;
     var x = event.offsetX;
     var y = event.offsetY;
     this.Point1 = [x, y];
@@ -82,11 +91,11 @@
     return false;
   };
 
-  RectSelectWidget.prototype.HandleMouseMove = function (layer) {
+  RectSelectWidget.prototype.HandleMouseMove = function () {
     if (this.State !== DRAG) {
       return true;
     }
-    var event = layer.Event;
+    var event = this.Layer.Event;
     var x = event.offsetX;
     var y = event.offsetY;
     this.Point2 = [x, y];
@@ -94,12 +103,12 @@
     return false;
   };
 
-  RectSelectWidget.prototype.HandleMouseUp = function (layer) {
+  RectSelectWidget.prototype.HandleMouseUp = function () {
     if (this.State !== DRAG) {
       return true;
     }
     this.State = FINISH;
-    layer.GetParent().css({'cursor': ''});
+    this.Layer.GetParent().css({'cursor': ''});
     this.Rectangle.hide().remove();
     // Compute the world coordinates of the points.
     var x1 = Math.min(this.Point1[0], this.Point2[0]);
@@ -110,20 +119,24 @@
     this.Point1 = [x1, y1];
     this.Point2 = [x2, y2];
 
-    this.Camera.DeepCopy(layer.GetCamera());
+    this.Camera.DeepCopy(this.Layer.GetCamera());
     if (this.FinishCallback) {
       this.FinishCallback(this);
     }
     return false;
   };
 
-  RectSelectWidget.prototype.WorldPointInSelection = function (x, y) {
-    var viewerPt = this.Camera.ConvertPointWorldToViewer(x, y);
-    if (viewerPt[0] > this.Point1[0] && viewerPt[0] < this.Point2[0] &&
-        viewerPt[1] > this.Point1[1] && viewerPt[1] < this.Point2[1]) {
+  RectSelectWidget.prototype.ViewerPointInSelection = function (x, y) {
+    if (x > this.Point1[0] && x < this.Point2[0] &&
+        y > this.Point1[1] && y < this.Point2[1]) {
       return true;
     }
     return false;
+  };
+
+  RectSelectWidget.prototype.WorldPointInSelection = function (x, y) {
+    var viewerPt = this.Camera.ConvertPointWorldToViewer(x, y);
+    return this.ViewerPointInSelection(viewerPt[0], viewerPt[1]);
   };
 
   SAM.RectSelectWidget = RectSelectWidget;

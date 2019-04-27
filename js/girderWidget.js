@@ -1,3 +1,6 @@
+// This looks like an old version of an annotation editing interface.
+// It is not used and is a candidate for removal.
+
 // TODO:
 // Record id when creating a new annotation.
 // Finish polyline "NewAnnotationItem"

@@ -14,7 +14,7 @@
     // I know javascript does not have desctuctors.
     // I was thinking of calling this explicilty to hasten freeing of resources.
   Circle.prototype.destructor = function () {
-        // Get rid of the buffers?
+    // Get rid of the buffers?
   };
 
   Circle.prototype.UpdateBuffers = function (view) {

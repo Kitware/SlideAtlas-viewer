@@ -228,6 +228,10 @@
     return this.Shape.Widths.length;
   };
 
+  RectSetWidget.prototype.IsEmpty = function () {
+    return this.GetLength() === 0;
+  };
+
   // Prioritizing by confidence does not work because they all have such high (equal) confidences.
   // Lets prioritize by area instead
   RectSetWidget.prototype.ComputeVisibilities = function (layer) {
@@ -375,9 +379,9 @@
     this.Shape.Threshold = threshold;
   };
 
-  RectSetWidget.prototype.Draw = function (view) {
+  RectSetWidget.prototype.Draw = function (layer) {
     if (this.Visibility) {
-      this.Shape.Draw(view);
+      this.Shape.Draw(layer.GetView());
     }
   };
 
@@ -493,6 +497,18 @@
   // Multiple active states. Active state is a bit confusing.
   RectSetWidget.prototype.GetActive = function () {
     return this.Active;
+  };
+
+  // Does notning now.
+  RectSetWidget.prototype.SetActive = function (flag, layer) {
+    if (!this.Visibility) {
+      this.Visibility = true;
+    }
+    if (flag === this.GetActive()) {
+      return;
+    }
+    this.Active = flag;
+    layer.EventuallyDraw();
   };
 
   RectSetWidget.prototype.RemoveFromLayer = function (layer) {

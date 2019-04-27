@@ -52,9 +52,13 @@
     // dictionary to share caches when multiple sections on one slide
     this.Caches = {};
     this.Display = display;
-    this.Overlay = overlay;
+    // Have the viewer call this objects event methods.
+    display.AddLayer(this);
+    // For debugging (place two section on top of each other to judge alignment.
+    // this.Overlay = overlay;
 
     var self = this;
+    // THese event bindings do not work.
     this.SliderDiv = $('<div>')
       .appendTo(parent)
       .css({
@@ -62,9 +66,9 @@
         // 'opacity': '0.2',
         'position': 'absolute',
         'left': '0px',
-        'bottom': '0px',
+        'bottom': '5px',
         'width': '100%',
-        'z-index': '10'})
+        'z-index': '1000'})
       .on('keyup', function (e) { self.HandleKeyUp(e); })
       .hover(
         function () {
@@ -121,12 +125,12 @@
   };
 
   GirderStackWidget.prototype.HandleKeyUp = function (e) {
-    if (e.keyCode === 33) {
-      // page up
+    if (e.keyCode === 33 || e.keyCode === 80) {
+      // page up or p
       this.Previous();
       return false;
-    } else if (e.keyCode === 34) {
-      // page down
+    } else if (e.keyCode === 34 || e.keyCode === 32 || e.keyCode === 78) {
+      // page down, space or n
       this.Next();
       return false;
     }
@@ -275,7 +279,17 @@
     if (this.SectionIndex === index) {
       return;
     }
+    console.log('stack index ' + index.toString());
     this.SectionIndex = index;
+    // Tell annotation what time to display.
+    var num = this.Display.GetNumberOfLayers();
+    for (var i = 0; i < num; ++i) {
+      var layer = this.Display.GetLayer(i);
+      if (layer && layer.SetTime) {
+        layer.SetTime(index);
+      }
+    }
+
     this.RenderSection(this.Stack[index]);
   };
 

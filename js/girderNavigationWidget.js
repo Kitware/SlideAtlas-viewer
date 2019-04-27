@@ -42,7 +42,9 @@
           'bottom': '0px',
           'right': '150px',
           'z-index': '200'});
-      this.Tab.Panel.addClass('sa-view-navigation-panel');
+      this.Tab.Panel
+        .addClass('sa-view-navigation-panel')
+        .css({'overflow': 'hidden'});
 
       // Put the stack display in the navigation button
       this.NoteDisplay = $('<div>')
@@ -132,6 +134,9 @@
   };
 
   GirderNavigationWidget.prototype.ChangeItem = function () {
+    window.history.pushState(this.ItemId, 'SlideAtlas viewer ' + this.ItemId,
+                             '/#item/' + this.ItemId);
+
     if (this.ChangeItemCallback) {
       (this.ChangeItemCallback)(this.ItemId);
     }
@@ -172,7 +177,6 @@
       var itemId = data[i]._id;
       if (itemId === this.ItemId) {
         this.ItemIndex = i;
-        this.ItemName = data[i].name;
       }
       this.FolderItemIds.push(itemId);
       this.FolderItemNames.push(data[i].name);
@@ -233,6 +237,7 @@
 
   // Change which buttons are active based on the current index.
   GirderNavigationWidget.prototype.Update = function () {
+    this.ItemName = this.FolderItemNames[this.ItemIndex];
     this.NameLabel.text(this.ItemIndex.toString() + ':' + this.ItemName);
 
     // Disable and enable prev/next slide buttons so we cannot go past the end.
@@ -275,7 +280,6 @@
 
     this.ItemIndex += 1;
     this.ItemId = this.FolderItemIds[this.ItemIndex];
-    this.ItemName = this.FolderItemNames[this.ItemIndex];
     this.ChangeItem();
     this.Update();
   };

@@ -16,8 +16,20 @@
   // Get rid of the buffers?
   // }
 
+  // A single point is considered empty.
   Polyline.prototype.IsEmpty = function () {
-    return this.Points.length === 0;
+    if (this.Points.length < 2) {
+      return true;
+    }
+    return false;
+  };
+
+  Polyline.prototype.DeleteSelected = function () {
+    if (this.IsSelected()) {
+      this.Points = [];
+      return true;
+    }
+    return false;
   };
 
   Polyline.prototype.SetLineWidth = function (lineWidth) {
@@ -118,14 +130,14 @@
     var k;
     for (var i = 1; i < this.Points.length; ++i) {
       k = this.IntersectPointLine(pt, this.Points[i - 1],
-                                            this.Points[i], dist);
+                                  this.Points[i], dist);
       if (k !== undefined) {
         return [i - 1, i, k];
       }
     }
     if (this.Closed) {
       k = this.IntersectPointLine(pt, this.Points[this.Points.length - 1],
-                                            this.Points[0], dist);
+                                  this.Points[0], dist);
       if (k !== undefined) {
         return [this.Points.length - 1, 0, k];
       }
@@ -241,7 +253,7 @@
         var dir2 = (p0[0] - p2[0]) * (p3[0] - p2[0]) + (p0[1] - p2[1]) * (p3[1] - p2[1]);
         if (mag < spacing && dir1 < 0.0 && dir2 < 0.0) {
           // Replace the two points with their average.
-          newPoints.push([cx, cy]);
+          newPoints.push([cx, cy, 0]);
           modified = true;
           // Skip the next point the window will have one old merged point,
           // but that is ok because it is just used as reference and not altered.
@@ -425,7 +437,7 @@
     var remaining = step / 2;
     // Recursive to serialize asynchronous cutouts.
     this.RecursiveSampleEdge(this.Points.length - 1, 0, remaining, step, count,
-                                 cache, dimensions, scale, callback);
+                             cache, dimensions, scale, callback);
   };
   Polyline.prototype.RecursiveSampleEdge = function (i0, i1, remaining, step, count,
                                                       cache, dimensions, scale, callback) {
@@ -493,6 +505,10 @@
   Polyline.prototype.IsSelected = function () {
     return this.Selected;
   };
+
+  // Polyline.prototype.Draw = function (view) {
+  //  SAM.Shape.prototype.Draw.call(this, view);
+  // };
 
   SAM.Polyline = Polyline;
 })();

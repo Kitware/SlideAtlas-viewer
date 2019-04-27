@@ -20,8 +20,8 @@
     this.Origin = [10000, 10000]; // Anchor in world coordinates.
     // FixedSize => PointBuffer units in viewer pixels.
     // otherwise
-    this.FixedSize = true;
-    this.FixedOrientation = true;
+    this.FixedSize = false;
+    this.FixedOrientation = false;
     this.LineWidth = 0; // Line width has to be in same coordinates as points.
     this.Visibility = true; // An easy way to turn off a shape (with removing it from the shapeList).
     this.Selected = false;
@@ -29,6 +29,39 @@
         // Playing around with layering.  The anchor is being obscured by the text.
     this.ZOffset = 0.1;
   }
+
+  Shape.prototype.GetLineWidth = function () {
+    return this.LineWidth;
+  };
+
+  Shape.prototype.GetOrigin = function () {
+    return this.Origin;
+  };
+
+  // in degrees
+  Shape.prototype.GetOrientation = function () {
+    return this.Orientation;
+  };
+
+  // in radians
+  Shape.prototype.GetRotation = function () {
+    return this.Orientation * Math.PI / 180.0;
+  };
+
+  Shape.prototype.Modified = function () {
+    this.Matrix = undefined;
+  };
+
+  Shape.prototype.DeleteSelected = function () {
+    if (this.IsSelected()) {
+      this.PointBuffer = undefined;
+      return true;
+    }
+  };
+
+  Shape.prototype.IsEmpty = function () {
+    return this.PointBuffer === undefined;
+  };
 
   // Coordinate Systems
   Shape.SLIDE = 0; // Pixel of highest resolution level.
@@ -38,12 +71,27 @@
     // Get rid of the buffers?
   };
 
+  // Returns true if the selected state changed.
+  Shape.prototype.SetSelected = function (f) {
+    if (f === this.Selected) { return false; }
+    this.Selected = f;
+    return true;
+  };
+
+  Shape.prototype.IsSelected = function () {
+    return this.Selected;
+  };
+
   Shape.prototype.Draw = function (view) {
     if (!this.Visibility) {
       return;
     }
     if (this.Matrix === undefined) {
       this.UpdateBuffers(view);
+    }
+
+    if (this.IsEmpty()) {
+      return;
     }
 
     var theta;
@@ -298,6 +346,10 @@
     this.OutlineColor = SAM.ConvertColor(c);
   };
 
+  Shape.prototype.GetOutlineColor = function (c) {
+    return this.OutlineColor;
+  };
+
   Shape.prototype.SetFillColor = function (c) {
     this.FillColor = SAM.ConvertColor(c);
   };
@@ -323,7 +375,11 @@
     var vy = end1[1] - end0[1];
 
     // Rotate so the edge lies on the x axis.
-    var length = Math.sqrt(vx * vx + vy * vy); // Avoid atan2 ... with clever use of complex numbers.
+    var length = Math.sqrt(vx * vx + vy * vy); // Avoid atan2 ... by rotating with complex numbers
+    if (length === 0) {
+      return undefined;
+    }
+
     // Get the edge normal direction.
     vx = vx / length;
     vy = -vy / length;

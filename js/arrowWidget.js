@@ -1,251 +1,127 @@
 // ==============================================================================
 // This widget will first be setup to define an arrow.
 // Layer will forward events to the arrow.
-// TODO: I need to indicate that the base of the arrow has different active
-// state than the rest.
+// TODO: Active hover: circles cursor.
 
 (function () {
   'use strict';
 
-    // The arrow has just been created and is following the mouse.
-    // I have to differentiate from ARROW_WIDGET_DRAG because
-    // dragging while just created cannot be relative.  It places the tip on the mouse.
-  var ARROW_WIDGET_NEW = 0;
-  var ARROW_WIDGET_DRAG = 1; // The whole arrow is being dragged.
-  var ARROW_WIDGET_DRAG_TAIL = 3;
-  var ARROW_WIDGET_WAITING = 4; // The normal (resting) state.
-  var ARROW_WIDGET_ACTIVE = 5; // Mouse is over the widget and it is receiving events.
-  var ARROW_WIDGET_PROPERTIES_DIALOG = 6; // Properties dialog is up
+  // The arrow has just been created and is following the mouse.
+  // I have to differentiate from DRAG because
+  // dragging while just created cannot be relative.  It places the tip on the mouse.
+  var NEW = 0;
+  var NEW_DRAG_TAIL = 1;
+  var DRAG = 2; // The whole arrow is being dragged.
+  var DRAG_TIP = 3;
+  var DRAG_TAIL = 4;
+  var INACTIVE = 5; // The normal (resting) state.
+  var ACTIVE = 6; // Mouse is receiving events.
+  var HOVER = 7;  // Mouse is over the widget
+  var DIALOG = 8; // Properties dialog is up
 
-    // We might get rid of the new flag by passing in a null layer.
-  function ArrowWidget (layer, newFlag) {
+  // We might get rid of the new flag by passing in a null layer.
+  function ArrowWidget (layer) {
     if (layer === null) {
       return null;
     }
     this.Layer = layer;
+    this.Type = 'arrow';
+    this.State = INACTIVE;
 
-        // Wait to create this until the first move event.
-    this.Shape = new SAM.Arrow();
-    this.Shape.Origin = [0, 0];
-    this.Shape.SetFillColor([0.0, 0.0, 0.0]);
-    this.Shape.OutlineColor = [1.0, 1.0, 1.0];
-    this.Shape.Length = 50;
-    this.Shape.Width = 8;
-        // Note: If the user clicks before the mouse is in the
-        // canvas, this will behave odd.
+    // This method gets called if the active state of this widget turns on or off.
+    // This is used to turn off the pencil button in the Panel.
+    this.StateChangeCallback = undefined;
+    // This is used by the annotationPanel to transfer draing mode to a new selected widget.
+    this.SelectedCallback = undefined;
+
+    // Wait to create this until the first move event.
+    this.Arrow = new SAM.Arrow();
+    this.Arrow.Origin = [0, 0];
+    this.Arrow.SetFillColor([0.0, 0.0, 0.0]);
+    this.Arrow.OutlineColor = [1.0, 1.0, 1.0];
+    this.Arrow.Length = 50;
+    this.Arrow.Width = 8;
+    // Note: If the user clicks before the mouse is in the
+    // canvas, this will behave odd.
     this.TipPosition = [0, 0];
     this.TipOffset = [0, 0];
 
-    if (layer) {
-      layer.AddWidget(this);
-      if (newFlag && layer) {
-        this.State = ARROW_WIDGET_NEW;
-        this.Layer.ActivateWidget(this);
-        return;
+    // Circle is to show an active tip and base.
+    this.CircleTip = new SAM.Circle();
+    this.CircleTip.SetFillColor();
+    this.CircleTip.SetOutlineColor([0.0, 0.0, 0.0]);
+    this.CircleTip.Radius = 5;
+    this.CircleTip.LineWidth = 1;
+    this.CircleTip.PositionCoordinateSystem = 1; // Shape.VIEWER;
+    // this.Circle.ZOffset = -0.05;
+
+    this.CircleTail = new SAM.Circle();
+    this.CircleTail.SetFillColor();
+    this.CircleTail.SetOutlineColor([0.0, 0.0, 0.0]);
+    this.CircleTail.Radius = 5;
+    this.CircleTail.PositionCoordinateSystem = 1; // Shape.VIEWER;
+
+    // Get default properties.
+    if (localStorage.ArrowWidgetDefaults) {
+      var defaults = JSON.parse(localStorage.ArrowWidgetDefaults);
+      if (defaults.Color) {
+        this.Arrow.SetFillColor(defaults.Color);
+      }
+      if (defaults.Width) {
+        this.Arrow.Width = defaults.Width;
       }
     }
-
-    this.State = ARROW_WIDGET_WAITING;
   }
 
-  ArrowWidget.prototype.Draw = function (view) {
-    this.Shape.Draw(view);
+  // Not used yet, but might be useful.
+  ArrowWidget.prototype.SetCreationCamera = function (cam) {
+    // Lets save the zoom level (sort of).
+    // Load will overwrite this for existing annotations.
+    // This will allow us to expand annotations into notes.
+    this.CreationCamera = cam.Serialize();
   };
 
-  ArrowWidget.prototype.RemoveFromLayer = function () {
-    if (this.Layer) {
-      this.Layer.RemoveWidget(this);
-    }
+  ArrowWidget.prototype.SetModifiedCallback = function (callback) {
+    this.ModifiedCallback = callback;
   };
 
-  ArrowWidget.prototype.Serialize = function () {
-    if (this.Shape === undefined) {
-      return null;
-    }
-
-    var obj = {};
-    obj.type = 'arrow';
-    obj.origin = this.Shape.Origin;
-    obj.fillcolor = this.Shape.FillColor;
-    obj.outlinecolor = this.Shape.OutlineColor;
-    obj.length = this.Shape.Length;
-    obj.width = this.Shape.Width;
-    obj.orientation = this.Shape.Orientation;
-    obj.fixedsize = this.Shape.FixedSize;
-    obj.fixedorientation = this.Shape.FixedOrientation;
-
-    return obj;
-  };
-
-    // Load a widget from a json object (origin MongoDB).
-  ArrowWidget.prototype.Load = function (obj) {
-    this.Shape.Origin = [parseFloat(obj.origin[0]), parseFloat(obj.origin[1])];
-    this.Shape.FillColor = [parseFloat(obj.fillcolor[0]), parseFloat(obj.fillcolor[1]), parseFloat(obj.fillcolor[2])];
-    this.Shape.OutlineColor = [parseFloat(obj.outlinecolor[0]), parseFloat(obj.outlinecolor[1]), parseFloat(obj.outlinecolor[2])];
-    this.Shape.Length = parseFloat(obj.length);
-    this.Shape.Width = parseFloat(obj.width);
-    this.Shape.Orientation = parseFloat(obj.orientation);
-
-    if (obj.fixedsize === undefined) {
-      this.Shape.FixedSize = true;
-    } else {
-      this.Shape.FixedSize = (obj.fixedsize === 'true');
-    }
-
-    if (obj.fixedorientation === undefined) {
-      this.Shape.FixedOrientation = true;
-    } else {
-      this.Shape.FixedOrientation = (obj.fixedorientation === 'true');
-    }
-
-    this.Shape.UpdateBuffers(this.Layer.AnnotationView);
-  };
-
-    // When we toggle fixed size, we have to convert the length of the arrow
-    // between viewer and world.
-  ArrowWidget.prototype.SetFixedSize = function (fixedSizeFlag) {
-    if (this.Shape.FixedSize === fixedSizeFlag) {
-      return;
-    }
-    var pixelsPerUnit = this.Layer.GetPixelsPerUnit();
-
-    if (fixedSizeFlag) {
-            // Convert length from world to viewer.
-      this.Shape.Length *= pixelsPerUnit;
-      this.Shape.Width *= pixelsPerUnit;
-    } else {
-      this.Shape.Length /= pixelsPerUnit;
-      this.Shape.Width /= pixelsPerUnit;
-    }
-    this.Shape.FixedSize = fixedSizeFlag;
-    this.Shape.UpdateBuffers();
-    this.Layer.EventuallyDraw();
-  };
-
-  ArrowWidget.prototype.HandleKeyPress = function (keyCode, shift) {
-  };
-
-  ArrowWidget.prototype.HandleMouseDown = function (event) {
-    if (event.which !== 1) {
-      return;
-    }
-    if (this.State === ARROW_WIDGET_NEW) {
-      this.TipPosition = [this.Layer.MouseX, this.Layer.MouseY];
-      this.State = ARROW_WIDGET_DRAG_TAIL;
-    }
-    if (this.State === ARROW_WIDGET_ACTIVE) {
-      if (this.ActiveTail) {
-        this.TipPosition = this.Layer.ConvertPointWorldToViewer(this.Shape.Origin[0], this.Shape.Origin[1]);
-        this.State = ARROW_WIDGET_DRAG_TAIL;
-      } else {
-        var tipPosition = this.Layer.ConvertPointWorldToViewer(this.Shape.Origin[0], this.Shape.Origin[1]);
-        this.TipOffset[0] = tipPosition[0] - this.Layer.MouseX;
-        this.TipOffset[1] = tipPosition[1] - this.Layer.MouseY;
-        this.State = ARROW_WIDGET_DRAG;
-      }
+  // Called when the widget is modified.
+  ArrowWidget.prototype.Modified = function () {
+    if (this.ModifiedCallback) {
+      this.ModifiedCallback(this);
     }
   };
 
-    // returns false when it is finished doing its work.
-  ArrowWidget.prototype.HandleMouseUp = function (event) {
-    if (this.State === ARROW_WIDGET_ACTIVE && event.which === 3) {
-            // Right mouse was pressed.
-            // Pop up the properties dialog.
-            // Which one should we popup?
-            // Add a ShowProperties method to the widget. (With the magic of javascript).
-      this.State = ARROW_WIDGET_PROPERTIES_DIALOG;
-      this.ShowPropertiesDialog();
-    } else if (this.State !== ARROW_WIDGET_PROPERTIES_DIALOG) {
-      this.SetActive(false);
+  ArrowWidget.prototype.SetSelectedCallback = function (callback) {
+    this.SelectedCallback = callback;
+  };
+
+  // This callback gets called when ever the active state changes,
+  // even if caused by an external call. This widget is passed as a argument.
+  // This is used to turn off the pencil button in the Panel.
+  ArrowWidget.prototype.SetStateChangeCallback = function (callback) {
+    this.StateChangeCallback = callback;
+  };
+
+  // Called when the state changes.
+  ArrowWidget.prototype.StateChanged = function () {
+    if (this.StateChangeCallback) {
+      this.StateChangeCallback(this);
     }
   };
 
-  ArrowWidget.prototype.HandleMouseMove = function (event) {
-    var x = this.Layer.MouseX;
-    var y = this.Layer.MouseY;
-
-    if (this.Layer.MouseDown === false && this.State === ARROW_WIDGET_ACTIVE) {
-      this.CheckActive(event);
-      return;
-    }
-
-    if (this.State === ARROW_WIDGET_NEW || this.State === ARROW_WIDGET_DRAG) {
-      this.Shape.Origin = this.Layer.ConvertPointViewerToWorld(x + this.TipOffset[0], y + this.TipOffset[1]);
-      this.Layer.EventuallyDraw();
-    }
-
-    if (this.State === ARROW_WIDGET_DRAG_TAIL) {
-      var dx = x - this.TipPosition[0];
-      var dy = y - this.TipPosition[1];
-      if (!this.Shape.FixedSize) {
-        var pixelsPerUnit = this.Layer.GetPixelsPerUnit();
-        dx /= pixelsPerUnit;
-        dy /= pixelsPerUnit;
-      }
-      this.Shape.Length = Math.sqrt(dx * dx + dy * dy);
-      this.Shape.Orientation = Math.atan2(dy, dx) * 180.0 / Math.PI;
-      this.Shape.UpdateBuffers();
-      this.Layer.EventuallyDraw();
-    }
-
-    if (this.State === ARROW_WIDGET_WAITING) {
-      this.CheckActive(event);
-    }
+  // Sets state to "NEW"
+  ArrowWidget.prototype.SetStateToDrawing = function () {
+    // if (this.Layer) {
+    // this.StateChanged();
+    this.State = NEW;
+    // return;
+    // }
+    // this.State = INACTIVE;
   };
 
-  ArrowWidget.prototype.CheckActive = function (event) {
-    var viewport = this.Layer.GetViewport();
-    var cam = this.Layer.MainView.Camera;
-    var m = cam.Matrix;
-        // Compute tip point in screen coordinates.
-    var x = this.Shape.Origin[0];
-    var y = this.Shape.Origin[1];
-        // Convert from world coordinate to view (-1->1);
-    var h = (x * m[3] + y * m[7] + m[15]);
-    var xNew = (x * m[0] + y * m[4] + m[12]) / h;
-    var yNew = (x * m[1] + y * m[5] + m[13]) / h;
-        // Convert from view to screen pixel coordinates.
-    xNew = (xNew + 1.0) * 0.5 * viewport[2] + viewport[0];
-    yNew = (yNew + 1.0) * 0.5 * viewport[3] + viewport[1];
-
-        // Use this point as the origin.
-    x = this.Layer.MouseX - xNew;
-    y = this.Layer.MouseY - yNew;
-        // Rotate so arrow lies along the x axis.
-    var tmp = this.Shape.Orientation * Math.PI / 180.0;
-    var ct = Math.cos(tmp);
-    var st = Math.sin(tmp);
-    xNew = x * ct + y * st;
-    yNew = -x * st + y * ct;
-
-    var length = this.Shape.Length;
-    var halfWidth = this.Shape.Width / 2.0;
-    if (!this.Shape.FixedSize) {
-      var pixelsPerUnit = this.Layer.GetPixelsPerUnit();
-      length *= pixelsPerUnit;
-      halfWidth *= pixelsPerUnit;
-    }
-
-    this.ActiveTail = false;
-    if (xNew > 0.0 && xNew < length && yNew > -halfWidth && yNew < halfWidth) {
-      this.SetActive(true);
-            // Save the position along the arrow to decide which drag behavior to use.
-      if (xNew > length - halfWidth) {
-        this.ActiveTail = true;
-      }
-      return true;
-    } else {
-      this.SetActive(false);
-      return false;
-    }
-  };
-
-    // We have three states this widget is active.
-    // First created and following the mouse (actually two, head or tail following). Color nbot active.
-    // Active because mouse is over the arrow.  Color of arrow set to active.
-    // Active because the properties dialog is up. (This is how dialog know which widget is being edited).
   ArrowWidget.prototype.GetActive = function () {
-    if (this.State === ARROW_WIDGET_WAITING) {
+    if (this.State === INACTIVE) {
       return false;
     }
     return true;
@@ -257,33 +133,498 @@
     }
 
     if (flag) {
-      this.State = ARROW_WIDGET_ACTIVE;
-      this.Shape.Active = true;
-      this.Layer.ActivateWidget(this);
-      this.Layer.EventuallyDraw();
+      this.State = ACTIVE;
     } else {
-      this.State = ARROW_WIDGET_WAITING;
-      this.Shape.Active = false;
-      this.Layer.DeactivateWidget(this);
-      this.Layer.EventuallyDraw();
+      this.State = INACTIVE;
+    }
+    this.StateChanged();
+    this.Layer.EventuallyDraw();
+  };
+
+  ArrowWidget.prototype.Draw = function () {
+    var view = this.Layer.GetView();
+    this.Arrow.Draw(view);
+    if (this.State !== INACTIVE && this.State !== NEW && this.State !== DRAG) {
+      var pts = this.GetViewPoints();
+      this.CircleTip.Origin = pts[0];
+      this.CircleTail.Origin = pts[1];
+      this.CircleTip.Draw(view);
+      this.CircleTail.Draw(view);
     }
   };
 
-  // Can we bind the dialog apply callback to an objects method?
-  ArrowWidget.prototype.ShowPropertiesDialog = function () {
-    // var fs = document.getElementById("ArrowFixedSize");
-    // fs.checked = this.Shape.FixedSize;
+  ArrowWidget.prototype.Serialize = function () {
+    if (this.Arrow === undefined) {
+      return null;
+    }
 
-    var color = document.getElementById('arrowcolor');
-    color.value = SAM.ConvertColorToHex(this.Shape.FillColor);
+    var obj = {};
+    obj.type = 'arrow';
+    obj.origin = this.Arrow.Origin;
+    obj.fillcolor = this.Arrow.FillColor;
+    obj.outlinecolor = this.Arrow.OutlineColor;
+    obj.length = this.Arrow.Length;
+    obj.width = this.Arrow.Width;
+    obj.orientation = this.Arrow.Orientation;
+    obj.fixedsize = this.Arrow.FixedSize;
+    obj.fixedorientation = this.Arrow.FixedOrientation;
 
-    $('#arrow-properties-dialog').dialog('open');
+    return obj;
+  };
+
+  // Load a widget from a json object (origin MongoDB).
+  ArrowWidget.prototype.Load = function (obj) {
+    this.Arrow.Origin = [parseFloat(obj.origin[0]), parseFloat(obj.origin[1])];
+    this.TipPosition = [parseFloat(obj.origin[0]), parseFloat(obj.origin[1])];
+    this.Arrow.FillColor = [parseFloat(obj.fillcolor[0]), parseFloat(obj.fillcolor[1]), parseFloat(obj.fillcolor[2])];
+    this.Arrow.OutlineColor = [parseFloat(obj.outlinecolor[0]), parseFloat(obj.outlinecolor[1]), parseFloat(obj.outlinecolor[2])];
+    this.Arrow.Length = parseFloat(obj.length);
+    this.Arrow.Width = parseFloat(obj.width);
+    this.Arrow.Orientation = parseFloat(obj.orientation);
+
+    if (obj.fixedsize === undefined) {
+      this.Arrow.FixedSize = false;
+    } else {
+      this.Arrow.FixedSize = (obj.fixedsize === 'true');
+    }
+
+    if (obj.fixedorientation === undefined) {
+      this.Arrow.FixedOrientation = false;
+    } else {
+      this.Arrow.FixedOrientation = (obj.fixedorientation === 'true');
+    }
+
+    this.Arrow.UpdateBuffers(this.Layer.AnnotationView);
+  };
+
+  // When we toggle fixed size, we have to convert the length of the arrow
+  // between viewer and world.
+  ArrowWidget.prototype.SetFixedSize = function (fixedSizeFlag) {
+    if (this.Arrow.FixedSize === fixedSizeFlag) {
+      return;
+    }
+    var pixelsPerUnit = this.Layer.GetPixelsPerUnit();
+
+    if (fixedSizeFlag) {
+      // Convert length from world to viewer.
+      this.Arrow.Length *= pixelsPerUnit;
+      this.Arrow.Width *= pixelsPerUnit;
+    } else {
+      this.Arrow.Length /= pixelsPerUnit;
+      this.Arrow.Width /= pixelsPerUnit;
+    }
+    this.Arrow.FixedSize = fixedSizeFlag;
+    this.Arrow.UpdateBuffers(this.Layer.AnnotationView);
+    this.Layer.EventuallyDraw();
+  };
+
+  // Selects the widget if the arrow is fuly contained in the selection rectangle.
+  ArrowWidget.prototype.ApplySelect = function (selection) {
+    var viewPts = this.GetViewPoints();
+    if (selection.ViewerPointInSelection(viewPts[0][0], viewPts[0][1]) &&
+        selection.ViewerPointInSelection(viewPts[1][0], viewPts[1][1])) {
+      this.SetSelected(true);
+      return true;
+    }
+    this.SetSelected(false);
+    return false;
+  };
+
+  // Returns true if the mouse is over the arrow.
+  ArrowWidget.prototype.SingleSelect = function () {
+    if (this.State === DIALOG) {
+      return;
+    }
+    var event = this.Layer.Event;
+    var x = event.offsetX;
+    var y = event.offsetY;
+
+    if (this.PointViewerInArrow(x, y)) {
+      this.Arrow.Selected = true;
+      return this;
+    }
+    this.Arrow.Selected = false;
+  };
+
+  ArrowWidget.prototype.HandleMouseDown = function (layer) {
+    if (this.State === INACTIVE || this.State === ACTIVE) {
+      // Widget only responds when mouse is hovering over it,
+      // otherwise, let the viewer do its thing.
+      return true;
+    }
+
+    var event = layer.Event;
+    if (event.which !== 1) {
+      return false;
+    }
+    if (this.State === NEW) {
+      this.TipPosition = [this.Layer.MouseX, this.Layer.MouseY];
+      // Creation behaves differently.  It is not selected.
+      // When finished, it goes in active.
+      this.State = NEW_DRAG_TAIL;
+      this.CircleTail.Selected = true;
+      this.CircleTail.SetFillColor([1, 1, 0]);
+    }
+    if (this.State === HOVER) {
+      if (this.CircleTip.Selected) {
+        this.State = DRAG_TIP;
+      } else if (this.CircleTail.Selected) {
+        this.State = DRAG_TAIL;
+      } else {
+        this.State = DRAG;
+      }
+      var x = event.offsetX;
+      var y = event.offsetY;
+      var cam = this.Layer.GetCamera();
+      this.LastMouseWorld = cam.ConvertPointViewerToWorld(x, y);
+    }
+    return false;
+  };
+
+  ArrowWidget.prototype.HandleMouseUp = function (layer) {
+    if (this.State === INACTIVE || this.State === ACTIVE) {
+      // Widget only responds when mouse is hovering over it,
+      // otherwise, let the viewer do its thing.
+      return true;
+    }
+    if (this.State === NEW_DRAG_TAIL) {
+      this.State = INACTIVE;
+      this.StateChanged();
+      this.Layer.EventuallyDraw();
+      this.Modified();
+      return false;
+    }
+
+    var event = layer.Event;
+    if (this.State === ACTIVE && event.which === 3) {
+      // Right mouse was pressed.
+      // Pop up the properties dialog.
+      // Which one should we popup?
+      // Add a ShowProperties method to the widget. (With the magic of javascript).
+      this.ShowPropertiesDialog();
+    }
+    this.State = HOVER;
+    this.Modified();
+    return false;
+  };
+
+  ArrowWidget.prototype.PointViewerInArrow = function (x, y) {
+    var pts = this.GetViewPoints();
+    var vx = (pts[1][0] - pts[0][0]);
+    var vy = (pts[1][1] - pts[0][1]);
+    var vm = Math.sqrt(vx * vx + vy * vy);
+    var nx = vx / vm;
+    var ny = vy / vm;
+    var mx = x - pts[0][0];
+    var my = y - pts[0][1];
+    var mm = Math.sqrt(mx * mx + my * my);
+    var d = nx * mx + ny * my;
+    var tx = mx - nx * d;
+    var ty = my - ny * d;
+    var tm = Math.sqrt(tx * tx + ty * ty);
+    var widthViewer = this.Arrow.Width * vm / this.Arrow.Length;
+    if (mm > vm || tm > (widthViewer / 2) + 2) {
+      return false;
+    }
+    return true;
+  };
+
+  ArrowWidget.prototype.HandleMouseMove = function (layer) {
+    if (this.State === INACTIVE) {
+      return true;
+    }
+    var event = layer.Event;
+    var x = this.Layer.MouseX;
+    var y = this.Layer.MouseY;
+
+    if (event.which === 1 && this.State === ACTIVE) {
+      // If only active, left the viewer do its thing.
+      return true;
+    }
+
+    // Hover logic.
+    if (this.State === ACTIVE || this.State === HOVER) {
+      var cursor = '';
+      if (this.PointViewerInArrow(x, y)) {
+        cursor = 'move';
+        this.State = HOVER;
+      } else {
+        this.State = ACTIVE;
+      }
+
+      // Now deal with control point hovering.
+      var dx = x - this.CircleTip.Origin[0];
+      var dy = y - this.CircleTip.Origin[1];
+      if (dx * dx + dy * dy < Math.pow(this.CircleTip.Radius, 2)) {
+        this.CircleTip.Selected = true;
+        this.CircleTip.SetFillColor([1, 1, 0]);
+        cursor = 'move';
+        this.State = HOVER;
+      } else {
+        this.CircleTip.Selected = false;
+        this.CircleTip.SetFillColor();
+      }
+      dx = x - this.CircleTail.Origin[0];
+      dy = y - this.CircleTail.Origin[1];
+      if (dx * dx + dy * dy < Math.pow(this.CircleTail.Radius, 2)) {
+        this.CircleTail.Selected = true;
+        this.CircleTail.SetFillColor([1, 1, 0]);
+        cursor = 'move';
+        this.State = HOVER;
+      } else {
+        this.CircleTail.Selected = false;
+        this.CircleTail.SetFillColor();
+      }
+      this.Layer.GetParent().css({'cursor': cursor});
+      this.Layer.EventuallyDraw();
+
+      return false;
+    }
+
+    var cam = this.Layer.GetCamera();
+    var mouseWorld = cam.ConvertPointViewerToWorld(x, y);
+    if (this.State === NEW) {
+      // Just have the tip follow the mouse.
+      this.Arrow.Origin = mouseWorld;
+      this.Layer.EventuallyDraw();
+      return false;
+    }
+
+    if (event.which !== 1) {
+      return false;
+    }
+
+    if (this.State === DRAG) {
+      // Tip follows its relative position to the mouse.
+      dx = mouseWorld[0] - this.LastMouseWorld[0];
+      dy = mouseWorld[1] - this.LastMouseWorld[1];
+      this.Arrow.Origin[0] += dx;
+      this.Arrow.Origin[1] += dy;
+    } else if (this.State === DRAG_TAIL || this.State === NEW_DRAG_TAIL) {
+      // Tail follows mouse, but tip stays fixed.
+      this.Arrow.SetTailViewer(x, y, cam);
+      this.Arrow.UpdateBuffers(this.Layer.AnnotationView);
+    } else if (this.State === DRAG_TIP) {
+      // Tip follows mouse, but tail does not move.
+      // var tailViewer = this.Arrow.GetTailViewer(cam);
+      var pts = this.GetViewPoints();
+      var tailViewer = pts[1];
+      this.Arrow.Origin = mouseWorld;
+      this.Arrow.SetTailViewer(tailViewer[0], tailViewer[1], cam);
+      this.Arrow.UpdateBuffers(this.Layer.AnnotationView);
+    }
+    this.LastMouseWorld = mouseWorld;
+    this.Layer.EventuallyDraw();
+    return false;
+  };
+
+  // Return points 1 and 2 in view (screen) coordinates.
+  ArrowWidget.prototype.GetViewPoints = function () {
+    var cam = this.Layer.GetCamera();
+    var pt1 = this.Arrow.Origin;
+    var tmp = -this.Arrow.Orientation * Math.PI / 180.0;
+    var dx = this.Arrow.Length * Math.cos(tmp);
+    var dy = this.Arrow.Length * Math.sin(tmp);
+
+    var vpt1 = cam.ConvertPointWorldToViewer(pt1[0], pt1[1]);
+    if (this.Arrow.FixedSize) {
+      var vpt2 = [vpt1[0] + dx, vpt1[1] + dy];
+    } else {
+      var pt2 = [pt1[0] + dx, pt1[1] + dy];
+      vpt2 = cam.ConvertPointWorldToViewer(pt2[0], pt2[1]);
+    }
+
+    return [vpt1, vpt2];
+  };
+
+  // TODO: Repurpose for dragging
+  ArrowWidget.prototype.CheckActive = function () {
+    var viewport = this.Layer.GetViewport();
+    var cam = this.Layer.GetCamera();
+    // TODO: Should not be accessing this without a getter.
+    var m = cam.ImageMatrix;
+    // Compute tip point in screen coordinates.
+    var x = this.Arrow.Origin[0];
+    var y = this.Arrow.Origin[1];
+    // Convert from world coordinate to view (-1->1);
+    var h = (x * m[3] + y * m[7] + m[15]);
+    var xNew = (x * m[0] + y * m[4] + m[12]) / h;
+    var yNew = (x * m[1] + y * m[5] + m[13]) / h;
+    // Convert from view to screen pixel coordinates.
+    xNew = (xNew + 1.0) * 0.5 * viewport[2] + viewport[0];
+    yNew = (yNew + 1.0) * 0.5 * viewport[3] + viewport[1];
+    yNew = viewport[3] - yNew;
+
+    console.log('origin: ' + xNew + ', ' + yNew + ', mouse: ' + this.Layer.MouseX + ', ' + this.Layer.MouseY);
+
+    // Use this point as the origin.
+    x = this.Layer.MouseX - xNew;
+    y = this.Layer.MouseY - yNew;
+    // Rotate so arrow lies along the x axis.
+    var tmp = -this.Arrow.Orientation * Math.PI / 180.0;
+    var ct = Math.cos(tmp);
+    var st = Math.sin(tmp);
+    xNew = x * ct + y * st;
+    yNew = -x * st + y * ct;
+
+    var length = this.Arrow.Length;
+    var halfWidth = this.Arrow.Width / 2.0;
+    if (!this.Arrow.FixedSize) {
+      var pixelsPerUnit = this.Layer.GetPixelsPerUnit();
+      length *= pixelsPerUnit;
+      halfWidth *= pixelsPerUnit;
+    }
+
+    this.ActiveTail = false;
+    if (xNew > 0.0 && xNew < length && yNew > -halfWidth && yNew < halfWidth) {
+      this.SetActive(true);
+      // Save the position along the arrow to decide which drag behavior to use.
+      if (xNew > length - halfWidth) {
+        this.ActiveTail = true;
+      }
+      return true;
+    } else {
+      this.SetActive(false);
+      return false;
+    }
+  };
+
+  // Returns true if selected
+  // This is sort of ugly.  Change it to delete directly if possible.
+  // Return value will let the layer clean up.
+  ArrowWidget.prototype.DeleteSelected = function () {
+    return this.Arrow.DeleteSelected();
+  };
+
+  ArrowWidget.prototype.IsEmpty = function () {
+    if (this.State === NEW) {
+      return true;
+    }
+    return this.Arrow.IsEmpty();
+  };
+
+  // I am divorcing selected from active.
+  ArrowWidget.prototype.IsSelected = function () {
+    return this.Arrow.Selected;
+  };
+
+  ArrowWidget.prototype.SetSelected = function (flag) {
+    this.Arrow.SetSelected(flag);
+    if (flag && this.SelectedCallback) {
+      this.SelectedCallback(this);
+    }
   };
 
   // I need this because old schemes cannot use "Load"
   ArrowWidget.prototype.SetColor = function (hexColor) {
-    this.Shape.SetFillColor(hexColor);
+    this.Arrow.SetFillColor(hexColor);
     this.Layer.EventuallyDraw();
+  };
+
+  ArrowWidget.prototype.InitPropertiesDialog = function () {
+    var self = this;
+
+    this.Dialog = new SAM.Dialog(this.Layer.GetParent().parent());
+    this.Dialog.SetApplyCallback(function () { self.DialogApplyCallback(); });
+    // Customize dialog for an arrow.
+    this.Dialog.Title.text('Arrow Properties');
+    this.Dialog.Body.css({'margin': '1em 2em'});
+    // Color
+    this.Dialog.ColorDiv =
+            $('<div>')
+            .css({'height': '24px'})
+            .appendTo(this.Dialog.Body)
+            .addClass('sa-view-annotation-modal-div');
+    this.Dialog.ColorLabel =
+            $('<div>')
+            .appendTo(this.Dialog.ColorDiv)
+            .text('Color:')
+            .addClass('sa-view-annotation-modal-input-label');
+    this.Dialog.ColorInput =
+            $('<input type="color">')
+            .appendTo(this.Dialog.ColorDiv)
+            .val('#30ff00')
+            .addClass('sa-view-annotation-modal-input');
+
+    // Width
+    this.Dialog.WidthDiv =
+            $('<div>')
+            .appendTo(this.Dialog.Body)
+            .addClass('sa-view-annotation-modal-div');
+    this.Dialog.WidthLabel =
+            $('<div>')
+            .appendTo(this.Dialog.WidthDiv)
+            .text('Shaft Width:')
+            .addClass('sa-view-annotation-modal-input-label');
+    this.Dialog.WidthInput =
+            $('<input type="number">')
+            .appendTo(this.Dialog.WidthDiv)
+            .addClass('sa-view-annotation-modal-input')
+            .keypress(function (event) { return event.keyCode !== 13; });
+  };
+
+  // Can we bind the dialog apply callback to an objects method?
+  ArrowWidget.prototype.ShowPropertiesDialog = function () {
+    if (this.Dialog === undefined) {
+      this.InitPropertiesDialog();
+    }
+    this.WidgetPropertiesToDialog();
+    var self = this;
+    this.Dialog.SetApplyCallback(function () { self.DialogApplyCallback(); });
+    this.Dialog.SetCloseCallback(function () { self.DialogCloseCallback(); });
+    this.Dialog.Show(true);
+    this.State = DIALOG;
+  };
+
+  ArrowWidget.prototype.DialogApplyCallback = function () {
+    // Transfer properties fromt he dialog GUI to the widget.
+    this.DialogPropertiesToWidget();
+    // View bindings kept the dialog text input from working.
+    if (!this.Layer) {
+      return;
+    }
+    this.SetActive(false);
+    this.Layer.EventuallyDraw();
+  };
+
+  ArrowWidget.prototype.DialogCloseCallback = function () {
+    this.SetActive(false);
+    this.Layer.EventuallyDraw();
+  };
+
+  // Fill the dialog values from the widget values.
+  ArrowWidget.prototype.WidgetPropertiesToDialog = function () {
+    this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Arrow.FillColor));
+    this.Dialog.WidthInput.val((this.Arrow.Width).toFixed(2));
+  };
+
+  // Copy the properties of the dialog into the widget
+  ArrowWidget.prototype.DialogPropertiesToWidget = function () {
+    var modified = false;
+
+    // Get the color
+    var hexcolor = SAM.ConvertColorToHex(this.Dialog.ColorInput.val());
+    if (hexcolor !== this.Arrow.FillColor) {
+      modified = true;
+      this.Arrow.SetFillColor(hexcolor);
+      this.Arrow.ChooseOutlineColor();
+      modified = true;
+    }
+
+    var width = parseFloat(this.Dialog.WidthInput.val());
+    if (width !== this.Arrow.Width) {
+      this.Arrow.Width = width;
+      modified = true;
+    }
+
+    if (modified) {
+      // Save values in local storage as defaults for next time.
+      localStorage.ArrowWidgetDefaults = JSON.stringify({
+        Color: hexcolor,
+        Width: width});
+      this.Modified();
+      this.Arrow.UpdateBuffers(this.Layer.AnnotationView);
+    }
   };
 
   SAM.ArrowWidget = ArrowWidget;

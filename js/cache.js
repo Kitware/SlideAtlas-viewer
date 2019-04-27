@@ -1,9 +1,75 @@
 (function () {
   'use strict';
 
+  // The levels are causing a problem for very large images.
+  // They are preallocated and take up too much space.
+  // TODO:
+  // 1: (finished) No access to level except through API.
+  // 2: (finished) Allocate on demand
+  // 3: Make them into a fat tree (64x64 children).
+  //    Two levels should hold us over for a long time.
+
   // I am adding a levels with grids to index tiles in addition
   // to the tree.  Eventually I want to get rid fo the tree.
   // I am trying to get rid of the roots now.
+
+// ==============================================================================
+
+  var CacheLevel = function (xGridDim, yGridDim) {
+    this.GridDims = [xGridDim, yGridDim];
+  };
+
+  // No bounds checking.
+  CacheLevel.prototype.SetTile = function (tile) {
+    if (this.Tiles === undefined) {
+      this.Tiles = new Array(this.GridDims[0] * this.GridDims[1]);
+    }
+
+    this.Tiles[tile.X + (tile.Y * this.GridDims[0])] = tile;
+    return tile;
+  };
+
+  CacheLevel.prototype.GetTile = function (x, y) {
+    if (this.Tiles === undefined) {
+      return null;
+    }
+    var idx = x + (y * this.GridDims[0]);
+    var tile = this.Tiles[idx];
+    if (tile && !tile.Matrix) {
+      this.Tiles[idx] = undefined;
+      return;
+    }
+    return tile;
+  };
+
+  // We only need an iterator for pruning.  BUild it right into the Cache Level.
+  CacheLevel.prototype.StartIteration = function () {
+    if (this.Tiles === undefined || this.Tiles.length === 0) {
+      this.IteratorIndex = undefined;
+    } else {
+      this.IteratorIndex = 0;
+    }
+  };
+
+  CacheLevel.prototype.Next = function () {
+    if (this.IteratorIndex === undefined) {
+      this.IteratorIndex = undefined;
+      return null;
+    }
+
+    var idx = this.IteratorIndex;
+    while (this.Tiles[idx] === null) {
+      idx += 1;
+      if (idx >= this.Tiles.length) {
+        this.IteratorIndex = undefined;
+        return null;
+      }
+    }
+
+    return this.Tiles[idx];
+  };
+
+// ==============================================================================
 
   // A stripped down source object.
   // A source object must have a getTileUrl method.
@@ -130,7 +196,6 @@
   };
 
 // ==============================================================================
-
   SA.FindCache = function (image) {
     // Look through existing caches and reuse one if possible
     for (var i = 0; i < SA.Caches.length; ++i) {
@@ -142,20 +207,6 @@
     cache.SetImageData(image);
 
     return cache;
-  };
-
-// ==============================================================================
-  var CacheLevel = function (xGridDim, yGridDim) {
-    this.Tiles = new Array(xGridDim * yGridDim);
-    this.GridDims = [xGridDim, yGridDim];
-  };
-  // No bounds checking.
-  CacheLevel.prototype.SetTile = function (tile) {
-    this.Tiles[tile.X + (tile.Y * this.GridDims[0])] = tile;
-    return tile;
-  };
-  CacheLevel.prototype.GetTile = function (x, y) {
-    return this.Tiles[x + (y * this.GridDims[0])];
   };
 
 // ==============================================================================
@@ -548,14 +599,13 @@
   // This also prunes texture maps.
   // SA.PruneTimeTiles and SA.PruneTimeTextures are compared with used time of tile.
   Cache.prototype.PruneTiles = function () {
-    for (var i = 0; i < this.Levels[0].Tiles.length; ++i) {
-      var node = this.Levels[0].Tiles[i];
-      if (node !== null) {
-        if (node.BranchTimeStamp < SA.PruneTimeTiles || node.BranchTimeStamp < SA.PruneTimeTextures) {
-          var count = this.RecursivePruneTiles(node);
-          if (count > 0) {
-            console.log('prune ' + count + ' from ' + this.Image.label);
-          }
+    this.Levels[0].StartIteration();
+    var node = this.Levels[0].Next();
+    if (node.LoadState === 3) {
+      if (node.BranchTimeStamp < SA.PruneTimeTiles || node.BranchTimeStamp < SA.PruneTimeTextures) {
+        var count = this.RecursivePruneTiles(node);
+        if (count > 0) {
+          console.log('prune ' + count + ' from ' + this.Image.label);
         }
       }
     }

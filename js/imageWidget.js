@@ -1,6 +1,7 @@
 // ==============================================================================
-// Mouse down defined the center.
-// Drag defines the radius.
+// Display a samller mask image ontop of a large image.
+// Mask image will be an additional file in the image item.
+// Not sure how to store the image in the annotation schema.
 
 (function () {
   'use strict';

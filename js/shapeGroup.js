@@ -9,6 +9,15 @@
     this.Bounds = [0, -1, 0, -1];
   }
 
+  ShapeGroup.prototype.UpdateBuffers = function (view) {
+    for (var i = 1; i < this.Shapes.length; ++i) {
+      var shape = this.Shapes[i];
+      if (shape.UpdateBuffers) {
+        shape.UpdateBuffers(view);
+      }
+    }
+  };
+
   ShapeGroup.prototype.GetBounds = function () {
     return this.Bounds;
   };
@@ -35,17 +44,19 @@
     return retVal;
   };
 
-  // Returns true if a shape was selected.
+  // Returns the selecteded shape (or undefined).
   ShapeGroup.prototype.SingleSelect = function (pt, dist) {
-    var found = false;
+    var found;
     for (var idx = 0; idx < this.Shapes.length; ++idx) {
       var shape = this.Shapes[idx];
       if (found || !shape.PointOnShape(pt, dist)) {
         // A shape was already selected. Just unselect the rest.
-        shape.SetSelected(false);
+        if (!SAM.ShiftKey) {
+          shape.SetSelected(false);
+        }
       } else {
         shape.SetSelected(true);
-        found = true;
+        found = shape;
       }
     }
     return found;
@@ -62,24 +73,39 @@
     return -1;
   };
 
-  ShapeGroup.prototype.UpdateBuffers = function (view) {
+  ShapeGroup.prototype.Modified = function () {
     for (var i = 0; i < this.Shapes.length; ++i) {
-      this.Shapes.UpdateBuffers(view);
+      this.Shapes.Modified();
     }
   };
 
+  // Return true if any shape was deleted.
   ShapeGroup.prototype.DeleteSelected = function () {
+    var modified = false;
     var keepers = [];
     for (var idx = 0; idx < this.Shapes.length; ++idx) {
-      if (!this.Shapes[idx].IsSelected()) {
+      var shape = this.Shapes[idx];
+      if (this.Shapes[idx].DeleteSelected()) {
+        // Something was deleted.
+        modified = true;
+      }
+      if (!shape.IsEmpty()) {
         keepers.push(this.Shapes[idx]);
       }
     }
     if (keepers.length < this.Shapes.length) {
       this.Shapes = keepers;
+    }
+    return modified;
+  };
+
+  ShapeGroup.prototype.IsEmpty = function () {
+    for (var idx = 0; idx < this.Shapes.length; ++idx) {
+      if (!this.Shapes[idx].IsEmpty()) {
+        return false;
+      }
       return true;
     }
-    return false;
   };
 
   // Depreciates: TODO:  Remove this method.
@@ -127,6 +153,7 @@
     return this.Shapes.pop();
   };
 
+  // Should be called remove child
   ShapeGroup.prototype.DeleteChild = function (idx) {
     return this.Shapes.splice(idx, 1);
   };
@@ -206,12 +233,6 @@
       return this.Shapes[0].Origin;
     }
     return [0, 0, 0];
-  };
-
-  ShapeGroup.prototype.UpdateBuffers = function (view) {
-    for (var i = 0; i < this.Shapes.length; ++i) {
-      this.Shapes[i].UpdateBuffers(view);
-    }
   };
 
   SAM.ShapeGroup = ShapeGroup;
