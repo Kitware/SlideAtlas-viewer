@@ -1,6 +1,5 @@
 // This class is not used anywhere.
 
-
 // ==============================================================================
 // Collection widget, No serialize or load.
 // Manage 3 annotation sets,  detection, positives (ground truth) and false positives.
@@ -11,18 +10,14 @@
 // This object is added to the layer as a widget.
 // It is probably better if this were a layer, but it is not worth changing yet.
 
-
-
 // TODO: Clean this up.
-//if ( ! this.annotationlayer) {
+// if ( ! this.annotationlayer) {
 //  this.annotationLayer = new SAM.AnnotationLayer(this.sa_viewer.GetDiv());
 //  this.annotationLayer.SetViewer(this.sa_viewer);
 //  this.annotationLayer.SetCamera(this.sa_viewer.GetCamera());
 //  this.annotationLayer.UpdateSize();
 //  this.sa_viewer.AddLayer(this.annotationLayer);
-//}
-
-
+// }
 
 (function () {
   'use strict';
@@ -47,7 +42,7 @@
       this.ArrowLayer = new SAM.AnnotationLayer(this.Parent);
       this.ArrowLayer.SetCamera(viewer.GetCamera());
     }
-    
+
     this.Viewer = viewer;
     this.ActiveClassIndex = 0;
     this.ItemId = itemId;
@@ -68,7 +63,6 @@
     this.SetActiveClassIndex(0);
   };
 
-
   // Since we have to make forwarding methods, just use the layer as a helper object.
   GirderAnnotationEditor.prototype.EventuallyDraw = function () {
     if (!this.RenderPending) {
@@ -80,11 +74,11 @@
           self.Draw();
         });
     }
-    //this.Layer.EventuallyDraw();
+    // this.Layer.EventuallyDraw();
   };
   GirderAnnotationEditor.prototype.GetView = function () {
     return this.Layer.GetView();
-  };  
+  };
   GirderAnnotationEditor.prototype.GetCamera = function () {
     return this.Layer.GetCamera();
   };
@@ -102,10 +96,6 @@
     }
   };
 
-
-  
-
-  
   GirderAnnotationEditor.prototype.CreateClasses = function (classNames) {
     var numClasses = classNames.length;
     this.Classes = [];
@@ -313,14 +303,14 @@
     }
     return true;
   };
-  
+
   GirderAnnotationEditor.prototype.HandleMouseUp = function (event) {
     if (this.ArrowLayer) {
       return this.ArrowLayer.HandleMouseUp(event);
     }
     return true;
   };
-  
+
   // Highlight on hover.
   GirderAnnotationEditor.prototype.HandleMouseMove = function (event) {
     if (this.ArrowLayer) {
@@ -614,7 +604,7 @@
         function (widget) { self.HandleArrowFinished(widget); });
     }
   };
-  
+
   // Forward = 1, backward = -1
   GirderAnnotationEditor.prototype.ChangeCurrent = function (direction) {
     if (this.ArrowMode) {
@@ -622,7 +612,7 @@
     }
 
     if (this.IteratorClass.widget === undefined) {
-        return true;
+      return true;
     }
     var rectSet = this.IteratorClass.widget.Shape;
     var index = this.IteratorIndex;

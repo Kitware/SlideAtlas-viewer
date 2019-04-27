@@ -44,7 +44,7 @@
           'z-index': '200'});
       this.Tab.Panel
         .addClass('sa-view-navigation-panel')
-        .css({'overflow':'hidden'});
+        .css({'overflow': 'hidden'});
 
       // Put the stack display in the navigation button
       this.NoteDisplay = $('<div>')
@@ -134,8 +134,8 @@
   };
 
   GirderNavigationWidget.prototype.ChangeItem = function () {
-    window.history.pushState(this.ItemId, "SlideAtlas viewer " + this.ItemId,
-                             "/#item/" + this.ItemId);
+    window.history.pushState(this.ItemId, 'SlideAtlas viewer ' + this.ItemId,
+                             '/#item/' + this.ItemId);
 
     if (this.ChangeItemCallback) {
       (this.ChangeItemCallback)(this.ItemId);

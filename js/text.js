@@ -92,17 +92,17 @@
     this.BackgroundFlag = false;
   }
 
-  Text.prototype.DeleteSelected = function() {
+  Text.prototype.DeleteSelected = function () {
     if (this.IsSelected()) {
-      this.SetString("");
+      this.SetString('');
       return true;
     }
   };
 
-  Text.prototype.IsEmpty = function() {
-    return this.String === undefined || this.String === "";
-  }
-  
+  Text.prototype.IsEmpty = function () {
+    return this.String === undefined || this.String === '';
+  };
+
   Text.prototype.SetString = function (str) {
     this.String = str;
   };
@@ -151,7 +151,7 @@
       // ctx.fillStyle = '#fff';
       // ctx.strokeStyle = '#000';
       // ctx.fillRect(x - 2, y - 2, this.PixelBounds[1] + 4, (this.PixelBounds[3] + this.FontSize/3)*1.4);
-      var radius = this.FontSize/4;
+      var radius = this.FontSize / 4;
       roundRect(ctx, x - radius, y - radius,
                 width + 2 * radius, height + 2 * radius,
                 radius, true, false);
@@ -173,7 +173,7 @@
       y = y + this.FontSize * LINE_SPACING;
     }
 
-    //ctx.stroke();
+    // ctx.stroke();
     ctx.restore();
   };
 
@@ -182,7 +182,7 @@
       radius = 2;
     }
     ctx.fillStyle = '#fff';
-    //ctx.strokeStyle = '#666';
+    // ctx.strokeStyle = '#666';
     ctx.fillRect(x, y, width, height);
 
     /*
@@ -198,7 +198,7 @@
     ctx.quadraticCurveTo(x, y, x + radius, y);
     ctx.closePath();
     */
-    //ctx.stroke();
+    // ctx.stroke();
     // ctx.fill();
   }
 
@@ -321,7 +321,7 @@
 
     var bds = this.PixelBounds.slice(0);
     if (this.BackgroundFlag) {
-      var radius = this.FontSize/4;
+      var radius = this.FontSize / 4;
       bds[0] -= radius;
       bds[1] += radius;
       bds[2] -= radius;

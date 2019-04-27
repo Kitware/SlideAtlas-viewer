@@ -11,12 +11,11 @@
   var DRAG_Y0 = 4;
   var DRAG_Y1 = 8;
   var SYMMETRIC = 16; // Lock the position of the center
-  var ASPECT = 32;    // Lock the aspect ratio
+  // var ASPECT = 32;    // Lock the aspect ratio
   // These two are only used alone.  However, they are drag features.
   var CENTER = 64;
   var ROTATE = 128;
-  
-  
+
   var NEW = 0;         // Newly created and waiting to be placed.
   var INACTIVE = 1;    // Not resposnsive tp mouse events
   var ACTIVE = 2;      // Mouse is receiving move events, but mouse is not over.
@@ -82,7 +81,7 @@
       return null;
     }
     this.Layer = layer;
-    this.Type = 'rect';    
+    this.Type = 'rect';
     this.Visibility = true;
     // Keep track of annotation created by students without edit
     // permission.
@@ -93,7 +92,7 @@
     this.StateChangeCallback = undefined;
     // This is used by the annotationPanel to transfer draing mode to a new selected widget.
     this.SelectedCallback = undefined;
-        
+
     this.Tolerance = 0.05;
     if (SAM.detectMobile()) {
       this.Tolerance = 0.1;
@@ -115,10 +114,10 @@
     }
     this.Shape.LineWidth = 0;
     this.Shape.FixedSize = false;
-    
-    // Circle is a handle for translation.
+
+    // false is a handle for translation.
     this.CenterCircle = new SAM.Circle();
-    this.CenterCircle.SetFillColor([1,1,0]);
+    this.CenterCircle.SetFillColor([1, 1, 0]);
     this.CenterCircle.SetOutlineColor([0.0, 0.0, 0.0]);
     this.CenterCircle.Radius = 5;
     this.CenterCircle.LineWidth = 1;
@@ -128,12 +127,12 @@
 
     // Circle is a handle for rotation.
     this.RotateCircle = new SAM.Circle();
-    this.RotateCircle.SetFillColor([1,1,0]);
+    this.RotateCircle.SetFillColor([1, 1, 0]);
     this.RotateCircle.SetOutlineColor([0.0, 0.0, 0.0]);
     this.RotateCircle.Radius = 5;
     this.RotateCircle.LineWidth = 1;
     this.RotateCircle.PositionCoordinateSystem = 1;
-    
+
     // Get default properties.
     if (localStorage.RectWidgetDefaults) {
       var defaults = JSON.parse(localStorage.RectWidgetDefaults);
@@ -141,14 +140,13 @@
         this.Shape.SetOutlineColor(defaults.Color);
       }
     }
-    
+
     // Note: If the user clicks before the mouse is in the
     // canvas, this will behave odd.
 
     this.Layer.GetParent().css({'cursor': 'default'});
     this.State = INACTIVE;
     this.WhichDrag = 0;      // Bits
-
   }
 
   // Not used yet, but might be useful.
@@ -210,7 +208,7 @@
     }
     return this.Shape.IsEmpty();
   };
-  
+
   // I am divorcing selected from active.
   RectWidget.prototype.IsSelected = function () {
     return this.Shape.Selected;
@@ -252,21 +250,21 @@
     if (width < minWidth) { width = minWidth; }
     return width;
   };
-  
+
   // Returns true if the mouse is over the rectangle.
   RectWidget.prototype.SingleSelect = function () {
     if (this.State === DIALOG) {
       return;
     }
     // Check to see if a stroke was clicked.
-    var x = this.Layer.MouseX;
-    var y = this.Layer.MouseY;
+    // var x = this.Layer.MouseX;
+    // var y = this.Layer.MouseY;
     var z = this.Layer.ZTime;
-    if (this.Shape.Origin.length > 2 && this.Shape.Origin[2] != z) {
+    if (this.Shape.Origin.length > 2 && this.Shape.Origin[2] !== z) {
       return false;
     }
 
-    var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
+    // var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
 
     var part = this.PointOnWhichPart();
     if (part !== undefined) {
@@ -276,7 +274,7 @@
 
     return false;
   };
-  
+
   // Threshold above is the only option for now.
   RectWidget.prototype.SetThreshold = function (threshold) {
     if (this.confidence !== undefined) {
@@ -286,8 +284,8 @@
 
   RectWidget.prototype.Draw = function () {
     var view = this.Layer.GetView();
-    if (this.Layer.ZTime != undefined && this.Shape.Origin.length > 2) {
-      if (this.Layer.ZTime != this.Shape.Origin[2]) {
+    if (this.Layer.ZTime !== undefined && this.Shape.Origin.length > 2) {
+      if (this.Layer.ZTime !== this.Shape.Origin[2]) {
         return;
       }
     }
@@ -410,7 +408,7 @@
       this.WhichDrag = DRAG_X0 + DRAG_Y0 + SYMMETRIC;
     }
     if (this.State === HOVER) {
-      var part = this.PointOnWhichPart();
+      // var part = this.PointOnWhichPart();
       this.State = DRAG;
       this.LastMouse = this.Layer.GetMouseWorld();
       // Which drag is already set by mouse move.
@@ -418,7 +416,6 @@
 
     return false;
   };
-
 
   RectWidget.prototype.HandleMouseMove = function () {
     if (this.State === INACTIVE) {
@@ -437,7 +434,7 @@
     var dy = worldPt1[1] - worldPt0[1];
     var x = worldPt1[0] - this.Shape.Origin[0];
     var y = worldPt1[1] - this.Shape.Origin[1];
-    
+
     // Mouse moving with no button pressed:
     if (event.which === 0) {
       // This keeps the rectangle from being drawn in the wrong place
@@ -461,51 +458,51 @@
         }
         this.State = HOVER;
         if (part[0] === CORNER) {
-          switch(part[1]) {
-          case 0:
-            if (this.Rotatable) {
-              this.Layer.GetParent().css({'cursor': 'pointer'});
-              this.WhichDrag = ROTATE;
-            } else {
-              this.Layer.GetParent().css({'cursor': 'nw-resize'});
-              this.WhichDrag = DRAG_X0 + DRAG_Y0;
-            }
-            break;
-          case 1:
-            this.Layer.GetParent().css({'cursor': 'ne-resize'});
-            this.WhichDrag = DRAG_X1 + DRAG_Y0;
-            break;
-          case 2:
-            this.Layer.GetParent().css({'cursor': 'se-resize'});
-            this.WhichDrag = DRAG_X1 + DRAG_Y1;
-            break;
-          case 3:
-            this.Layer.GetParent().css({'cursor': 'sw-resize'});
-            this.WhichDrag = DRAG_X0 + DRAG_Y1;
-            break;
-          case 4:
-            this.Layer.GetParent().css({'cursor': 'move'});
-            this.WhichDrag = CENTER;
+          switch (part[1]) {
+            case 0:
+              if (this.Rotatable) {
+                this.Layer.GetParent().css({'cursor': 'pointer'});
+                this.WhichDrag = ROTATE;
+              } else {
+                this.Layer.GetParent().css({'cursor': 'nw-resize'});
+                this.WhichDrag = DRAG_X0 + DRAG_Y0;
+              }
+              break;
+            case 1:
+              this.Layer.GetParent().css({'cursor': 'ne-resize'});
+              this.WhichDrag = DRAG_X1 + DRAG_Y0;
+              break;
+            case 2:
+              this.Layer.GetParent().css({'cursor': 'se-resize'});
+              this.WhichDrag = DRAG_X1 + DRAG_Y1;
+              break;
+            case 3:
+              this.Layer.GetParent().css({'cursor': 'sw-resize'});
+              this.WhichDrag = DRAG_X0 + DRAG_Y1;
+              break;
+            case 4:
+              this.Layer.GetParent().css({'cursor': 'move'});
+              this.WhichDrag = CENTER;
           }
         }
         if (part[0] === EDGE) {
-          switch(part[1]) {
-          case 0:
-            this.Layer.GetParent().css({'cursor': 'ns-resize'});
-            this.WhichDrag = DRAG_Y0;
-            break;
-          case 1:
-            this.Layer.GetParent().css({'cursor': 'ew-resize'});
-            this.WhichDrag = DRAG_X1;
-            break;
-          case 2:
-            this.Layer.GetParent().css({'cursor': 'ns-resize'});
-            this.WhichDrag = DRAG_Y1;
-            break;
-          case 3:
-            this.Layer.GetParent().css({'cursor': 'ew-resize'});
-            this.WhichDrag = DRAG_X0;
-            break;
+          switch (part[1]) {
+            case 0:
+              this.Layer.GetParent().css({'cursor': 'ns-resize'});
+              this.WhichDrag = DRAG_Y0;
+              break;
+            case 1:
+              this.Layer.GetParent().css({'cursor': 'ew-resize'});
+              this.WhichDrag = DRAG_X1;
+              break;
+            case 2:
+              this.Layer.GetParent().css({'cursor': 'ns-resize'});
+              this.WhichDrag = DRAG_Y1;
+              break;
+            case 3:
+              this.Layer.GetParent().css({'cursor': 'ew-resize'});
+              this.WhichDrag = DRAG_X0;
+              break;
           }
         }
         return false;
@@ -529,7 +526,7 @@
       if (this.WhichDrag & ROTATE) {
         // Special case with no modifiers.  Just translate the whole rectangle.
         // Compute two vectors, then rotate to align them.
-        var v0 = [-this.Shape.Width, -this.Shape.Height]
+        var v0 = [-this.Shape.Width, -this.Shape.Height];
         var mag = Math.sqrt(v0[0] * v0[0] + v0[1] * v0[1]);
         v0[0] = v0[0] / mag;
         v0[1] = v0[1] / mag;
@@ -537,8 +534,8 @@
         mag = Math.sqrt(v1[0] * v1[0] + v1[1] * v1[1]);
         v1[0] = v1[0] / mag;
         v1[1] = v1[1] / mag;
-        var c = v0[0] * v1[0] + v0[1] * v1[1];
-        var s = v0[0] * v1[1] - v0[1] * v1[0];
+        c = v0[0] * v1[0] + v0[1] * v1[1];
+        s = v0[0] * v1[1] - v0[1] * v1[0];
         this.Shape.Orientation = -Math.atan2(s, c) * 180 / Math.PI;
         this.Layer.EventuallyDraw();
         this.Modified();
@@ -560,8 +557,8 @@
         // Position of the mouse in box coordinates.
         // Constrain the mouse vector based on axes being modified.
         // Transform the detla mouse to rectangle coordinate system.
-        var rdx = c*dx - s*dy;
-        var rdy = s*dx + c*dy;
+        var rdx = (c * dx) - (s * dy);
+        var rdy = (s * dx) + (c * dy);
         if (this.WhichDrag & DRAG_X1) {
           this.Shape.Width += rdx;
         } else if (this.WhichDrag & DRAG_X0) {
@@ -579,8 +576,8 @@
           rdy = 0;
         }
         // Rotate the constrained mouse back to world coordinate system.
-        dx = c*rdx + s*rdy;
-        dy = -s*rdx + c*rdy;
+        dx = (c * rdx) + (s * rdy);
+        dy = (-s * rdx) + (c * rdy);
         // Center is moving half as fast as the mouse.
         this.Shape.Origin[0] += dx / 2.0;
         this.Shape.Origin[1] += dy / 2.0;
@@ -610,7 +607,7 @@
     this.Shape.Width = Math.abs(this.Shape.Width);
     this.Shape.Height = Math.abs(this.Shape.Height);
     this.Layer.EventuallyDraw();
- 
+
     return false;
   };
 
@@ -656,7 +653,7 @@
     }
     this.WidgetPropertiesToDialog();
     var self = this;
-    this.Dialog.SetApplyCallback(function () { self.DialogApplyCallback();});
+    this.Dialog.SetApplyCallback(function () { self.DialogApplyCallback(); });
     this.Dialog.SetCloseCallback(function () { self.DialogCloseCallback(); });
     this.Dialog.Show(true);
     this.State = DIALOG;
@@ -702,7 +699,7 @@
     this.Shape.SetOutlineColor(hexcolor);
     this.Shape.LineWidth = parseFloat(this.Dialog.LineWidthInput.val());
     this.Shape.UpdateBuffers(this.Layer.AnnotationView);
-    
+
     if (modified) {
       // Save values in local storage as defaults for next time.
       localStorage.RectWidgetDefaults = JSON.stringify({
@@ -719,7 +716,7 @@
     var cam = this.Layer.GetCamera();
     var theta = this.Shape.GetRotation();
     var c = Math.cos(theta);
-    var s = Math.sin(theta);    
+    var s = Math.sin(theta);
     var origin = this.Shape.Origin;
     var rw = this.Shape.Width / 2.0;
     var rh = this.Shape.Height / 2.0;
@@ -740,10 +737,10 @@
     var pt3 = [origin[0] + x, origin[1] + y];
     pt3 = cam.ConvertPointWorldToViewer(pt3[0], pt3[1]);
 
-    var pt4 = [(pt0[0] + pt2[0]) * 0.5,
-               (pt0[1] + pt2[1]) * 0.5];
-    
-    
+    var pt4 = [
+      (pt0[0] + pt2[0]) * 0.5,
+      (pt0[1] + pt2[1]) * 0.5];
+
     return [pt0, pt1, pt2, pt3, pt4];
   };
 
@@ -766,12 +763,12 @@
       }
     }
     // Now check the edges.
-    var corner0 = corners[3]; 
-    for (var i = 0; i < 4; ++i) {
+    var corner0 = corners[3];
+    for (i = 0; i < 4; ++i) {
       var corner1 = corners[i];
       if (this.Shape.IntersectPointLine([x, y], corner0, corner1, tolerance) !== undefined) {
         // Chance the edge index to start on top edge (=0).
-        return [EDGE, (i+3)%4];
+        return [EDGE, (i + 3) % 4];
       }
       corner0 = corner1;
     }
@@ -850,7 +847,7 @@
             .appendTo(this.Dialog.BoundsDiv)
             .css({'display': 'table-cell'});
   };
-  
+
   SAM.Rect = Rect;
   SAM.RectWidget = RectWidget;
 })();

@@ -642,7 +642,7 @@
     // Annotations use this to decide whether to draw or not.
     // It is changed when the GirderStackWidget changes frame.
     this.ZTime = 0;
-    
+
     // This will be called when a widget is selected by the user.
     // So the panel can put the layer into edit mode.
     this.ActivatedCallback = undefined;
@@ -693,8 +693,8 @@
     // I want to move away from having each shape have its own interaction (dialog).
     // Instead, I want to keep the shapes, and then have helper objects for interaction.
     // Right now this is used for non interactive annotation.
-    // In the future I will add interaction helper object to manipulate shapes.. 
-    //this.ShapeList = []; // Not needed quite yet.
+    // In the future I will add interaction helper object to manipulate shapes..
+    // this.ShapeList = []; // Not needed quite yet.
 
     // Scale widget is unique. Deal with it separately so it is not
     // saved with the notes.
@@ -706,7 +706,7 @@
     this.LayerDiv.remove();
     this.Parent = undefined;
   };
-  
+
   // This gets called when a click causes as single widget in this layer
   // to be selected. The annotation panel, uses it to turn editing on for this layer.
   AnnotationLayer.prototype.SetActivatedCallback = function (callback) {
@@ -766,7 +766,7 @@
       }
     }
     return true;
-  }
+  };
 
   AnnotationLayer.prototype.InactivateAll = function () {
     for (var i = 0; i < this.WidgetList.length; ++i) {
@@ -789,8 +789,8 @@
 
   // Returns true if any widget was deleted.
   // This Also prunes empty widgets.
-  AnnotationLayer.prototype.DeleteSelected = function () { 
-   var modified = false;
+  AnnotationLayer.prototype.DeleteSelected = function () {
+    var modified = false;
     var keepers = [];
     // Let every widget delete its selected components.
     for (var idx = 0; idx < this.WidgetList.length; ++idx) {
@@ -802,16 +802,16 @@
           keepers.push(widget);
         }
       } else {
-          keepers.push(widget);
+        keepers.push(widget);
       }
     }
-    if (this.WidgetList.length != keepers.length) {
+    if (this.WidgetList.length !== keepers.length) {
       this.WidgetList = keepers;
     }
-    
+
     return modified;
   };
-  
+
   AnnotationLayer.prototype.GetVisibility = function () {
     return this.Visibility;
   };
@@ -851,7 +851,8 @@
     return this.AnnotationView.GetMetersPerUnit();
   };
 
-  AnnotationLayer.prototype.TestDrawingOnImage= function () {
+  /*
+  AnnotationLayer.prototype.TestDrawingOnImage = function () {
     if (false && !this.TestImageLoading) {
       // Load the test image
       var self = this;
@@ -867,7 +868,7 @@
         var ctx = canvas[0].getContext('2d');
         // ----- Image canvas.
         ctx.drawImage(self.TestImage,0,0);
-        //self.TestImage.style.display = 'none';
+        // self.TestImage.style.display = 'none';
         // ----- Canvas to data
         var imageData = ctx.getImageData(0, 0, width, height);
         var data = imageData.data;
@@ -875,7 +876,7 @@
           for (var x = 512; x < width; x += 1) {
             var idx = 4*(x + y * width);
             data[idx]     = 255 - data[idx];     // red
-            //data[idx + 1] = 255 - data[idx + 1]; // green
+            // data[idx + 1] = 255 - data[idx + 1]; // green
             data[idx + 2] = 255 - data[idx + 2]; // blue
             data[idx + 3] = 255 - data[idx + 3]; // alpha
           }
@@ -884,27 +885,28 @@
         ctx.putImageData(imageData, 0, 0);
         // ----- canvas to image.
         self.TestImage2 = new Image();
-        SA.GirderView.uploadImage(canvas[0].toDataURL("image/png"), '5990fc973f24e54cbd1469b9');
-        self.TestImage2.src = canvas[0].toDataURL("image/png");
+        SA.GirderView.uploadImage(canvas[0].toDataURL('image/png'), '5990fc973f24e54cbd1469b9');
+        self.TestImage2.src = canvas[0].toDataURL('image/png');
 
       };
       test.src = SA.ImagePathUrl + 'imageTest.png';
-      test.src = "http://lemon/api/v1/file/5ad3eb243f24e55361fb4fd9/download?contentDisposition=inline";
+      test.src = 'http://lemon/api/v1/file/5ad3eb243f24e55361fb4fd9/download?contentDisposition=inline';
       this.TestImageLoading = true;
     }
 
     if (this.TestImage2) {
       var ctx=this.AnnotationView.Context2d;
-      ctx.drawImage(this.TestImage2,10,10);
-    } 
+      ctx.drawImage(this.TestImage2, 10, 10);
+    }
   };
-  
+  */
+
   // the view arg is necessary for rendering into a separate canvas for
   // saving large images.
   AnnotationLayer.prototype.Draw = function () {
     this.AnnotationView.Clear();
-    this.TestDrawingOnImage();
-    
+    // this.TestDrawingOnImage();
+
     if (!this.Visibility) { return; }
 
     for (var i = 0; i < this.WidgetList.length; ++i) {
@@ -957,7 +959,7 @@
   // TODO: Get rid of this reference.
   AnnotationLayer.prototype.SetViewer = function (viewer) {
     this.Viewer = viewer;
-  }
+  };
 
   // Load an array of anntoations into this layer.
   // It does not clear previous annotations. Call reset to do that.
@@ -1077,13 +1079,13 @@
     this.InitializeTouch(event, true);
 
     if (event.pencil) {
-      console.log("ipad pencil start");
+      console.log('ipad pencil start');
       var pencil = this.GetIPadPencilWidget();
       pencil.SetStateToDrawing();
       pencil.HandleTouchStart(this);
       return false;
     }
-    
+
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
       if (widget.HandleTouchStart && !widget.HandleTouchStart(this)) {
@@ -1100,12 +1102,12 @@
     if (!this.InitializeTouch(e, false)) { return; }
 
     if (event.pencil) {
-      console.log("ipad pencil move");
+      console.log('ipad pencil move');
       var pencil = this.GetIPadPencilWidget();
       pencil.HandleTouchMove(this);
       return false;
     }
-        
+
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
       if (widget.HandleTouchMove && !widget.HandleTouchMove(this)) {
@@ -1145,25 +1147,25 @@
   };
 
   AnnotationLayer.prototype.HandleTouchEnd = function (event) {
-    console.log("layer touch end");
+    console.log('layer touch end');
     if (!this.GetVisibility()) {
       return true;
     }
     this.Event = event;
 
     if (this.Pencil) {
-      console.log("pencil state = " + this.Pencil.State);
+      console.log('pencil state = ' + this.Pencil.State);
     } else {
-      console.log("no pencil");
+      console.log('no pencil');
     }
-    
+
     // It seems that end events do not have a force (to indicate iPad pencil).
     if (this.Pencil && this.Pencil.IsStateDrawingDown()) {
       event.pencil = true;
     }
-    
+
     if (event.pencil) {
-      console.log("ipad pencil end");
+      console.log('ipad pencil end');
       var pencil = this.GetIPadPencilWidget();
       pencil.HandleTouchEnd(this);
       pencil.SetActive(false);
@@ -1174,7 +1176,7 @@
       }
       return false;
     }
-    
+
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
       if (widget.HandleTouchEnd && !widget.HandleTouchEnd(this)) {
@@ -1209,7 +1211,7 @@
       }
     }
   };
-  
+
   // Click will only select one widget.
   // returns the widget selected or undefined.
   AnnotationLayer.prototype.SingleSelect = function (event, shift) {
@@ -1368,9 +1370,9 @@
 
     // The event position is relative to the target which can be a tab on
     // top of the canvas.  Just skip these events.
-    if ($(event.target).width() !== $(event.currentTarget).width()) {
-      //console.log('child event ' + event.MouseY);
-    }
+    // if ($(event.target).width() !== $(event.currentTarget).width()) {
+      // console.log('child event ' + event.MouseY);
+    // }
 
     this.ComputeMouseWorld(event);
 
@@ -1442,17 +1444,17 @@
           s0.Points = s0.Points.concat(s1.Points);
         } else {
           s0.Points = s1.Points.concat(s0.Points);
-        }          
+        }
         s0.UpdateBuffers(this.AnnotationView);
         this.RemoveWidget(strokes[1]);
         this.EventuallyDraw();
         return false;
       }
     }
-    
+
     this.Event = event;
 
-    for (var i = 0; i < this.WidgetList.length; ++i) {
+    for (i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
       if (widget.HandleKeyDown && !widget.HandleKeyDown(this)) {
         return false;
@@ -1695,7 +1697,7 @@
     this.WidgetList.push(this.Pencil);
     return this.Pencil;
   };
-  
+
   SAM.AnnotationLayer = AnnotationLayer;
 })();
 

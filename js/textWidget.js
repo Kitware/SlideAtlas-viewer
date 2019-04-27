@@ -1,6 +1,5 @@
 // ==============================================================================
 
-
 (function () {
     // Depends on the CIRCLE widget
   'use strict';
@@ -21,7 +20,7 @@
   var TEXT_ONLY = 0;
   var ARROW_HOVER = 1;
   var TEXT_ARROW = 2;
-  
+
   // TODO: Get rid of this layer in the constructor.
   function TextWidget (layer) {
     this.Layer = layer;
@@ -35,7 +34,7 @@
     this.State = INACTIVE;
 
     this.VisibilityMode = TEXT_ONLY;
-    
+
     // This method gets called if anything is added, deleted or moved.
     this.ModifiedCallback = undefined;
     // This method gets called if the active state of this widget turns on or off.
@@ -61,7 +60,7 @@
     var bds = this.Text.PixelBounds;
     var cam = this.Layer.GetCamera();
     var p = cam.ConvertPointWorldToViewer(this.Text.Position[0], this.Text.Position[1]);
-    
+
     if (selection.ViewerPointInSelection(p[0] + bds[0], p[1] + bds[2]) &&
         selection.ViewerPointInSelection(p[0] + bds[0], p[1] + bds[3]) &&
         selection.ViewerPointInSelection(p[0] + bds[1], p[1] + bds[2]) &&
@@ -74,14 +73,14 @@
     this.Arrow.SetSelected(false);
     return false;
   };
-  
+
   TextWidget.prototype.SetCreationCamera = function (cam) {
     // Lets save the zoom level (sort of).
     // Load will overwrite this for existing annotations.
     // This will allow us to expand annotations into notes.
     this.CreationCamera = cam.Serialize();
   };
-  
+
   // This callback gets called when ever the active state changes,
   // even if caused by an external call. This widget is passed as a argument.
   // This is used to turn off the pencil button in the Panel.
@@ -118,13 +117,13 @@
     // And this.
     this.Layer.EventuallyDraw();
   };
-  
+
   // I am not sure if this is used.  We have multiple selected states.
   // Default to the whole widget selected.
   TextWidget.prototype.SetSelected = function (flag) {
     this.Text.SetSelected(flag);
     this.Arrow.SetSelected(flag);
-  
+
     if (flag && this.SelectedCallback) {
       (this.SelectedCallback)(this);
     }
@@ -160,11 +159,13 @@
   TextWidget.prototype.SetPositionToDefault = function () {
     var view = this.Layer.GetView();
     this.Text.UpdateBuffers(view); // Needed to get the bounds.
-    // middle top(above) 
-    var offset = [(this.Text.PixelBounds[0] + this.Text.PixelBounds[1]) * 0.5,
-                  -this.Text.PixelBounds[3]];
-    var middle = [0.5 * (this.Text.PixelBounds[0] + this.Text.PixelBounds[1]),
-                  0.5 * (this.Text.PixelBounds[2] + this.Text.PixelBounds[3])];
+    // middle top(above)
+    var offset = [
+      (this.Text.PixelBounds[0] + this.Text.PixelBounds[1]) * 0.5,
+      -this.Text.PixelBounds[3]];
+    var middle = [
+      0.5 * (this.Text.PixelBounds[0] + this.Text.PixelBounds[1]),
+      0.5 * (this.Text.PixelBounds[2] + this.Text.PixelBounds[3])];
     if (this.VisibilityMode === TEXT_ONLY) {
       this.Text.Offset = middle;
       this.SavedTextOffset = offset;
@@ -209,12 +210,12 @@
     if (this.VisibilityMode !== 0) {
       this.Arrow.Draw(view);
     }
-    //if (this.VisibilityMode !== ARROW_HOVER || this.Arrow.IsSelected()) {
-      this.Text.Draw(view);
-      this.Text.Visibility = true;
-    //} else {
+    // if (this.VisibilityMode !== ARROW_HOVER || this.Arrow.IsSelected()) {
+    this.Text.Draw(view);
+    this.Text.Visibility = true;
+    // } else {
     //  this.Text.Visibility = false;
-    //}
+    // }
   };
 
   TextWidget.prototype.PasteCallback = function (data, mouseWorldPt) {
@@ -285,7 +286,7 @@
   // When the arrow is visible, the text is offset from the position (tip of arrow).
   TextWidget.prototype.SetTextOffset = function (x, y) {
     this.SavedTextOffset = [-x, -y];
-      this.Text.Offset = this.SavedTextOffset.slice(0);
+    this.Text.Offset = this.SavedTextOffset.slice(0);
     this.ArrowModified = true;
   };
 
@@ -300,21 +301,23 @@
     if (mode === this.VisibilityMode) {
       return;
     }
-    var modified = true;
+    // var modified = true;
     this.ArrowModified = true;
     if (mode === TEXT_ONLY) {
       this.SavedTextOffset = this.Text.Offset.slice(0);
       // Adjust the offset so the anchor is in the center of the text.
-      this.Text.Offset = [(this.Text.PixelBounds[0] + this.Text.PixelBounds[1]) * 0.5,
-                          (this.Text.PixelBounds[2] + this.Text.PixelBounds[3]) * 0.5];
+      this.Text.Offset = [
+        (this.Text.PixelBounds[0] + this.Text.PixelBounds[1]) * 0.5,
+        (this.Text.PixelBounds[2] + this.Text.PixelBounds[3]) * 0.5];
     }
     if (this.VisibilityMode === TEXT_ONLY) {
       if (this.SavedTextOffset) {
-        this.Text.Offset = this.SavedTextOffset.slice(0); 
+        this.Text.Offset = this.SavedTextOffset.slice(0);
       } else {
         // SHort arrow pointing to the left.
-        this.Text.Offset = [(this.Text.PixelBounds[0] + this.Text.PixelBounds[1]) * 0.5,
-                            -this.Text.PixelBounds[3]];
+        this.Text.Offset = [
+          (this.Text.PixelBounds[0] + this.Text.PixelBounds[1]) * 0.5,
+          -this.Text.PixelBounds[3]];
       }
     }
     this.VisibilityMode = mode;
@@ -382,7 +385,6 @@
     }
     // Not really necesary, but it cannot hurt.
     this.SetActive(false);
-    return;
   };
 
   // Returns true if modified.
@@ -420,7 +422,7 @@
       var x = event.offsetX;
       var y = event.offsetY;
       this.LastMouse = [x, y];
-      var tMouse = this.ScreenPixelToTextPixelPoint(x, y);
+      // var tMouse = this.ScreenPixelToTextPixelPoint(x, y);
       if (this.State === HOVER) {
         if (this.Arrow.IsSelected()) {
           this.State = DRAG;
@@ -433,7 +435,7 @@
         }
       }
     }
-    
+
     return this.State === ACTIVE;
   };
 
@@ -487,10 +489,10 @@
         this.State = HOVER;
       } else {
         this.State = ACTIVE;
-      } 
+      }
       this.Layer.GetParent().css({'cursor': cursor});
     }
-    
+
     if ((this.VisibilityMode === 0 && this.State === DRAG_TEXT) ||
         this.State === DRAG) {
       var cam = this.Layer.GetCamera();
@@ -552,57 +554,52 @@
     this.Dialog.Body.css({'margin': '1em 2em'});
 
     this.Dialog.TextInput =
-            $('<textarea>')
-            .appendTo(this.Dialog.Body)
-            .css({'width': '87%',
-                  'height': '8em'});
+      $('<textarea>')
+      .appendTo(this.Dialog.Body)
+      .css({
+        'width': '87%',
+        'height': '8em'});
 
-    this.Dialog.FontDiv =
-            $('<div>')
-            .appendTo(this.Dialog.Body)
-            .css({'display': 'table-row'});
-    this.Dialog.FontLabel =
-            $('<div>')
-            .appendTo(this.Dialog.FontDiv)
-            .text('Font (px):')
-            .css({'display': 'table-cell',
-              'text-align': 'left'});
-    this.Dialog.FontInput =
-            $('<input type="number">')
-            .appendTo(this.Dialog.FontDiv)
-            .val('12')
+    this.Dialog.FontDiv = $('<div>')
+      .appendTo(this.Dialog.Body)
+      .css({'display': 'table-row'});
+    this.Dialog.FontLabel = $('<div>')
+      .appendTo(this.Dialog.FontDiv)
+      .text('Font (px):')
+      .css({
+        'display': 'table-cell',
+        'text-align': 'left'});
+    this.Dialog.FontInput = $('<input type="number">')
+      .appendTo(this.Dialog.FontDiv)
+      .val('12')
+      .css({'display': 'table-cell'});
+
+    this.Dialog.ColorDiv = $('<div>')
+      .appendTo(this.Dialog.Body)
+      .css({'display': 'table-row'});
+    this.Dialog.ColorLabel = $('<div>')
+      .appendTo(this.Dialog.ColorDiv)
+      .text('Color:')
+      .css({
+        'display': 'table-cell',
+        'text-align': 'left'});
+    this.Dialog.ColorInput = $('<input type="color">')
+      .appendTo(this.Dialog.ColorDiv)
+      .val('#30ff00')
             .css({'display': 'table-cell'});
 
-    this.Dialog.ColorDiv =
-            $('<div>')
-            .appendTo(this.Dialog.Body)
-            .css({'display': 'table-row'});
-    this.Dialog.ColorLabel =
-            $('<div>')
-            .appendTo(this.Dialog.ColorDiv)
-            .text('Color:')
-            .css({'display': 'table-cell',
-              'text-align': 'left'});
-    this.Dialog.ColorInput =
-            $('<input type="color">')
-            .appendTo(this.Dialog.ColorDiv)
-            .val('#30ff00')
-            .css({'display': 'table-cell'});
-
-    this.Dialog.VisibilityModeDiv =
-            $('<div>')
-            .appendTo(this.Dialog.Body)
-            .css({'display': 'table-row'});
-    this.Dialog.VisibilityModeLabel =
-            $('<div>')
-            .appendTo(this.Dialog.VisibilityModeDiv)
-            .text('Visibility:')
-            .css({'display': 'table-cell',
-              'text-align': 'left'});
-    this.Dialog.VisibilityModeInputButtons =
-            $('<div>')
-            .appendTo(this.Dialog.VisibilityModeDiv)
-            .css({'display': 'table-cell'});
+    this.Dialog.VisibilityModeDiv = $('<div>')
+      .appendTo(this.Dialog.Body)
+      .css({'display': 'table-row'});
+    this.Dialog.VisibilityModeLabel = $('<div>')
+      .appendTo(this.Dialog.VisibilityModeDiv)
+      .text('Visibility:')
+      .css({
+        'display': 'table-cell',
+        'text-align': 'left'});
+    this.Dialog.VisibilityModeInputButtons = $('<div>')
+      .appendTo(this.Dialog.VisibilityModeDiv)
+      .css({'display': 'table-cell'});
     this.Dialog.VisibilityModeInputs = [];
     this.Dialog.VisibilityModeInputs[TEXT_ONLY] =
       $('<input type="radio" name="visibilityoptions" value="0">Text only</input>')
@@ -620,9 +617,8 @@
       $('<input type="radio" name="visibilityoptions" value="2">Arrow and text visible</input>')
       .appendTo(this.Dialog.VisibilityModeInputButtons);
 
-    this.Dialog.VisibilityModeInputs[TEXT_ONLY].attr('checked', 'true')
+    this.Dialog.VisibilityModeInputs[TEXT_ONLY].attr('checked', 'true');
 
-    
     this.Dialog.BackgroundDiv =
             $('<div>')
             .appendTo(this.Dialog.Body)
@@ -660,7 +656,7 @@
       }
       if (defaults.VisibilityMode !== undefined) {
         this.VisibilityMode = defaults.VisibilityMode;
-        this.Dialog.VisibilityModeInputs[this.VisibilityMode].attr('checked', 'true')
+        this.Dialog.VisibilityModeInputs[this.VisibilityMode].attr('checked', 'true');
       }
     }
   };
@@ -668,12 +664,12 @@
   // Can we bind the dialog apply callback to an objects method?
   TextWidget.prototype.ShowPropertiesDialog = function () {
     var self = this;
-    this.Dialog.SetApplyCallback(function () { self.DialogApplyCallback();});
+    this.Dialog.SetApplyCallback(function () { self.DialogApplyCallback(); });
     this.Dialog.SetCloseCallback(function () { self.DialogCloseCallback(); });
     this.Dialog.Show(true);
     this.Dialog.TextInput.focus();
   };
- 
+
   TextWidget.prototype.DialogApplyCallback = function () {
     // Transfer properties fromt he dialog GUI to the widget.
     this.DialogPropertiesToWidget();
@@ -684,7 +680,7 @@
     this.SetActive(false);
     this.Layer.EventuallyDraw();
   };
-    
+
   TextWidget.prototype.DialogCloseCallback = function () {
     // View bindings keep dialog text input from working.
     if (this.Uninitialized) {
@@ -712,7 +708,7 @@
     this.Dialog.TextInput.val(this.Text.String);
     // this.Dialog.VisibilityModeInputs[this.VisibilityMode].attr('checked', true);
   };
- 
+
   // Copy the properties of the dialog into the widget
   TextWidget.prototype.DialogPropertiesToWidget = function () {
     var modified = false;

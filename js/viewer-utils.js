@@ -3000,14 +3000,14 @@
           fullScreenFlag = !fullScreenFlag;
           if (fullScreenFlag) {
             savedHeight = parent.css('height');
-            
+
             // just make the viewer fill the body.
             var height = window.innerHeight;
-            $(elem).appendTo('body')
+            $(elem).appendTo('body');
             $(elem)
               .css({
-                'z-index':'100',
-                'background-color':'#fff',
+                'z-index': '100',
+                'background-color': '#fff',
                 'position': 'fixed',
                 'left': '0',
                 'top': '0',

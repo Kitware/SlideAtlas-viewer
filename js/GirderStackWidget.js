@@ -55,7 +55,7 @@
     // Have the viewer call this objects event methods.
     display.AddLayer(this);
     // For debugging (place two section on top of each other to judge alignment.
-    //this.Overlay = overlay;
+    // this.Overlay = overlay;
 
     var self = this;
     // THese event bindings do not work.
@@ -125,7 +125,7 @@
   };
 
   GirderStackWidget.prototype.HandleKeyUp = function (e) {
-    if (e.keyCode === 33 || e.keyCode === 80 ) {
+    if (e.keyCode === 33 || e.keyCode === 80) {
       // page up or p
       this.Previous();
       return false;
@@ -279,7 +279,7 @@
     if (this.SectionIndex === index) {
       return;
     }
-    console.log("stack index " + index.toString())
+    console.log('stack index ' + index.toString());
     this.SectionIndex = index;
     // Tell annotation what time to display.
     var num = this.Display.GetNumberOfLayers();
@@ -289,7 +289,7 @@
         layer.SetTime(index);
       }
     }
-    
+
     this.RenderSection(this.Stack[index]);
   };
 

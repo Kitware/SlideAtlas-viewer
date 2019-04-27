@@ -19,14 +19,14 @@
   // Pencil up and pencil down.
   var DRAWING_UP = 2;
   var DRAWING_DOWN = 3;
-  
+
   var OPEN = 0;
   var CLOSED = 1;
 
   function PencilWidget (layer) {
-    this.Layer = layer;    
+    this.Layer = layer;
     this.State = INACTIVE;
-      
+
     // This method gets called if anything is added, deleted or moved.
     this.ModifiedCallback = undefined;
     // This method gets called if the active state of this widget turns on or off.
@@ -39,13 +39,11 @@
     // True when this widget is dedicated to the apple pencil.
     this.StylusOnly = false;
 
-    var self = this;
-
     this.LineWidth = 0;
     this.Mode = OPEN;
     this.Color = '#00c';
     this.LoadDefaults();
-    
+
     this.Shapes = new SAM.ShapeGroup();
 
     // Temporary way of showing time
@@ -65,7 +63,7 @@
         this.LineWidth = defaults.LineWidth;
       }
       if (defaults.Mode !== undefined) {
-        if (defaults.Mode === "open") {
+        if (defaults.Mode === 'open') {
           this.Mode = OPEN;
         } else {
           this.Mode = CLOSED;
@@ -73,7 +71,7 @@
       }
     }
   };
-  
+
   PencilWidget.prototype.InitializeDialog = function () {
     this.Dialog = new SAM.Dialog(this.Layer.GetParent().parent());
     var self = this;
@@ -90,8 +88,9 @@
       $('<div>')
       .appendTo(this.Dialog.ColorDiv)
       .text('Color:')
-      .css({'display': 'table-cell',
-            'text-align': 'left'});
+      .css({
+        'display': 'table-cell',
+        'text-align': 'left'});
     this.Dialog.ColorInput =
       $('<input type="color">')
       .appendTo(this.Dialog.ColorDiv)
@@ -107,8 +106,9 @@
       $('<div>')
       .appendTo(this.Dialog.LineWidthDiv)
       .text('Line Width:')
-      .css({'display': 'table-cell',
-            'text-align': 'left'});
+      .css({
+        'display': 'table-cell',
+        'text-align': 'left'});
     this.Dialog.LineWidthInput =
       $('<input type="number">')
       .appendTo(this.Dialog.LineWidthDiv)
@@ -116,7 +116,7 @@
       .css({'display': 'table-cell'})
       .keypress(function (event) { return event.keyCode !== 13; });
   };
-  
+
   // This callback gets called when ever the active state changes,
   // even if caused by an external call. This widget is passed as a argument.
   // This is used to turn off the pencil button in the Panel.
@@ -145,9 +145,9 @@
       (this.ModifiedCallback)(this);
     }
   };
-  //PencilWidget.prototype.Modified = function () {
+  // PencilWidget.prototype.Modified = function () {
   //  this.Shapes.Modified();
-  //};  
+  // };
 
   // Called when the state changes.
   PencilWidget.prototype.SelectionChanged = function () {
@@ -158,7 +158,7 @@
 
   // Can we delete this?
   PencilWidget.prototype.IsEmpty = function () {
-    return this.Shapes.IsEmpty()
+    return this.Shapes.IsEmpty();
   };
 
   // TODO: CLean this up.
@@ -174,10 +174,10 @@
         }
         stroke.Closed = false;
         stroke.UpdateBuffers(this.Layer.AnnotationView);
-        stroke.Modified()
+        stroke.Modified();
       }
     }
-    this.SaveDefaults();    
+    this.SaveDefaults();
   };
   PencilWidget.prototype.SetModeToClosed = function () {
     // Used for future strokes.
@@ -194,11 +194,11 @@
         stroke.Modified();
       }
     }
-    this.SaveDefaults();    
+    this.SaveDefaults();
   };
   PencilWidget.prototype.IsModeClosed = function () {
     return this.Mode === CLOSED;
-  }
+  };
 
   // Not used yet, but might be useful.
   PencilWidget.prototype.SetCreationCamera = function (cam) {
@@ -217,7 +217,7 @@
       this.State = DRAWING_UP;
       this.StateChanged();
     }
-    if (!flag &&  this.State !== INACTIVE) {
+    if (!flag && this.State !== INACTIVE) {
       this.State = INACTIVE;
       this.StateChanged();
     }
@@ -231,7 +231,7 @@
   PencilWidget.prototype.IsStateDrawingDown = function () {
     return this.State === DRAWING_DOWN;
   };
-  
+
   PencilWidget.prototype.SetStateToDrawing = function () {
     if (this.State === DRAWING_UP || this.State === DRAWING_DOWN) {
       return;
@@ -252,14 +252,14 @@
     var view = this.Layer.GetView();
     this.Shapes.Draw(view);
     this.Circle.FillColor = this.Color;
-    if (this.Layer.ZTime != undefined &&  this.Shapes.Shapes.length > 0) {
+    if (this.Layer.ZTime !== undefined && this.Shapes.Shapes.length > 0) {
       // Find the time in the list of points
       var pts = this.Shapes.Shapes[0].Points;
       for (var i = 0; i < pts.length; ++i) {
         var pt = pts[i];
         if (pt.length === 3 && pt[2] === this.Layer.ZTime) {
           this.Circle.Origin = pt;
-          //this.Circle.Draw(view);
+          // this.Circle.Draw(view);
           break;
         }
       }
@@ -294,7 +294,7 @@
     }
 
     // Shapes use [1,1,1] instead of hex color.
-    
+
     var outlineColor = this.Color;
     if (obj.outlinecolor) {
       outlineColor = SAM.ConvertColorToHex(obj.outlinecolor);
@@ -390,7 +390,7 @@
       var numStrokes = this.Shapes.GetNumberOfShapes();
       if (numStrokes > 0) {
         // Trying out cut feature
-        //this.Shapes.SetSelectedChild(numStrokes - 1, false);
+        // this.Shapes.SetSelectedChild(numStrokes - 1, false);
       }
     }
     // Start a new stroke
@@ -424,13 +424,13 @@
       if (this.IsSelected()) {
         var stroke = this.Shapes.Shapes[0];
         var p0 = stroke.Points[0];
-        var p1 = stroke.Points[stroke.Points.length-1]
+        var p1 = stroke.Points[stroke.Points.length - 1];
         var dx = pt[0] - p0[0];
         var dy = pt[1] - p0[1];
-        var dist0 = dx*dx + dy*dy;
+        var dist0 = (dx * dx) + (dy * dy);
         dx = pt[0] - p1[0];
         dy = pt[1] - p1[1];
-        var dist1 = dx*dx + dy*dy;
+        var dist1 = (dx * dx) + (dy * dy);
         pt = [pt[0], pt[1], this.Layer.ZTime];
         console.log(pt.toString());
         if (dist1 < dist0) {
@@ -448,7 +448,7 @@
         return false;
       }
     }
-    
+
     var width = this.Shapes.GetLineWidth();
     // Tolerance: 5 screen pixels.
     var minWidth = 20.0 / this.Layer.GetPixelsPerUnit();
@@ -466,8 +466,6 @@
       this.SelectionChanged();
       return selectedShape;
     }
-
-    return;
   };
 
   PencilWidget.prototype.HandleMouseDown = function () {
@@ -648,7 +646,7 @@
   // Returns true if any selection changed.
   PencilWidget.prototype.SetSelected = function (flag) {
     var ret = this.Shapes.SetSelected(flag);
-  
+
     if (flag) {
       this.SelectionChanged();
     }
@@ -657,7 +655,7 @@
       // active without being selected.
       this.SetActive(false);
     }
-    
+
     return ret;
   };
 
@@ -685,7 +683,7 @@
         shape.SetSelected(false);
       }
     }
-    return selected;;
+    return selected;
   };
 
   // Can we bind the dialog apply callback to an objects method?
@@ -714,15 +712,15 @@
 
   PencilWidget.prototype.SaveDefaults = function () {
     var hexcolor = this.Color;
-    var mode = "open";
+    var mode = 'open';
     if (this.Mode === CLOSED) {
       mode = 'closed';
     }
-    localStorage.PencilWidgetDefaults = JSON.stringify(
-      {Color: hexcolor,
-       LineWidth: this.LineWidth,
-       Mode: mode 
-      });
+    localStorage.PencilWidgetDefaults = JSON.stringify({
+      Color: hexcolor,
+      LineWidth: this.LineWidth,
+      Mode: mode
+    });
   };
 
   // ====================================================================
@@ -748,19 +746,19 @@
       stroke2.Closed = true;
       stroke2.UpdateBuffers(this.Layer.AnnotationView);
       this.Layer.EventuallyDraw();
-      console.log("first stroke not found");
+      console.log('first stroke not found');
       return;
     }
 
     // Now see if they overlap.
     if (this.CombineStrokes(stroke1, stroke2)) {
-      console.log("stroke merged");
+      console.log('stroke merged');
       // The last stroke has been merged.  Remove it.
       this.Shapes.DeleteChild(lastIdx);
       // Leave the other stroke selected.
       stroke1.UpdateBuffers(this.Layer.AnnotationView);
     } else {
-      console.log("no intersection");
+      console.log('no intersection');
       // no intersection.  Keep them both, but leave the new one selected.
       stroke1.SetSelected(false);
       if (this.Mode === CLOSED) {
@@ -791,23 +789,23 @@
       var pt1 = stroke[i];
       var intersections = this.FindSegmentLoopIntersections(pt0, pt1, loop);
       // We are looking for the first and last interestions: so sort.
-      intersections.sort(function(a, b){return a.k - b.k});
+      intersections.sort(function (a, b) { return a.k - b.k; });
       for (var j = 0; j < intersections.length; ++j) {
         var intersection = intersections[j];
         if (intersections.length > 0) {
           if (intersection0 === undefined) {
             intersection0 = intersection;
-            intersection0.StrokeIdx0 = i-1;
+            intersection0.StrokeIdx0 = i - 1;
             intersection0.StrokeIdx1 = i;
           } else {
             intersection1 = intersection;
-            intersection1.StrokeIdx0 = i-1;
+            intersection1.StrokeIdx0 = i - 1;
             intersection1.StrokeIdx1 = i;
           }
         }
       }
     }
-    
+
     // If we have two intersections, clip the loop with the stroke.
     if (intersection1 === undefined) {
       // Get rid of that extra duplicated point we added.
@@ -820,7 +818,7 @@
     croppedStroke = croppedStroke.concat(stroke.slice(intersection0.StrokeIdx1,
                                                       intersection1.StrokeIdx1));
     croppedStroke.push(intersection1.Point);
-      
+
     // Do we need to reverse the cropped stroke?
     var reverseCroppedStroke = true;
 
@@ -851,7 +849,7 @@
       croppedStroke.reverse();
     }
     polyLineLoop.Points = croppedLoop.concat(croppedStroke);
-    
+
     return true;
   };
 
@@ -870,7 +868,7 @@
     }
     return length;
   };
-  
+
   // Returns all te points that a loop intersects with a single stroke segment.
   // transform all points so p0 is origin and p1 maps to (1,0)
   // Returns an empty array if no intersection,
@@ -904,7 +902,7 @@
         var x = k0[0] + k * (k1[0] - k0[0]);
         if (x > 0 && x <= 1) {
           var newPt = [(m0[0] + k * (m1[0] - m0[0])), (m0[1] + k * (m1[1] - m0[1])), 0.0];
-          intersections.push({Point: newPt, LoopIdx0: i-1, LoopIdx1: i, k: x});
+          intersections.push({Point: newPt, LoopIdx0: i - 1, LoopIdx1: i, k: x});
         }
       }
       m0 = m1;
@@ -935,7 +933,7 @@
   // Stuff for eraser. Never finihsed.
 
   // Left turn.
-  // Returns "undefined" if zero length segment.
+  // Returns 'undefined' if zero length segment.
   PencilWidget.prototype.ComputeSegmentNormal = function (pt0, pt1) {
     var dx = pt1[0] - pt0[0];
     var dy = pt1[1] - pt0[1];
@@ -943,7 +941,7 @@
     if (mag === 0) {
       return;
     }
-    return [-dy/mag, dx/mag];
+    return [-dy / mag, dx / mag];
   };
 
   // We need a fat line. Handle one segment at a time.
@@ -951,11 +949,11 @@
   // The first and last points are the same.
   PencilWidget.prototype.SegmentToLoop = function (pt1, pt2, radius) {
     var divisions = 8;
-    loop = [];
+    var loop = [];
     // Compute a normal to the line segment.
     var n = this.ComputeSegmentNormal(pt1, pt2);
     if (!n) {
-      n = [0,1];
+      n = [0, 1];
       loop.concat(this.EndCap(pt1, n, radius, divisions));
       // Do not duplicate the point in the middle of the circle.
       loop.pop();
@@ -969,7 +967,7 @@
 
   // I did not finish this method.
   /*
-  // We need a fat line. 
+  // We need a fat line.
   // Output is an loop (array of points) around a thick line with rounded ends.
   // The first and last points of the output are the same.
   PencilWidget.prototype.StrokeToLoop = function (polyLineStroke, radius) {
@@ -977,12 +975,12 @@
     if (stroke.length === 0) {
       return;
     }
-    
+
     // Compute normals for every segment in the loop.
     // (and get rid of 0 length segments).
     var normals = []; // One fewer normals than points.
     var pt0 = stroke[0];
-    var points = [pt0]; // Only keep the non zero length segments.    
+    var points = [pt0]; // Only keep the non zero length segments.
     for (var i = 1; i < stroke.length; ++i) {
       var pt1 = points[i];
       n = this.ComputeSegmentNormal(pt0, pt1);
@@ -993,8 +991,6 @@
       }
     }
 
-    
-    
     pt0 = points[0];
     // First the endcap.
     var loop = this.EndCap(points[0], nommals[0], radius, divisions);
@@ -1004,16 +1000,8 @@
     //  .... Will have to compute partial segments.
     pt1 = points[1];
 
-
-
-
-    
     var divisions = 8;
     var dTheata = Math.PI / divisions;
-    
-  
-
-    
 
     // Compute a normal to the line segment.
     var n = [pt2[0] - pt1[0], pt2[1] - pt1[1]];
@@ -1031,10 +1019,10 @@
     return loop;
   };
   */
-  
+
   // Return half a circle.
   PencilWidget.prototype.EndCap = function (center, n, radius, divisions) {
-    points = [];
+    var points = [];
     for (var i = 0; i <= divisions; ++i) {
       var theta = Math.PI * i / divisions;
       var c = Math.cos(theta);
@@ -1069,21 +1057,21 @@
       var pt1 = stroke[i];
       var intersections = this.FindSegmentLoopIntersections(pt0, pt1, loop);
       // We are looking for the first and last interestions: so sort.
-      intersections.sort(function(a, b){return a.k - b.k});
+      intersections.sort(function (a, b) { return a.k - b.k; });
       if (intersections.length > 0) {
         if (intersection0 === undefined) {
           intersection0 = intersections[0];
-          intersection0.StrokeIdx0 = i-1;
+          intersection0.StrokeIdx0 = i - 1;
           intersection0.StrokeIdx1 = i;
         } else {
           var last = intersections.length - 1;
           intersection1 = intersections[last];
-          intersection1.StrokeIdx0 = i-1;
+          intersection1.StrokeIdx0 = i - 1;
           intersection1.StrokeIdx1 = i;
         }
       }
     }
-    
+
     // If we have two intersections, clip the loop with the stroke.
     if (intersection1 === undefined) {
       // Get rid of that extra duplicated point we added.
@@ -1096,7 +1084,7 @@
     croppedStroke = croppedStroke.concat(stroke.slice(intersection0.StrokeIdx1,
                                                       intersection1.StrokeIdx1));
     croppedStroke.push(intersection1.Point);
-      
+
     // Do we need to reverse the cropped stroke?
     var reverseCroppedStroke = true;
 
@@ -1127,7 +1115,7 @@
       croppedStroke.reverse();
     }
     polyLineLoop.Points = croppedLoop.concat(croppedStroke);
-    
+
     return true;
   };
 
@@ -1161,7 +1149,7 @@
       if (intersections.length > 0) {
         // Cut the line here.
         var part1 = stroke1.Points.slice(i);
-        var part2 = stroke1.Points.slice(0,i);
+        var part2 = stroke1.Points.slice(0, i);
         if (part1.length < 2) {
           part1 = part2;
           part2 = undefined;
@@ -1171,7 +1159,7 @@
         // The last stroke either gets moved to a new widget or deleted.
         this.Shapes.DeleteChild(lastIdx);
 
-        if (part2) {        
+        if (part2) {
           stroke2.Points = part2;
           stroke2.UpdateBuffers(this.Layer.AnnotationView);
           // Problems with multiple strokes in one widget.  Make a new widget.
@@ -1189,6 +1177,6 @@
     this.Layer.EventuallyDraw();
     this.SelectionChanged();
   };
-  
+
   SAM.PencilWidget = PencilWidget;
 })();

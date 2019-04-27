@@ -1,6 +1,5 @@
 window.SA = window.SA || {};
 
-
 (function () {
   'use strict';
 
@@ -130,7 +129,7 @@ window.SA = window.SA || {};
     } else if (event.which === 3) {
       event.which = 2;
     }
-    console.log("firefox which = " + event.which);
+    console.log('firefox which = ' + event.which);
   };
 
   SA.Debug = function (msg) {

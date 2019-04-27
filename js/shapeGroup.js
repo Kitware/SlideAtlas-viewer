@@ -17,7 +17,7 @@
       }
     }
   };
-  
+
   ShapeGroup.prototype.GetBounds = function () {
     return this.Bounds;
   };

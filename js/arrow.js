@@ -115,37 +115,39 @@
   // Polar is a pain.
   // This positions the tail a point in viewer coordinates.
   // This only works for world coordinat system, constant size, constant orientation.
-  Arrow.prototype.SetTailViewer = function(x, y, cam) {
+  Arrow.prototype.SetTailViewer = function (x, y, cam) {
+    var dx, dy;
     if (this.FixedSize) {
       var tipViewer = cam.ConvertPointWorldToViewer(this.Origin[0], this.Origin[1]);
-      var dx = x - tipViewer[0];
-      var dy = y - tipViewer[1];
+      dx = x - tipViewer[0];
+      dy = y - tipViewer[1];
     } else {
       var tailWorld = cam.ConvertPointViewerToWorld(x, y);
-      var dx = tailWorld[0] - this.Origin[0];
-      var dy = tailWorld[1] - this.Origin[1];
+      dx = tailWorld[0] - this.Origin[0];
+      dy = tailWorld[1] - this.Origin[1];
     }
     this.Length = Math.sqrt(dx * dx + dy * dy);
     this.Orientation = -Math.atan2(dy, dx) * 180.0 / Math.PI;
   };
-  
+
   // Polar is a pain.
   // This positions the tail a point in viewer coordinates.
   // This only works for world coordinat system, constant size, constant orientation.
-  Arrow.prototype.GetTailViewer = function(cam) {
+  Arrow.prototype.GetTailViewer = function (cam) {
     var theta = -this.Orientation * Math.PI / 180.0;
+    var x, y;
     if (this.FixedSize) {
       var tipViewer = cam.ConvertPointWorldToViewer(this.Origin[0], this.Origin[1]);
-      var x = tipViewer[0] + this.Length * Math.cos(theta);
-      var y = tipViewer[1] + this.Length * Math.sin(theta);
+      x = tipViewer[0] + this.Length * Math.cos(theta);
+      y = tipViewer[1] + this.Length * Math.sin(theta);
       return [x, y];
     } else {
-      var x = origin[0] + this.Length * Math.cos(theta);
-      var y = origin[1] + this.Length * Math.sin(theta);
+      x = this.Origin[0] + this.Length * Math.cos(theta);
+      y = this.Origin[1] + this.Length * Math.sin(theta);
       var tailViewer = cam.ConvertPointWorldToViewer(x, y);
       return tailViewer;
     }
   };
-  
+
   SAM.Arrow = Arrow;
 })();

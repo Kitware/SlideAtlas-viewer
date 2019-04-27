@@ -1,17 +1,14 @@
 // ==============================================================================
-
-//The magic code to add show/hide custom event triggers
+// The magic code to add show/hide custom event triggers
 (function ($) {
-	  $.each(['show', 'hide'], function (i, ev) {
-	    var el = $.fn[ev];
-	    $.fn[ev] = function () {
-	      this.trigger(ev);
-	      return el.apply(this, arguments);
-	    };
-	  });
-	})(jQuery);
-
-
+  $.each(['show', 'hide'], function (i, ev) {
+    var el = $.fn[ev];
+    $.fn[ev] = function () {
+      this.trigger(ev);
+      return el.apply(this, arguments);
+    };
+  });
+})(jQuery);
 
 (function () {
   'use strict';
@@ -173,11 +170,11 @@
                   'z-index': '4'});
     }
   }
-  
+
   Viewer.prototype.GetParentDiv = function () {
     return this.Div;
   };
-  
+
   Viewer.prototype.GetParent = function () {
     return this.Parent;
   };
@@ -187,8 +184,8 @@
       this.ScaleWidget = new SAM.ScaleWidget();
     }
   };
-  
-  // I need to turn the bindins on and off, to make children "contentEditable".
+
+  // I need to turn the bindins on and off, to make children 'contentEditable'.
   Viewer.prototype.InteractionOn = function () {
     var self = this;
     // var can = this.MainView.Parent;
@@ -196,7 +193,7 @@
     can.on(
       'mousedown.viewer',
       function (event) {
-        //SA.FirefoxWhich(event);
+        // SA.FirefoxWhich(event);
         self.FirefoxWhich = event.which;
         return self.HandleMouseDown(event);
       });
@@ -206,7 +203,7 @@
         // So key events go the the right viewer.
         this.focus();
         // Firefox does not define offsetX ...?
-        //SA.FirefoxWhich(event);
+        // SA.FirefoxWhich(event);
         // Firefox does not set which for mouse move events.
         event.which = self.FirefoxWhich;
         return self.HandleMouseMove(event);
@@ -215,7 +212,7 @@
     $(document.body).on(
       'mouseup.viewer',
       function (event) {
-        //SA.FirefoxWhich(event);
+        // SA.FirefoxWhich(event);
         self.FirefoxOverviewWhich = 0;
         self.FirefoxWhich = 0;
         if (event.which === undefined) {
@@ -252,7 +249,7 @@
     can.on(
       'keydown.viewer',
       function (event) {
-        // alert("keydown");
+        // alert('keydown');
         return self.HandleKeyDown(event);
       });
     can.on(
@@ -285,7 +282,7 @@
       can.on(
         'mousemove.viewer',
         function (event) {
-          //SA.FirefoxWhich(event);
+          // SA.FirefoxWhich(event);
           event.which = self.FirefoxOverviewWhich;
           return self.HandleOverViewMouseMove(event);
         });
@@ -297,7 +294,7 @@
     }
   };
 
-  // I need to turn the bindins on and off, to make children "contentEditable".
+  // I need to turn the bindins on and off, to make children 'contentEditable'.
   Viewer.prototype.InteractionOff = function () {
     // Options:
     // 1: Just use off to get rid of all bindings. This will remove outside bindings too.
@@ -689,18 +686,20 @@
                                SA.ImagePathUrl + 'share.png',
                                'shareTab');
     this.ShareTab.Div
-      .css({'box-sizing': 'border-box',
-            'position': 'absolute',
-            'bottom': '0px',
-            'right': '47px',
-            'z-index': '49'});
+      .css({
+        'box-sizing': 'border-box',
+        'position': 'absolute',
+        'bottom': '0px',
+        'right': '47px',
+        'z-index': '49'});
     this.ShareTab.Panel
-      .css({'box-sizing': 'border-box',
-            'left': '-300px',
-            'width': '380px',
-            'z-index': '500',
-            //'height': '45px',
-            'padding': '0 2px'});
+      .css({
+        'box-sizing': 'border-box',
+        'left': '-300px',
+        'width': '380px',
+        'z-index': '500',
+        // 'height': '45px',
+        'padding': '0 2px'});
     var self = this;
     // TODO: Separate the share update from EndInteraction.
     this.ShareTab.Panel.on('show', function () {
@@ -712,62 +711,61 @@
       .addClass('sa-view-share-text')
       .html('')
       .attr('contenteditable', 'true')
-      .css({'tabindex': '1',
-            'z-index': '501',
-            'width': '100%',
-            '-webkit-user-select': 'all',
-            'user-select' : 'all'});
+      .css({
+        'tabindex': '1',
+        'z-index': '501',
+        'width': '100%',
+        '-webkit-user-select': 'all',
+        'user-select': 'all'});
 
-
-    
     // Put the zoom bottons in a tab.
     this.ZoomTab = new SA.Tab(this.GetDiv(),
                                SA.ImagePathUrl + 'mag.png',
                                'zoomTab');
     this.ZoomTab.Div
-            .css({'box-sizing': 'border-box',
-              'position': 'absolute',
-              'bottom': '0px',
-              'right': '7px',
-              'z-index': '49'});
+      .css({
+        'box-sizing': 'border-box',
+        'position': 'absolute',
+        'bottom': '0px',
+        'right': '7px',
+        'z-index': '49'});
     // .prop('title', 'Zoom scroll');
     this.ZoomTab.Panel
-            .addClass('sa-view-zoom-panel');
+      .addClass('sa-view-zoom-panel');
     // Put the magnification factor inside the magnify glass icon.
     this.ZoomDisplay = $('<div>')
-            .appendTo(this.ZoomTab.Div)
-            .addClass('sa-view-zoom-text')
-            .html('');
+      .appendTo(this.ZoomTab.Div)
+      .addClass('sa-view-zoom-text')
+      .html('');
 
     // Place the zoom in / out buttons.
     // Todo: Make the button become more opaque when pressed.
     // Associate with viewer (How???).
     // Place properly (div per viewer?) (viewer.SetViewport also places buttons).
-    var self = this;
 
     this.ZoomDiv = $('<div>')
-            .appendTo(this.ZoomTab.Panel)
-            .addClass('sa-view-zoom-panel-div');
+      .appendTo(this.ZoomTab.Panel)
+      .addClass('sa-view-zoom-panel-div');
     this.ZoomInButton = $('<img>')
-            .appendTo(this.ZoomDiv)
-            .addClass('sa-view-zoom-button sa-zoom-in')
-            .attr('type', 'image')
-            .attr('src', SA.ImagePathUrl + 'zoomin2.png')
-            .on('click touchstart', function () { self.AnimateZoom(0.5); })
-            .attr('draggable', 'false')
-            .on('dragstart', function () {
-              return false;
-            });
+      .appendTo(this.ZoomDiv)
+      .addClass('sa-view-zoom-button sa-zoom-in')
+      .attr('type', 'image')
+      .attr('src', SA.ImagePathUrl + 'zoomin2.png')
+      .on('click touchstart', function () { self.AnimateZoom(0.5); })
+      .attr('draggable', 'false')
+      .on('dragstart', function () {
+        return false;
+      });
 
     this.ZoomOutButton = $('<img>').appendTo(this.ZoomDiv)
-            .addClass('sa-view-zoom-button sa-zoom-out')
-            .attr('type', 'image')
-            .attr('src', SA.ImagePathUrl + 'zoomout2.png')
-            .on('click touchstart', function () { self.AnimateZoom(2.0); })
-            .attr('draggable', 'false')
-            .on('dragstart', function () {
-              return false;
-            });
+      .addClass('sa-view-zoom-button sa-zoom-out')
+      .attr('type', 'image')
+      .attr('src', SA.ImagePathUrl + 'zoomout2.png')
+      .on('click touchstart', function () { self.AnimateZoom(2.0); })
+      .attr('draggable', 'false')
+      .on('dragstart', function () {
+        return false;
+      });
 
     this.ZoomInButton.addClass('sa-active');
     this.ZoomOutButton.addClass('sa-active');
@@ -843,17 +841,17 @@
 
     // this.CancelLargeImage = false;
     SA.AddFinishedLoadingCallback(
-            function () {
-              self.SaveLargeImage2(view, fileName,
-                                              width, height, stack,
-                                              finishedCallback);
-            }
-        );
+      function () {
+        self.SaveLargeImage2(view, fileName,
+                             width, height, stack,
+                             finishedCallback);
+      }
+    );
   };
 
   Viewer.prototype.SaveLargeImage2 = function (view, fileName,
-                                                width, height, stack,
-                                                finishedCallback) {
+                                               width, height, stack,
+                                               finishedCallback) {
     var sectionFileName = fileName;
     var note;
     if (stack) {
@@ -863,8 +861,8 @@
         sectionFileName = fileName + SA.ZERO_PAD(note.StartIndex, 4) + '.png';
       } else {
         sectionFileName = fileName.substring(0, idx) +
-                    SA.ZERO_PAD(note.StartIndex, 4) +
-                    fileName.substring(idx, fileName.length);
+          SA.ZERO_PAD(note.StartIndex, 4) +
+          fileName.substring(idx, fileName.length);
       }
     }
     console.log(sectionFileName + ' ' + SA.LoadQueue.length + ' ' + SA.LoadingCount);
@@ -890,7 +888,7 @@
         var self = this;
         setTimeout(function () {
           self.SaveLargeImage(fileName, width, height, stack,
-                                        finishedCallback);
+                              finishedCallback);
         }, 1000);
         return;
       }
@@ -903,13 +901,13 @@
   Viewer.prototype.EventuallySaveImage = function (fileName, finishedCallback) {
     var self = this;
     SA.AddFinishedLoadingCallback(
-            function () {
-              self.SaveImage(fileName);
-              if (finishedCallback) {
-                finishedCallback();
-              }
-            }
-        );
+      function () {
+        self.SaveImage(fileName);
+        if (finishedCallback) {
+          finishedCallback();
+        }
+      }
+    );
     this.EventuallyRender(false);
   };
 
@@ -919,10 +917,10 @@
   Viewer.prototype.SaveStackImages = function (fileNameRoot) {
     var self = this;
     SA.AddFinishedLoadingCallback(
-            function () {
-              self.SaveStackImage(fileNameRoot);
-            }
-        );
+      function () {
+        self.SaveStackImage(fileNameRoot);
+      }
+    );
     this.EventuallyRender(false);
   };
 
@@ -935,21 +933,21 @@
     if (note.StartIndex < note.ViewerRecords.length - 1) {
       SA.display.NavigationWidget.NextNote();
       SA.AddFinishedLoadingCallback(
-                function () {
-                  self.SaveStackImage(fileNameRoot);
-                }
-            );
+        function () {
+          self.SaveStackImage(fileNameRoot);
+        }
+      );
       this.EventuallyRender(false);
     }
   };
-    // -----
+  // -----
 
   Viewer.prototype.SetOverViewBounds = function (bounds) {
     this.OverViewBounds = bounds;
     if (this.OverView) {
       // With the rotating overview, the overview camera
       // never changes. Maybe this should be set in
-      // "UpdateCamera".
+      // 'UpdateCamera'.
       this.OverView.Camera.SetHeight(bounds[3] - bounds[2]);
       this.OverView.Camera.SetWorldFocalPoint([
         0.5 * (bounds[0] + bounds[1]),
@@ -983,7 +981,7 @@
         fp[1] - halfHeight, fp[1] + halfHeight];
       return this.OverViewBounds;
     }
-        // This method is called once too soon.  There is no image, and mobile devices have no overview.
+    // This method is called once too soon.  There is no image, and mobile devices have no overview.
     return [0, 10000, 0, 10000];
   };
 
@@ -1034,7 +1032,7 @@
       }
 
       this.CopyrightWrapper
-                .html(cache.Image.copyright);
+        .html(cache.Image.copyright);
     }
 
     this.MainView.SetCache(cache);
@@ -1043,7 +1041,8 @@
       if (cache) {
         var bds = cache.GetBounds();
         if (bds) {
-          this.OverView.Camera.SetWorldFocalPoint([(bds[0] + bds[1]) / 2,
+          this.OverView.Camera.SetWorldFocalPoint([
+            (bds[0] + bds[1]) / 2,
             (bds[2] + bds[3]) / 2]);
           var height = (bds[3] - bds[2]);
           // See if the view is constrained by the width.
@@ -1072,7 +1071,7 @@
   Viewer.prototype.SetViewport = function (viewport) {
     // TODO: Get rid of this positioning hack.
     // Caller should be positioning the parent.
-    // The whole "viewport" concept needs to be eliminated.
+    // The whole 'viewport' concept needs to be eliminated.
     // this.MainView.SetViewport(viewport, this.Parent);
     // this.MainView.Camera.ComputeMatrix();
 
@@ -1166,7 +1165,7 @@
     this.TranslateTarget[0] = center[0];
     this.TranslateTarget[1] = center[1];
     this.RollTarget = rotation;
-    
+
     this.UpdateCamera();
     this.EventuallyRender(true);
   };
@@ -1282,7 +1281,7 @@
     // This just changes the camera based on the current time.
     this.Animate();
 
-    // console.time("ViewerDraw");
+    // console.time('ViewerDraw');
 
     // connectome
     if (!this.MainView || !this.MainView.Section) {
@@ -1327,7 +1326,7 @@
       // But we still need the scale widget for the grid widget.
       this.ScaleWidget.Draw(this.MainView);
     }
-    
+
     // TODO: Drawing correlations should not be embedded in a single
     // viewer. Maybe dualViewWidget or a new stack object should handle it.
 
@@ -1342,7 +1341,7 @@
 
     // Here to trigger SA.FinishedLoadingCallbacks
     SA.LoadQueueUpdate();
-    // console.timeEnd("ViewerDraw");
+    // console.timeEnd('ViewerDraw');
     this.Drawing = false;
   };
 
@@ -1399,7 +1398,7 @@
         this.OverView.Camera.SetWorldRoll(0);
         this.OverView.Camera.ComputeMatrix();
       }
-      this.TriggerEndInteraction()
+      this.TriggerEndInteraction();
     } else {
       // Interpolate
       var currentHeight = this.MainView.Camera.GetHeight();
@@ -1407,16 +1406,16 @@
       var currentRoll = this.MainView.Camera.GetWorldRoll();
 
       this.MainView.Camera.SetHeight(
-                currentHeight + (this.ZoomTarget - currentHeight) *
-                    (timeNow - this.AnimateLast) / this.AnimateDuration);
+        currentHeight + (this.ZoomTarget - currentHeight) *
+          (timeNow - this.AnimateLast) / this.AnimateDuration);
       this.MainView.Camera.SetWorldRoll(
-                currentRoll + (this.RollTarget - currentRoll) *
-                (timeNow - this.AnimateLast) / this.AnimateDuration);
+        currentRoll + (this.RollTarget - currentRoll) *
+          (timeNow - this.AnimateLast) / this.AnimateDuration);
       this.MainView.Camera.SetWorldFocalPoint(
         [currentCenter[0] + (this.TranslateTarget[0] - currentCenter[0]) *
-                 (timeNow - this.AnimateLast) / this.AnimateDuration,
+         (timeNow - this.AnimateLast) / this.AnimateDuration,
           currentCenter[1] + (this.TranslateTarget[1] - currentCenter[1]) *
-                 (timeNow - this.AnimateLast) / this.AnimateDuration]);
+         (timeNow - this.AnimateLast) / this.AnimateDuration]);
       this.ConstrainCamera();
       if (this.OverView) {
         roll = this.MainView.Camera.GetWorldRoll();
@@ -1649,7 +1648,7 @@
       SA.MOBILE_ANNOTATION_WIDGET.ToggleVisibility();
     }
     */
-    
+
     // Let the annotation layers have first dibs on processing the event.
     for (var i = 0; i < this.Layers.length; ++i) {
       var layer = this.Layers[i];
@@ -1880,7 +1879,7 @@
 
   Viewer.prototype.HandleTouchEnd = function (event) {
     if (!this.InteractionEnabled) { return true; }
-    
+
     var date = new Date();
     var dTime = date.getTime() - this.StartTouchTime;
     if (dTime < 200.0) { // 200 milliseconds
@@ -1889,7 +1888,7 @@
       this.InteractionState = INTERACTION_NONE;
       return this.HandleMouseClick(event);
     }
-    
+
     // Let the annotation layers have first dibs on processing the event.
     for (var i = 0; i < this.Layers.length; ++i) {
       var layer = this.Layers[i];
@@ -1992,7 +1991,7 @@
       this.MomentumTimerId = 0;
       if (this.InteractionState !== INTERACTION_NONE) {
         this.InteractionState = INTERACTION_NONE;
-        this.TriggerEndInteraction()
+        this.TriggerEndInteraction();
       }
     } else {
       this.MomentumTimerId = window.requestAnimationFrame(function () { self.HandleMomentum(); });
@@ -2056,7 +2055,6 @@
     }
     return true;
   };
-
 
   Viewer.prototype.HandleMouseDown = function (event) {
     this.Shift = event.shiftKey;
@@ -2171,7 +2169,7 @@
 
     if (this.InteractionState !== INTERACTION_NONE) {
       this.InteractionState = INTERACTION_NONE;
-      this.TriggerEndInteraction()
+      this.TriggerEndInteraction();
     }
 
     return false; // trying to keep the browser from selecting images
@@ -2189,7 +2187,7 @@
 
   // Relative to the div receiving the event. I do not know why this is so hard.
   // The event has postiion relative to the local child, or top window.
-  // I might consider adding a class to divs that are "transparent" to events.
+  // I might consider adding a class to divs that are 'transparent' to events.
   Viewer.prototype.GetMousePosition = function (event) {
     // Possibly a child.
     var pt = this.GetEventOffset(event);
@@ -2367,12 +2365,12 @@
     return false;
   };
 
-  // returns false if the event was "consumed" (browser convention).
+  // returns false if the event was 'consumed' (browser convention).
   // Returns true if nothing was done with the event.
   Viewer.prototype.HandleKeyDown = function (event) {
     SAM.ShiftKey = event.shiftKey;
     SAM.ControlKey = event.ctrlKey;
-    
+
     if (!this.InteractionEnabled) { return true; }
 
     // Key events are not going first to layers like mouse events.
@@ -2494,7 +2492,7 @@
     return true;
   };
 
-  // returns false if the event was "consumed" (browser convention).
+  // returns false if the event was 'consumed' (browser convention).
   // Returns true if nothing was done with the event.
   Viewer.prototype.HandleKeyUp = function (event) {
     SAM.ShiftKey = event.shiftKey;
@@ -2514,11 +2512,11 @@
     // Copy paste error?
     // Key events are not going first to layers like mouse events.
     // Give layers a change to process them.
-    //for (i = 0; i < this.Layers.length; ++i) {
+    // for (i = 0; i < this.Layers.length; ++i) {
     //  if (this.Layers[i].HandleKeyUp && !this.Layers[i].HandleKeyUp(event)) {
     //    return false;
     //  }
-    //}
+    // }
     return true;
   };
 
@@ -2791,7 +2789,6 @@
     return viewLayer;
   };
 
-  
   Viewer.prototype.TriggerEndInteraction = function () {
     this.UpdateZoomGui();
 
@@ -2802,20 +2799,21 @@
 
     // Update the url to the current view.
     var cam = this.GetCamera();
-    var fp = cam.GetWorldFocalPoint()
+    var fp = cam.GetWorldFocalPoint();
     var width = Math.round(cam.GetWidth());
     var height = Math.round(cam.GetHeight());
-    var left = Math.round(fp[0] - width/2)
-    var top = Math.round(fp[1] - height/2)
+    var left = Math.round(fp[0] - width / 2);
+    var top = Math.round(fp[1] - height / 2);
     var imageId = this.GetCache().Image._id;
-    var url = window.location.href
+    var url = window.location.href;
     var end = url.indexOf('item/');
-    url = url.substr(0,end+4);
-    url = url + "#item/" + imageId + "?bounds=" + left + "," + (left+width) + "," + top + "," + (top+width);
+    url = url.substr(0, end + 4);
+    url = url + '#item/' + imageId + '?bounds=' + left + ',' + (left + width) +
+      ',' + top + ',' + (top + width);
 
-    this.ShareDisplay.text(url)
+    this.ShareDisplay.text(url);
   };
-  
+
   // ------------------------------------------------------
 
   SA.Viewer = Viewer;

@@ -10,7 +10,7 @@
   // I can probably merge this state with drag. (mouse up vs down though)
   var NEW_HIDDEN = 0;
   var NEW_DRAG = 1;
-  var NEW_DRAG_RADIUS = 2
+  var NEW_DRAG_RADIUS = 2;
   var DRAG = 3; // The whole circle is being dragged.
   var DRAG_RADIUS = 4;
   var INACTIVE = 5; // Not responding to events at all
@@ -21,7 +21,7 @@
   var CIRCUMFERENCE = 1;
   var INSIDE = 2;
   var CENTER = 3;
-  
+
   function CircleWidget (layer) {
     this.Layer = layer;
 
@@ -29,7 +29,7 @@
     if (localStorage.CircleWidgetDefaults) {
       this.Defaults = JSON.parse(localStorage.CircleWidgetDefaults);
     }
-    
+
     // This method gets called if anything is added, deleted or moved.
     this.ModifiedCallback = undefined;
     // This method gets called if the active state of this widget turns on or off.
@@ -37,7 +37,6 @@
     this.StateChangeCallback = undefined;
     // This is used by the annotationPanel to transfer draing mode to a new selected widget.
     this.SelectedCallback = undefined;
-
 
     // Keep track of annotation created by students without edit
     // permission.
@@ -70,21 +69,21 @@
       if (this.Defaults.Color) {
         this.Circle.OutlineColor = this.Defaults.Color;
       }
-      if (this.Defaults.LineWidth != undefined) {
+      if (this.Defaults.LineWidth !== undefined) {
         // Only use the default if it is reasonable.
-        if (this.Defaults.LineWidth == 0) {
+        if (this.Defaults.LineWidth === 0) {
           this.Circle.LineWidth = this.Defaults.LineWidth;
         } else {
           var tmp = this.Circle.LineWidth / this.Defaults.LineWidth;
-          if (Math.max(tmp, 1/tmp) < 10) {
+          if (Math.max(tmp, 1 / tmp) < 10) {
             this.Circle.LineWidth = this.Defaults.LineWidth;
           }
         }
       }
       if (this.Defaults.Radius) {
         // Only use the default if it is reasonable.
-        var tmp = this.Circle.Radius / this.Defaults.Radius;
-        if (Math.max(tmp, 1/tmp) < 10) {
+        tmp = this.Circle.Radius / this.Defaults.Radius;
+        if (Math.max(tmp, 1 / tmp) < 10) {
           this.Circle.Radius = this.Defaults.Radius;
         }
       }
@@ -97,9 +96,9 @@
 
     // Cross hairs is to show an active center.
     // this.Cross = new SAM.CrossHairs();
-    //this.Cross.SetOutlineColor([1.0, 1.0, 0.0]);
-    //this.Cross.length = 10;
-    //this.Cross.LineWidth = 1;
+    // this.Cross.SetOutlineColor([1.0, 1.0, 0.0]);
+    // this.Cross.length = 10;
+    // this.Cross.LineWidth = 1;
 
     this.Cross = new SAM.Circle();
     this.Cross.Origin = [0, 0];
@@ -107,17 +106,16 @@
     this.Cross.SetOutlineColor([0.0, 0.0, 0.0]);
     this.Cross.LineWidth = 1;
     this.Cross.Radius = 10;
-    this.Cross.PositionCoordinateSystem = 1; //Shape.VIEWER;
+    this.Cross.PositionCoordinateSystem = 1; // Shape.VIEWER;
 
     this.Cross = new SAM.Circle();
-    this.Cross.SetFillColor([1,1,0]);
+    this.Cross.SetFillColor([1, 1, 0]);
     this.Cross.SetOutlineColor([0.0, 0.0, 0.0]);
     this.Cross.Radius = 5;
     this.Cross.LineWidth = 1;
     this.Cross.PositionCoordinateSystem = 1;
-      
-    this.State = INACTIVE;
 
+    this.State = INACTIVE;
   }
 
   CircleWidget.prototype.SetModifiedCallback = function (callback) {
@@ -150,9 +148,8 @@
   // Sets state to "NEW" (dragging without mouse pressed
   CircleWidget.prototype.SetStateToDrawing = function () {
     this.State = NEW_HIDDEN;
-    return;
   };
-  
+
   // Called when the state changes.
   CircleWidget.prototype.Modified = function () {
     this.SaveDefaults();
@@ -184,7 +181,7 @@
     var radius = this.Circle.Radius;
     var cam = this.Layer.GetCamera();
     var p = cam.ConvertPointWorldToViewer(this.Circle.Origin[0], this.Circle.Origin[1]);
-    
+
     if (selection.ViewerPointInSelection(p[0] - radius, p[1] - radius) &&
         selection.ViewerPointInSelection(p[0] - radius, p[1] + radius) &&
         selection.ViewerPointInSelection(p[0] + radius, p[1] - radius) &&
@@ -206,7 +203,7 @@
     }
     return this.Circle.IsEmpty();
   };
-  
+
   CircleWidget.prototype.GetActive = function () {
     return this.State !== INACTIVE;
   };
@@ -219,7 +216,7 @@
       this.Layer.GetParent().css({'cursor': 'move'});
       this.StateChanged();
     }
-    if (!flag &&  this.State !== INACTIVE) {
+    if (!flag && this.State !== INACTIVE) {
       this.State = INACTIVE;
       this.StateChanged();
     }
@@ -235,7 +232,7 @@
   // Default to the whole widget selected.
   CircleWidget.prototype.SetSelected = function (flag) {
     this.Circle.SetSelected(flag);
-  
+
     if (flag && this.SelectedCallback) {
       (this.SelectedCallback)(this);
     }
@@ -309,7 +306,7 @@
     }
     this.WidgetPropertiesToDialog();
     var self = this;
-    this.Dialog.SetApplyCallback(function () { self.DialogApplyCallback();});
+    this.Dialog.SetApplyCallback(function () { self.DialogApplyCallback(); });
     this.Dialog.SetCloseCallback(function () { self.DialogCloseCallback(); });
     this.Dialog.Show(true);
     this.State = DIALOG;
@@ -326,7 +323,7 @@
     this.Layer.EventuallyDraw();
     this.SetActive(false);
   };
-  
+
   CircleWidget.prototype.DialogCloseCallback = function () {
     this.SetActive(false);
     this.Layer.EventuallyDraw();
@@ -358,7 +355,7 @@
       }
     }
     this.Dialog.Area.text(areaString);
-    
+
     // Get the color
     var hexcolor = SAM.ConvertColorToHex(this.Dialog.ColorInput.val());
     if (hexcolor !== this.Circle.OutlineColor) {
@@ -377,17 +374,17 @@
       this.Modified();
       this.Circle.UpdateBuffers(this.Layer.AnnotationView);
     }
-  };  
+  };
 
   CircleWidget.prototype.SaveDefaults = function () {
     // Save values in local storage as defaults for next time.
     this.Defaults.Color = this.Circle.GetOutlineColor();
     this.Defaults.LineWidth = this.Circle.LineWidth;
     this.Defaults.Radius = this.Circle.Radius;
-    
+
     localStorage.CircleWidgetDefaults = JSON.stringify(this.Defaults);
   };
-  
+
   CircleWidget.prototype.Draw = function () {
     if (this.State !== NEW_HIDDEN && this.Circle) {
       var view = this.Layer.GetView();
@@ -396,7 +393,7 @@
         var origin = this.Circle.Origin;
         var cam = this.Layer.GetCamera();
         var pt = cam.ConvertPointWorldToViewer(origin[0], origin[1]);
-        this.Cross.Origin = [pt[0], pt[1]]; 
+        this.Cross.Origin = [pt[0], pt[1]];
         this.Cross.Draw(view);
       }
     }
@@ -451,7 +448,7 @@
       this.CreationCamera = obj.CreationCamera;
     }
   };
-  
+
   CircleWidget.prototype.HandleKeyDown = function (keyCode) {
     if (this.State === INACTIVE) {
       return true;
@@ -471,7 +468,7 @@
       this.SetActive(false);
       return false;
     }
-    
+
     // Copy
     if (event.keyCode === 67 && event.ctrlKey) {
       // control-c for copy
@@ -543,7 +540,7 @@
       // Add a ShowProperties method to the widget. (With the magic of javascript).
       this.ShowPropertiesDialog();
     }
-    
+
     return false;
   };
 
@@ -703,23 +700,23 @@
     var r = this.Circle.Radius;
     var lineWidth = this.Circle.LineWidth;
     // Do the comparison in view coordinates.
-    if ( ! this.FixedSize) {
+    if (!this.FixedSize) {
       var cam = this.Layer.GetCamera();
       c = cam.ConvertPointWorldToViewer(c[0], c[1]);
       r = cam.ConvertScaleWorldToViewer(r);
       lineWidth = cam.ConvertScaleWorldToViewer(lineWidth);
     }
-    
-    var dx = pt[0] - c[0]
-    var dy = pt[1] - c[1]
+
+    var dx = pt[0] - c[0];
+    var dy = pt[1] - c[1];
 
     var d = Math.sqrt(dx * dx + dy * dy);
 
-    if (Math.abs(d-r) < this.Tolerance + lineWidth) {
+    if (Math.abs(d - r) < this.Tolerance + lineWidth) {
       return CIRCUMFERENCE;
     }
-    if (d < (2*this.Tolerance + lineWidth)) {
-        return CENTER;
+    if (d < (2 * this.Tolerance + lineWidth)) {
+      return CENTER;
     }
     if (d < r) {
       return INSIDE;

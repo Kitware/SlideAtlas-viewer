@@ -16,7 +16,6 @@
   // Get rid of the buffers?
   // }
 
-  
   // A single point is considered empty.
   Polyline.prototype.IsEmpty = function () {
     if (this.Points.length < 2) {
@@ -32,7 +31,7 @@
     }
     return false;
   };
-  
+
   Polyline.prototype.SetLineWidth = function (lineWidth) {
     this.LineWidth = lineWidth;
   };
@@ -509,7 +508,7 @@
 
   // Polyline.prototype.Draw = function (view) {
   //  SAM.Shape.prototype.Draw.call(this, view);
-  //};
-  
+  // };
+
   SAM.Polyline = Polyline;
 })();

@@ -45,8 +45,8 @@
 
   RectSelectWidget.prototype.IsEmpty = function () {
     return true;
-  }
-  
+  };
+
   // Starts the process of dragging a rectangle (just changes the cursor.
   RectSelectWidget.prototype.SetActive = function (flag) {
     if (!flag && this.State !== INACTIVE) {

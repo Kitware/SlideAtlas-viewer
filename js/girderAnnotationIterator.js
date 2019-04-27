@@ -12,15 +12,15 @@
 
   // action states
   var KEY_UP = 0;
-  var KEY_DOWN = 1;
-  var KEY_USED_ADVANCE = 2;
-  var KEY_USED_NO_ADVANCE = 3;
+  // var KEY_DOWN = 1;
+  // var KEY_USED_ADVANCE = 2;
+  // var KEY_USED_NO_ADVANCE = 3;
 
   var GirderAnnotationIterator = function (parent, viewer, itemId, classes) {
     // when iterating, only show the current rect.
     this.HighlightedRect = new SAM.Rect();
-    this.HighlightedRect.OutlineColor = [1,1,0];
-    
+    this.HighlightedRect.OutlineColor = [1, 1, 0];
+
     // quick hack to add arrows.
     this.ArrowMode = true;
 
@@ -33,9 +33,9 @@
     if (this.ArrowMode) {
       this.ArrowLayer = new SAM.AnnotationLayer(this.ViewerParent);
       this.ArrowLayer.SetCamera(viewer.GetCamera());
-      this.LoadItemArrows(itemId, "plane-nose", this.ArrowLayer);
+      this.LoadItemArrows(itemId, 'plane-nose', this.ArrowLayer);
     }
-    
+
     this.Viewer = viewer;
     this.ActiveClassIndex = 0;
     this.ItemId = itemId;
@@ -54,7 +54,6 @@
     this.SetActiveClassIndex(0);
   };
 
-
   // Since we have to make forwarding methods, just use the layer as a helper object.
   GirderAnnotationIterator.prototype.EventuallyDraw = function () {
     if (!this.RenderPending) {
@@ -66,23 +65,23 @@
           self.Draw();
         });
     }
-    //this.Layer.EventuallyDraw();
+    // this.Layer.EventuallyDraw();
   };
   GirderAnnotationIterator.prototype.GetView = function () {
     return this.Layer.GetView();
-  };  
+  };
   GirderAnnotationIterator.prototype.GetCamera = function () {
     return this.Layer.GetCamera();
   };
   GirderAnnotationIterator.prototype.Remove = function () {
     // We are moving to the next slide in the folder and this object is being
     // discarded. Save the arrows.
-    //this.Save();
+    // this.Save();
 
     this.LayerControl.remove();
     this.InstructionsHeading.remove();
     this.InstructionsUL.remove();
-    
+
     this.Layer.Remove();
     if (this.ArrowLayer) {
       this.ArrowLayer.Remove();
@@ -95,7 +94,7 @@
       this.ArrowLayer.UpdateSize();
     }
   };
-  
+
   GirderAnnotationIterator.prototype.CreateClasses = function (classNames) {
     var numClasses = classNames.length;
     this.Classes = [];
@@ -286,7 +285,7 @@
   // TODO: Clean this up.  Probably put the widgets in the layer.
   GirderAnnotationIterator.prototype.Draw = function () {
     this.Layer.Draw();
-    var view = this.Layer.GetView();    
+    var view = this.Layer.GetView();
     this.HighlightedRect.Draw(view);
     if (this.ArrowLayer) {
       this.ArrowLayer.Draw();
@@ -305,7 +304,7 @@
     }
     return true;
   };
-  
+
   GirderAnnotationIterator.prototype.HandleMouseUp = function (event) {
     if (this.ArrowLayer) {
       return this.ArrowLayer.HandleMouseUp(event);
@@ -327,12 +326,12 @@
     if (selectedWidget) {
       selectedWidget.SetActive(true);
       this.SelectedWidget = selectedWidget;
-      return false
-    }    
+      return false;
+    }
     this.SelectedWidget = undefined;
     return true;
   };
-  
+
   // Highlight on hover.
   GirderAnnotationIterator.prototype.HandleMouseMove = function (event) {
     if (this.ArrowLayer) {
@@ -365,7 +364,7 @@
   GirderAnnotationIterator.prototype.SetHighlightedRect = function (classObj, idx) {
     var widget = classObj.widget;
     var rectSet = widget.Shape;
-    
+
     widget.Visibility = false;
     this.HighlightedRect.Visibility = true;
     this.HighlightedRect.Width = rectSet.Widths[idx];
@@ -374,9 +373,9 @@
     var x = rectSet.Centers[idx * 2];
     var y = rectSet.Centers[idx * 2 + 1];
     this.HighlightedRect.Origin = [x, y];
-    //this.OutlineColor = [0, 0, 0];
+    // this.OutlineColor = [0, 0, 0];
     this.HighlightedRect.UpdateBuffers();
-    
+
     this.EventuallyDraw();
   };
 
@@ -393,11 +392,9 @@
   GirderAnnotationIterator.prototype.HandleKeyUp = function (event) {
     if (this.IteratorClass) {
       // iterating
-      var self = this;
-
       if (event.keyCode === 46 || event.keyCode === 8) { // delete key
         if (this.ArrowLayer) {
-          this.ArrowLayer. DeleteSelected();
+          this.ArrowLayer.DeleteSelected();
           this.ArrowLayer.EventuallyDraw();
         }
         event.preventDefault();
@@ -483,7 +480,7 @@
   };
 
   GirderAnnotationIterator.prototype.LoadItemArrows = function (itemId, name, layer) {
-    self = this;
+    var self = this;
     girder.rest.restRequest({
       path: 'annotation?itemId=' + itemId + '&name=' + name + '&limit=1',
       method: 'GET'
@@ -531,7 +528,6 @@
       var length = Math.sqrt(dx * dx + dy * dy);
       var orientation = Math.atan2(dy, dx) * 180 / Math.PI;
 
-      
       if (element.type === 'arrow') {
         var obj = {
           origin: element.points[0],
@@ -540,7 +536,7 @@
           orientation: orientation,
           fillcolor: SAM.ConvertColor(element.fillColor),
           outlinecolor: SAM.ConvertColor(element.lineColor)
-        }
+        };
         var widget = new SAM.ArrowWidget(this.ArrowLayer);
         widget.Load(obj);
         this.ArrowLayer.AddWidget(widget);
@@ -549,11 +545,11 @@
 
     this.EventuallyDraw();
   };
-  
+
   // Forward = 1, backward = -1
   GirderAnnotationIterator.prototype.ChangeCurrent = function (direction) {
     if (this.IteratorClass.widget === undefined) {
-        return true;
+      return true;
     }
     var rectSet = this.IteratorClass.widget.Shape;
     var index = this.IteratorIndex;
@@ -842,7 +838,7 @@
   GirderAnnotationIterator.prototype.Save = function () {
     // Save arrows in the database
     var annotation = this.ArrowAnnotation;
-    annotation.elements = this.ArrowLayerToGirderElements(this.ArrowLayer)
+    annotation.elements = this.ArrowLayerToGirderElements(this.ArrowLayer);
     SA.PushProgress();
     girder.rest.restRequest({
       path: 'annotation/' + this.ArrowAnnotationId,
@@ -858,15 +854,15 @@
 
     for (var idx = 0; idx < layer.GetNumberOfWidgets(); ++idx) {
       var widget = layer.GetWidget(idx).Serialize();
-      var pt1 = [widget.origin[0], widget.origin[1], 0]
-      var pt2 = [widget.origin[0], widget.origin[1], 0]
+      var pt1 = [widget.origin[0], widget.origin[1], 0];
+      var pt2 = [widget.origin[0], widget.origin[1], 0];
       var theta = widget.orientation * Math.PI / 180.0;
       pt2[0] += widget.length * Math.cos(theta);
-      pt2[1] += widget.length * Math.sin(theta);        
+      pt2[1] += widget.length * Math.sin(theta);
       var points = [pt1, pt2];
       var element = {
         'type': 'arrow',
-        'lineWidth': widget.width, 
+        'lineWidth': widget.width,
         'fillColor': SAM.ConvertColorToHex(widget.fillcolor),
         'lineColor': SAM.ConvertColorToHex(widget.outlinecolor),
         'points': points};

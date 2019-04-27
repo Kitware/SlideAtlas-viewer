@@ -30,39 +30,39 @@
     this.ZOffset = 0.1;
   }
 
-  Shape.prototype.GetLineWidth = function() {
+  Shape.prototype.GetLineWidth = function () {
     return this.LineWidth;
   };
-  
-  Shape.prototype.GetOrigin = function() {
+
+  Shape.prototype.GetOrigin = function () {
     return this.Origin;
   };
 
   // in degrees
-  Shape.prototype.GetOrientation = function() {
+  Shape.prototype.GetOrientation = function () {
     return this.Orientation;
   };
 
   // in radians
-  Shape.prototype.GetRotation = function() {
+  Shape.prototype.GetRotation = function () {
     return this.Orientation * Math.PI / 180.0;
   };
-  
-  Shape.prototype.Modified = function() {
-    this.Matrix = undefined;
-  }
 
-  Shape.prototype.DeleteSelected = function() {
+  Shape.prototype.Modified = function () {
+    this.Matrix = undefined;
+  };
+
+  Shape.prototype.DeleteSelected = function () {
     if (this.IsSelected()) {
       this.PointBuffer = undefined;
       return true;
     }
   };
 
-  Shape.prototype.IsEmpty = function() {
+  Shape.prototype.IsEmpty = function () {
     return this.PointBuffer === undefined;
-  }
-  
+  };
+
   // Coordinate Systems
   Shape.SLIDE = 0; // Pixel of highest resolution level.
   Shape.VIEWER = 1; // Pixel of viewer canvas.
@@ -81,7 +81,7 @@
   Shape.prototype.IsSelected = function () {
     return this.Selected;
   };
-  
+
   Shape.prototype.Draw = function (view) {
     if (!this.Visibility) {
       return;
@@ -93,7 +93,7 @@
     if (this.IsEmpty()) {
       return;
     }
-    
+
     var theta;
     var m;
     var x;

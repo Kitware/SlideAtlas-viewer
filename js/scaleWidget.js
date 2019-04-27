@@ -406,14 +406,14 @@
   };
 
   ScaleWidget.prototype.Deactivate = function () {
-    //this.View.Parent.css({'cursor': 'default'});
-    //this.Popup.StartHideTimer();
+    // this.View.Parent.css({'cursor': 'default'});
+    // this.Popup.StartHideTimer();
     this.State = WAITING;
     this.Shape.Active = false;
-    //this.Layer.DeactivateWidget(this);
-    //if (this.DeactivateCallback) {
-    //  this.DeactivateCallback();
-    //}
+    // this.Layer.DeactivateWidget(this);
+    // if (this.DeactivateCallback) {
+    //   this.DeactivateCallback();
+    // }
     this.Layer.EventuallyDraw();
   };
 
@@ -427,13 +427,13 @@
     if (flag) {
       this.State = ACTIVE;
       this.Shape.Active = true;
-      //this.Layer.ActivateWidget(this);
-      //this.Layer.EventuallyDraw();
-            // Compute the location for the pop up and show it.
+      // this.Layer.ActivateWidget(this);
+      // this.Layer.EventuallyDraw();
+      // Compute the location for the pop up and show it.
     } else {
       this.Deactivate();
     }
-    //this.Layer.EventuallyDraw();
+    // this.Layer.EventuallyDraw();
   };
 
   SAM.ScaleWidget = ScaleWidget;

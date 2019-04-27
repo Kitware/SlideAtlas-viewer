@@ -21,18 +21,14 @@
 
 // Text background flag does not toggle.
 
-
-
 // 1: fix delay before pencil starts drawing (gap in line).
 //  9: Make the panel collapse to a single button.
 // 11: make sure it works on an ipad / surface.
 
 // 3: undo.
 
-
 // Added: currently visible annotations names to the "localStorage" so they remain open when stepping
 // through images with the navigator.
-
 
 // Notes:  It was tricky getting two modes of activating tools:  1 radio button, 2 click to select widget.
 // Here is what happens for the two paths:
@@ -46,7 +42,6 @@
 //   1: Widget state to Editing (Widget handles this)
 //   2: Layer editon (good)
 //   3: Changes tool button GUI.
-
 
 (function () {
   'use strict';
@@ -68,9 +63,9 @@
     viewer.ScaleOn();
 
     this.SelectedWidgets = [];
-    
+
     this.InitializeHelp(this.Parent.parent());
-    
+
     // The pannel should probably not be managing this navigation widget.
     // I am putting it here as a temporary home.
     if (itemId) {
@@ -78,7 +73,7 @@
     }
     // To get event calls from the viewer.
     viewer.AddLayer(this);
-    
+
     // -----------------------------------------------------
     this.ActiveColor = '#7CF';
     this.DefaultColor = '#DDD';
@@ -86,11 +81,11 @@
     if (SAM.MOBILE_DEVICE === 'iPad') {
       this.ButtonSize = '24px';
     }
-    
+
     // Create a parent div to hold all of the annotation labels
     this.Margin = 6;
     this.ToolDivHeight = 70;
-    
+
     // Holds the annotation tools and the list of annotation buttons
     this.Div = $('<div>')
       // Have to use this parent, or events are blocked.
@@ -113,11 +108,11 @@
              function () { $(this).css({'opacity': '0.6'}); })
       .css({
         'position': 'absolute',
-        'background-color':'#fff',
-        'border': '1px solid #666666',        
+        'background-color': '#fff',
+        'border': '1px solid #666666',
         'left': '3px',
         'top': (5 * this.Margin) + 'px',
-        //'height': this.ToolDivHeight.toString() + 'px',
+        // 'height': this.ToolDivHeight.toString() + 'px',
         'opacity': '0.6',
         'z-index': '300'})
       .draggable();
@@ -158,34 +153,35 @@
           'top': '3px',
           'min-height': '300px',
           'min-width': '200px',
-          'background-color':'#fff',
+          'background-color': '#fff',
           'border': '1px solid #666666',
           'z-index': '400'})
         .hide()
-        .on('mouseleave', 
+        .on('mouseleave',
             function (e) {
               helpDiv.hide();
             });
-    var helpCloseButton = $('<div>')
-        .appendTo(helpDiv)
-        .prop('title', 'close')
-        .addClass('sa-view-button')
-        .css({
-          'position': 'absolute',
-          'right': '3px',
-          'top': '3px',
-          'height': '24px',
-          'color': '#000',
-          'z-index': '300'})
-        .text('close')
-        .on('click touchend',
-            function (e) {
-              helpDiv.hide();
-            });
+    // var helpCloseButton =
+    $('<div>')
+      .appendTo(helpDiv)
+      .prop('title', 'close')
+      .addClass('sa-view-button')
+      .css({
+        'position': 'absolute',
+        'right': '3px',
+        'top': '3px',
+        'height': '24px',
+        'color': '#000',
+        'z-index': '300'})
+      .text('close')
+      .on('click touchend',
+          function (e) {
+            helpDiv.hide();
+          });
 
     var fullScreenOnDiv = $('<div>')
         .appendTo(helpDiv)
-        .css({'width':'100%'});
+        .css({'width': '100%'});
     $('<img>')
       .appendTo(fullScreenOnDiv)
       .addClass('sa-view-button')
@@ -193,12 +189,12 @@
       .css({'height': '24px'});
     $('<p>')
       .appendTo(fullScreenOnDiv)
-      .css({'display':'inline-block'})
+      .css({'display': 'inline-block'})
       .text('Expand the viewer to fullscreen.');
-    
+
     var fullScreenOffDiv = $('<div>')
         .appendTo(helpDiv)
-        .css({'width':'100%'});
+        .css({'width': '100%'});
     $('<img>')
       .appendTo(fullScreenOffDiv)
       .addClass('sa-view-button')
@@ -206,12 +202,12 @@
       .css({'height': '24px'});
     $('<p>')
       .appendTo(fullScreenOffDiv)
-      .css({'display':'inline-block'})
+      .css({'display': 'inline-block'})
       .text('Exit fullscreen');
 
     var textDiv = $('<div>')
         .appendTo(helpDiv)
-        .css({'width':'100%'});
+        .css({'width': '100%'});
     $('<img>')
       .appendTo(textDiv)
       .addClass('sa-view-button')
@@ -219,12 +215,12 @@
       .css({'height': '24px'});
     $('<p>')
       .appendTo(textDiv)
-      .css({'display':'inline-block'})
+      .css({'display': 'inline-block'})
       .text('Text tool: Select text to drag it.');
 
     var arrowDiv = $('<div>')
         .appendTo(helpDiv)
-        .css({'width':'100%'});
+        .css({'width': '100%'});
     $('<img>')
       .appendTo(arrowDiv)
       .addClass('sa-view-button')
@@ -232,12 +228,12 @@
       .css({'height': '24px'});
     $('<p>')
       .appendTo(arrowDiv)
-      .css({'display':'inline-block'})
+      .css({'display': 'inline-block'})
       .text('Arrow tool: draw an arrow. Mouse press places the tip. Mouse drag places the end.');
 
     var pencilDiv = $('<div>')
         .appendTo(helpDiv)
-        .css({'width':'100%'});
+        .css({'width': '100%'});
     $('<img>')
       .appendTo(pencilDiv)
       .addClass('sa-view-button')
@@ -245,35 +241,37 @@
       .css({'height': '24px'});
     $('<p>')
       .appendTo(pencilDiv)
-      .css({'display':'inline-block'})
+      .css({'display': 'inline-block'})
       .text('Pencil tool: draw lines on the slide. Click on a line to select it.');
 
     var openDiv = $('<div>')
         .appendTo(helpDiv)
-        .css({'width':'100%'});
+        .css({'width': '100%'});
     $('<img>')
       .appendTo(openDiv)
       .addClass('sa-view-button')
       .attr('src', SA.ImagePathUrl + 'open_lasso.png')
-      .css({'height': '24px',
-            'margin-left':'24px'});
+      .css({
+        'height': '24px',
+        'margin-left': '24px'});
     $('<p>')
       .appendTo(openDiv)
-      .css({'display':'inline-block'})
+      .css({'display': 'inline-block'})
       .text('Open pencil mode: Simple open strokes.');
 
     var closedDiv = $('<div>')
         .appendTo(helpDiv)
-        .css({'width':'100%'});
+        .css({'width': '100%'});
     $('<img>')
       .appendTo(closedDiv)
       .addClass('sa-view-button')
       .attr('src', SA.ImagePathUrl + 'select_lasso.png')
-      .css({'height': '24px',
-            'margin-left':'24px'});
+      .css({
+        'height': '24px',
+        'margin-left': '24px'});
     $('<p>')
       .appendTo(closedDiv)
-      .css({'display':'inline-block'})
+      .css({'display': 'inline-block'})
       .text('Closed pencil mode: Draw closed loops that can be modified with subsequent strokes. Editing strokes must cross the loop twice.');
 
     // Selection -------------------------------------------------------------------
@@ -281,12 +279,12 @@
       .appendTo(helpDiv);
     $('<p>')
       .appendTo(helpDiv)
-      .css({'display':'inline-block'})
-      .text("Click on any annotation to select it. The delete key deletes selected annotations. When one annotation is selected it can be edited.");
+      .css({'display': 'inline-block'})
+      .text('Click on any annotation to select it. The delete key deletes selected annotations. When one annotation is selected it can be edited.');
 
     var rectSelectDiv = $('<div>')
         .appendTo(helpDiv)
-        .css({'width':'100%'});
+        .css({'width': '100%'});
     $('<img>')
       .appendTo(rectSelectDiv)
       .addClass('sa-view-button')
@@ -294,12 +292,12 @@
       .css({'height': '24px'});
     $('<p>')
       .appendTo(rectSelectDiv)
-      .css({'display':'inline-block'})
-      .text("The rectancle selection tool allows multiple annotations to be selected at once.");
+      .css({'display': 'inline-block'})
+      .text('The rectancle selection tool allows multiple annotations to be selected at once.');
 
     var propertiesDiv = $('<div>')
         .appendTo(helpDiv)
-        .css({'width':'100%'});
+        .css({'width': '100%'});
     $('<img>')
       .appendTo(propertiesDiv)
       .addClass('sa-view-button')
@@ -307,8 +305,8 @@
       .css({'height': '24px'});
     $('<p>')
       .appendTo(propertiesDiv)
-      .css({'display':'inline-block'})
-      .text("Show the selected annotation's property dialog.");
+      .css({'display': 'inline-block'})
+      .text('Show the selected annotation\'s property dialog.');
 
     // Annotation buttons ---------------------------------------------------------
     $('<hr>')
@@ -316,7 +314,7 @@
 
     var annotationButtonDiv = $('<div>')
         .appendTo(helpDiv)
-        .css({'width':'100%'});
+        .css({'width': '100%'});
     $('<img>')
       .appendTo(annotationButtonDiv)
       .addClass('sa-view-button')
@@ -324,18 +322,19 @@
       .css({'height': '24px'});
     $('<p>')
       .appendTo(annotationButtonDiv)
-      .css({'display':'inline-block'})
-      .text("Annotation buttons represent markup collections. YOu can click the name to change it.");
+      .css({'display': 'inline-block'})
+      .text('Annotation buttons represent markup collections. YOu can click the name to change it.');
 
     var visibilityDiv = $('<div>')
         .appendTo(helpDiv)
-        .css({'width':'100%'});
+        .css({'width': '100%'});
     $('<img>')
       .appendTo(visibilityDiv)
       .addClass('sa-view-button')
       .attr('src', SA.ImagePathUrl + 'eyeClosed32.png')
-      .css({'height': '24px',
-            'margin-left':'24px'});
+      .css({
+        'height': '24px',
+        'margin-left': '24px'});
     $('<img>')
       .appendTo(visibilityDiv)
       .addClass('sa-view-button')
@@ -343,18 +342,19 @@
       .css({'height': '24px'});
     $('<p>')
       .appendTo(visibilityDiv)
-      .css({'display':'inline-block'})
+      .css({'display': 'inline-block'})
       .text('The visibility toggle hides or shows all the markups in the annotation group.');
 
     var editDiv = $('<div>')
         .appendTo(helpDiv)
-        .css({'width':'100%'});
+        .css({'width': '100%'});
     $('<img>')
       .appendTo(editDiv)
       .addClass('sa-view-button')
       .attr('src', SA.ImagePathUrl + 'edit_up.png')
-      .css({'height': '24px',
-            'margin-left':'24px'});
+      .css({
+        'height': '24px',
+        'margin-left': '24px'});
     $('<img>')
       .appendTo(editDiv)
       .addClass('sa-view-button')
@@ -362,39 +362,41 @@
       .css({'height': '24px'});
     $('<p>')
       .appendTo(editDiv)
-      .css({'display':'inline-block'})
+      .css({'display': 'inline-block'})
       .text('The edit toggle selects a single annotation group for editing.');
 
     var deleteDiv = $('<div>')
         .appendTo(helpDiv)
-        .css({'width':'100%'});
+        .css({'width': '100%'});
     $('<img>')
       .appendTo(deleteDiv)
       .addClass('sa-view-button')
       .attr('src', SA.ImagePathUrl + 'remove.png')
-      .css({'height': '24px',
-            'margin-left':'24px'});
+      .css({
+        'height': '24px',
+        'margin-left': '24px'});
     $('<p>')
       .appendTo(deleteDiv)
-      .css({'display':'inline-block'})
+      .css({'display': 'inline-block'})
       .text('Delete a selected annotation. If no annotation is selected, the whole annotation group will be deleted.');
 
     // Toggle the help window on and off.
-    var helpButton = $('<img>')
-        .appendTo(parent)
-        .prop('title', 'help')
-        .addClass('sa-view-button')
-        .attr('src', SA.ImagePathUrl + 'question32.png')
-        .css({
-          'position': 'absolute',
-          'left': '35px',
-          'top': '2px',
-          'height': '24px',
-          'z-index': '300'})
-        .on('click touchend',
-            function (e) {
-              helpDiv.show();
-            });
+    // var helpButton =
+    $('<img>')
+      .appendTo(parent)
+      .prop('title', 'help')
+      .addClass('sa-view-button')
+      .attr('src', SA.ImagePathUrl + 'question32.png')
+      .css({
+        'position': 'absolute',
+        'left': '35px',
+        'top': '2px',
+        'height': '24px',
+        'z-index': '300'})
+      .on('click touchend',
+          function (e) {
+            helpDiv.show();
+          });
   };
   // ===============================================================================
   // Call back from navigation to update the annotation to match the viewer item.
@@ -414,11 +416,10 @@
     // Only the one used by the gui changes local storage values.
     // For now, save and restore the cached names.
     var savedNames = this.LocalStorageVisibleAnnotationNames;
-    
+
     // Now for the annotation stuff.
     this.DeleteAnnotationButtons();
     this.LocalStorageVisibleAnnotationNames = savedNames;
-
     this.InitializeButtons(this.Div, itemId);
   };
 
@@ -487,10 +488,10 @@
     });
   };
   GirderAnnotationPanel.prototype.CheckFolderDataAccessTools = function (data) {
-    //if (data._accessLevel > 0) {
-      // We have access.  Go ahead and create the tools.
-      this.InitializeTools();
-    //}
+    // if (data._accessLevel > 0) {
+    // We have access.  Go ahead and create the tools.
+    this.InitializeTools();
+    // }
   };
   GirderAnnotationPanel.prototype.InitializeTools = function () {
     var self = this;
@@ -503,12 +504,13 @@
     this.RectangleButton = this.AddToolRadioButton('rectangle.gif', 'RectangleButtonOn');
     this.PencilButton = this.AddToolRadioButton('Pencil-icon.png', 'PencilButtonOn');
     this.RectSelectButton = this.AddToolRadioButton('rect_select.png', 'RectSelectOn');
- 
+
     // This is visibile, only when a annotation is being edited.
     this.RectSelectButton.hide();
-    this.CursorButton.css({'border': '2px solid #333',
-			                     'background-color':'#bcf'});
-    
+    this.CursorButton.css({
+      'border': '2px solid #333',
+      'background-color': '#bcf'});
+
     // Default just lets the viewer handle the events.
     this.ActiveToolButton = this.CursorButton;
 
@@ -521,7 +523,7 @@
       .css({
         'border': '1px solid #333',
         'width': '28px',
-        'height':'28px',
+        'height': '28px',
         'background-color': '#fff'})
       .attr('type', 'image')
       .prop('title', 'open/closed')
@@ -565,7 +567,7 @@
       .css({
         'border': '1px solid #333',
         'width': '28px',
-        'height':'28px',
+        'height': '28px',
         'background-color': '#fff'})
       .attr('type', 'image')
       .prop('title', 'properties')
@@ -586,12 +588,13 @@
     var self = this;
     var button = $('<img>')
         .appendTo(this.ToolDiv)
-        .css({'border': '2px solid #ccc',
-	      'margin': '1px',
-              'background-color':'#fff',
-              'width': '28px',
-              'height':'28px',
-             })
+        .css({
+          'border': '2px solid #ccc',
+          'margin': '1px',
+          'background-color': '#fff',
+          'width': '28px',
+          'height': '28px'
+        })
         .attr('type', 'image')
         .attr('src', SA.ImagePathUrl + imageFile)
       .on('click touchstart',
@@ -603,15 +606,16 @@
       .on('mousedown mousemove mouseup touchmove touchend',
           function () { return false; });
       // On off functionality
-      if (onCallbackName) {
-	      button.on(
-	        'radio-on',
-	        function () {
-		        self.WithHighlightedCall(function (annotObj) { (self[onCallbackName])(annotObj); });
+    if (onCallbackName) {
+      button.on(
+        'radio-on',
+        function () {
+          self.WithHighlightedCall(function (annotObj) {
+            (self[onCallbackName])(annotObj);
           });
-      }
-
-      return button;
+        });
+    }
+    return button;
   };
 
   // Change the state of the Radio GUI, but do not trigger side effects (PencidOn ...)
@@ -621,11 +625,13 @@
     }
     // Turn off the old one. We have to do this by turning on the cursor.
     this.ActiveToolButton
-      .css({'border': '2px solid #ccc',
-			          'background-color':'#fff'});
+      .css({
+        'border': '2px solid #ccc',
+        'background-color': '#fff'});
     // Turn on the new one.
-    pressedButton.css({'border': '2px solid #222',
-		       'background-color':'#cdf'});
+    pressedButton.css({
+      'border': '2px solid #222',
+      'background-color': '#cdf'});
     this.ActiveToolButton = pressedButton;
   };
 
@@ -649,7 +655,7 @@
     pressedButton.trigger('radio-on');
 
     // Show the open closed toggle and other options.
-    this.UpdateToolVisibility();    
+    this.UpdateToolVisibility();
   };
 
   // Called by the PropertiesDialogButton click event.
@@ -665,7 +671,7 @@
       widget.ShowPropertiesDialog();
     }
   };
-  
+
   // When tools have nothing to modify, they disappear.
   // TODO: Help tool. to explain why a tool is not available.
   GirderAnnotationPanel.prototype.UpdateToolVisibility = function () {
@@ -729,10 +735,8 @@
     }
     localStorage.SaAnnotationPanelDefaults = JSON.stringify(defaults);
   };
-  
+
   GirderAnnotationPanel.prototype.TogglePencilOpenClosed = function () {
-    var widget;
-    var i;
     if (this.PencilOpenClosedState === CLOSED) {
       this.SetPencilModeToOpen();
     } else {
@@ -768,7 +772,7 @@
     if (this.PencilOpenClosedState === CLOSED) {
       return;
     }
-    console.log("Set mode to closed");
+    console.log('Set mode to closed');
     this.PencilOpenClosedState = CLOSED;
     this.PencilOpenClosedToggle
         .attr('src', SA.ImagePathUrl + 'select_lasso.png');
@@ -817,7 +821,7 @@
       method: 'GET'
     }).done(function (data) {
       if (!data) {
-        self.UserData = {_id:'0000', login:'guest'};
+        self.UserData = {_id: '0000', login: 'guest'};
       } else {
         self.UserData = data;
       }
@@ -860,9 +864,9 @@
   // Add a new annotation to the list
   GirderAnnotationPanel.prototype.AddAnnotationButton = function (metadata) {
     // For now, users can only see their own annotations.
-    //if (metadata.creatorId !== this.UserData._id) {
+    // if (metadata.creatorId !== this.UserData._id) {
     //  return;
-    //}
+    // }
     var self = this;
     var div = $('<div>')
       .appendTo(this.ButtonDiv)
@@ -1035,15 +1039,15 @@
 
     // Make te default user annotation visible.
     // Race condition?
-    //if (annotObj.Name === this.UserData.login) {
+    // if (annotObj.Name === this.UserData.login) {
     //  this.AfterLoad(annotObj, function () { self.VisibilityOn(annotObj); });
-    //}
+    // }
 
     // Restore any visible annotations from a previous session.
     if (this.LocalStorageVisibleAnnotationNames.indexOf(annotObj.Name) > -1) {
       this.AfterLoad(annotObj, function () { self.VisibilityOn(annotObj); });
     }
-    
+
     return annotObj;
   };
 
@@ -1149,7 +1153,7 @@
 
     return annotationLayer;
   };
-  
+
   // TODO: Load annotations into a 'group'.  Manage separate groups.
   // Move the annotation info to the layer widgets and draw.
   GirderAnnotationPanel.prototype.DisplayAnnotation = function (annotObj) {
@@ -1160,7 +1164,7 @@
       // I am not sure that this is still used.
       annotObj.Layer.SetActivatedCallback(function () { self.EditOn(annotObj); });
       annotObj.Layer.SetModifiedCallback(function () { self.AnnotationModified(annotObj); });
-      //annotObj.Layer.SetSelectionChangeCallback(function () { self.SelectionChanged(annotObj); });
+      // annotObj.Layer.SetSelectionChangeCallback(function () { self.SelectionChanged(annotObj); });
       annotObj.Layer.Reset();
 
       // Put all the rectangles into one set.
@@ -1208,8 +1212,9 @@
           obj.linewidth = element.lineWidth;
           obj.origin = element.center;
           obj.radius = element.radius;
-          var w = annotObj.Layer.LoadWidget(obj);
-          w = this.Viewer;
+          // var w =
+          annotObj.Layer.LoadWidget(obj);
+          // w = this.Viewer;
         }
         if (element.type === 'rect') {
           obj.type = element.type;
@@ -1218,8 +1223,9 @@
           obj.origin = element.center;
           obj.radius = element.radius;
           obj.orientation = element.orientation;
-          var w = annotObj.Layer.LoadWidget(obj);
-          w = this.Viewer;
+          // var w =
+          annotObj.Layer.LoadWidget(obj);
+          // w = this.Viewer;
         }
         if (element.type === 'arrow') {
           if (element.label) {
@@ -1232,26 +1238,27 @@
             obj.offset[0] -= obj.position[0];
             obj.offset[1] -= obj.position[1];
             obj.visibility = element.points[0][2];
-            var w = annotObj.Layer.LoadWidget(obj);
-            w = this.Viewer;
+            // var w =
+            annotObj.Layer.LoadWidget(obj);
+            // w = this.Viewer;
           } else {
             obj.type = 'arrow';
             obj.origin = element.points[0].slice(0);
-            //if (SAM.HACK) {
+            // if (SAM.HACK) {
             //  var dx = element.points[1][0] - element.points[0][0];
             //  var dy = element.points[1][1] - element.points[0][1];
             //  obj.origin[0] -= dx;
             //  obj.origin[1] -= dy;
-            //}
+            // }
             obj.fillcolor = SAM.ConvertColor(element.fillColor);
             obj.outlinecolor = SAM.ConvertColor(element.lineColor);
             var dx = element.points[1][0] - element.points[0][0];
             var dy = element.points[1][1] - element.points[0][1];
-            var length = Math.sqrt(dx*dx + dy*dy);
+            var length = Math.sqrt((dx * dx) + (dy * dy));
             obj.length = length;
-            //obj.width = ;
+            // obj.width = ;
             // The upper left origin causes orientation to be negative.
-            obj.orientation = -Math.atan2(dy/length,dx/length) * 180 / Math.PI;
+            obj.orientation = -Math.atan2(dy / length, dx / length) * 180 / Math.PI;
             if (element.lineWidth !== undefined) {
               obj.width = element.lineWidth;
             } else {
@@ -1259,8 +1266,9 @@
             }
             obj.fixedsize = 'false';
             obj.fixedorientation = 'false';
-            var w = annotObj.Layer.LoadWidget(obj);
-            w = this.Viewer;
+            // var w =
+            annotObj.Layer.LoadWidget(obj);
+            // w = this.Viewer;
           }
         }
         if (element.type === 'rectanglegrid') {
@@ -1272,12 +1280,14 @@
           obj.bin_height = element.height / element.heightSubdivisions;
           obj.orientation = element.rotation;
           obj.dimensions = [element.widthSubdivisions, element.heightSubdivisions];
-          var w = annotObj.Layer.LoadWidget(obj);
-          w = this.Viewer;
+          // var w =
+          annotObj.Layer.LoadWidget(obj);
+          // w = this.Viewer;
         }
         if (element.type === 'rectangle') {
           // Switch to rect set versus individual rects. if false
-          if (false && element.type === 'rectangle') { // switch behavior to ....
+          var keepRectSets = false;
+          if (keepRectSets && element.type === 'rectangle') { // switch behavior to ....
             setObj.widths.push(element.width);
             setObj.heights.push(element.height);
             setObj.centers.push(element.center[0]);
@@ -1299,8 +1309,9 @@
             obj.width = element.width;
             obj.length = element.height;
             obj.orientation = element.rotation;
-            var w = annotObj.Layer.LoadWidget(obj);
-            w = this.Viewer;
+            // var w =
+            annotObj.Layer.LoadWidget(obj);
+            // w = this.Viewer;
           }
         }
         if (element.type === 'polyline') {
@@ -1316,14 +1327,16 @@
           obj.linewidth = element.lineWidth;
           obj.shapes = [element.points];
           obj.closedFlags = [element.closed];
-          var w = annotObj.Layer.LoadWidget(obj);
-          w = this.Viewer;
+          // var w =
+          annotObj.Layer.LoadWidget(obj);
+          // w = this.Viewer;
         }
       }
 
       if (setObj.widths.length > 0) {
-        var w = annotObj.Layer.LoadWidget(setObj);
-        w = this.Viewer;
+        // var w =
+        annotObj.Layer.LoadWidget(setObj);
+        // w = this.Viewer;
       }
     }
 
@@ -1402,31 +1415,28 @@
     this.UpdateToolVisibility();
   };
 
-
-  GirderAnnotationPanel.prototype.RestoreVisibilityFromLocalStorage = function() {
+  GirderAnnotationPanel.prototype.RestoreVisibilityFromLocalStorage = function () {
     this.LocalStorageVisibleAnnotationNames = [];
-    var str = localStorage.getItem("SAAnnotationVisibility");
+    var str = localStorage.getItem('SAAnnotationVisibility');
     if (str) {
       this.LocalStorageVisibleAnnotationNames = JSON.parse(str);
-    } 
+    }
   };
 
-  
-  GirderAnnotationPanel.prototype.SaveVisibilityInLocalStorage = function() {
+  GirderAnnotationPanel.prototype.SaveVisibilityInLocalStorage = function () {
     // Assemble a list of visible names.
     var names = [];
     for (var idx = 0; idx < this.AnnotationObjects.length; ++idx) {
       var annotObj = this.AnnotationObjects[idx];
       if (annotObj.Visible) {
-        names.push(annotObj.Name)
+        names.push(annotObj.Name);
       }
     }
-    
-    localStorage.setItem("SAAnnotationVisibility", JSON.stringify(names));
-    this.LocalStorageVisibleAnnotationNames = names;
-  }
 
-  
+    localStorage.setItem('SAAnnotationVisibility', JSON.stringify(names));
+    this.LocalStorageVisibleAnnotationNames = names;
+  };
+
   GirderAnnotationPanel.prototype.VisibilityOn = function (annotObj) {
     if (!annotObj || annotObj.Visible) {
       return;
@@ -1439,7 +1449,7 @@
     // Record the visibility of this annotation in local storage.
     this.SaveVisibilityInLocalStorage();
   };
-  
+
   GirderAnnotationPanel.prototype.VisibilityOff = function (annotObj) {
     if (!annotObj || !annotObj.Visible) {
       return;
@@ -1493,7 +1503,7 @@
     annotObj.Layer = this.NewAnnotationLayer();
     // I am not sure that this is still used.
     annotObj.Layer.SetActivatedCallback(function () { self.EditOn(annotObj); });
-    //annotObj.Layer.SetSelectionChangeCallback(function () { self.SelectionChanged(annotObj); });
+    // annotObj.Layer.SetSelectionChangeCallback(function () { self.SelectionChanged(annotObj); });
     annotObj.Layer.SetModifiedCallback(function () { self.AnnotationModified(annotObj); });
 
     this.EditOn(annotObj);
@@ -1511,17 +1521,17 @@
 
   // Call back from deleteButton.
   GirderAnnotationPanel.prototype.DeleteCallback = function (annotObj) {
-    if (! this.Highlighted) {
+    if (!this.Highlighted) {
       return;
     }
     this.DeleteAnnotationObject(this.Highlighted);
   };
-    
+
   GirderAnnotationPanel.prototype.DeleteAnnotationObject = function (annotObj) {
     if (!this.Highlighted.Layer.IsSelected()) {
       if (!confirm('Do you want to delete the entire annotation group?' + annotObj.Name)) {
         return;
-      }    
+      }
       if (annotObj.SaveTimerId) {
         clearTimeout(annotObj.SaveTimerId);
         annotObj.SaveTimerId = undefined;
@@ -1564,29 +1574,29 @@
     var self = this;
     annotObj.Modified = true;
     // Change the background color of the edit toggle to show that is is modified.
-    if (this.UserData.login !== "guest") {
+    if (this.UserData.login !== 'guest') {
       annotObj.EditToggle.css({'background-color': '#F55'});
     }
     // Save after 30 second pause in annotation.
     // start a timer to actually save.
-    //if (annotObj.SaveTimerId) {
+    // if (annotObj.SaveTimerId) {
     //  clearTimeout(annotObj.SaveTimerId);
     //  annotObj.SaveTimerId = undefined;
-    //}
+    // }
     // Every minute
-    //console.log('Save in 30 seconds');
-    //annotObj.SaveTimerId = setTimeout(function () { self.RecordAndSave(annotObj); }, 30000);
+    // console.log('Save in 30 seconds');
+    // annotObj.SaveTimerId = setTimeout(function () { self.RecordAndSave(annotObj); }, 30000);
 
     // Save after 30 seconds regardless of additional markup.
     if (!annotObj.SaveTimerId) {
       console.log('Save in 30 seconds');
       annotObj.SaveTimerId = setTimeout(function () { self.RecordAndSave(annotObj); }, 30000);
     }
-    
+
     window.onbeforeunload = function (event) {
       console.log('Leaving page ' + self.ModifiedCount);
       return true;
-    }
+    };
   };
 
   // Called when the annotation is saved successfully..
@@ -1604,7 +1614,7 @@
 
   // Records and saves an annotation. Will create a new one if annotObj has no id.
   GirderAnnotationPanel.prototype.RecordAndSave = function (annotObj) {
-    if (this.UserData.login === "guest") {
+    if (this.UserData.login === 'guest') {
       return;
     }
     var self = this;
@@ -1706,7 +1716,7 @@
     */
     var element;
     for (i = 0; i < annotObj.Layer.GetNumberOfWidgets(); ++i) {
-      if ( ! annotObj.Layer.GetWidget(i).Serialize) {
+      if (!annotObj.Layer.GetWidget(i).Serialize) {
         continue;
       }
       var widget = annotObj.Layer.GetWidget(i).Serialize();
@@ -1746,15 +1756,15 @@
       }
       if (widget.type === 'arrow') {
         // Will not keep scale feature..
-        var pt1 = [widget.origin[0], widget.origin[1], 0]
-        var pt2 = [widget.origin[0], widget.origin[1], 0]
+        var pt1 = [widget.origin[0], widget.origin[1], 0];
+        var pt2 = [widget.origin[0], widget.origin[1], 0];
         var theta = -widget.orientation * Math.PI / 180.0;
         pt2[0] += widget.length * Math.cos(theta);
-        pt2[1] += widget.length * Math.sin(theta);        
+        pt2[1] += widget.length * Math.sin(theta);
         points = [pt1, pt2];
         element = {
           'type': 'arrow',
-          'lineWidth': widget.width, 
+          'lineWidth': widget.width,
           'fillColor': SAM.ConvertColorToHex(widget.fillcolor),
           'lineColor': SAM.ConvertColorToHex(widget.outlinecolor),
           'points': points};
@@ -1879,7 +1889,7 @@
     layer.RemoveWidget(selector);
     layer.EventuallyDraw();
 
-    if (selectedWidgets.length === 1){
+    if (selectedWidgets.length === 1) {
       this.SetSelectedWidget(selectedWidgets[0]);
     } else {
       // See if we can move this to CursorOn
@@ -1908,7 +1918,7 @@
     if (!widget) {
       // A selected textWidget was not found. Make a new text widget.
       widget = new SAM.TextWidget(layer);
-      //widget.State = 3; // hack hack TODO: fix (text chowing up before dialog closes.
+      // widget.State = 3; // hack hack TODO: fix (text chowing up before dialog closes.
       // Dialog needs tu turn off and on bindings.
       // TODO: REmove dialogs from widget and manage them here.
       // Widgets can share a dialog.
@@ -1918,8 +1928,8 @@
     }
 
     // Activate the widget to start drawing.
-    // TODO: Fix the Text dialog cration process.  THis is not right but necvessary it seems.
-    //widget.SetActive(true);
+    // TODO: Fix the Text dialog creation process.  THis is not right but necvessary it seems.
+    // widget.SetActive(true);
 
     // If the text is deactivated by closing the dialog, this will turn off the
     // text button.
@@ -1929,7 +1939,7 @@
         // string was empty.  TODO: find a better way to handle widget initiated delete.
         self.SelectedWidgets = [];
         self.ToolRadioButtonCallback(self.CursorButton);
-        self.UpdateToolVisibility();            
+        self.UpdateToolVisibility();
       } else if (!widget.GetActive()) {
         self.ToolRadioButtonCallback(self.CursorButton);
       }
@@ -1971,7 +1981,7 @@
         self.ToolRadioButtonCallback(self.CursorButton);
       }
     });
-      
+
     this.SelectedWidgets = [widget];
   };
 
@@ -2007,7 +2017,7 @@
         self.ToolRadioButtonCallback(self.CursorButton);
       }
     });
-      
+
     this.SelectedWidgets = [widget];
   };
 
@@ -2043,7 +2053,7 @@
         self.ToolRadioButtonCallback(self.CursorButton);
       }
     });
-      
+
     this.SelectedWidgets = [widget];
   };
 
@@ -2080,7 +2090,7 @@
         self.ToolRadioButtonCallback(self.CursorButton);
       }
     });
-      
+
     // Will it use open or closed strokes?
     if (this.PencilOpenClosedState === OPEN) {
       widget.SetModeToOpen(layer);
@@ -2091,10 +2101,9 @@
     this.SelectedWidgets = [widget];
   };
 
-
   // ===========================================================================
   // Forward events to layers.
-  
+
   // onresize callback.  Canvas width and height and the camera need
   // to be synchronized with the canvas div.
   GirderAnnotationPanel.prototype.UpdateSize = function () {
@@ -2131,11 +2140,12 @@
     if (this.CheckForIPadPencil(event)) {
       var self = this;
       // User is drawing with a pencil.  Make sure a layer is editable.
-		  this.WithHighlightedCall(function (annotObj) {
-        // A small hack.
-        self.SelectedWidgets = [annotObj.Layer.GetIPadPencilWidget()];
-        annotObj.Layer.HandleTouchStart(event);
-      });
+      this.WithHighlightedCall(
+        function (annotObj) {
+          // A small hack.
+          self.SelectedWidgets = [annotObj.Layer.GetIPadPencilWidget()];
+          annotObj.Layer.HandleTouchStart(event);
+        });
       return false;
     }
     if (this.Highlighted) {
@@ -2159,7 +2169,7 @@
   };
 
   GirderAnnotationPanel.prototype.HandleTouchEnd = function (event) {
-    console.log("panel touch end " + event.touches.length);
+    console.log('panel touch end ' + event.touches.length);
     // No touches for end events so we cannot check for ipad pencil.
     if (this.Highlighted) {
       var layer = this.Highlighted.Layer;
@@ -2215,9 +2225,7 @@
   GirderAnnotationPanel.prototype.HandleKeyDown = function (event) {
     // Handle the delete key special
     // Multiple widgets ( in the layer being edit) can be deleted.
-    var widget;
     if (event.keyCode === 46 || event.keyCode === 8) { // delete key
-
       if (this.Highlighted) { // delete key
         this.DeleteSelected();
         this.Highlighted.Layer.EventuallyDraw();
@@ -2242,12 +2250,12 @@
     if (!annotObj) {
       return false;
     }
-    if (! annotObj.Layer.IsSelected()) {
+    if (!annotObj.Layer.IsSelected()) {
       this.DeleteAnnotationObject(annotObj);
       return;
     }
     if (annotObj.Layer.DeleteSelected()) {
-      this.AnnotationModified(annotObj);     
+      this.AnnotationModified(annotObj);
       if (annotObj.Layer.IsEmpty()) {
         this.DeleteAnnotationObject(annotObj);
       }
@@ -2259,7 +2267,7 @@
       this.Highlighted.Layer.EventuallyDraw();
     }
   };
-  
+
   GirderAnnotationPanel.prototype.HandleKeyUp = function (event) {
     if (this.Highlighted) {
       var layer = this.Highlighted.Layer;
@@ -2269,7 +2277,6 @@
     }
     return true;
   };
-
 
  /*
   GirderAnnotationPanel.prototype.HandleTouchPan = function () {
@@ -2341,25 +2348,25 @@
     // First one to consume the click wins the selection.
     // TODO: Change this to voting if annotations start to overlap.
     var selectedWidget;
-    var selectedAnnotObj;
+    // var selectedAnnotObj;
 
     // TODO: Get rid of the multiple strokes in a single pencil widget.
-    // It was a bad idea. It is "hard" because lasso interaction editing of loops
+    // It was a bad idea. It is 'hard' because lasso interaction editing of loops
     // depends on the two strokes to be in the same widget.  I do not want to
     // Break everything by rewritting this widget again.  I need to detect
     // If the same stroke was selected again (to show the popup).
     // This is the best way to trigger the popup. Ha,  it is not. I am getting
     // rid of the popup anyway.  I will just put a popup button in the option
     // panel.
-    
+
     for (var i = 0; i < this.AnnotationObjects.length; ++i) {
       var annotObj = this.AnnotationObjects[i];
-      var layer = annotObj.Layer;
+      layer = annotObj.Layer;
       if (!layer) {
         continue;
       }
       if (selectedWidget) {
-        if (!shift && ! SAM.ControlKey) {
+        if (!shift && !SAM.ControlKey) {
           // Just unselect remaining layers.
           layer.SetSelected(false);
         }
@@ -2367,22 +2374,23 @@
         // We even give inactive layers a chance to claim the selection.
         // It is a way to find which group a mark belongs to.
         if (layer.SingleSelect) {
-          var selectedWidget = layer.SingleSelect(event, shift);
-          if (selectedWidget) {
-            selectedAnnotObj = annotObj;
-          }
+          selectedWidget = layer.SingleSelect(event, shift);
+          // if (selectedWidget) {
+          //  selectedAnnotObj = annotObj;
+          // }
         }
       }
     }
 
-    this.SetSelectedWidget(selectedWidget);    
+    this.SetSelectedWidget(selectedWidget);
     return false;
   };
 
   // If only one widget is selected, we make it active (and show the properties button.
   // You can call this with selectedWidget = undefined to unset it.
   // The annot object is the one that contains the widget.
-  GirderAnnotationPanel.prototype.SetSelectedWidget = function(selectedWidget, selectedAnnotObj) {
+  GirderAnnotationPanel.prototype.SetSelectedWidget = function (selectedWidget,
+                                                                selectedAnnotObj) {
     // Unselect previous selected widgets.
     for (var i = 0; i < this.SelectedWidgets.length; ++i) {
       var widget = this.SelectedWidgets[i];
@@ -2406,7 +2414,7 @@
     // I not sure that you can select an widget that is not in the editing annotObj anyway.
     if (selectedAnnotObj === undefined) {
       // Find the annotObj for this widget.
-      for (var i = 0; i < this.AnnotationObjects.length && !selectedAnnotObj; ++i) {
+      for (i = 0; i < this.AnnotationObjects.length && !selectedAnnotObj; ++i) {
         var annotObj = this.AnnotationObjects[i];
         if (annotObj.Layer !== undefined) {
           var layer = annotObj.Layer;
@@ -2434,7 +2442,7 @@
 
     // TODO: Try to get rid of this case statement.
     // Change the tool radio to reflect the widget choosen.
-    if (selectedWidget.Type == 'pencil') {
+    if (selectedWidget.Type === 'pencil') {
       // Make the open-closed toggle button match the state of the selected widget.
       // I could not (easily) put this in UpdateToolVisibility because the widget
       // was changed to match the button before this code executed.
@@ -2450,23 +2458,23 @@
       // Should we change this to SetActive(true)?
       selectedWidget.SetStateToDrawing(selectedAnnotObj.Layer);
     }
-    if (selectedWidget.Type == 'text') {
+    if (selectedWidget.Type === 'text') {
       selectedWidget.SetActive(true);
       this.HighlightRadioToolButton(this.TextButton);
     }
-    if (selectedWidget.Type == 'arrow') {
+    if (selectedWidget.Type === 'arrow') {
       this.HighlightRadioToolButton(this.ArrowButton);
       selectedWidget.SetActive(true);
     }
-    if (selectedWidget.Type == 'circle') {
+    if (selectedWidget.Type === 'circle') {
       this.HighlightRadioToolButton(this.CircleButton);
       selectedWidget.SetActive(true);
     }
-    if (selectedWidget.Type == 'rect') {
+    if (selectedWidget.Type === 'rect') {
       this.HighlightRadioToolButton(this.RectangleButton);
       selectedWidget.SetActive(true);
     }
-    
+
     // TODO: This ivar is only really needed for the properties dialog.
     // We could just find the first selected widget ....
     this.SelectedWidgets = [selectedWidget];
@@ -2489,7 +2497,7 @@
         return true;
       } else {
         if (debug) {
-          if (toucn.force === undefined) {
+          if (touch.force === undefined) {
             print('No force in event');
           } else {
             print('non qualified event force = ' + touch.force);
@@ -2509,6 +2517,6 @@
       }
     }
   };
-  
+
   SAM.GirderAnnotationPanel = GirderAnnotationPanel;
 })();
