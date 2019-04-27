@@ -557,6 +557,13 @@
     this.RotateIconX = e.clientX - cx;
     this.RotateIconY = e.clientY - cy;
 
+    // Move event is in the viewer or overview.
+    // It has a sanity check of which button was pressed.
+    // It looks like the icon consumes the down event so
+    // the viewer never has a chance to set this
+    SA.FirefoxWhich(event);
+    this.FirefoxOverviewWhich = event.which;
+    
     return false;
   };
   Viewer.prototype.RollMove = function (e) {
