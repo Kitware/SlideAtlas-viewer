@@ -28,6 +28,8 @@
     // Get default properties.
     if (localStorage.CircleWidgetDefaults) {
       this.Defaults = JSON.parse(localStorage.CircleWidgetDefaults);
+    } else {
+      this.Defaults = {};
     }
 
     // This method gets called if anything is added, deleted or moved.
