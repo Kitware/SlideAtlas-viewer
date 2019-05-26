@@ -1207,14 +1207,7 @@
           }
         }
         if (element.type === 'circle') {
-          obj.type = element.type;
-          obj.outlinecolor = SAM.ConvertColor(element.lineColor);
-          obj.linewidth = element.lineWidth;
-          obj.origin = element.center;
-          obj.radius = element.radius;
-          // var w =
-          annotObj.Layer.LoadWidget(obj);
-          // w = this.Viewer;
+          annotObj.Layer.LoadWidget(element);
         }
         if (element.type === 'rect') {
           obj.type = element.type;
@@ -1721,11 +1714,7 @@
       }
       var widget = annotObj.Layer.GetWidget(i).Serialize();
       if (widget.type === 'circle') {
-        widget.origin[2] = 0; // z coordinate
-        element = {
-          'type': 'circle',
-          'center': widget.origin,
-          'radius': widget.radius};
+        element = widget;
       }
       if (widget.type === 'rect') {
         widget.origin[2] = 0; // z coordinate

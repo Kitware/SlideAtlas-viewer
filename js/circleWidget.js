@@ -25,6 +25,10 @@
   function CircleWidget (layer) {
     this.Layer = layer;
 
+    // This is to save fields from loaded elements that we ignore.
+    // That way we include them when we serialize.
+    this.Element = {};
+    
     // Get default properties.
     if (localStorage.CircleWidgetDefaults) {
       this.Defaults = JSON.parse(localStorage.CircleWidgetDefaults);
@@ -97,19 +101,6 @@
     // canvas, this will behave odd.
 
     // Cross hairs is to show an active center.
-    // this.Cross = new SAM.CrossHairs();
-    // this.Cross.SetOutlineColor([1.0, 1.0, 0.0]);
-    // this.Cross.length = 10;
-    // this.Cross.LineWidth = 1;
-
-    this.Cross = new SAM.Circle();
-    this.Cross.Origin = [0, 0];
-    this.Cross.SetFillColor([1.0, 1.0, 0.0]);
-    this.Cross.SetOutlineColor([0.0, 0.0, 0.0]);
-    this.Cross.LineWidth = 1;
-    this.Cross.Radius = 10;
-    this.Cross.PositionCoordinateSystem = 1; // Shape.VIEWER;
-
     this.Cross = new SAM.Circle();
     this.Cross.SetFillColor([1, 1, 0]);
     this.Cross.SetOutlineColor([0.0, 0.0, 0.0]);
@@ -412,42 +403,85 @@
 
   CircleWidget.prototype.Serialize = function () {
     if (this.Circle === undefined) { return null; }
-    var obj = {};
-    obj.type = 'circle';
-    obj.origin = this.Circle.Origin;
-    obj.outlinecolor = this.Circle.OutlineColor;
-    obj.radius = this.Circle.Radius;
-    obj.linewidth = this.Circle.LineWidth;
-    obj.creation_camera = this.CreationCamera;
-    return obj;
+    var element = this.Element;
+    element.type = 'circle';
+    element.center = [this.Circle.Origin[0], this.Circle.Origin[1], 0];
+    element.lineColor = SAM.ConvertColorToHex(this.Circle.OutlineColor);
+    element.radius = this.Circle.Radius;
+    element.lineWidth = this.Circle.LineWidth;
+    //element.creation_camera = this.CreationCamera;
+    return element;
   };
 
   // Load a widget from a json object (origin MongoDB).
   // Layer is needed to update the bufferes.
   // TODO: delayed upldating bufferes until the first draw
-  CircleWidget.prototype.Load = function (obj) {
-    this.Circle.Origin[0] = parseFloat(obj.origin[0]);
-    this.Circle.Origin[1] = parseFloat(obj.origin[1]);
-    if (obj['outlinecolor'] !== undefined) {
-      this.Circle.OutlineColor[0] = parseFloat(obj.outlinecolor[0]);
-      this.Circle.OutlineColor[1] = parseFloat(obj.outlinecolor[1]);
-      this.Circle.OutlineColor[2] = parseFloat(obj.outlinecolor[2]);
+  CircleWidget.prototype.Load = function (element) {
+    this.Element = element;
+    this.Circle.Origin[0] = parseFloat(element.center[0]);
+    this.Circle.Origin[1] = parseFloat(element.center[1]);
+    if (element['lineColor'] !== undefined) {
+      var outlinecolor = SAM.ConvertColor(element.lineColor);
+      this.Circle.OutlineColor[0] = parseFloat(outlinecolor[0]);
+      this.Circle.OutlineColor[1] = parseFloat(outlinecolor[1]);
+      this.Circle.OutlineColor[2] = parseFloat(outlinecolor[2]);
     } else {
       this.Circle.OutlineColor[0] = 0.0;
       this.Circle.OutlineColor[1] = 1.0;
       this.Circle.OutlineColor[2] = 1.0;
     }
-    this.Circle.Radius = parseFloat(obj.radius);
+    this.Circle.Radius = parseFloat(element.radius);
     this.Circle.LineWidth = 0;
-    if (obj.lineWidth) {
-      this.Circle.LineWidth = parseFloat(obj.linewidth);
+    if (element.lineWidth) {
+      this.Circle.LineWidth = parseFloat(element.linewidth);
     }
     this.Circle.FixedSize = false;
     this.Circle.UpdateBuffers(this.Layer.AnnotationView);
 
     // How zoomed in was the view when the annotation was created.
-    if (obj.creation_camera !== undefined) {
-      this.CreationCamera = obj.CreationCamera;
+    if (element.creation_camera !== undefined) {
+      this.CreationCamera = element.CreationCamera;
+    }
+
+    if ("user" in element) {
+      if ("keypoints" in element['user']) {
+        var keypoints = element['user']['keypoints'];
+        for (var idx = 0; idx < keypoints.length; ++idx) {
+          var kp = keypoints[idx];
+          var circle = new SAM.Circle();
+          if (kp["category"] == "nose") {
+            circle.SetFillColor([0.0, 1.0, 0]);
+          } else if (kp["category"] == "tail") {
+            circle.SetFillColor([1.0, 0.0, 0]);
+          } else {
+            circle.SetFillColor([0.8, 0.8, 1]);
+          }
+          circle.SetOutlineColor([0.0, 0.0, 0.0]);
+          circle.Radius = 2;
+          circle.LineWidth = 1;
+          circle.Origin = kp['xy'];
+          this.Circle.Children[kp["category"]] = circle;
+        }
+      }
+      if ("network_keypoints" in element['user']) {
+        var keypoints = element['user']['network_keypoints'];
+        for (var idx = 0; idx < keypoints.length; ++idx) {
+          var kp = keypoints[idx];
+          var circle = new SAM.Circle();
+          if (kp["keypoint_category"] == "nose") {
+            circle.SetFillColor([0.5, 1.0, 0.5]);
+          } else if (kp["keypoint_category"] == "tail") {
+            circle.SetFillColor([1.0, 0.5, 0.5]);
+          } else {
+            circle.SetFillColor([0.8, 0.8, 1]);
+          }
+          circle.SetOutlineColor([0.0, 0.0, 0.0]);
+          circle.Radius = 2;
+          circle.LineWidth = 1;
+          circle.Origin = kp['xy'];
+          this.Circle.Children[kp["keypoint_category"]] = circle;
+        }
+      }
     }
   };
 

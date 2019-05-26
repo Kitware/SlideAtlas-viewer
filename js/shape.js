@@ -26,8 +26,12 @@
     this.Visibility = true; // An easy way to turn off a shape (with removing it from the shapeList).
     this.Selected = false;
     this.SelectedColor = [1.0, 1.0, 0.0];
-        // Playing around with layering.  The anchor is being obscured by the text.
+    // Playing around with layering.  The anchor is being obscured by the text.
     this.ZOffset = 0.1;
+
+    // Grouping shapes.
+    // TODO: Change widgets to interactors (that can deal with multiple shapes).
+    this.Children = {}
   }
 
   Shape.prototype.GetLineWidth = function () {
@@ -53,10 +57,16 @@
   };
 
   Shape.prototype.DeleteSelected = function () {
+    for (name in this.Children) {
+      if (this.Children[name].DeleteSelected()) {
+        delete this.Children[name];
+      }
+    }
     if (this.IsSelected()) {
       this.PointBuffer = undefined;
       return true;
     }
+    return false;
   };
 
   Shape.prototype.IsEmpty = function () {
@@ -178,7 +188,7 @@
           view.gl.uniform3f(program.colorUniform, this.FillColor[0],
                                  this.FillColor[1], this.FillColor[2]);
         }
-                // Cell Connectivity
+        // Cell Connectivity
         view.gl.bindBuffer(view.gl.ELEMENT_ARRAY_BUFFER, this.CellBuffer);
 
         view.gl.drawElements(view.gl.TRIANGLES, this.CellBuffer.numItems,
@@ -330,6 +340,9 @@
       }
 
       view.Context2d.restore();
+    }
+    for (name in this.Children) {
+      this.Children[name].Draw(view);
     }
   };
 
