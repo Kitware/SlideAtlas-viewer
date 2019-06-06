@@ -443,6 +443,15 @@
       this.CreationCamera = element.CreationCamera;
     }
 
+    if ("label" in element) {
+      var str = element["label"]["value"]
+      var text = new SAM.Text()
+      text.BackgroundFlag = true;
+      text.String = str;
+      text.Position = [this.Circle.Origin[0]-30, this.Circle.Origin[1]+this.Circle.Radius+30]
+      this.Circle.Children["label"] = text;
+    }
+    
     if ("user" in element) {
       if ("keypoints" in element['user']) {
         var keypoints = element['user']['keypoints'];
