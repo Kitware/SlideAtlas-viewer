@@ -1210,15 +1210,7 @@
           annotObj.Layer.LoadWidget(element);
         }
         if (element.type === 'rect') {
-          obj.type = element.type;
-          obj.outlinecolor = SAM.ConvertColor(element.lineColor);
-          obj.linewidth = element.lineWidth;
-          obj.origin = element.center;
-          obj.radius = element.radius;
-          obj.orientation = element.orientation;
-          // var w =
-          annotObj.Layer.LoadWidget(obj);
-          // w = this.Viewer;
+          annotObj.Layer.LoadWidget(element);
         }
         if (element.type === 'arrow') {
           if (element.label) {
@@ -1295,16 +1287,7 @@
               setObj.labels.push('');
             }
           } else {
-            obj.type = 'rect';
-            obj.outlinecolor = SAM.ConvertColor(element.lineColor);
-            obj.linewidth = element.lineWidth;
-            obj.origin = element.center;
-            obj.width = element.width;
-            obj.length = element.height;
-            obj.orientation = element.rotation;
-            // var w =
-            annotObj.Layer.LoadWidget(obj);
-            // w = this.Viewer;
+            annotObj.Layer.LoadWidget(element);
           }
         }
         if (element.type === 'polyline') {

@@ -48,6 +48,14 @@
     // Get rid of the buffers?
   };
 
+  //Rect.prototype.Draw = function(view) {
+  //  if (this.Image) {
+  //    view.Context2d.drawImage(this.Image, 0,0);      
+  //  }
+  //  SAM.Shape.prototype.Draw.call(this, view);
+  //}
+
+  
   Rect.prototype.UpdateBuffers = function (view) {
     this.PointBuffer = [];
 
@@ -323,35 +331,36 @@
     obj.orientation = this.Shape.GetOrientation();
     obj.linewidth = this.Shape.LineWidth;
     obj.creation_camera = this.CreationCamera;
+    if ('UserImageUrl' in this.Shape) {
+      obj.user = {'imageUrl': this.Shape.UserImageUrl};
+    }
     return obj;
   };
 
   // Load a widget from a json object (origin MongoDB).
   RectWidget.prototype.Load = function (obj) {
     this.UserNoteFlag = obj.user_note_flag;
-    this.Shape.Origin[0] = parseFloat(obj.origin[0]);
-    this.Shape.Origin[1] = parseFloat(obj.origin[1]);
-    if (obj.origin.length > 2) {
-      this.Shape.Origin[2] = parseFloat(obj.origin[2]);
+    this.Shape.Origin[0] = parseFloat(obj.center[0]);
+    this.Shape.Origin[1] = parseFloat(obj.center[1]);
+    if (obj.center.length > 2) {
+      this.Shape.Origin[2] = parseFloat(obj.center[2]);
     }
 
-    if (obj.outlinecolor) {
-      this.Shape.OutlineColor[0] = parseFloat(obj.outlinecolor[0]);
-      this.Shape.OutlineColor[1] = parseFloat(obj.outlinecolor[1]);
-      this.Shape.OutlineColor[2] = parseFloat(obj.outlinecolor[2]);
+    if (obj.lineColor) {
+      var color = SAM.ConvertColor(obj.lineColor);
+      this.Shape.OutlineColor[0] = parseFloat(color[0]);
+      this.Shape.OutlineColor[1] = parseFloat(color[1]);
+      this.Shape.OutlineColor[2] = parseFloat(color[2]);
     }
     this.Shape.Width = parseFloat(obj.width);
     if (obj.confidence) {
       this.confidence = parseFloat(obj.confidence);
     }
-    if (obj.length) {
-      this.Shape.Height = parseFloat(obj.length);
-    }
     if (obj.height) {
       this.Shape.Height = parseFloat(obj.height);
     }
-    if (obj.orientation) {
-      this.Shape.Orientation = parseFloat(obj.orientation);
+    if (obj.rotation) {
+      this.Shape.Orientation = parseFloat(obj.rotation);
     }
     if (obj.linewidth !== undefined) {
       this.Shape.LineWidth = parseFloat(obj.linewidth);
@@ -362,6 +371,16 @@
     // How zoomed in was the view when the annotation was created.
     if (obj.creation_camera !== undefined) {
       this.CreationCamera = obj.CreationCamera;
+    }
+
+    if ("user" in obj) {
+      var user = obj.user;
+      if ("imageUrl" in user) {
+        this.Shape.UserImageUrl = user.imageUrl;
+        this.Shape.Image = new Image();
+        this.Shape.Image.src = user.imageUrl;
+        // On loaded, render?
+      }
     }
   };
 

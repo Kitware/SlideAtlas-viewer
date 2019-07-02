@@ -446,15 +446,16 @@
     if ("label" in element) {
       var str = element["label"]["value"]
       var text = new SAM.Text()
-      text.BackgroundFlag = true;
+      text.BackgroundFlag = false;
       text.String = str;
-      text.Position = [this.Circle.Origin[0]-30, this.Circle.Origin[1]+this.Circle.Radius+30]
+      text.Position = [this.Circle.Origin[0], this.Circle.Origin[1]]
       this.Circle.Children["label"] = text;
     }
     
     if ("user" in element) {
-      if ("keypoints" in element['user']) {
-        var keypoints = element['user']['keypoints'];
+      var user = element['user'];
+      if ("keypoints" in user) {
+        var keypoints = user['keypoints'];
         for (var idx = 0; idx < keypoints.length; ++idx) {
           var kp = keypoints[idx];
           var circle = new SAM.Circle();
@@ -462,6 +463,10 @@
             circle.SetFillColor([0.0, 1.0, 0]);
           } else if (kp["category"] == "tail") {
             circle.SetFillColor([1.0, 0.0, 0]);
+          } else if (kp["category"] == "left_wingtip") {
+            circle.SetFillColor([1.0, 0.0, 1.0]);
+          } else if (kp["category"] == "right_wingtip") {
+            circle.SetFillColor([0.0, 1.0, 1.0]);
           } else {
             circle.SetFillColor([0.8, 0.8, 1]);
           }
@@ -471,9 +476,8 @@
           circle.Origin = kp['xy'];
           this.Circle.Children[kp["category"]] = circle;
         }
-      }
-      if ("network_keypoints" in element['user']) {
-        var keypoints = element['user']['network_keypoints'];
+      } else if ("network_keypoints" in user) {
+        var keypoints = user['network_keypoints'];
         for (var idx = 0; idx < keypoints.length; ++idx) {
           var kp = keypoints[idx];
           var circle = new SAM.Circle();

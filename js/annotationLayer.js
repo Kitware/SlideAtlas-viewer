@@ -43,7 +43,7 @@
       case 'polyline':
         widget = new SAM.PolylineWidget(layer);
         break;
-      case 'rect':
+      case 'rectangle':
         widget = new SAM.RectWidget(layer);
         break;
       case 'rect_set':
