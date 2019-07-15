@@ -277,6 +277,22 @@
             .addClass('sa-view-annotation-modal-input')
             .keypress(function (event) { return event.keyCode !== 13; });
 
+    // Label
+    this.Dialog.LabelDiv =
+            $('<div>')
+            .appendTo(this.Dialog.Body)
+            .addClass('sa-view-annotation-modal-div');
+    this.Dialog.LabelLabel =
+            $('<div>')
+            .appendTo(this.Dialog.LabelDiv)
+            .text('Label:')
+            .addClass('sa-view-annotation-modal-input-label');
+    this.Dialog.LabelInput =
+            $('<input type="text">')
+            .appendTo(this.Dialog.LabelDiv)
+            .addClass('sa-view-annotation-modal-input')
+            .keypress(function (event) { return event.keyCode !== 13; });
+
     // Area
     this.Dialog.AreaDiv =
             $('<div>')
@@ -327,11 +343,11 @@
   CircleWidget.prototype.WidgetPropertiesToDialog = function () {
     this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Circle.OutlineColor));
     this.Dialog.LineWidthInput.val((this.Circle.LineWidth).toFixed(2));
-  };
-
-  // Copy the properties of the dialog into the widget
-  CircleWidget.prototype.DialogPropertiesToWidget = function () {
-    var modified = false;
+    var label = "";
+    if ("label" in this.Circle.Children) {
+      label = this.Circle.Children['label'].String;
+    }
+    this.Dialog.LabelInput.val(label);
 
     var area = (2.0 * Math.PI * this.Circle.Radius * this.Circle.Radius) * 0.25 * 0.25;
     var areaString = '';
@@ -348,6 +364,22 @@
       }
     }
     this.Dialog.Area.text(areaString);
+  };
+
+  
+  // I am having the two shapes share an origin/position point array.
+  // That way code that just modifies oring will automatically change label.
+  CircleWidget.prototype.SetOrigin = function (xy) {
+    this.Circle.Origin = xy;
+    if ('label' in this.Circle.Children) {
+      this.Circle.Children.label.Position = xy;
+    }
+  };
+
+  
+  // Copy the properties of the dialog into the widget
+  CircleWidget.prototype.DialogPropertiesToWidget = function () {
+    var modified = false;
 
     // Get the color
     var hexcolor = SAM.ConvertColorToHex(this.Dialog.ColorInput.val());
@@ -363,6 +395,22 @@
       modified = true;
     }
 
+    var label = this.Dialog.LabelInput.val();
+    label = label.trim();
+    if (label == "") {
+      this.Circle.Children.label = undefined;
+    } else {
+      if (!this.Circle.Children.label) {
+        var text = new SAM.Text()
+        text.BackgroundFlag = false;
+        text.String = label;
+        text.Position = this.Circle.Origin;
+        this.Circle.Children["label"] = text;
+      }
+      this.Circle.Children.label.String = label;
+      modified = true;
+    }
+    
     if (modified) {
       this.Modified();
       this.Circle.UpdateBuffers(this.Layer.AnnotationView);
@@ -396,7 +444,7 @@
     this.Load(data);
     // Place the widget over the mouse.
     // This would be better as an argument.
-    this.Circle.Origin = [mouseWorldPt[0], mouseWorldPt[1]];
+    this.SetOrigin([mouseWorldPt[0], mouseWorldPt[1]]);
     // TODO: Just have the caller draw.
     layer.EventuallyDraw();
   };
@@ -410,6 +458,11 @@
     element.radius = this.Circle.Radius;
     element.lineWidth = this.Circle.LineWidth;
     //element.creation_camera = this.CreationCamera;
+
+    if ('label' in this.Circle.Children) {
+      element.label = {'value': this.Circle.Children.label.String};
+    }
+
     return element;
   };
 
@@ -448,7 +501,7 @@
       var text = new SAM.Text()
       text.BackgroundFlag = false;
       text.String = str;
-      text.Position = [this.Circle.Origin[0], this.Circle.Origin[1]]
+      text.Position = this.Circle.Origin;
       this.Circle.Children["label"] = text;
     }
     
@@ -656,7 +709,7 @@
     }
     if (this.State === NEW_DRAG || this.State === DRAG) {
       if (SA && SA.notesWidget) { SA.notesWidget.MarkAsModified(); } // hack
-      this.Circle.Origin = cam.ConvertPointViewerToWorld(x, y);
+      this.SetOrigin(cam.ConvertPointViewerToWorld(x, y));
       layer.EventuallyDraw();
     }
 
