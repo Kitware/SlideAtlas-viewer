@@ -3,7 +3,6 @@
 // It is an annotation layer plus the gui button to manipulate the layer.
 
 
-
 (function () {
   'use strict';
   
@@ -12,6 +11,9 @@
     // This is needed because EditOn, has to turn off any other layers editing.
     this.LayerPanel = layerPanel;
     this.Viewer = this.LayerPanel.Viewer;
+    // Only widgets in a single layer can be selected at the same time.
+    this.SelectedWidgets = [];
+
     this.ActiveColor = '#7CF';
     this.DefaultColor = '#DDD';
     this.ButtonSize = '16px';
@@ -182,7 +184,9 @@
 
     // Restore any visible annotations from a previous session.
     if (this.LayerPanel.LocalStorageVisibleAnnotationNames.indexOf(this.Name) > -1) {
-      this.AfterLoad(function () { self.VisibilityOn(); });
+      this.AfterLoad(function () {
+        self.VisibilityOn();
+      });
     }
   };
 
@@ -217,17 +221,26 @@
   // Only one editable at a time (or none)
   AnnotationLayerGui.prototype.EditOn = function () {
     if (this.Editing) {
-      this.LayerPanel.UpdateToolVisibility();
+      this.UpdateToolVisibility();
       return;
     }
     this.Editing = true;
 
-    // Turn the previous one off. (Only one can be highlighted at a time)
-    // TODO: Evaulate if we should be changing ivars in the layer panel.
-    if (this.LayerPanel.EditingLayer) {
-      this.LayerPanel.EditingLayer.EditOff();
+    // Wait as long as possible before creating and setting the tool panel.
+    // create it now.
+    if (!this.ToolPanel) {
+      if (this.Name == this.LayerPanel.GetDefaultLayerName()) {
+        this.ToolPanel = this.LayerPanel.DefaultToolPanel;
+      } else if (this.Data.annotation.elements.length > 0 &&
+          this.Data.annotation.elements[0].user &&
+          this.Data.annotation.elements[0].user.imageUrl) {
+        this.ToolPanel = new SAM.MaskToolPanel(this.LayerPanel);
+      } else {
+        this.ToolPanel = new SAM.AnnotationToolPanel(this.LayerPanel);
+      }
+      this.ToolPanel.SetLayerGui(this);
     }
-
+    
     // Make the name editable.
     this.SetNameButtonModeToEdit();
 
@@ -237,15 +250,13 @@
     this.DeleteButton.show();
 
     // Turn the new on on.
-    this.LayerPanel.EditingLayer = this;
+    this.LayerPanel.SetEditingLayerGui(this);
     // Change the color of the GUI.
     this.Div.css({'background-color': this.ActiveColor});
     // Make the markup visible
     this.VisibilityOn();
 
-    // TODO:
-    // Figure out how to have custom tools.
-    this.LayerPanel.UpdateToolVisibility();
+    this.UpdateToolVisibility();
   };
 
 
@@ -259,10 +270,11 @@
       .attr('src', SA.ImagePathUrl + 'edit_up.png');
 
     // Deactivate any widgets in the layer.
-    this.Layer.SetSelected(false);
-    this.Layer.Deactivate();
-    this.Layer.EventuallyDraw();
-
+    if (this.Layer) {
+      this.Layer.SetSelected(false);
+      this.Layer.Deactivate();
+      this.Layer.EventuallyDraw();
+    }
     // Disable editing of the name.
     this.SetNameButtonModeToOwner();
 
@@ -273,12 +285,12 @@
     // Hide the delete button
     this.DeleteButton.hide();
     // Turn the background to the default.
-    if (this.LayerPanel.EditingLayer === this) {
+    if (this.LayerPanel.EditingLayerGui === this) {
       this.Div.css({'background-color': this.DefaultColor});
-      this.LayerPanel.EditingLayer = undefined;
+      this.LayerPanel.SetEditingLayerGui(undefined);
     }
 
-    this.LayerPanel.UpdateToolVisibility();
+    this.UpdateToolVisibility();
   };
 
 
@@ -398,6 +410,10 @@
                        function () { return false; });
     // Turn editing back on if the mouse enters the button again.
     this.NameButton.on('mouseenter', function () { self.EditNameOn(); });
+
+    if (this.Name !== this.LayerPanel.GetDefaultLayerName()) {
+      this.LayerPanel.prototype.InitializeDefaultToolPanel();
+    }
   };
 
 
@@ -430,7 +446,7 @@
 
   // Call back from deleteButton.
   AnnotationLayerGui.prototype.DeleteCallback = function () {
-    if (!this.LayerPanel.EditingLayer) {
+    if (!this.LayerPanel.EditingLayerGui) {
       return;
     }
     this.Delete();
@@ -438,7 +454,7 @@
 
 
   AnnotationLayerGui.prototype.Delete = function () {
-    if (!this.LayerPanel.EditingLayer.Layer.IsSelected()) {
+    if (!this.LayerPanel.EditingLayerGui.Layer.IsSelected()) {
       if (!confirm('Do you want to delete the entire annotation group?' + this.Name)) {
         return;
       }
@@ -469,13 +485,17 @@
 
   
   AnnotationLayerGui.prototype.DeleteAnnotationGui = function () {
+    // Break these links which will allow the default tool panel to
+    // create another layerGUi if it is used.
+    this.ToolPanel.SetLayerGui(undefined);
+    this.ToolPanel = undefined;
     // Visibility and editing off.
     this.VisibilityOff();
     // Remove the buttons
     this.Div.remove();
     // Take it out of the annotation panel.
-    var idx = this.LayerPanel.AnnotationObjects.indexOf(this);
-    this.LayerPanel.AnnotationObjects.splice(idx, 1);
+    var idx = this.LayerPanel.LayerGuis.indexOf(this);
+    this.LayerPanel.LayerGuis.splice(idx, 1);
   };
 
   
@@ -620,9 +640,6 @@
   
   // Records and saves an annotation. Will create a new one if this obj has no id.
   AnnotationLayerGui.prototype.RecordAndSave = function () {
-    if (this.LayerPanel.UserData.login === 'guest') {
-      return;
-    }
     var self = this;
     if (this.SaveTimerId) {
       clearTimeout(self.SaveTimerId);
@@ -630,7 +647,7 @@
     }
 
     console.log('Save annotation');
-    if (this.Data) {
+    if (!this.Data) {
       this.Data = {annotation: {elements: []}};
     }
     // Read markup and put into data object.
@@ -648,14 +665,14 @@
       }
       // A new annotation
       girder.rest.restRequest({
-        path: 'annotation?itemId=' + this.LayerPanel.ImageItemId,
+        path: 'annotation?itemId=' + this.LayerPanel.ItemId,
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(this.Data.annotation)
       }).done(function (retAnnot) {
         // Saving has finished.
         // This has the girder id.
-        this.GirderAnnotId = this.Data._id = retAnnot._id;
+        self.GirderAnnotId = self.Data._id = retAnnot._id;
         self.AnnotationSaved();
       });
     } else {
@@ -825,6 +842,107 @@
       }
     }
     return returnElements;
+  };
+
+  
+  AnnotationLayerGui.prototype.UpdateToolVisibility = function () {
+    if (this.ToolPanel) {
+      this.ToolPanel.UpdateToolVisibility();
+    }
+  };
+
+  
+  // Rectangle select is only active on the editing layer.
+  // Only widgets from one layer can be selected.
+  // Called by the SelectedDeleteButton click event (or delete key).
+  // Returns true if a widget was deleted.
+  AnnotationLayerGui.prototype.DeleteSelected = function () {
+    if (!this.Layer.IsSelected()) {
+      this.Delete();
+      return;
+    }
+    if (this.Layer.DeleteSelected()) {
+      this.AnnotationModified();
+      if (this.Layer.IsEmpty()) {
+        this.Delete();
+        return;
+      }
+    }
+    this.SelectedWidgets = [];
+    // TODO: Clean this up.
+    this.ToolPanel.ToolRadioButtonCallback(this.ToolPanel.CursorButton);
+    this.UpdateToolVisibility();
+    this.Layer.EventuallyDraw();
+  };
+
+
+  // If only one widget is selected, we make it active (and show the properties button.
+  // You can call this with selectedWidget = undefined to unset it.
+  // "selectedLayerGui" is the one that contains the widget.
+  AnnotationLayerGui.prototype.SetSelectedWidget = function (selectedWidget) {
+    // Unselect previous selected widgets.
+    for (var i = 0; i < this.SelectedWidgets.length; ++i) {
+      var widget = this.SelectedWidgets[i];
+      widget.SetActive(false);
+    }
+    this.SelectedWidgets = [];
+
+    // No widget: Go back to the cursor mode.
+    if (!selectedWidget) {
+      // Nothing was selected.
+      // Change the state back to cursor.
+      // TODO: Clean this API up.
+      var tools = this.ToolPanel;
+      tools.HighlightRadioToolButton(tools.CursorButton);
+      // See if we can move this to CursorOn
+      this.Viewer.EventuallyRender();
+      tools.UpdateToolVisibility();
+      return true;
+    }
+
+    this.EditOn();
+
+    // TODO: Try to get rid of this case statement.
+    // TODO: Move this into ToolPanel
+    // Change the tool radio to reflect the widget choosen.
+    var tools = this.ToolPanel;
+    if (selectedWidget.Type === 'pencil') {
+      // Make the open-closed toggle button match the state of the selected widget.
+      // I could not (easily) put this in UpdateToolVisibility because the widget
+      // was changed to match the button before this code executed.
+      if (selectedWidget.IsModeClosed()) {
+        tools.SetPencilModeToClosed();
+      } else {
+        tools.SetPencilModeToOpen();
+      }
+      // Turn on the pencil tool
+      // I am trying to avoid triggering the button. It has caused headaches in the past.
+      // This might miss setting up a callback on the widget.
+      tools.HighlightRadioToolButton(tools.PencilButton);
+      // Should we change this to SetActive(true)?
+      selectedWidget.SetStateToDrawing(this.Layer);
+    }
+    if (selectedWidget.Type === 'text') {
+      selectedWidget.SetActive(true);
+      tools.HighlightRadioToolButton(tools.TextButton);
+    }
+    if (selectedWidget.Type === 'arrow') {
+      tools.HighlightRadioToolButton(tools.ArrowButton);
+      selectedWidget.SetActive(true);
+    }
+    if (selectedWidget.Type === 'circle') {
+      tools.HighlightRadioToolButton(tools.CircleButton);
+      selectedWidget.SetActive(true);
+    }
+    if (selectedWidget.Type === 'rect') {
+      tools.HighlightRadioToolButton(tools.RectangleButton);
+      selectedWidget.SetActive(true);
+    }
+
+    // TODO: This ivar is only really needed for the properties dialog.
+    // We could just find the first selected widget ....
+    this.SelectedWidgets = [selectedWidget];
+    tools.UpdateToolVisibility();
   };
 
   

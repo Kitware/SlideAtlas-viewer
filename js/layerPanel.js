@@ -34,8 +34,9 @@
     this.ItemId = itemId;
     this.LayerGuis = [];
     this.ModifiedCount = 0;
-    this.EditingLayer = undefined;
-    this.SelectedWidgets = [];
+    this.EditingLayerGui = undefined;
+
+    this.Viewer.ScaleOn();
     
     // Because of loading on demand, the easiest way to restore
     // visibile annotations from local storage is to load a list
@@ -47,7 +48,7 @@
     this.Margin = 6;
     this.ToolDivHeight = 70;
 
-    // Holds the annotation tools and the list of annotation buttons
+    // Holds the annotation buttons.  The tool div acutally floats in the viewer.
     this.Div = $('<div>')
       // Have to use this parent, or events are blocked.
       .appendTo(this.Parent)
@@ -62,31 +63,19 @@
         'opacity': '0.6',
         'z-index': '2'});
     
-    if (itemId) {
-      this.CheckItemIdAccessTools(itemId);
-      // This makes a button for each annotation in the item.
-      this.InitializeButtons(this.Div, itemId);
-    }
+    this.Parent = viewer.GetDiv();
+    this.InitializeHelp(this.Parent.parent());
 
     // The pannel should probably not be managing this navigation widget.
     // I am putting it here as a temporary home.
     if (itemId) {
       this.InitializeNavigation(viewer.GetDiv(), itemId);
+      this.Initialize(this.Div, itemId);
     }
-
-    this.Parent = viewer.GetDiv();
-    this.InitializeHelp(this.Parent.parent());
 
     // To get event calls from the viewer.
     this.Viewer.AddLayer(this);
   }
-
-
-  LayerPanel.prototype.UpdateToolVisibility = function () {
-    if (this.AnnotationToolPanel) {
-      this.AnnotationToolPanel.UpdateToolVisibility();
-    }
-  };
 
 
   // onresize callback.  Canvas width and height and the camera need
@@ -136,44 +125,18 @@
   // with the default name (users last name).  If none are found, one is created.
   // The tools use this method.
   LayerPanel.prototype.WithEditingLayerCall = function (callback) {
-    if (this.EditingLayer) {
-      (callback)(this.EditingLayer);
-      return;
-    }
-    var self = this;
-    var layerGui;
-    for (var idx = 0; idx < this.LayerGuis.length; ++idx) {
-      layerGui = this.LayerGuis[idx];
-      if (layerGui.CreatorId === this.UserData._id &&
-          layerGui.Name === this.UserData.login) {
-        // Use this one. Make sure it is loaded before executing the callback.
-        layerGui.AfterLoad(function () {
-          layerGui.DisplayAnnotation();
-          layerGui.EditOn();
-          (callback)(layerGui);
-        });
-        return;
-      }
+    if (!this.EditingLayerGui) {
+      this.EditingLayerGui = this.GetDefaultLayerGui();
     }
 
-    // Make a new one.
-    // Do not make it real until saved.
-    var annotation = {elements: []};
-    var data = {
-      annotation: {name: this.UserData.login},
-      creatorId: this.UserData._id,
-      _id: undefined,
-      data: annotation};
-    // TODO: try to merge this with the other code that makes a layer.
-    layerGui = new SAM.AnnotationLayerGui(data, this);
-    this.LayerGuis.push(layerGui);
-    layerGui.VisToggle.prop('checked', true);
-    layerGui.MakeAnnotationLayer(this.Viewer);
-
-    layerGui.EditOn();
-    (callback)(this.EditingLayer);
+    // Make sure it is loaded before executing the callback.
+    var layerGui = this.EditingLayerGui;
+    layerGui.AfterLoad(function () {
+      layerGui.DisplayAnnotation();
+      layerGui.EditOn();
+      (callback)(layerGui);
+    });
   };
-
 
   
   // ===============================================================================
@@ -434,35 +397,6 @@
   };
 
   
-  // Setup the tool buttons / GUI when this pannel is first constructed.
-  // But first we have to go through a series of rest calls to determine we have write access.
-  LayerPanel.prototype.CheckItemIdAccessTools = function (itemId) {
-    // First we have to see if we have write access to the folder containing this item.
-    var self = this;
-    girder.rest.restRequest({
-      path: 'item/' + itemId,
-      method: 'GET'
-    }).done(function (data) {
-      self.CheckItemDataAccessTools(data);
-    });
-  };
-  LayerPanel.prototype.CheckItemDataAccessTools = function (data) {
-    // First we have to see if we have write access to the folder containing this item.
-    var self = this;
-    girder.rest.restRequest({
-      path: 'folder/' + data.folderId,
-      method: 'GET'
-    }).done(function (data) {
-      self.CheckFolderDataAccessTools(data);
-    });
-  };
-  LayerPanel.prototype.CheckFolderDataAccessTools = function (data) {
-    // if (data._accessLevel > 0) {
-    // We have access.  Go ahead and create the tools.
-    this.AnnotationToolPanel = new SAM.AnnotationToolPanel(this);
-  };
-
-  
   // ===============================================================================
   // Call back from navigation to update the annotation to match the viewer item.
   LayerPanel.prototype.ChangeItem = function (itemId) {
@@ -485,7 +419,7 @@
     // Now for the annotation stuff.
     this.DeleteAnnotationButtons();
     this.LocalStorageVisibleAnnotationNames = savedNames;
-    this.InitializeButtons(this.Div, itemId);
+    this.Initialize(this.Div, itemId);
   };
 
 
@@ -557,7 +491,7 @@
   };
 
 
-  LayerPanel.prototype.InitializeButtons = function (parent, itemId) {
+  LayerPanel.prototype.Initialize = function (parent, itemId) {
     // The multiple nested annotation button divs are to get the scrollbar
     // on the left, but keep the text left justified.
     this.ScrollDiv = $('<div>')
@@ -593,8 +527,7 @@
       } else {
         self.UserData = data;
       }
-      if (itemId) {
-        self.ImageItemId = itemId;
+      if (itemId) { // This check is probably unnecessary
         self.RequestGirderImageItem(itemId);
       }
     });
@@ -621,18 +554,77 @@
       self.LoadGirderItemAnnotations(data);
     });
   };
-
-
   // Just the meta data for the items.  Make buttons from the meta data.
   LayerPanel.prototype.LoadGirderItemAnnotations = function (data) {
+    // TODO: Figure out the edit button (hide it if the user does not have access.)
     for (var i = 0; i < data.length; ++i) {
       var layerGui = new SAM.AnnotationLayerGui(data[i], this);
       this.LayerGuis.push(layerGui);
     }
+    
+    // If the user has write access, we need a default layerGui.
+    // First we have to see if we have write access to the folder containing this item.
+    // We get the folder from the item ........
+    if (this.ItemId) {
+      var self = this;
+      girder.rest.restRequest({
+        path: 'item/' + this.ItemId,
+        method: 'GET'
+      }).done(function (data) {
+        self.CheckItemDataAccessTools(data);
+      });
+    }
+  };
+  LayerPanel.prototype.CheckItemDataAccessTools = function (data) {
+    // First we have to see if we have write access to the folder containing this item.
+    var self = this;
+    girder.rest.restRequest({
+      path: 'folder/' + data.folderId,
+      method: 'GET'
+    }).done(function (data) {
+      self.CheckFolderDataAccessTools(data);
+    });
+  };
+  LayerPanel.prototype.CheckFolderDataAccessTools = function (data) {
+    if (data._accessLevel == 0) {
+      // No access, skip creating the tools (which are confusing to have
+      // if annoation cannot be saved.
+      return;
+    }
+
+    this.InitializeDefaultToolPanel();
   };
 
+  // This is done when this object is first created, and
+  // when the dafault layerGui name is changed.
+  LayerPanel.prototype.InitializeDefaultToolPanel = function () {
+    this.DefaultToolPanel = new SAM.AnnotationToolPanel(this);
+    this.DefaultToolPanel.Show();
+  }
 
+  LayerPanel.prototype.GetDefaultLayerName = function () {
+    return this.UserData.login;
+  }
+  
+  // Find or make a deafult GUI (user name).  Return it.
+  LayerPanel.prototype.GetDefaultLayerGui = function () {
+    var layerGui;
+    var defaultLayerName = this.GetDefaultLayerName();
+    for (var idx = 0; idx < this.LayerGuis.length; ++ idx) {
+      var layerGui = this.LayerGuis[idx];
+      if (layerGui.Name == defaultLayerName) {
+        return layerGui;
+      }
+    }
 
+    // Setting the ToolPanel is deferred until it starts editing.
+    layerGui = new SAM.AnnotationLayerGui({'annotation':{'name': defaultLayerName}},
+                                          this);
+    this.LayerGuis.push(layerGui);
+    return layerGui;
+  };
+  
+  
   // ===========================================================================
   // Forward events to layers.
 
@@ -668,6 +660,7 @@
     }
   };
 
+  // TODO: Try to put this into annotationLayerGui (if it makes sense).
   LayerPanel.prototype.HandleTouchStart = function (event) {
     if (this.CheckForIPadPencil(event)) {
       var self = this;
@@ -675,13 +668,13 @@
       this.WithEditingLayerCall(
         function (layerGui) {
           // A small hack.
-          self.SelectedWidgets = [layerGui.Layer.GetIPadPencilWidget()];
+          layerGui.SelectedWidgets = [layerGui.Layer.GetIPadPencilWidget()];
           layerGui.Layer.HandleTouchStart(event);
         });
       return false;
     }
-    if (this.EditingLayer) {
-      var layer = this.EditingLayer.Layer;
+    if (this.EditingLayerGui) {
+      var layer = this.EditingLayerGui.Layer;
       if (layer && layer.HandleTouchStart) {
         return layer.HandleTouchStart(event);
       }
@@ -691,8 +684,8 @@
 
   LayerPanel.prototype.HandleTouchMove = function (event) {
     this.CheckForIPadPencil(event);
-    if (this.EditingLayer) {
-      var layer = this.EditingLayer.Layer;
+    if (this.EditingLayerGui) {
+      var layer = this.EditingLayerGui.Layer;
       if (layer && layer.HandleTouchMove) {
         return layer.HandleTouchMove(event);
       }
@@ -703,11 +696,11 @@
   LayerPanel.prototype.HandleTouchEnd = function (event) {
     console.log('panel touch end ' + event.touches.length);
     // No touches for end events so we cannot check for ipad pencil.
-    if (this.EditingLayer) {
-      var layer = this.EditingLayer.Layer;
+    if (this.EditingLayerGui) {
+      var layer = this.EditingLayerGui.Layer;
       if (layer && layer.HandleTouchEnd) {
         // To cache pencil editing.
-        this.UpdateToolVisibility();
+        this.EditingLayerGui.UpdateToolVisibility();
         return layer.HandleTouchEnd(event);
       }
     }
@@ -715,8 +708,8 @@
   };
 
   LayerPanel.prototype.HandleMouseDown = function (event) {
-    if (this.EditingLayer) {
-      var layer = this.EditingLayer.Layer;
+    if (this.EditingLayerGui) {
+      var layer = this.EditingLayerGui.Layer;
       if (layer && layer.HandleMouseDown) {
         return layer.HandleMouseDown(event);
       }
@@ -725,8 +718,8 @@
   };
 
   LayerPanel.prototype.HandleMouseUp = function (event) {
-    if (this.EditingLayer) {
-      var layer = this.EditingLayer.Layer;
+    if (this.EditingLayerGui) {
+      var layer = this.EditingLayerGui.Layer;
       if (layer && layer.HandleMouseUp) {
         return layer.HandleMouseUp(event);
       }
@@ -735,8 +728,8 @@
   };
 
   LayerPanel.prototype.HandleMouseMove = function (event) {
-    if (this.EditingLayer) {
-      var layer = this.EditingLayer.Layer;
+    if (this.EditingLayerGui) {
+      var layer = this.EditingLayerGui.Layer;
       if (layer && layer.HandleMouseMove) {
         return layer.HandleMouseMove(event);
       }
@@ -745,8 +738,8 @@
   };
 
   LayerPanel.prototype.HandleMouseWheel = function (event) {
-    if (this.EditingLayer) {
-      var layer = this.EditingLayer.Layer;
+    if (this.EditingLayerGui) {
+      var layer = this.EditingLayerGui.Layer;
       if (layer && layer.HandleMouseWheel) {
         return layer.HandleMouseWheel(event);
       }
@@ -755,17 +748,20 @@
   };
 
   LayerPanel.prototype.HandleKeyDown = function (event) {
-    if ( ! this.EditingLayer) {
+    if ( ! this.EditingLayerGui) {
       return true;
     }
-    var layer = this.EditingLayer.Layer;
+    var layer = this.EditingLayerGui.Layer;
     // Handle the delete key special
     // Multiple widgets ( in the layer being edit) can be deleted.
     if (event.keyCode === 46 || event.keyCode === 8) { // delete key
-      this.DeleteSelected();
-      layer.EventuallyDraw();
-      event.preventDefault();
-      return false;
+      if (this.EditingLayerGui) {
+        this.EditingLayerGui.DeleteSelected();
+        // TODO: SHould this be in "DeleteSelected"?
+        layer.EventuallyDraw();
+        event.preventDefault();
+        return false;
+      }
     }
 
     if (layer && layer.HandleKeyDown) {
@@ -782,17 +778,19 @@
   // Event propagation will turn anyones off in the early layers.
   // After event propagation is stoped,  Loop through the rest
   // un selecting them.
-  // NOTE: Select opperates on all layers.  It will choose a new "EditingLayer".
+  // NOTE: Select opperates on all layers.  It will choose a new "EditingLayerGui".
   LayerPanel.prototype.HandleMouseClick = function (event, shift) {
     // Turn off previous tool widgets. (deactivate)
-    if (this.EditingLayer && !shift && !SAM.ControlKey) {
-      var layer = this.EditingLayer.Layer;
-      layer.UnselectAll();
+    if (this.EditingLayerGui && !shift && !SAM.ControlKey) {
+      var layer = this.EditingLayerGui.Layer;
+      if (layer) {
+        layer.UnselectAll();
+      }
     }
 
     // First one to consume the click wins the selection.
     // TODO: Change this to voting if annotations start to overlap.
-    var selectedWidget;
+    var selectedWidget, selectedLayerGui;
 
     // TODO: Get rid of the multiple strokes in a single pencil widget.
     // It was a bad idea. It is 'hard' because lasso interaction editing of loops
@@ -810,6 +808,7 @@
         continue;
       }
       if (selectedWidget) {
+        // I do not think the shift of control keys are fully implemented.
         if (!shift && !SAM.ControlKey) {
           // Just unselect remaining layers.
           layer.SetSelected(false);
@@ -819,145 +818,71 @@
         // It is a way to find which group a mark belongs to.
         if (layer.SingleSelect) {
           selectedWidget = layer.SingleSelect(event, shift);
-          // if (selectedWidget) {
-          //  selectedAnnotObj = layerGui;
-          // }
+          selectedLayerGui = layerGui;
         }
       }
     }
 
+    this.SetEditingLayerGui(selectedLayerGui);
+    
     // I should really pass in the layerGui that contains the widget.
     // However, this method finds it anyway.
-    this.SetSelectedWidget(selectedWidget);
+    this.EditingLayerGui.SetSelectedWidget(selectedWidget);
     return false;
   };
 
   
-  // If only one widget is selected, we make it active (and show the properties button.
-  // You can call this with selectedWidget = undefined to unset it.
-  // "selectedLayerGui" is the one that contains the widget.
-  LayerPanel.prototype.SetSelectedWidget = function (selectedWidget,
-                                                     selectedLayerGui) {
-    var tools = this.AnnotationToolPanel;
-    
-    // Unselect previous selected widgets.
-    for (var i = 0; i < this.SelectedWidgets.length; ++i) {
-      var widget = this.SelectedWidgets[i];
-      widget.SetActive(false);
+  // The EditinlayerGui is always set. If non are checked by the user,
+  // then use the default layer. The tools of the layer being edited are
+  // displayed in this layer panel
+  LayerPanel.prototype.SetEditingLayerGui = function (layerGui) {
+    if (this.EditingLayerGui == layerGui) {
+      return;
     }
-    this.SelectedWidgets = [];
+    this.DefaultToolPanel.Hide();
 
-    // No widget: Go back to the cursor mode.
-    if (!selectedWidget) {
-      // Nothing was selected.
-      // Change the state back to cursor
-      tools.HighlightRadioToolButton(tools.CursorButton);
-      // See if we can move this to CursorOn
-      this.Viewer.EventuallyRender();
-      tools.UpdateToolVisibility();
-      return true;
+    // This check is only used on the first call after this object has been created.
+    if (this.EditingLayerGui) {
+      this.EditingLayerGui.ToolPanel.Hide()
+      this.EditingLayerGui.EditOff();
     }
+    if (layerGui == undefined) {
+      this.DefaultToolPanel.Show();
+    } else {
+      layerGui.ToolPanel.Show();
+    }    
+    this.EditingLayerGui = layerGui;
+  };
+  
 
-    // Trying to unify single select and region select (when only one is selected)
-    // This is ugly.  Caller should supply the layer gui.
-    if (selectedLayerGui === undefined) {
-      // Find the layerGui for this widget.
-      for (i = 0; i < this.LayerGuis.length && !selectedLayerGui; ++i) {
-        var layerGui = this.LayerGuis[i];
-        if (layerGui.Layer !== undefined) {
-          var layer = layerGui.Layer;
-          for (var j = 0; j < layer.GetNumberOfWidgets(); ++j) {
-            if (selectedWidget === layer.GetWidget(j)) {
-              selectedLayerGui = layerGui;
-              break;
-            }
+
+  // This adds a pencil ivar (= true) for events generated by the iPad pencil.
+  LayerPanel.prototype.CheckForIPadPencil = function (event, debug) {
+    if (SAM.MOBILE_DEVICE === 'iPad' && event.touches && event.touches.length === 1) {
+      var touch = event.touches[0];
+      // iPad pencil generates a force.
+      if (touch.force && !isNaN(touch.force) && touch.force !== 0) {
+        if (debug) {
+          print('event force = ' + touch.force);
+        }
+        event.pencil = true;
+        // Hack
+        // TODO: Trigger this on selected stroke.
+        this.PencilOpenClosedToggle.show();
+        return true;
+      } else {
+        if (debug) {
+          if (touch.force === undefined) {
+            print('No force in event');
+          } else {
+            print('non qualified event force = ' + touch.force);
           }
         }
       }
     }
-    if (selectedLayerGui === undefined) {
-      return;
-    }
-
-    // TODO: This ivar is only really needed for the properties dialog.
-    // We could just find the first selected widget ....
-    this.SelectedWidgets = [];
-
-    // Make the layer editable.
-    if (selectedLayerGui) {
-      selectedLayerGui.EditOn();
-    }
-
-    // TODO: Try to get rid of this case statement.
-    // Change the tool radio to reflect the widget choosen.
-    if (selectedWidget.Type === 'pencil') {
-      // Make the open-closed toggle button match the state of the selected widget.
-      // I could not (easily) put this in UpdateToolVisibility because the widget
-      // was changed to match the button before this code executed.
-      if (selectedWidget.IsModeClosed()) {
-        tools.SetPencilModeToClosed();
-      } else {
-        tools.SetPencilModeToOpen();
-      }
-      // Turn on the pencil tool
-      // I am trying to avoid triggering the button. It has caused headaches in the past.
-      // This might miss setting up a callback on the widget.
-      tools.HighlightRadioToolButton(tools.PencilButton);
-      // Should we change this to SetActive(true)?
-      selectedWidget.SetStateToDrawing(selectedLayerGui.Layer);
-    }
-    if (selectedWidget.Type === 'text') {
-      selectedWidget.SetActive(true);
-      tools.HighlightRadioToolButton(tools.TextButton);
-    }
-    if (selectedWidget.Type === 'arrow') {
-      tools.HighlightRadioToolButton(tools.ArrowButton);
-      selectedWidget.SetActive(true);
-    }
-    if (selectedWidget.Type === 'circle') {
-      tools.HighlightRadioToolButton(tools.CircleButton);
-      selectedWidget.SetActive(true);
-    }
-    if (selectedWidget.Type === 'rect') {
-      tools.HighlightRadioToolButton(tools.RectangleButton);
-      selectedWidget.SetActive(true);
-    }
-
-    // TODO: This ivar is only really needed for the properties dialog.
-    // We could just find the first selected widget ....
-    this.SelectedWidgets = [selectedWidget];
-    tools.UpdateToolVisibility();
+    return false;
   };
 
-
-  // This should probably go into annotationLayerGui, but
-  // I cannot decide who should be responsible for updating the tools.
-  // Wait until we figure out how the layerGui can own the tools.
-  // Rectangle select is only active on the editing layer.
-  // Only widgets from one layer can be selected.
-  // Called by the SelectedDeleteButton click event (or delete key).
-  // Returns true if a widget was deleted.
-  LayerPanel.prototype.DeleteSelected = function () {
-    var layerGui = this.EditingLayer;
-    if (!layerGui) {
-      return false;
-    }
-    if (!layerGui.Layer.IsSelected()) {
-      layerGui.Delete();
-      return;
-    }
-    if (layerGui.Layer.DeleteSelected()) {
-      layerGui.AnnotationModified();
-      if (layerGui.Layer.IsEmpty()) {
-        layerGui.Delete();
-      }
-    }
-    this.SelectedWidgets = [];
-    this.ToolRadioButtonCallback(this.CursorButton);
-    this.UpdateToolVisibility();
-    layerGUi.Layer.EventuallyDraw();
-  };
-
-
+  
   SAM.LayerPanel = LayerPanel;
 })();

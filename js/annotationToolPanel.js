@@ -46,6 +46,10 @@
 //   2: Layer editon (good)
 //   3: Changes tool button GUI.
 
+
+// TODO: Clean up the access to "AnnotationLayerGui::SelectedWidgets"
+
+
 (function () {
   'use strict';
 
@@ -61,13 +65,12 @@
     this.Viewer = layerPanel.Viewer;
     
     this.Parent = this.Viewer.GetDiv();
-    this.Viewer.ScaleOn();
 
     // -----------------------------------------------------
 
-    // Warning: These are duplicated in layerPanel
-    this.Margin = 6;
-    this.ToolDivHeight = 70;
+    // CSS maybe?
+    this.Margin = layerPanel.Margin;
+    this.ToolDivHeight = layerPanel.ToolDivHeight;
 
     // If we have write access, this creates markup tools.
     this.ToolPanel = $('<div>')
@@ -83,7 +86,8 @@
         // 'height': this.ToolDivHeight.toString() + 'px',
         'opacity': '0.6',
         'z-index': '300'})
-      .draggable();
+      .draggable()
+      .hide();
 
     this.ToolDiv = $('<div>')
       .appendTo(this.ToolPanel);
@@ -92,12 +96,32 @@
       .appendTo(this.ToolPanel)
       .attr('id', 'saAnnotationTools');
 
-    this.Radius = 7;
-
     this.InitializeTools();
   }
 
+  AnnotationToolPanel.prototype.SetLayerGui = function (layerGui) {
+    this.LayerGui = layerGui;
+  };
 
+  AnnotationToolPanel.prototype.GetLayerGui = function () {
+    if (! this.LayerGui) {
+      this.LayerGui = this.LayerPanel.GetDefaultLayerGui()
+      // The layer panel aleady sets this,
+      // but it cannot hurt to do this for saftey.
+      // It is a hack.  No API.
+      // this.LayerGui.ToolPanel = this;
+    }
+    return this.LayerGui;
+  };
+  
+  AnnotationToolPanel.prototype.Hide = function () {
+    this.ToolPanel.hide();
+  };
+
+  AnnotationToolPanel.prototype.Show = function () {
+    this.ToolPanel.show();
+  };
+  
   AnnotationToolPanel.prototype.InitializeTools = function () {
     var self = this;
 
@@ -216,8 +240,8 @@
         'radio-on',
         function () {
           self.LayerPanel.WithEditingLayerCall(
-            function (annotObj) {
-              (self[onCallbackName])(annotObj);
+            function (layerGui) {
+              (self[onCallbackName])(layerGui);
             });
         });
     }
@@ -266,11 +290,12 @@
 
   // Called by the PropertiesDialogButton click event.
   AnnotationToolPanel.prototype.ShowSelectedWidgetMenu = function () {
-    if (!this.LayerPanel.EditingLayer || !this.LayerPanel.SelectedWidgets.length === 1) {
+    var layerGUi = this.GetLayerGui();
+    if (!layerGui().SelectedWidgets.length === 1) {
       return;
     }
 
-    var widget = this.LayerPanel.SelectedWidgets[0];
+    var widget = layerGui.SelectedWidgets[0];
     if (widget.SetStateToDialog) {
       widget.SetStateToDialog();
     } else {
@@ -281,7 +306,7 @@
   // When tools have nothing to modify, they disappear.
   // TODO: Help tool. to explain why a tool is not available.
   AnnotationToolPanel.prototype.UpdateToolVisibility = function () {
-    if (this.LayerPanel.SelectedWidgets.length === 1) {
+    if (this.GetLayerGui().SelectedWidgets.length === 1) {
       this.PropertiesDialogButton.show();
     } else {
       this.PropertiesDialogButton.hide();
@@ -362,13 +387,16 @@
     this.PencilOpenClosedToggle
         .attr('src', SA.ImagePathUrl + 'open_lasso.png');
 
-    for (var i = 0; i < this.LayerPanel.SelectedWidgets.length; ++i) {
-      var widget = this.LayerPanel.SelectedWidgets[i];
-      if (widget.SetModeToOpen) {
-        widget.SetModeToOpen();
-      }
-      if (this.LayerPanel.EditingLayer) {
-        this.LayerPanel.EditingLayer.Layer.EventuallyDraw();
+    if (this.LayerGui) {
+      var layerGui = this.LayerGui;
+      for (var i = 0; i < layerGui.SelectedWidgets.length; ++i) {
+        var widget = layerGui.SelectedWidgets[i];
+        if (widget.SetModeToOpen) {
+          widget.SetModeToOpen();
+        }
+        if (this.LayerPanel.EditingLayer) {
+          this.LayerPanel.EditingLayer.Layer.EventuallyDraw();
+        }
       }
     }
     this.SaveDefaults();
@@ -383,13 +411,16 @@
     this.PencilOpenClosedToggle
         .attr('src', SA.ImagePathUrl + 'select_lasso.png');
 
-    for (var i = 0; i < this.LayerPanel.SelectedWidgets.length; ++i) {
-      var widget = this.LayerPanel.SelectedWidgets[i];
-      if (widget.SetModeToClosed) {
-        widget.SetModeToClosed();
-      }
-      if (this.LayerPanel.EditingLayer) {
-        this.LayerPanel.EditingLayer.Layer.EventuallyDraw();
+    if (this.LayerGui) {
+      var layerGui = this.LayerGui;
+      for (var i = 0; i < layerGui.SelectedWidgets.length; ++i) {
+        var widget = layerGui.SelectedWidgets[i];
+        if (widget.SetModeToClosed) {
+          widget.SetModeToClosed();
+        }
+        if (this.LayerPanel.EditingLayer) {
+          this.LayerPanel.EditingLayer.Layer.EventuallyDraw();
+        }
       }
     }
     this.SaveDefaults();
@@ -408,16 +439,18 @@
     this.Viewer.GetParentDiv().css({'cursor': ''});
     this.ActiveToolButton = this.CursorButton;
     // Is this thie correct behavior?
-    this.LayerPanel.SelectedWidgets = [];
+    if (this.LayerGui) {
+      this.LayerGui.SelectedWidgets = [];
+    }
   };
 
   // An annotation has to be selected for editing before this is called.
   // It starts a rectSelectWidget for the user.
   AnnotationToolPanel.prototype.RectSelectOn = function () {
     var self = this;
-    var annotObj = this.LayerPanel.EditingLayer;
+    var layerGui = this.LayerPanel.EditingLayer;
     // Anything being edited has to be loaded too.
-    var layer = annotObj.Layer;
+    var layer = layerGui.Layer;
     layer.SetSelected(false);
     var rectSelectWidget = new SAM.RectSelectWidget(layer);
     rectSelectWidget.SetFinishCallback(function (w) { self.RectSelectOff(rectSelectWidget); });
@@ -429,9 +462,9 @@
   };
   // This is called when the selection has been made by the user.
   AnnotationToolPanel.prototype.RectSelectOff = function (selector) {
-    var annotObj = this.LayerPanel.EditingLayer;
+    var layerGui = this.LayerPanel.EditingLayer;
     var selectedWidgets = [];
-    var layer = annotObj.Layer;
+    var layer = layerGui.Layer;
     for (var idx = 0; idx < layer.GetNumberOfWidgets(); ++idx) {
       var w = layer.GetWidget(idx);
       if (w.ApplySelect && w.ApplySelect(selector)) {
@@ -441,11 +474,12 @@
     layer.RemoveWidget(selector);
     layer.EventuallyDraw();
 
+    var layerGui = this.GetLayerGui();
     if (selectedWidgets.length === 1) {
-      this.LayerPanel.SetSelectedWidget(selectedWidgets[0]);
+      layerGui.SetSelectedWidget(selectedWidgets[0]);
     } else {
       // See if we can move this to CursorOn
-      this.LayerPanel.SelectedWidgets = selectedWidgets;
+      layerGui.SelectedWidgets = selectedWidgets;
       this.HighlightRadioToolButton(this.CursorButton);
     }
     this.UpdateToolVisibility();
@@ -456,14 +490,14 @@
   // Selecting a text automatically turns text button on and shows dialog.
   // I do not know if any call actually passes a wiodget.
   // Widget is an optional arguement. May not ever be called with a widget.
-  AnnotationToolPanel.prototype.TextButtonOn = function (annotObj) {
+  AnnotationToolPanel.prototype.TextButtonOn = function (layerGui) {
     // The layer has to be in editing mode.
-    annotObj.EditOn();
+    layerGui.EditOn();
 
     var widget;
     // Get a text widget.
     // Look for a selected widget to reuse.
-    var layer = annotObj.Layer;
+    var layer = layerGui.Layer;
     if (!widget) {
       widget = layer.GetASelectedWidget('text');
     }
@@ -489,7 +523,7 @@
     widget.SetStateChangeCallback(function () {
       if (!widget.Layer) {
         // string was empty.  TODO: find a better way to handle widget initiated delete.
-        self.LayerPanel.SelectedWidgets = [];
+        self.GetLayerGui().SelectedWidgets = [];
         self.ToolRadioButtonCallback(self.CursorButton);
         self.UpdateToolVisibility();
       } else if (!widget.GetActive()) {
@@ -497,18 +531,18 @@
       }
     });
 
-    this.LayerPanel.SelectedWidgets = [widget];
+    this.GetLayerGui().SelectedWidgets = [widget];
   };
 
   // Widget is an optional arguement.
-  AnnotationToolPanel.prototype.ArrowButtonOn = function (annotObj) {
+  AnnotationToolPanel.prototype.ArrowButtonOn = function (layerGui) {
     // The layer has to be in editing mode.
-    annotObj.EditOn();
+    layerGui.EditOn();
 
     var widget;
     // Get an arrow widget.
     // Look for a selected widget to reuse.
-    var layer = annotObj.Layer;
+    var layer = layerGui.Layer;
     if (!widget) {
       widget = layer.GetASelectedWidget('arrow');
     }
@@ -535,17 +569,17 @@
       }
     });
 
-    this.LayerPanel.SelectedWidgets = [widget];
+    this.GetLayerGui().SelectedWidgets = [widget];
   };
 
-  AnnotationToolPanel.prototype.CircleButtonOn = function (annotObj) {
+  AnnotationToolPanel.prototype.CircleButtonOn = function (layerGui) {
     // The layer has to be in editing mode.
-    annotObj.EditOn();
+    layerGui.EditOn();
 
     var widget;
     // Get an arrow widget.
     // Look for a selected widget to reuse.
-    var layer = annotObj.Layer;
+    var layer = layerGui.Layer;
     if (!widget) {
       widget = layer.GetASelectedWidget('circle');
     }
@@ -571,17 +605,17 @@
       }
     });
 
-    this.LayerPanel.SelectedWidgets = [widget];
+    this.GetLayerGui().SelectedWidgets = [widget];
   };
 
-  AnnotationToolPanel.prototype.RectangleButtonOn = function (annotObj) {
+  AnnotationToolPanel.prototype.RectangleButtonOn = function (layerGui) {
     // The layer has to be in editing mode.
-    annotObj.EditOn();
+    layerGui.EditOn();
 
     var widget;
     // Get an arrow widget.
     // Look for a selected widget to reuse.
-    var layer = annotObj.Layer;
+    var layer = layerGui.Layer;
     if (!widget) {
       widget = layer.GetASelectedWidget('rect');
     }
@@ -607,18 +641,18 @@
       }
     });
 
-    this.LayerPanel.SelectedWidgets = [widget];
+    this.GetLayerGui().SelectedWidgets = [widget];
   };
 
   // Widget is an optional arguement.
-  AnnotationToolPanel.prototype.PencilButtonOn = function (annotObj) {
+  AnnotationToolPanel.prototype.PencilButtonOn = function (layerGui) {
     // The layer has to be in editing mode.
-    annotObj.EditOn();
+    layerGui.EditOn();
 
     var widget;
     // Get a pencil widget.
     // Look for a selected widget to reuse.
-    var layer = annotObj.Layer;
+    var layer = layerGui.Layer;
     if (!widget) {
       widget = layer.GetASelectedWidget('pencil');
     }
@@ -651,48 +685,20 @@
       widget.SetModeToClosed(layer);
     }
 
-    this.LayerPanel.SelectedWidgets = [widget];
+    this.GetLayerGui().SelectedWidgets = [widget];
   };
 
-  
-  // This adds a pencil ivar (= true) for events generated by the iPad pencil.
-  AnnotationToolPanel.prototype.CheckForIPadPencil = function (event, debug) {
-    if (SAM.MOBILE_DEVICE === 'iPad' && event.touches && event.touches.length === 1) {
-      var touch = event.touches[0];
-      // iPad pencil generates a force.
-      if (touch.force && !isNaN(touch.force) && touch.force !== 0) {
-        if (debug) {
-          print('event force = ' + touch.force);
-        }
-        event.pencil = true;
-        // Hack
-        // TODO: Trigger this on selected stroke.
-        this.PencilOpenClosedToggle.show();
-        return true;
-      } else {
-        if (debug) {
-          if (touch.force === undefined) {
-            print('No force in event');
-          } else {
-            print('non qualified event force = ' + touch.force);
-          }
-        }
-      }
-    }
-    return false;
-  };
-
-  
+    
   AnnotationToolPanel.prototype.SetTime = function (time) {
     for (var i = 0; i < this.AnnotationObjects.length; ++i) {
-      var annotObj = this.AnnotationObjects[i];
-      var layer = annotObj.Layer;
+      var layerGui = this.AnnotationObjects[i];
+      var layer = layerGui.Layer;
       if (layer) {
         layer.ZTime = time;
       }
     }
   };
 
-
+  
   SAM.AnnotationToolPanel = AnnotationToolPanel;
 })();

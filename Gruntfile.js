@@ -38,11 +38,15 @@ var jsSrcFiles = [
   'js/girderWidget.js',
   'js/girderAnnotationEditor.js',
   'js/girderAnnotationIterator.js',
-  'js/girderAnnotationPanel.js',
   'js/girderArrowIterator.js',
   'js/GirderStackWidget.js',
   'js/GirderRocWidget.js',
   'js/view.js',
+  // These three work together to make ath annotation GUI
+  'js/layerPanel.js',
+  'js/annotationLayerGui.js',
+  'js/annotationToolPanel.js',
+  'js/maskToolPanel.js',
   // Core files
   'js/cookies.js',
   'js/girderNavigationWidget.js',
