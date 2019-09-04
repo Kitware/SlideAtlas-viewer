@@ -373,13 +373,33 @@
       this.CreationCamera = obj.CreationCamera;
     }
 
+
     if ("user" in obj) {
       var user = obj.user;
       if ("imageUrl" in user) {
         this.Shape.UserImageUrl = user.imageUrl;
         this.Shape.Image = new Image();
+        var self = this;
+		$(self.Shape.Image).one('load', function () {
+			var width = self.Shape.Image.width;
+			var height = self.Shape.Image.height;
+			var hiddenCanvas = $('<canvas width='+width+'  height='+height+'>') ;
+			
+			var ctx = hiddenCanvas[0].getContext("2d");
+			ctx.drawImage(self.Shape.Image, 0, 0);
+			ctx.beginPath();
+			ctx.lineWidth = "100";
+			ctx.strokeStyle = "blue";
+			ctx.arc(500, 500, 300, 0, 2 * Math.PI);
+			ctx.stroke();
+			ctx.clearRect(200, 200, 300, 300);
+			self.Shape.Image.src = hiddenCanvas[0].toDataURL();
+		});
+        
+
         this.Shape.Image.src = user.imageUrl;
         // On loaded, render?
+        
       }
     }
   };

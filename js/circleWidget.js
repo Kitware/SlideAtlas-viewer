@@ -243,7 +243,7 @@
     this.Dialog = new SAM.Dialog(this.Layer.GetParent().parent());
     this.Dialog.SetApplyCallback(function () { self.DialogApplyCallback(); });
     // Customize dialog for a circle.
-    this.Dialog.Title.text('Circle Propoerties');
+    this.Dialog.Title.text('Circle Properties');
     this.Dialog.Body.css({'margin': '1em 2em', 'height': '14em'});
     // Radius
     this.Dialog.RadiusDiv =
