@@ -62,7 +62,23 @@
         'bottom': (2 * this.Margin) + 'px',
         'opacity': '0.6',
         'z-index': '2'});
-    
+
+    // Test
+    /*
+    var self = this;
+    var obj = {'item_id': "5cd437d71841c12368df8519",
+               'name': "test.txt",
+               'data': "Hello World"};
+    girder.rest.restRequest({
+      path: 'item/' + obj.item_id + '/tiles',
+      method: 'GET'
+    }).done(function (data) {
+      obj.sizeX = data.sizeX;
+      obj.sizeY = data.sizeY;
+      self.TestUploadFile(obj);
+    });
+    */
+
     this.Parent = viewer.GetDiv();
     this.InitializeHelp(this.Parent.parent());
 
@@ -76,6 +92,74 @@
     // To get event calls from the viewer.
     this.Viewer.AddLayer(this);
   }
+
+
+  LayerPanel.prototype.TestUploadFile = function (obj) {
+    var self = this;
+    girder.rest.restRequest({
+      path: 'item/' + obj.item_id + '/files',
+      method: 'GET'
+    }).done(function (data) {
+      for (var idx = 0; idx < data.length; ++idx) {
+        if (data[idx].name == obj.name) {
+          obj.file_id = data[idx]._id;
+          break;
+        }
+      }
+      self.TestUploadFile2(obj);
+    });
+  };
+
+  
+  LayerPanel.prototype.TestUploadFile2 = function (obj) {
+    var self = this;
+    if ('file_id' in obj) {
+      var params = {
+        'size': obj.data.length,
+      };
+      girder.rest.restRequest({
+        path: 'file/' + obj.file_id + '/contents',
+        params: params,
+        method: 'PUT'
+      }).done(function (data) {
+        obj.upload_id = data._id;
+        self.TestUploadFile3(obj);
+      });
+    } else {
+      var params = {
+        'parentType': 'item',
+        'parentId': obj.item_id,
+        'name': "test.txt",
+        'size': obj.data.length,
+        //'mimeType':"image/png"
+        'mimeType': "text/plain"
+      };
+      girder.rest.restRequest({
+        path: 'file',
+        params: params,
+        method: 'POST'
+      }).done(function (data) {
+        obj.upload_id = data._id;
+        self.TestUploadFile3(obj);
+      });
+    }
+  };
+
+
+  LayerPanel.prototype.TestUploadFile3 = function (obj) {
+    var params = {
+      'offset': 0,
+      'uploadId': obj.upload_id
+    };
+    girder.rest.restRequest({
+      path: 'file/chunk',
+      params: params,
+      method: 'POST',
+      data: obj.data
+    }).done(function (data) {
+      console.log("upload sucessful " + data['_id'])
+    });
+  };
 
 
   // onresize callback.  Canvas width and height and the camera need
@@ -843,13 +927,13 @@
 
     // This check is only used on the first call after this object has been created.
     if (this.EditingLayerGui) {
-      this.EditingLayerGui.ToolPanel.Hide()
+      this.EditingLayerGui.GetToolPanel().Hide()
       this.EditingLayerGui.EditOff();
     }
     if (layerGui == undefined) {
       this.DefaultToolPanel.Show();
     } else {
-      layerGui.ToolPanel.Show();
+      layerGui.GetToolPanel().Show();
     }    
     this.EditingLayerGui = layerGui;
   };

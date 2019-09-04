@@ -290,8 +290,8 @@
 
   // Called by the PropertiesDialogButton click event.
   AnnotationToolPanel.prototype.ShowSelectedWidgetMenu = function () {
-    var layerGUi = this.GetLayerGui();
-    if (!layerGui().SelectedWidgets.length === 1) {
+    var layerGui = this.GetLayerGui();
+    if (!layerGui.SelectedWidgets.length === 1) {
       return;
     }
 

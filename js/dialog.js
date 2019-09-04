@@ -27,7 +27,7 @@
             .addClass('sa-view-dialog-title')
             .appendTo(this.Dialog)
             .css({'width': '100%',
-              'height': '2.25em',
+              'height': '2.5em',
               'box-sizing': 'border-box'});
     this.Title = $('<div>')
             .appendTo(this.Row1)

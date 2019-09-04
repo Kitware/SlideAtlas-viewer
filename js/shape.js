@@ -359,7 +359,9 @@
       view.Context2d.restore();
     }
     for (name in this.Children) {
-      this.Children[name].Draw(view);
+      if (this.Children[name] &&  this.Children[name].Draw) {
+        this.Children[name].Draw(view);
+      }
     }
   };
 

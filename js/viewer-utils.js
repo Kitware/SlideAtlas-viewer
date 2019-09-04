@@ -2952,6 +2952,9 @@
       contents.slideUp();
       openCloseIcon.attr('src', SA.ImagePathUrl + 'plus.png');
     };
+    contents[0].getOpen = function () {
+      return open;
+    };
     contents[0].getLabel = function () {
       return labelSpan;
     };

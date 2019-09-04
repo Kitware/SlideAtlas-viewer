@@ -13,10 +13,11 @@
   var NEW_DRAG_RADIUS = 2;
   var DRAG = 3; // The whole circle is being dragged.
   var DRAG_RADIUS = 4;
-  var INACTIVE = 5; // Not responding to events at all
-  var ACTIVE = 6; // Receive events.  Looking for a hover.
-  var HOVER = 7; // Mouse is over the widget.
-  var DIALOG = 8; // Properties dialog is up
+  var DRAG_KEYPOINT = 5;
+  var INACTIVE = 6; // Not responding to events at all
+  var ACTIVE = 7; // Receive events.  Looking for a hover.
+  var HOVER = 8; // Mouse is over the widget.
+  var DIALOG = 9; // Properties dialog is up
 
   var CIRCUMFERENCE = 1;
   var INSIDE = 2;
@@ -243,7 +244,48 @@
     this.Dialog.SetApplyCallback(function () { self.DialogApplyCallback(); });
     // Customize dialog for a circle.
     this.Dialog.Title.text('Circle Propoerties');
-    this.Dialog.Body.css({'margin': '1em 2em'});
+    this.Dialog.Body.css({'margin': '1em 2em', 'height': '14em'});
+    // Radius
+    this.Dialog.RadiusDiv =
+            $('<div>')
+            .css({'height': '24px'})
+            .appendTo(this.Dialog.Body)
+            .addClass('sa-view-annotation-modal-div');
+    this.Dialog.RadiusLabel =
+            $('<div>')
+            .appendTo(this.Dialog.RadiusDiv)
+            .text('Radius:')
+            .addClass('sa-view-annotation-modal-input-label');
+    this.Dialog.RadiusInput =
+            $('<input type="number">')
+            .appendTo(this.Dialog.RadiusDiv)
+            .val(10)
+            .addClass('sa-view-annotation-modal-input');
+
+    // Center
+    this.Dialog.CenterDiv =
+            $('<div>')
+            .css({'height': '24px'})
+            .appendTo(this.Dialog.Body)
+            .addClass('sa-view-annotation-modal-div');
+    this.Dialog.CenterLabel =
+            $('<div>')
+            .appendTo(this.Dialog.CenterDiv)
+            .text('Center:')
+            .addClass('sa-view-annotation-modal-input-label');
+    this.Dialog.CenterXInput =
+            $('<input type="number">')
+            .appendTo(this.Dialog.CenterDiv)
+            .css({'width': '30%'})
+            .val(0)
+            .addClass('sa-view-annotation-modal-input');    
+    this.Dialog.CenterYInput =
+            $('<input type="number">')
+            .appendTo(this.Dialog.CenterDiv)
+            .css({'width': '30%'})
+            .val(0)
+            .addClass('sa-view-annotation-modal-input');
+    
     // Color
     this.Dialog.ColorDiv =
             $('<div>')
@@ -341,10 +383,13 @@
 
   // Fill the dialog values from the widget values.
   CircleWidget.prototype.WidgetPropertiesToDialog = function () {
+    this.Dialog.RadiusInput.val(Math.round(this.Circle.Radius));
+    this.Dialog.CenterXInput.val(Math.round(this.Circle.Origin[0]));
+    this.Dialog.CenterYInput.val(Math.round(this.Circle.Origin[1]));
     this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Circle.OutlineColor));
     this.Dialog.LineWidthInput.val((this.Circle.LineWidth).toFixed(2));
     var label = "";
-    if ("label" in this.Circle.Children) {
+    if (this.Circle.Children.label && this.Circle.Children.label.String) {
       label = this.Circle.Children['label'].String;
     }
     this.Dialog.LabelInput.val(label);
@@ -381,6 +426,20 @@
   CircleWidget.prototype.DialogPropertiesToWidget = function () {
     var modified = false;
 
+    var radius = parseInt(this.Dialog.RadiusInput.val());
+    if (radius !== this.Circle.Radius) {
+      this.Circle.Radius = radius;
+      modified = true;
+    }
+
+    var cx = parseInt(this.Dialog.CenterXInput.val());
+    var cy = parseInt(this.Dialog.CenterYInput.val());
+    if (cx !== this.Circle.Origin[0] || cy !== this.Circle.Origin[1]) {
+      this.Circle.Origin[0] = cx;
+      this.Circle.Origin[1] = cy;
+      modified = true;
+    }
+
     // Get the color
     var hexcolor = SAM.ConvertColorToHex(this.Dialog.ColorInput.val());
     if (hexcolor !== this.Circle.OutlineColor) {
@@ -398,7 +457,7 @@
     var label = this.Dialog.LabelInput.val();
     label = label.trim();
     if (label == "") {
-      this.Circle.Children.label = undefined;
+      delete this.Circle.Children.label;
     } else {
       if (!this.Circle.Children.label) {
         var text = new SAM.Text()
@@ -459,10 +518,33 @@
     element.lineWidth = this.Circle.LineWidth;
     //element.creation_camera = this.CreationCamera;
 
-    if ('label' in this.Circle.Children) {
+    if (this.Circle.Children.label && this.Circle.Children.label.String) {
       element.label = {'value': this.Circle.Children.label.String};
     }
-
+    // Serialize the keypoints
+    var childKey, child;
+    for (childKey in this.Circle.Children) {
+      child = this.Circle.Children[childKey];
+      if (typeof(child) === "object" && 'Radius' in child) {
+        if (! "user" in element) {
+          element["user"] = {}
+        }
+        var user = element["user"];
+        if (! "keypoints" in user) {
+          user["keypoints"] = []
+        }
+        var keypoints = user["keypoints"];
+        // This is an inefficient schema.  I have to search an array.
+        // This will not add a new keypoint.
+        for (var i = 0; i < keypoints.length; ++i) {
+          var kp = keypoints[i]
+          if (kp.category === childKey) {
+            kp.xy = child.Origin;
+          }
+        }
+      }
+    }
+    
     return element;
   };
 
@@ -471,8 +553,8 @@
   // TODO: delayed upldating bufferes until the first draw
   CircleWidget.prototype.Load = function (element) {
     this.Element = element;
-    this.Circle.Origin[0] = parseFloat(element.center[0]);
-    this.Circle.Origin[1] = parseFloat(element.center[1]);
+    this.Circle.Origin[0] = Math.round(parseFloat(element.center[0]));
+    this.Circle.Origin[1] = Math.round(parseFloat(element.center[1]));
     if (element['lineColor'] !== undefined) {
       var outlinecolor = SAM.ConvertColor(element.lineColor);
       this.Circle.OutlineColor[0] = parseFloat(outlinecolor[0]);
@@ -483,10 +565,10 @@
       this.Circle.OutlineColor[1] = 1.0;
       this.Circle.OutlineColor[2] = 1.0;
     }
-    this.Circle.Radius = parseFloat(element.radius);
+    this.Circle.Radius = Math.round(parseFloat(element.radius));
     this.Circle.LineWidth = 0;
     if (element.lineWidth) {
-      this.Circle.LineWidth = parseFloat(element.linewidth);
+      this.Circle.LineWidth = parseFloat(element.lineWidth);
     }
     this.Circle.FixedSize = false;
     this.Circle.UpdateBuffers(this.Layer.AnnotationView);
@@ -604,7 +686,10 @@
     if (this.State === HOVER) {
       var circlePart = this.MouseOverWhichPart(layer.Event);
       // Determine behavior from active radius.
-      if (circlePart === CENTER) {
+      if (typeof(circlePart) === "object") {
+        this.State = DRAG_KEYPOINT;
+        this.KeyPoint = circlePart;
+      } else if (circlePart === CENTER) {
         this.State = DRAG;
       } else if (circlePart === CIRCUMFERENCE) {
         this.OriginViewer =
@@ -628,10 +713,12 @@
       this.Layer.EventuallyDraw();
     }
 
-    if (this.State === DRAG || this.State === DRAG_RADIUS) {
+    if (this.State === DRAG || this.State === DRAG_RADIUS ||
+        this.State === DRAG_KEYPOINT) {
       this.State = HOVER;
       this.Modified();
       this.Layer.EventuallyDraw();
+      this.KeyPoint = undefined;
     }
 
     var event = layer.Event;
@@ -678,11 +765,22 @@
     if (this.State === ACTIVE || this.State === HOVER) {
       var circlePart = this.MouseOverWhichPart(layer.Event);
       if (this.Circle.FillColor !== undefined && circlePart === INSIDE) {
+        // Mouse if over a child keypoint.
+        this.State = HOVER;
+        this.Layer.GetParent().css({'cursor': 'move'});
+        return false;
+      }
+      if (this.Circle.FillColor !== undefined && circlePart === INSIDE) {
         this.State = HOVER;
         this.Layer.GetParent().css({'cursor': 'move'});
         return false;
       }
       if (circlePart === CIRCUMFERENCE || circlePart === CENTER) {
+        this.State = HOVER;
+        this.Layer.GetParent().css({'cursor': 'move'});
+        return false;
+      }
+      if (typeof(circlePart) === "object" && 'Radius' in circlePart) {
         this.State = HOVER;
         this.Layer.GetParent().css({'cursor': 'move'});
         return false;
@@ -694,7 +792,8 @@
 
     // Hack to fix weird state where mouse up is not called.
     if (event.which === 0 &&
-        (this.State === NEW_DRAG_RADIUS || this.State === DRAG_RADIUS || this.State === DRAG)) {
+        (this.State === NEW_DRAG_RADIUS || this.State === DRAG_RADIUS ||
+         this.State === DRAG || this.State === DRAG_KEYPOINT)) {
       return this.HandleMouseUp(event);
     }
 
@@ -722,6 +821,12 @@
       this.Circle.Radius = Math.sqrt(dx * dx + dy * dy) * cam.Height / viewport[3];
       this.Circle.UpdateBuffers(layer.AnnotationView);
       if (SA && SA.notesWidget) { SA.notesWidget.MarkAsModified(); } // hack
+      layer.EventuallyDraw();
+    }
+
+    if (this.State === DRAG_KEYPOINT) {
+      if (SA && SA.notesWidget) { SA.notesWidget.MarkAsModified(); } // hack
+      this.KeyPoint.Origin = cam.ConvertPointViewerToWorld(x, y);
       layer.EventuallyDraw();
     }
 
@@ -798,8 +903,31 @@
   // Returns true or false.  Point is in viewer coordinates.
   CircleWidget.prototype.MouseOverWhichPart = function (event) {
     var pt = [event.offsetX, event.offsetY];
-    var c = this.Circle.Origin;
-    var r = this.Circle.Radius;
+    var c, r, child, childKey;
+    
+    // Check the children (keypoints).
+    for (childKey in this.Circle.Children) {
+      child = this.Circle.Children[childKey];
+      if (typeof(child) === "object" && 'Radius' in child) {
+        // Assume the child is a circle.
+        c = child.Origin;
+        r = child.Radius;
+        if (!this.FixedSize) {
+          var cam = this.Layer.GetCamera();
+          c = cam.ConvertPointWorldToViewer(c[0], c[1]);
+          r = cam.ConvertScaleWorldToViewer(r);
+        }
+        var dx = pt[0] - c[0];
+        var dy = pt[1] - c[1];
+        var d = Math.sqrt(dx * dx + dy * dy);
+        if (Math.abs(d) < r + this.Tolerance) {
+          return child;
+        }
+      }
+    }
+    
+    c = this.Circle.Origin;
+    r = this.Circle.Radius;
     var lineWidth = this.Circle.LineWidth;
     // Do the comparison in view coordinates.
     if (!this.FixedSize) {

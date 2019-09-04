@@ -217,17 +217,8 @@
     return annotationLayer;
   };
 
-  
-  // Only one editable at a time (or none)
-  AnnotationLayerGui.prototype.EditOn = function () {
-    if (this.Editing) {
-      this.UpdateToolVisibility();
-      return;
-    }
-    this.Editing = true;
 
-    // Wait as long as possible before creating and setting the tool panel.
-    // create it now.
+  AnnotationLayerGui.prototype.GetToolPanel = function () {
     if (!this.ToolPanel) {
       if (this.Name == this.LayerPanel.GetDefaultLayerName()) {
         this.ToolPanel = this.LayerPanel.DefaultToolPanel;
@@ -240,6 +231,22 @@
       }
       this.ToolPanel.SetLayerGui(this);
     }
+    return this.ToolPanel;
+  }
+
+  
+  // Only one editable at a time (or none)
+  AnnotationLayerGui.prototype.EditOn = function () {
+    if (this.Editing) {
+      this.UpdateToolVisibility();
+      return;
+    }
+    this.Editing = true;
+
+    // Wait as long as possible before creating and setting the tool panel.
+    // create it now.
+    // Not necessary top do it here I guess.
+    this.GetToolPanel();
     
     // Make the name editable.
     this.SetNameButtonModeToEdit();
@@ -412,7 +419,7 @@
     this.NameButton.on('mouseenter', function () { self.EditNameOn(); });
 
     if (this.Name !== this.LayerPanel.GetDefaultLayerName()) {
-      this.LayerPanel.prototype.InitializeDefaultToolPanel();
+      this.LayerPanel.InitializeDefaultToolPanel();
     }
   };
 
@@ -487,8 +494,10 @@
   AnnotationLayerGui.prototype.DeleteAnnotationGui = function () {
     // Break these links which will allow the default tool panel to
     // create another layerGUi if it is used.
-    this.ToolPanel.SetLayerGui(undefined);
-    this.ToolPanel = undefined;
+    if (this.ToolPanel) {
+      this.ToolPanel.SetLayerGui(undefined);
+      this.ToolPanel = undefined;
+    }
     // Visibility and editing off.
     this.VisibilityOff();
     // Remove the buttons
@@ -870,7 +879,8 @@
     }
     this.SelectedWidgets = [];
     // TODO: Clean this up.
-    this.ToolPanel.ToolRadioButtonCallback(this.ToolPanel.CursorButton);
+    var toolPanel = this.GetToolPanel();
+    toolPanel.ToolRadioButtonCallback(toolPanel.CursorButton);
     this.UpdateToolVisibility();
     this.Layer.EventuallyDraw();
   };
@@ -892,7 +902,7 @@
       // Nothing was selected.
       // Change the state back to cursor.
       // TODO: Clean this API up.
-      var tools = this.ToolPanel;
+      var tools = this.GetToolPanel();
       tools.HighlightRadioToolButton(tools.CursorButton);
       // See if we can move this to CursorOn
       this.Viewer.EventuallyRender();
@@ -905,7 +915,7 @@
     // TODO: Try to get rid of this case statement.
     // TODO: Move this into ToolPanel
     // Change the tool radio to reflect the widget choosen.
-    var tools = this.ToolPanel;
+    var tools = this.GetToolPanel();
     if (selectedWidget.Type === 'pencil') {
       // Make the open-closed toggle button match the state of the selected widget.
       // I could not (easily) put this in UpdateToolVisibility because the widget
