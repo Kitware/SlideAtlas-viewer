@@ -85,6 +85,12 @@
   Shape.prototype.SetSelected = function (f) {
     if (f === this.Selected) { return false; }
     this.Selected = f;
+    // When a parent is selected, the children are highligted too.
+    for (var childKey in this.Children) {
+      var child = this.Children[childKey];
+      child.SetSelected(f);
+    }
+
     return true;
   };
 

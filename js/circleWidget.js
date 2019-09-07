@@ -181,6 +181,7 @@
         selection.ViewerPointInSelection(p[0] + radius, p[1] - radius) &&
         selection.ViewerPointInSelection(p[0] + radius, p[1] + radius)) {
       this.Circle.SetSelected(true);
+
       return true;
     }
     this.Circle.SetSelected(false);
@@ -892,6 +893,11 @@
       return this;
     }
     if (circlePart === CIRCUMFERENCE || circlePart === CENTER) {
+      this.Circle.SetSelected(true);
+      return this;
+    }
+    // Handle clicking on the keypoints.
+    if (typeof(circlePart) === "object") {
       this.Circle.SetSelected(true);
       return this;
     }
