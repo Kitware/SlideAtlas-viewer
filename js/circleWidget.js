@@ -531,7 +531,7 @@
           element["user"] = {}
         }
         var user = element["user"];
-        if (! "keypoints" in user) {
+        if (! ("keypoints" in user)) {
           user["keypoints"] = []
         }
         var keypoints = user["keypoints"];
