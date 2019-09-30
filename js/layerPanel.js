@@ -864,6 +864,17 @@
   // un selecting them.
   // NOTE: Select opperates on all layers.  It will choose a new "EditingLayerGui".
   LayerPanel.prototype.HandleMouseClick = function (event, shift) {
+    // See if a widget wants to handle the click.
+    if (this.EditingLayerGui) {
+      var layer = this.EditingLayerGui.Layer;
+      if (layer && layer.HandleMouseClick) {
+        if ( ! layer.HandleMouseClick(event)) {
+          // false means the event was consumed.
+          return false;
+        }
+      }
+    }
+
     // Turn off previous tool widgets. (deactivate)
     if (this.EditingLayerGui && !shift && !SAM.ControlKey) {
       var layer = this.EditingLayerGui.Layer;
