@@ -37,8 +37,10 @@
     this.Width = 50;
     this.Height = 50;
     this.Orientation = 0; // Angle with respect to x axis ?
-    this.Origin = [10000, 10000, 0]; // Center in world coordinates.
-    this.OutlineColor = [0, 0, 0];
+    this.Origin = new Array(2); // Center in world coordinates.
+    this.Origin.fill(10000);
+    this.OutlineColor = new Array(3);
+    this.OutlineColor.fill(0);
     this.PointBuffer = [];
   }
 
@@ -111,8 +113,8 @@
     this.Shape = new Rect();
     // TODO: Correct the mix or orientation and rotation.
     this.Shape.Orientation = cam.GetImageRotation();
-    this.Shape.Origin = [0, 0];
-    this.Shape.OutlineColor = [0.0, 0.0, 0.0];
+    this.Shape.Origin.fill(0);
+    this.Shape.SetOutlineColor([0.0, 0.0, 0.0]);
     if (DEFAULT_WIDTH > 0) {
       this.Shape.Height = DEFAULT_HEIGHT;
       this.Shape.Width = DEFAULT_WIDTH;
@@ -404,7 +406,7 @@
     }
   };
 
-  RectWidget.prototype.HandleKeyDown = function () {
+  RectWidget.prototype.HandleKeyDown = function (layer) {
     if (!this.Visibility || this.State === INACTIVE) {
       return true;
     }
@@ -414,7 +416,7 @@
       return false;
     }
 
-    var event = this.Layer.Event;
+    var event = layer.Event;
     if (this.State === NEW) {
       // escape key (or space or enter) to turn off drawing
       if (event.keyCode === 27 || event.keyCode === 32 || event.keyCode === 13) {
@@ -439,7 +441,7 @@
     return true;
   };
 
-  RectWidget.prototype.HandleMouseDown = function (event) {
+  RectWidget.prototype.HandleMouseDown = function (layer) {
     if (!this.Visibility || this.State === INACTIVE) {
       return true;
     }
@@ -449,18 +451,19 @@
     if (this.State === HOVER) {
       // var part = this.PointOnWhichPart();
       this.State = DRAG;
-      this.LastMouse = this.Layer.GetMouseWorld();
+      this.LastMouse = layer.GetMouseWorld();
       // Which drag is already set by mouse move.
     }
 
     return false;
   };
 
-  RectWidget.prototype.HandleMouseMove = function () {
+  RectWidget.prototype.HandleMouseMove = function (layer) {
     if (this.State === INACTIVE) {
       return true;
     }
-
+    var event = layer.Event;
+    
     // Dragging is complicated enough that we have to compute reactangle
     // from the mouse movement vector (and not contraints).
     var worldPt0 = this.LastMouseWorld;
@@ -557,7 +560,7 @@
     if (this.State === NEW || this.State === DRAG) {
       if (this.WhichDrag & CENTER) {
         // Special case with no modifiers.  Just translate the whole rectangle.
-        this.Shape.Origin = worldPt1;
+        this.Shape.SetOrigin(worldPt1);
         this.Layer.EventuallyDraw();
         this.Modified();
         return false;

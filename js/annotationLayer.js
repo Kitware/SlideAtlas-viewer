@@ -292,7 +292,7 @@
       return floatColor;
     }
     // No other formats for now.
-    return color;
+    return color.slice();
   };
 
   // RGB [Float, Float, Float] to #RRGGBB string

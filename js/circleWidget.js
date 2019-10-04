@@ -66,15 +66,16 @@
     var cam = layer.GetCamera();
     var viewport = layer.GetViewport();
     this.Circle = new SAM.Circle();
-    this.Circle.Origin = [0, 0];
-    this.Circle.OutlineColor = [0.0, 0.0, 0.0];
+    this.Circle.Origin = new Array(2);
+    this.Circle.Origin.fill(0)
+    this.Circle.OutlineColor = new Array(3);
     this.Circle.SetOutlineColor('#00ff00');
     this.Circle.Radius = 50 * cam.Height / viewport[3];
     this.Circle.LineWidth = 5.0 * cam.Height / viewport[3];
 
     if (this.Defaults) {
       if (this.Defaults.Color) {
-        this.Circle.OutlineColor = this.Defaults.Color;
+        this.Circle.OutlineColor = this.Defaults.Color.slice();
       }
       if (this.Defaults.LineWidth !== undefined) {
         // Only use the default if it is reasonable.
