@@ -1,6 +1,6 @@
-// Slidealtas has a "annotationLayer" interface which includes views.
-// This object has a slightly different meaning for layer.
-// It is an annotation layer plus the gui button to manipulate the layer.
+// AnnotationLayer holds the view and annotations in a girder annotation object.
+// This class (AnnotationLayerGui) holds the GUI button that controls the name,
+// visibiltiy button, and edit/save button.  Each annotation layer has one of these objects.
 
 
 (function () {

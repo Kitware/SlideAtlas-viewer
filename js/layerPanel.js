@@ -486,12 +486,8 @@
   LayerPanel.prototype.ChangeItem = function (itemId) {
     // Change the image in the viewer.
     var self = this;
-    girder.rest.restRequest({
-      path: 'item/' + itemId + '/tiles',
-      method: 'GET'
-    }).done(function (data) {
-      self.LoadItemToViewer(itemId, data);
-    });
+
+    this.ItemId = itemId;
 
     // There is contention trying to restore annotation visibility in the next item.
     // Deleting Annotation Buttons erases local storage of the visible names.
@@ -504,11 +500,17 @@
     this.DeleteAnnotationButtons();
     this.LocalStorageVisibleAnnotationNames = savedNames;
     this.Initialize(this.Div, itemId);
+    girder.rest.restRequest({
+      path: 'item/' + itemId + '/tiles',
+      method: 'GET'
+    }).done(function (data) {
+      self.LoadItemToViewer(itemId, data);
+    });
   };
-
 
   // Now update the annotation GUI
   LayerPanel.prototype.DeleteAnnotationButtons = function () {
+    this.EditingLayerGui = undefined;
     for (var i = 0; i < this.LayerGuis.length; ++i) {
       var layerGui = this.LayerGuis[i];
       layerGui.EditOff();
@@ -519,8 +521,6 @@
     }
     this.LayerGuis = [];
   };
-
-  
   
   LayerPanel.prototype.RestoreVisibilityFromLocalStorage = function () {
     this.LocalStorageVisibleAnnotationNames = [];
@@ -873,6 +873,11 @@
           return false;
         }
       }
+      // This is to avoid an undesireable behavior.
+      // Accidentally clicking an annotation in a different layer
+      // Changed the new layer to take editing focus.
+      // New annotations end up in the wrong layer.
+      return true;
     }
 
     // Turn off previous tool widgets. (deactivate)
@@ -922,7 +927,9 @@
     
     // I should really pass in the layerGui that contains the widget.
     // However, this method finds it anyway.
-    this.EditingLayerGui.SetSelectedWidget(selectedWidget);
+    if (this.EditingLayerGui) {
+      this.EditingLayerGui.SetSelectedWidget(selectedWidget);
+    }
     return false;
   };
 

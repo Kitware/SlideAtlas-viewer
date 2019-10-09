@@ -291,7 +291,14 @@
       }
       return floatColor;
     }
-    // No other formats for now.
+    if (typeof (color) === 'string') {
+      // No other formats for now.
+      console.error("Cannot decode color " + color)
+      var colorArray = new Array(3);
+      colorArray.fill(0);
+      return colorArray;
+    }
+    // Fall through arrays.
     return color.slice();
   };
 

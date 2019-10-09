@@ -75,7 +75,7 @@
 
     if (this.Defaults) {
       if (this.Defaults.Color) {
-        this.Circle.OutlineColor = this.Defaults.Color.slice();
+        this.Circle.OutlineColor = SAM.ConvertColor(this.Defaults.Color);
       }
       if (this.Defaults.LineWidth !== undefined) {
         // Only use the default if it is reasonable.
