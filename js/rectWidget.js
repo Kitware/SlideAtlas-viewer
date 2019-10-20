@@ -336,6 +336,11 @@
     if ('UserImageUrl' in this.Shape) {
       obj.user = {'imageUrl': this.Shape.UserImageUrl};
     }
+
+    if (this.Shape.Children.label && this.Shape.Children.label.String) {
+      obj.label = {'value': this.Shape.Children.label.String};
+    }
+    
     return obj;
   };
 
@@ -376,6 +381,15 @@
     }
 
 
+    if ("label" in obj) {
+      var str = obj["label"]["value"]
+      var text = new SAM.Text()
+      text.BackgroundFlag = false;
+      text.String = str;
+      text.Position = this.Shape.Origin;
+      this.Shape.Children["label"] = text;
+    }
+    
     if ("user" in obj) {
       var user = obj.user;
       if ("imageUrl" in user) {
@@ -716,6 +730,12 @@
   RectWidget.prototype.WidgetPropertiesToDialog = function () {
     this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Shape.OutlineColor));
 
+    var label = "";
+    if (this.Shape.Children.label && this.Shape.Children.label.String) {
+      label = this.Shape.Children['label'].String;
+    }
+    this.Dialog.LabelInput.val(label);
+
     var area = this.Shape.Width * this.Shape.Height;
     var areaString = '';
     if (this.Shape.FixedSize) {
@@ -742,6 +762,22 @@
     this.Shape.LineWidth = parseFloat(this.Dialog.LineWidthInput.val());
     this.Shape.UpdateBuffers(this.Layer.AnnotationView);
 
+    var label = this.Dialog.LabelInput.val();
+    label = label.trim();
+    if (label == "") {
+      delete this.Shape.Children.label;
+    } else {
+      if (!this.Shape.Children.label) {
+        var text = new SAM.Text()
+        text.BackgroundFlag = false;
+        text.String = label;
+        text.Position = this.Circle.Origin;
+        this.Shape.Children["label"] = text;
+      }
+      this.Shape.Children.label.String = label;
+      modified = true;
+    }    
+    
     if (modified) {
       // Save values in local storage as defaults for next time.
       localStorage.RectWidgetDefaults = JSON.stringify({
@@ -855,6 +891,22 @@
             $('<input type="number">')
             .appendTo(this.Dialog.LineWidthDiv)
             .css({'display': 'table-cell'})
+            .keypress(function (event) { return event.keyCode !== 13; });
+
+    // Label
+    this.Dialog.LabelDiv =
+            $('<div>')
+            .appendTo(this.Dialog.Body)
+            .addClass('sa-view-annotation-modal-div');
+    this.Dialog.LabelLabel =
+            $('<div>')
+            .appendTo(this.Dialog.LabelDiv)
+            .text('Label:')
+            .addClass('sa-view-annotation-modal-input-label');
+    this.Dialog.LabelInput =
+            $('<input type="text">')
+            .appendTo(this.Dialog.LabelDiv)
+            .addClass('sa-view-annotation-modal-input')
             .keypress(function (event) { return event.keyCode !== 13; });
 
     // Area

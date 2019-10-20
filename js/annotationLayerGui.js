@@ -788,11 +788,13 @@
       if (widget.type === 'rect') {
         element = {
           'type': 'rectangle',
-          'label': {'value': 'test'},
           'center': widget.origin,
           'height': widget.height,
           'width': widget.width,
           'rotation': widget.orientation};
+        if (widget.label) {
+          element.label = widget.label;
+        }
       }
       if (widget.type === 'rect_set') {
         var num = widget.widths.length;
