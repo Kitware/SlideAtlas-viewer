@@ -576,8 +576,8 @@
           } else {
             obj.type = 'arrow';
             obj.origin = element.points[0].slice(0);
-            obj.fillcolor = SAM.ConvertColor(element.fillColor);
-            obj.outlinecolor = SAM.ConvertColor(element.lineColor);
+            obj.fillColor = element.fillColor;
+            obj.lineColor = element.lineColor;
             var dx = element.points[1][0] - element.points[0][0];
             var dy = element.points[1][1] - element.points[0][1];
             var length = Math.sqrt((dx * dx) + (dy * dy));
@@ -596,8 +596,8 @@
         }
         if (element.type === 'rectanglegrid') {
           obj.type = 'grid';
-          obj.outlinecolor = SAM.ConvertColor(element.lineColor);
-          obj.linewidth = element.lineWidth;
+          obj.lineColor = SAM.ConvertColor(element.lineColor);
+          obj.lineWidth = element.lineWidth;
           obj.origin = element.center;
           obj.bin_width = element.width / element.widthSubdivisions;
           obj.bin_height = element.height / element.heightSubdivisions;
@@ -629,8 +629,8 @@
         if (element.type === 'polyline') {
           // Make a pencil instead.
           obj.type = 'pencil';
-          obj.outlinecolor = SAM.ConvertColor(element.lineColor);
-          obj.linewidth = element.lineWidth;
+          obj.lineColor = SAM.ConvertColor(element.lineColor);
+          obj.lineWidth = element.lineWidth;
           obj.shapes = [element.points];
           obj.closedFlags = [element.closed];
           this.Layer.LoadWidget(obj);
@@ -732,14 +732,8 @@
       if (widget.type === 'circle') {
         element = widget;
       }
-      if (widget.type === 'rect') {
-        widget.origin[2] = 0; // z coordinate
-        element = {
-          'type': 'rect',
-          'center': widget.origin,
-          'width': widget.width,
-          'height': widget.height,
-          'orientation': widget.orientation};
+      if (widget.type === 'rectangle') {
+        element = widget;
       }
       if (widget.type === 'text') {
         // Will not keep scale feature..
@@ -769,9 +763,9 @@
         points = [pt1, pt2];
         element = {
           'type': 'arrow',
-          'lineWidth': widget.width,
-          'fillColor': SAM.ConvertColorToHex(widget.fillcolor),
-          'lineColor': SAM.ConvertColorToHex(widget.outlinecolor),
+          //'lineWidth': widget.lineWidth,
+          'lineColor': widget.lineColor,
+          'fillColor': widget.fillColor,
           'points': points};
       }
       if (widget.type === 'grid') {
@@ -783,18 +777,9 @@
           'rotation': widget.orientation,
           'normal': [0, 0, 1.0],
           'widthSubdivisions': widget.dimensions[0],
-          'heightSubdivisions': widget.dimensions[1]};
-      }
-      if (widget.type === 'rect') {
-        element = {
-          'type': 'rectangle',
-          'center': widget.origin,
-          'height': widget.height,
-          'width': widget.width,
-          'rotation': widget.orientation};
-        if (widget.label) {
-          element.label = widget.label;
-        }
+          'heightSubdivisions': widget.dimensions[1],
+          'lineWidth': widget.lineWidth,
+          'lineColor': widget.lineColor};
       }
       if (widget.type === 'rect_set') {
         var num = widget.widths.length;
@@ -815,12 +800,16 @@
         element = {
           'type': 'polyline',
           'closed': widget.closedloop,
+          'lineWidth': widget.lineWidth,
+          'lineColor': widget.lineColor,
           'points': widget.points};
       }
       if (widget.type === 'lasso') {
         element = {
           'type': 'polyline',
           'closed': true,
+          'lineWidth': widget.lineWidth,
+          'lineColor': widget.lineColor,
           'points': widget.points};
       }
       // Pencil scheme not exact match.  Need to split up polylines.
@@ -832,22 +821,16 @@
             'closed': widget.closedFlags[k],
             'points': points};
           // Hackish way to deal with multiple lines.
-          if (widget.outlinecolor !== undefined) {
-            element.lineColor = SAM.ConvertColorToHex(widget.outlinecolor);
+          if (widget.lineColor !== undefined) {
+            element.lineColor = widget.lineColor;
           }
-          if (widget.linewidth !== undefined) {
-            element.lineWidth = Math.round(widget.linewidth);
+          if (widget.lineWidth !== undefined) {
+            element.lineWidth = Math.round(widget.lineWidth);
           }
           returnElements.push(element);
           element = undefined;
         }
       } else if (element) {
-        if (widget.outlinecolor !== undefined) {
-          element.lineColor = SAM.ConvertColorToHex(widget.outlinecolor);
-        }
-        if (widget.linewidth !== undefined) {
-          element.lineWidth = Math.round(widget.linewidth);
-        }
         returnElements.push(element);
         element = undefined;
       }
@@ -891,16 +874,17 @@
   // If only one widget is selected, we make it active (and show the properties button.
   // You can call this with selectedWidget = undefined to unset it.
   // "selectedLayerGui" is the one that contains the widget.
-  AnnotationLayerGui.prototype.SetSelectedWidget = function (selectedWidget) {
+  AnnotationLayerGui.prototype.SetSelectedWidgets = function (selectedWidgets) {
     // Unselect previous selected widgets.
-    for (var i = 0; i < this.SelectedWidgets.length; ++i) {
-      var widget = this.SelectedWidgets[i];
-      widget.SetActive(false);
-    }
+    // I do not think this is necessary.  The picking process should do this.
+    //for (var i = 0; i < this.SelectedWidgets.length; ++i) {
+    //  var widget = this.SelectedWidgets[i];
+    //  widget.SetActive(false);
+    //}
     this.SelectedWidgets = [];
 
     // No widget: Go back to the cursor mode.
-    if (!selectedWidget) {
+    if (!selectedWidgets || selectedWidgets.length == 0) {
       // Nothing was selected.
       // Change the state back to cursor.
       // TODO: Clean this API up.
@@ -913,6 +897,8 @@
     }
 
     this.EditOn();
+    // Hack so I do not need to deal with multiple selection right now.
+    var selectedWidget = selectedWidgets[0];
 
     // TODO: Try to get rid of this case statement.
     // TODO: Move this into ToolPanel
@@ -953,7 +939,7 @@
 
     // TODO: This ivar is only really needed for the properties dialog.
     // We could just find the first selected widget ....
-    this.SelectedWidgets = [selectedWidget];
+    this.SelectedWidgets = selectedWidgets;
     tools.UpdateToolVisibility();
   };
 

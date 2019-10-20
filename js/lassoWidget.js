@@ -117,8 +117,8 @@
     var obj = {};
     obj.type = 'lasso';
     obj.user_note_flag = this.UserNoteFlag;
-    obj.outlinecolor = this.Loop.OutlineColor;
-    obj.linewidth = this.Loop.GetLineWidth();
+    obj.lineColor = SAM.ConvertColorToHex(this.Loop.OutlineColor);
+    obj.lineWidth = this.Loop.GetLineWidth();
     obj.points = [];
     for (var j = 0; j < this.Loop.Points.length; ++j) {
       obj.points.push([this.Loop.Points[j][0], this.Loop.Points[j][1]]);
@@ -131,17 +131,11 @@
     // Load a widget from a json object (origin MongoDB).
   LassoWidget.prototype.Load = function (obj) {
     this.UserNoteFlag = obj.user_note_flag;
-    if (obj.outlinecolor !== undefined) {
-      this.Loop.OutlineColor[0] = parseFloat(obj.outlinecolor[0]);
-      this.Loop.OutlineColor[1] = parseFloat(obj.outlinecolor[1]);
-      this.Loop.OutlineColor[2] = parseFloat(obj.outlinecolor[2]);
-            // will never happen
-            // if (this.Stroke) {
-            //    this.Stroke.OutlineColor = this.Loop.OutlineColor;
-            // }
+    if (obj.lineColor !== undefined) {
+      this.Loop.OutlineColor = SAM.ConvertColor(obj.lineColor);
     }
-    if (obj.outlinewidth !== undefined) {
-      this.Loop.LineWidth = obj.linewidth;
+    if (obj.lineWidth !== undefined) {
+      this.Loop.LineWidth = obj.lineWidth;
     }
     var points = [];
     if (obj.points !== undefined) {
@@ -224,13 +218,13 @@
     var y = event.offsetY;
 
     if (event.which === 1) {
-            // Start drawing.
-            // Stroke is a temporary line for interaction.
-            // When interaction stops, it is converted/merged with loop.
+      // Start drawing.
+      // Stroke is a temporary line for interaction.
+      // When interaction stops, it is converted/merged with loop.
       this.Stroke = new SAM.Polyline();
       this.Stroke.OutlineColor = [0.0, 0.0, 0.0];
       this.Stroke.SetOutlineColor(this.Loop.OutlineColor);
-            // this.Stroke.SetOutlineColor(this.Dialog.ColorInput.val());
+      // this.Stroke.SetOutlineColor(this.Dialog.ColorInput.val());
       this.Stroke.FixedSize = false;
       this.Stroke.LineWidth = 0;
 

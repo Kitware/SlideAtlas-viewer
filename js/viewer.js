@@ -202,10 +202,15 @@
       function (event) {
         // So key events go the the right viewer.
         this.focus();
+        if (event.which === undefined) {
+          event.which = self.FirefoxWhich;
+        }
         // Firefox does not define offsetX ...?
         // SA.FirefoxWhich(event);
         // Firefox does not set which for mouse move events.
-        event.which = self.FirefoxWhich;
+        if (event.which === undefined) {
+          event.which = self.FirefoxWhich;
+        }
         return self.HandleMouseMove(event);
       });
     // We need to detect the mouse up even if it happens outside the canvas,
@@ -213,7 +218,6 @@
       'mouseup.viewer',
       function (event) {
         // SA.FirefoxWhich(event);
-        self.FirefoxOverviewWhich = 0;
         self.FirefoxWhich = 0;
         if (event.which === undefined) {
           event.which = 0;
@@ -237,6 +241,10 @@
     can.on(
       'touchmove.viewer',
       function (event) {
+        if (event.which === undefined) {
+          event.which = 0;
+        }
+        event.which = self.FirefoxWhich;
         return self.HandleTouchMove(event.originalEvent);
       });
     can.on(
@@ -265,14 +273,14 @@
         'mousedown.viewer',
         function (event) {
           SA.FirefoxWhich(event);
-          self.FirefoxOverviewWhich = event.which;
+          self.FirefoxWhich = event.which;
           return self.HandleOverViewMouseDown(event);
         });
 
       can.on(
         'mouseup.viewer',
         function (event) {
-          self.FirefoxOverviewWhich = 0;
+          self.FirefoxWhich = 0;
           self.FirefoxWhich = 0;
           if (event.which === undefined) {
             event.which = 0;
@@ -283,7 +291,9 @@
         'mousemove.viewer',
         function (event) {
           // SA.FirefoxWhich(event);
-          event.which = self.FirefoxOverviewWhich;
+          if (event.which === undefined) {
+            event.which = self.FirefoxWhich;
+          }
           return self.HandleOverViewMouseMove(event);
         });
       can.on(
@@ -539,7 +549,7 @@
     this.RotateIcon.addClass('sa-active');
   };
   Viewer.prototype.RollLeave = function (e) {
-    if (!this.Rotatable) { return; }
+    if (this.RotateIconDrag) { return; }
     this.RotateIconHover = false;
     if (!this.RotateIconDrag) {
       this.RotateIcon.removeClass('sa-active');
@@ -548,24 +558,35 @@
   Viewer.prototype.RollDown = function (e) {
     if (!this.OverView) { return; }
     if (!this.Rotatable) { return; }
+    this.FirefoxWhich = e.which;
     this.RotateIconDrag = true;
     // Find the center of the overview window.
-    var w = this.OverView.Parent;
-    var o = w.offset();
-    var cx = o.left + (w.width() / 2);
-    var cy = o.top + (w.height() / 2);
-    this.RotateIconX = e.clientX - cx;
-    this.RotateIconY = e.clientY - cy;
+    var cx = this.OverViewport[0] + (0.5 * this.OverViewport[2]);
+    var cy = this.OverViewport[1] + (0.5 * this.OverViewport[3]);
+    // same as
+    //var w = this.OverView.Parent;
+    //var o = w.offset();
+    //var cx = o.left + (w.width() / 2);
+    //var cy = o.top + (w.height() / 2);
+    var offset = this.MainView.Parent.offset();
+    var x = e.pageX - offset.left - cx;
+    var y = e.pageY - offset.top - cy;
+
+    // Normalize
+    var m = Math.sqrt(x*x + y*y);
+    this.RotateIconX  = x/m;
+    this.RotateIconY  = y/m;
 
     // Move event is in the viewer or overview.
     // It has a sanity check of which button was pressed.
     // It looks like the icon consumes the down event so
     // the viewer never has a chance to set this
     SA.FirefoxWhich(event);
-    this.FirefoxOverviewWhich = event.which;
+    this.FirefoxWhich = event.which;
 
     return false;
   };
+  
   Viewer.prototype.RollMove = function (e) {
     if (!this.OverView) { return; }
     if (!this.RotateIconDrag) { return; }
@@ -575,18 +596,26 @@
       this.RotateIconDrag = false;
       return;
     }
+
     // Find the center of the overview window.
-    var origin = this.MainView.Parent.offset();
-    // center of rotation
-    var cx = this.OverViewport[0] + (this.OverViewport[2] / 2);
-    var cy = this.OverViewport[1] + (this.OverViewport[3] / 2);
+    // Relative to mainview?
+    var cx = this.OverViewport[0] + (0.5 * this.OverViewport[2]);
+    var cy = this.OverViewport[1] + (0.5 * this.OverViewport[3]);
 
-    var x = (e.clientX - origin.left) - cx;
-    var y = (e.clientY - origin.top) - cy;
-    var c = x * this.RotateIconY - y * this.RotateIconX;
-    var r = c / (x * x + y * y);
+    var offset = this.MainView.Parent.offset();
+    var x = e.pageX - offset.left - cx;
+    var y = e.pageY - offset.top - cy;
 
-    var roll = this.MainView.Camera.GetWorldRoll() - r;
+    // Normalize
+    var m = Math.sqrt(x*x + y*y);
+    x = x/m;
+    y = y/m;
+    
+    console.log("m ("+x+", "+y+") c ("+cx+", "+cy+")");
+    // Cross product gives angle*m^2
+    var dAngle = x * this.RotateIconY - y * this.RotateIconX;
+
+    var roll = this.MainView.Camera.GetWorldRoll() - dAngle;
     this.MainView.Camera.SetWorldRoll(roll);
     this.UpdateCamera();
     this.EventuallyRender(true);
@@ -2155,7 +2184,7 @@
     this.FirefoxWhich = 0;
     this.RecordMouseUp(event);
 
-    if (this.Rotatable && this.RotateIconDrag) {
+    if (this.RotateIconDrag) {
       this.RollUp(event);
       return false;
     }
@@ -2237,7 +2266,7 @@
 
     // I think we need to deal with the move here because the mouse can
     // exit the icon and the events are lost.
-    if (this.Rotatable && this.RotateIconDrag) {
+    if (event.which === 1 && this.Rotatable && this.RotateIconDrag) {
       this.RollMove(event);
       return false;
     }
@@ -2677,50 +2706,13 @@
 
   Viewer.prototype.HandleOverViewMouseMove = function (event) {
     if (!this.InteractionEnabled) { return true; }
-    if (this.RotateIconDrag) {
+    if (event.which === 1 && this.RotateIconDrag) {
       this.RollMove(event);
       return false;
     }
 
     this.OverViewPlaceCamera(event);
 
-    /*
-    var w;
-    var p;
-    if (this.InteractionState === INTERACTION_OVERVIEW) {
-      // Do not start dragging until the mouse has moved some distance.
-      if (Math.abs(event.pageX - this.OverViewEventX) > 5 ||
-          Math.abs(event.pageY - this.OverViewEventY) > 5) {
-        // Start dragging the overview window.
-        this.InteractionState = INTERACTION_OVERVIEW_DRAG;
-        w = this.GetViewport()[2];
-        p = Math.max(w - event.pageX, event.pageY);
-        this.OverViewScaleLast = p;
-      }
-      return false;
-    }
-
-    // This consumes events even when I return true. Why?
-    if (this.InteractionState !== INTERACTION_OVERVIEW_DRAG) {
-      // Drag originated outside overview.
-      // Could be panning.
-      return true;
-    }
-
-    // Drag to change overview size
-    w = this.GetViewport()[2];
-    p = Math.max(w - event.pageX, event.pageY);
-    var d = p / this.OverViewScaleLast;
-    this.OverViewScale *= d * d;
-    this.OverViewScaleLast = p;
-    if (p < 60) {
-      this.RotateIcon.hide();
-    } else {
-      if (this.Rotatable) { this.RotateIcon.show(); }
-    }
-
-    this.UpdateSize();
-    */
     return false;
   };
 
@@ -2796,7 +2788,7 @@
     return viewLayer;
   };
 
-  Viewer.prototype.TriggerEndInteraction = function () {
+  Viewer.prototype.TriggerEndInteraction= function () {
     this.UpdateZoomGui();
 
     // Save the state when the animation is finished.

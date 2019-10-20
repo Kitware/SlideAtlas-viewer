@@ -315,7 +315,7 @@
   GirderAnnotationIterator.prototype.HandleMouseClick = function (event) {
     // We even give inactive layers a chance to claim the selection.
     // It is a way to find which group a mark belongs to.
-    var selectedWidget = this.ArrowLayer.SingleSelect(event, false);
+    var selectedWidget = this.ArrowLayer.HandleSelect(event);
     if (selectedWidget === this.SelectedWidget) {
       return;
     }

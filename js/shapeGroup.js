@@ -45,7 +45,7 @@
   };
 
   // Returns the selecteded shape (or undefined).
-  ShapeGroup.prototype.SingleSelect = function (pt, dist) {
+  ShapeGroup.prototype.HandleSelect = function (pt, dist) {
     var found;
     for (var idx = 0; idx < this.Shapes.length; ++idx) {
       var shape = this.Shapes[idx];

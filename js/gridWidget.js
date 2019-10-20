@@ -347,12 +347,12 @@
     obj.type = 'grid';
     obj.user_note_flag = this.UserNoteFlag;
     obj.origin = this.Grid.Origin;
-    obj.outlinecolor = this.Grid.OutlineColor;
+    obj.lineColor = SAM.ConvertColorToHex(this.Grid.OutlineColor);
     obj.bin_width = this.Grid.BinWidth;
     obj.bin_height = this.Grid.BinHeight;
     obj.dimensions = this.Grid.Dimensions;
     obj.orientation = this.Grid.Orientation;
-    obj.linewidth = this.Grid.LineWidth;
+    obj.lineWidth = this.Grid.LineWidth;
     obj.creation_camera = this.CreationCamera;
     return obj;
   };
@@ -362,9 +362,7 @@
     this.UserNoteFlag = obj.user_note_flag;
     this.Grid.Origin[0] = parseFloat(obj.origin[0]);
     this.Grid.Origin[1] = parseFloat(obj.origin[1]);
-    this.Grid.OutlineColor[0] = parseFloat(obj.outlinecolor[0]);
-    this.Grid.OutlineColor[1] = parseFloat(obj.outlinecolor[1]);
-    this.Grid.OutlineColor[2] = parseFloat(obj.outlinecolor[2]);
+    this.Grid.OutlineColor = SAM.CovertColor(obj.lineColor);
     if (obj.width) { this.Grid.BinWidth = parseFloat(obj.width); }
     if (obj.height) { this.Grid.BinHeight = parseFloat(obj.height); }
     if (obj.bin_width) { this.Grid.BinWidth = parseFloat(obj.bin_width); }
@@ -372,7 +370,7 @@
     this.Grid.Dimensions[0] = parseInt(obj.dimensions[0]);
     this.Grid.Dimensions[1] = parseInt(obj.dimensions[1]);
     this.Grid.Orientation = parseFloat(obj.orientation);
-    this.Grid.LineWidth = parseFloat(obj.linewidth);
+    this.Grid.LineWidth = parseFloat(obj.lineWidth);
     this.Grid.FixedSize = false;
     this.Grid.UpdateBuffers(this.Layer.AnnotationView);
 

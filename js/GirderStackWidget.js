@@ -605,8 +605,8 @@
       }
       if (element.type === 'circle') {
         obj.type = element.type;
-        obj.outlinecolor = SAM.ConvertColor(element.lineColor);
-        obj.linewidth = element.lineWidth;
+        obj.lineColor = SAM.ConvertColor(element.lineColor);
+        obj.lineWidth = element.lineWidth;
         obj.origin = element.center;
         obj.radius = element.radius;
         annotLayer.LoadWidget(obj);
@@ -624,8 +624,8 @@
       }
       if (element.type === 'rectanglegrid') {
         obj.type = 'grid';
-        obj.outlinecolor = SAM.ConvertColor(element.lineColor);
-        obj.linewidth = element.lineWidth;
+        obj.lineColor = SAM.ConvertColor(element.lineColor);
+        obj.lineWidth = element.lineWidth;
         obj.origin = element.center;
         obj.bin_width = element.width / element.widthSubdivisions;
         obj.bin_height = element.height / element.heightSubdivisions;
@@ -658,8 +658,8 @@
           }
         } else {
           obj.type = 'rect';
-          obj.outlinecolor = SAM.ConvertColor(element.lineColor);
-          obj.linewidth = element.lineWidth;
+          obj.lineColor = SAM.ConvertColor(element.lineColor);
+          obj.lineWidth = element.lineWidth;
           obj.origin = element.center;
           obj.width = element.width;
           obj.length = element.height;
@@ -670,8 +670,8 @@
       if (element.type === 'polyline') {
         obj.type = element.type;
         obj.closedloop = element.closed;
-        obj.outlinecolor = SAM.ConvertColor(element.lineColor);
-        obj.linewidth = element.lineWidth;
+        obj.lineColor = SAM.ConvertColor(element.lineColor);
+        obj.lineWidth = element.lineWidth;
         obj.points = element.points;
         annotLayer.LoadWidget(obj);
       }

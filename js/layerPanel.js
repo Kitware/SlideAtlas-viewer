@@ -863,9 +863,9 @@
   // After event propagation is stoped,  Loop through the rest
   // un selecting them.
   // NOTE: Select opperates on all layers.  It will choose a new "EditingLayerGui".
-  LayerPanel.prototype.HandleMouseClick = function (event, shift) {
-    // See if a widget wants to handle the click.
+  LayerPanel.prototype.HandleMouseClick = function (event) {
     if (this.EditingLayerGui) {
+      // See if a widget in the editing wants to handle the click.
       var layer = this.EditingLayerGui.Layer;
       if (layer && layer.HandleMouseClick) {
         if ( ! layer.HandleMouseClick(event)) {
@@ -873,25 +873,26 @@
           return false;
         }
       }
-      // This is to avoid an undesireable behavior.
-      // Accidentally clicking an annotation in a different layer
-      // Changed the new layer to take editing focus.
+      
+      // This selection path (for an editing layer) is to avoid an
+      // undesireable behavior. Accidentally clicking an annotation in
+      // a different layer Changed the new layer to take editing focus.
       // New annotations end up in the wrong layer.
-      return true;
-    }
 
-    // Turn off previous tool widgets. (deactivate)
-    if (this.EditingLayerGui && !shift && !SAM.ControlKey) {
-      var layer = this.EditingLayerGui.Layer;
-      if (layer) {
-        layer.UnselectAll();
+      var selectedWidgets = [];
+      if (layer.HandleSelect) {
+        selectedWidgets = layer.HandleSelect(event);
       }
+      // The Gui needs to know which widgets are selected.
+      // I do not think I want the layer to keep a pointer to the gui.
+      this.EditingLayerGui.SetSelectedWidgets(selectedWidgets);
+      // Returning false stops propagation of the event.
+      return selectedWidgets.length == 0;
     }
 
-    // First one to consume the click wins the selection.
-    // TODO: Change this to voting if annotations start to overlap.
-    var selectedWidget, selectedLayerGui;
-
+    // This selection path is to turn editing on for a layer.
+    // The layer is choosen by which widget is picked.
+    
     // TODO: Get rid of the multiple strokes in a single pencil widget.
     // It was a bad idea. It is 'hard' because lasso interaction editing of loops
     // depends on the two strokes to be in the same widget.  I do not want to
@@ -907,30 +908,17 @@
       if (!layer) {
         continue;
       }
-      if (selectedWidget) {
-        // I do not think the shift of control keys are fully implemented.
-        if (!shift && !SAM.ControlKey) {
-          // Just unselect remaining layers.
-          layer.SetSelected(false);
-        }
-      } else {
-        // We even give inactive layers a chance to claim the selection.
-        // It is a way to find which group a mark belongs to.
-        if (layer.SingleSelect) {
-          selectedWidget = layer.SingleSelect(event, shift);
-          selectedLayerGui = layerGui;
+      if (layer.HandleSelect) {
+        var selectedWidgets = layer.HandleSelect(event);
+        if (selectedWidgets.length > 0) {
+          this.SetEditingLayerGui(layerGui);
+          this.EditingLayerGui.SetSelectedWidgets(selectedWidgets);
+          return false;
         }
       }
     }
 
-    this.SetEditingLayerGui(selectedLayerGui);
-    
-    // I should really pass in the layerGui that contains the widget.
-    // However, this method finds it anyway.
-    if (this.EditingLayerGui) {
-      this.EditingLayerGui.SetSelectedWidget(selectedWidget);
-    }
-    return false;
+    return true;
   };
 
   

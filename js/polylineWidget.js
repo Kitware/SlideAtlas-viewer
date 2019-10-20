@@ -254,8 +254,8 @@
     var obj = {};
     obj.type = 'polyline';
     obj.user_note_flag = this.UserNoteFlag;
-    obj.outlinecolor = this.Polyline.OutlineColor;
-    obj.linewidth = this.LineWidth;
+    obj.lineColor = SAM.ConvertColorToHex(this.Polyline.OutlineColor);
+    obj.lineWidth = this.LineWidth;
     // Copy the points to avoid array reference bug.
     obj.points = [];
     for (var i = 0; i < this.Polyline.GetNumberOfPoints(); ++i) {
@@ -296,13 +296,11 @@
   // Load a widget from a json object (origin MongoDB).
   // Object already json decoded.
   PolylineWidget.prototype.Load = function (obj, layer) {
-    if (obj.outlinecolor) {
-      this.Polyline.OutlineColor[0] = parseFloat(obj.outlinecolor[0]);
-      this.Polyline.OutlineColor[1] = parseFloat(obj.outlinecolor[1]);
-      this.Polyline.OutlineColor[2] = parseFloat(obj.outlinecolor[2]);
+    if (obj.lineColor) {
+      this.Polyline.OutlineColor = SAM.ConvertColor(obj.lineColor);
     }
-    if (obj.linewidth !== undefined) {
-      this.LineWidth = parseFloat(obj.linewidth);
+    if (obj.lineWidth !== undefined) {
+      this.LineWidth = parseFloat(obj.lineWidth);
       this.Polyline.LineWidth = this.LineWidth;
     }
     this.Polyline.Points = [];
@@ -310,12 +308,10 @@
       this.Polyline.Points[n] = [parseFloat(obj.points[n][0]),
         parseFloat(obj.points[n][1])];
     }
-    if (obj.outlinecolor) {
-      if (obj.closedloop !== undefined) {
-        this.Polyline.Closed = obj.closedloop;
-      }
-      this.Polyline.UpdateBuffers(layer.AnnotationView);
+    if (obj.closedloop !== undefined) {
+      this.Polyline.Closed = obj.closedloop;
     }
+    this.Polyline.UpdateBuffers(layer.AnnotationView);
 
     if (obj.text) {
       if (!this.Text) {

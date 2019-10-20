@@ -558,10 +558,8 @@
     this.Circle.Origin[0] = Math.round(parseFloat(element.center[0]));
     this.Circle.Origin[1] = Math.round(parseFloat(element.center[1]));
     if (element['lineColor'] !== undefined) {
-      var outlinecolor = SAM.ConvertColor(element.lineColor);
-      this.Circle.OutlineColor[0] = parseFloat(outlinecolor[0]);
-      this.Circle.OutlineColor[1] = parseFloat(outlinecolor[1]);
-      this.Circle.OutlineColor[2] = parseFloat(outlinecolor[2]);
+      this.Circle.OutlineColor = SAM.ConvertColor(element.lineColor);
+      
     } else {
       this.Circle.OutlineColor[0] = 0.0;
       this.Circle.OutlineColor[1] = 1.0;
@@ -882,7 +880,7 @@
   };
 
   // Returns the selected stroke or undefined.
-  CircleWidget.prototype.SingleSelect = function () {
+  CircleWidget.prototype.HandleSelect = function () {
     if (this.State === NEW_HIDDEN || this.State === NEW_DRAG || this.State === DIALOG) {
       return false;
     }

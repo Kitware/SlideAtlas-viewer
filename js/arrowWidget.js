@@ -161,8 +161,8 @@
     var obj = {};
     obj.type = 'arrow';
     obj.origin = this.Arrow.Origin;
-    obj.fillcolor = this.Arrow.FillColor;
-    obj.outlinecolor = this.Arrow.OutlineColor;
+    obj.fillColor = SAM.ConvertColorToHex(this.Arrow.FillColor);
+    obj.lineColor = SAM.ConvertColorToHex(this.Arrow.OutlineColor);
     obj.length = this.Arrow.Length;
     obj.width = this.Arrow.Width;
     obj.orientation = this.Arrow.Orientation;
@@ -177,7 +177,7 @@
     this.Arrow.Origin = [parseFloat(obj.origin[0]), parseFloat(obj.origin[1])];
     this.TipPosition = [parseFloat(obj.origin[0]), parseFloat(obj.origin[1])];
     this.Arrow.FillColor = [parseFloat(obj.fillcolor[0]), parseFloat(obj.fillcolor[1]), parseFloat(obj.fillcolor[2])];
-    this.Arrow.OutlineColor = [parseFloat(obj.outlinecolor[0]), parseFloat(obj.outlinecolor[1]), parseFloat(obj.outlinecolor[2])];
+    this.Arrow.OutlineColor = SAM.ConvertColor(obj.lineColor);
     this.Arrow.Length = parseFloat(obj.length);
     this.Arrow.Width = parseFloat(obj.width);
     this.Arrow.Orientation = parseFloat(obj.orientation);
@@ -231,7 +231,7 @@
   };
 
   // Returns true if the mouse is over the arrow.
-  ArrowWidget.prototype.SingleSelect = function () {
+  ArrowWidget.prototype.HandleSelect = function () {
     if (this.State === DIALOG) {
       return;
     }

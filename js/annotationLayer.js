@@ -1221,7 +1221,7 @@
 
   // Click will only select one widget.
   // returns the widget selected or undefined.
-  AnnotationLayer.prototype.SingleSelect = function (event, shift) {
+  AnnotationLayer.prototype.HandleSelect = function (event) {
     if (!this.GetVisibility()) {
       return;
     }
@@ -1229,44 +1229,39 @@
     this.SetMousePositionFromEvent(event);
 
     // Not the same as modified.
-    var changed = false;
+    var modified = false;
+    // This is to limit selection to a single widget, unless shift is held.
+    var selectedWidgets = [];
 
-    // Each widget can use the click to activate itself.
-    // No cometition yet.  Just try the widgets one at a time.
-    var found;
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
-      if (found) {
-        // We already found one.  Unselect the rest.
-        if (!shift && widget.SetSelected && widget.SetSelected(false)) {
-          // Assume the selection changed.
-          changed = true;
-        }
-      } else if (widget.SingleSelect) {
-        if (widget.IsSelected()) {
-          changed = true;
-        }
-        found = widget.SingleSelect(this);
-        if (found) {
-          found = widget;
-          // Not perfect.  I think it will mark a change even if the
-          // mark was reselected.
-          changed = true;
+      var pick = false;
+      if (selectedWidgets.length == 0 || event.shiftKey == true) {
+        if (widget.HandleSelect && widget.HandleSelect(this)) {
+          pick = true;
+          selectedWidgets.push(widget);
         }
       }
+      if (pick != widget.IsSelected()) {
+        modified = true;
+      }
+      widget.SetSelected(pick);
     }
-    if (found && !this.Active) {
-      // TODO: Select should not make active by default.
+
+    if (selectedWidgets.length > 0 && !this.Active) {
+      // Active means editing, since a selected widget will respond to events
+      // and change, the layer has to be active.
       this.SetActive(true);
     }
+    
     // This does not work when previously selected
-    if (changed) {
+    if (modified) {
       if (this.SelectionChangeCallback) {
         (this.SelectionChangeCallback)(this);
       }
       this.EventuallyDraw();
     }
-    return found;
+    return selectedWidgets;
   };
 
   AnnotationLayer.prototype.HasSelections = function () {

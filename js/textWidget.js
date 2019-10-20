@@ -361,7 +361,7 @@
   };
 
   // Returns this widget if it is selected, undefined otherwise.
-  TextWidget.prototype.SingleSelect = function () {
+  TextWidget.prototype.HandleSelect = function () {
     if (this.State === DIALOG) {
       return;
     }

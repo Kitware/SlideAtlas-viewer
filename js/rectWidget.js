@@ -2,7 +2,6 @@
 // renaming this as Rect, other possible name is OrientedRectangle
 
 (function () {
-  // Depends on the CIRCLE widget
   'use strict';
 
   // Bits for WhichDrag (not the best way to encode this state).
@@ -159,6 +158,14 @@
     this.WhichDrag = 0;      // Bits
   }
 
+  RectWidget.prototype.SetOrigin = function (x, y) {
+    this.Shape.Origin[0] =  x;
+    this.Shape.Origin[1] =  y;
+    if (this.Shape.Children.Label) {
+      this.Shape.Children.Label = this.Shape.Origin;
+    }
+  };
+  
   // Not used yet, but might be useful.
   RectWidget.prototype.SetCreationCamera = function (cam) {
     // Lets save the zoom level (sort of).
@@ -229,6 +236,11 @@
     if (flag && this.SelectedCallback) {
       (this.SelectedCallback)(this);
     }
+    if (!flag) {
+      // We can be selected without being active, but we cannot be
+      // active without being selected.
+      this.SetActive(false);
+    }
   };
 
   // Selects the widget if the shape is fuly contained in the selection rectangle.
@@ -262,7 +274,7 @@
   };
 
   // Returns true if the mouse is over the rectangle.
-  RectWidget.prototype.SingleSelect = function () {
+  RectWidget.prototype.HandleSelect = function () {
     if (this.State === DIALOG) {
       return;
     }
@@ -316,48 +328,44 @@
     this.Load(data);
     // Place the widget over the mouse.
     // This would be better as an argument.
-    this.Shape.Origin = [mouseWorldPt[0], mouseWorldPt[1]];
+    this.SetOrigin(mouseWorldPt[0], mouseWorldPt[1]);
     layer.EventuallyDraw();
     this.Modified();
   };
 
   RectWidget.prototype.Serialize = function () {
     if (this.Shape === undefined) { return null; }
-    var obj = {};
-    obj.type = 'rect';
-    obj.user_note_flag = this.UserNoteFlag;
-    obj.origin = this.Shape.Origin;
-    obj.outlinecolor = this.Shape.OutlineColor;
-    obj.height = this.Shape.Height;
-    obj.width = this.Shape.Width;
-    obj.orientation = this.Shape.GetOrientation();
-    obj.linewidth = this.Shape.LineWidth;
-    obj.creation_camera = this.CreationCamera;
+    var obj = {
+      'type': 'rectangle',
+      'center': this.Shape.Origin,
+      'width': this.Shape.Width,
+      'height': this.Shape.Height,
+      'rotation': this.Shape.GetOrientation(),
+      // caller might handle this already.
+      'lineWidth': this.Shape.LineWidth,
+      'lineColor': SAM.ConvertColorToHex(this.Shape.OutlineColor)
+    }
+    if (this.Shape.Children.label && this.Shape.Children.label.String) {
+      obj.label = {'value': this.Shape.Children.label.String};
+    }
     if ('UserImageUrl' in this.Shape) {
       obj.user = {'imageUrl': this.Shape.UserImageUrl};
     }
 
-    if (this.Shape.Children.label && this.Shape.Children.label.String) {
-      obj.label = {'value': this.Shape.Children.label.String};
-    }
-    
     return obj;
   };
 
   // Load a widget from a json object (origin MongoDB).
   RectWidget.prototype.Load = function (obj) {
     this.UserNoteFlag = obj.user_note_flag;
-    this.Shape.Origin[0] = parseFloat(obj.center[0]);
-    this.Shape.Origin[1] = parseFloat(obj.center[1]);
+    this.SetOrigin(parseFloat(obj.center[0]),
+                   parseFloat(obj.center[1]));
     if (obj.center.length > 2) {
       this.Shape.Origin[2] = parseFloat(obj.center[2]);
     }
 
     if (obj.lineColor) {
-      var color = SAM.ConvertColor(obj.lineColor);
-      this.Shape.OutlineColor[0] = parseFloat(color[0]);
-      this.Shape.OutlineColor[1] = parseFloat(color[1]);
-      this.Shape.OutlineColor[2] = parseFloat(color[2]);
+      this.Shape.OutlineColor = SAM.ConvertColor(obj.lineColor);
     }
     this.Shape.Width = parseFloat(obj.width);
     if (obj.confidence) {
@@ -369,8 +377,8 @@
     if (obj.rotation) {
       this.Shape.Orientation = parseFloat(obj.rotation);
     }
-    if (obj.linewidth !== undefined) {
-      this.Shape.LineWidth = parseFloat(obj.linewidth);
+    if (obj.lineWidth !== undefined) {
+      this.Shape.LineWidth = parseFloat(obj.lineWidth);
     }
     this.Shape.FixedSize = false;
     this.Shape.UpdateBuffers(this.Layer.AnnotationView);
@@ -383,11 +391,14 @@
 
     if ("label" in obj) {
       var str = obj["label"]["value"]
-      var text = new SAM.Text()
-      text.BackgroundFlag = false;
-      text.String = str;
-      text.Position = this.Shape.Origin;
-      this.Shape.Children["label"] = text;
+      // I universally inserted label "test" before the label was rendered.
+      if (str != "test") {
+        var text = new SAM.Text()
+        text.BackgroundFlag = false;
+        text.String = str;
+        text.Position = this.Shape.Origin;
+        this.Shape.Children["label"] = text;
+      }
     }
     
     if ("user" in obj) {
@@ -501,7 +512,7 @@
         // THis is ignored until the mouse is pressed.
         this.Visibility = true;
         // Center follows mouse.
-        this.Shape.Origin = worldPt1;
+        this.SetOrigin(worldPt1[0], worldPt1[1]);
         this.Layer.EventuallyDraw();
         return false;
       }
@@ -574,7 +585,7 @@
     if (this.State === NEW || this.State === DRAG) {
       if (this.WhichDrag & CENTER) {
         // Special case with no modifiers.  Just translate the whole rectangle.
-        this.Shape.SetOrigin(worldPt1);
+        this.SetOrigin(worldPt1[0], worldPt1[1]);
         this.Layer.EventuallyDraw();
         this.Modified();
         return false;
@@ -635,8 +646,8 @@
         dx = (c * rdx) + (s * rdy);
         dy = (-s * rdx) + (c * rdy);
         // Center is moving half as fast as the mouse.
-        this.Shape.Origin[0] += dx / 2.0;
-        this.Shape.Origin[1] += dy / 2.0;
+        this.SetOrigin(this.Shape.Origin[0] + dx/2.0,
+                       this.Shape.Origin[1] + dy/2.0);
       }
     }
 
@@ -729,6 +740,7 @@
   // Fill the dialog values from the widget values.
   RectWidget.prototype.WidgetPropertiesToDialog = function () {
     this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Shape.OutlineColor));
+    this.Dialog.LineWidthInput.val((this.Shape.LineWidth).toFixed(2));
 
     var label = "";
     if (this.Shape.Children.label && this.Shape.Children.label.String) {
@@ -771,7 +783,7 @@
         var text = new SAM.Text()
         text.BackgroundFlag = false;
         text.String = label;
-        text.Position = this.Circle.Origin;
+        text.Position = this.Shape.Origin;
         this.Shape.Children["label"] = text;
       }
       this.Shape.Children.label.String = label;
