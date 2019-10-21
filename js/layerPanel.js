@@ -778,7 +778,6 @@
   };
 
   LayerPanel.prototype.HandleTouchEnd = function (event) {
-    console.log('panel touch end ' + event.touches.length);
     // No touches for end events so we cannot check for ipad pencil.
     if (this.EditingLayerGui) {
       var layer = this.EditingLayerGui.Layer;

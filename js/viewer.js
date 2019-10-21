@@ -611,7 +611,6 @@
     x = x/m;
     y = y/m;
     
-    console.log("m ("+x+", "+y+") c ("+cx+", "+cy+")");
     // Cross product gives angle*m^2
     var dAngle = x * this.RotateIconY - y * this.RotateIconX;
 
@@ -754,6 +753,17 @@
         '-webkit-user-select': 'all',
         'user-select': 'all'});
 
+    // Gymnastics to let the textarea get events.
+    // Allow copy of text.
+    this.ShareDisplay.on('mouseenter', function () {
+      self.InteractionOff();
+      self.ShareDisplay.focus();
+    });
+    this.ShareDisplay.on('mouseleave', function () {
+      self.InteractionOn();
+      self.ShareDisplay.blur();
+    });
+    
     // Put the zoom bottons in a tab.
     this.ZoomTab = new SA.Tab(this.GetDiv(),
                                SA.ImagePathUrl + 'mag.png',
@@ -2803,13 +2813,24 @@
     var height = Math.round(cam.GetHeight());
     var left = Math.round(fp[0] - width / 2);
     var top = Math.round(fp[1] - height / 2);
-    var imageId = this.GetCache().Image._id;
-    var url = window.location.href;
+    var rot = Math.round(cam.GetWorldRotation());
+
+    // Image._id is just a random id.
+    //var imageId = this.GetCache().Image._id;
+    // Hck to get th real id from a tile url.
+    var url = this.GetCache().TileSource.getTileUrl(0,0,0,0)
+    var imageId = url.split('/')[3];
+
+    url = window.location.href;
     var end = url.indexOf('item/');
     url = url.substr(0, end + 4);
-    url = url + '#item/' + imageId + '?bounds=' + left + ',' + (left + width) +
-      ',' + top + ',' + (top + width);
+    url = url + '/' + imageId + '?bounds=' + left + ',' + top +
+      ',' + (left + width) + ',' + (top + height);
 
+    if (rot != 0) {
+      url += '&rotate=' + rot;
+    }
+    
     this.ShareDisplay.text(url);
   };
 

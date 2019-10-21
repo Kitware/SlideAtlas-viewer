@@ -1154,17 +1154,10 @@
   };
 
   AnnotationLayer.prototype.HandleTouchEnd = function (event) {
-    console.log('layer touch end');
     if (!this.GetVisibility()) {
       return true;
     }
     this.Event = event;
-
-    if (this.Pencil) {
-      console.log('pencil state = ' + this.Pencil.State);
-    } else {
-      console.log('no pencil');
-    }
 
     // It seems that end events do not have a force (to indicate iPad pencil).
     if (this.Pencil && this.Pencil.IsStateDrawingDown()) {
@@ -1172,7 +1165,6 @@
     }
 
     if (event.pencil) {
-      console.log('ipad pencil end');
       var pencil = this.GetIPadPencilWidget();
       pencil.HandleTouchEnd(this);
       pencil.SetActive(false);

@@ -237,8 +237,6 @@
   
   // Only one editable at a time (or none)
   AnnotationLayerGui.prototype.EditOn = function () {
-    console.log("EditOn");
-
     if (this.Editing) {
       this.UpdateToolVisibility();
       return;
@@ -269,7 +267,6 @@
 
 
   AnnotationLayerGui.prototype.EditOff = function () {
-    console.log("EditOff");
     if (!this.Editing) {
       return;
     }
@@ -334,7 +331,6 @@
   // The complexity is because ancenstor events interfere with contentEditing.
   AnnotationLayerGui.prototype.SetNameButtonModeToEdit = function () {
     var self = this;
-    console.log("SetNameButtonModeToEdit");
     this.NameButton
       .off('click touchstart')
       // .prop('title', 'edit name')
@@ -347,7 +343,6 @@
 
   AnnotationLayerGui.prototype.SetNameButtonModeToOwner = function () {
     var self = this;
-    console.log("SetNameButtonModeToOwner");    
     this.NameButton
       .off('mouseenter')
       // .prop('title', 'edit')
@@ -394,7 +389,6 @@
   // There are two modes for name editing.  This is the inner mode.
   // When the mouse if over the button, make the div content editable.
   AnnotationLayerGui.prototype.EditNameOn = function () {
-    console.log("EditNameOn");
     var self = this;
     this.Viewer.InteractionOff();
     // Get rid of the events blocking viewer interaction
@@ -409,7 +403,6 @@
 
   
   AnnotationLayerGui.prototype.EditNameOff = function () {
-    console.log("EditNameOff");
     var self = this;
     // Did the name change?
     var name = this.NameButton.text();
