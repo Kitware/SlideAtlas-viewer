@@ -237,6 +237,8 @@
   
   // Only one editable at a time (or none)
   AnnotationLayerGui.prototype.EditOn = function () {
+    console.log("EditOn");
+
     if (this.Editing) {
       this.UpdateToolVisibility();
       return;
@@ -244,8 +246,7 @@
     this.Editing = true;
 
     // Wait as long as possible before creating and setting the tool panel.
-    // create it now.
-    // Not necessary top do it here I guess.
+    // create it now.  SetEditinglayerGui needs to tool panel.
     this.GetToolPanel();
     
     // Make the name editable.
@@ -268,6 +269,7 @@
 
 
   AnnotationLayerGui.prototype.EditOff = function () {
+    console.log("EditOff");
     if (!this.Editing) {
       return;
     }
@@ -332,6 +334,7 @@
   // The complexity is because ancenstor events interfere with contentEditing.
   AnnotationLayerGui.prototype.SetNameButtonModeToEdit = function () {
     var self = this;
+    console.log("SetNameButtonModeToEdit");
     this.NameButton
       .off('click touchstart')
       // .prop('title', 'edit name')
@@ -339,10 +342,12 @@
       .css({'cursor': 'text'})
       // Needed to expose contenteditable which is blocked by ancestor event handlers.
       .on('mouseenter', function () { self.EditNameOn(); });
+    this.EditNameOn();
   };
 
   AnnotationLayerGui.prototype.SetNameButtonModeToOwner = function () {
     var self = this;
+    console.log("SetNameButtonModeToOwner");    
     this.NameButton
       .off('mouseenter')
       // .prop('title', 'edit')
@@ -351,7 +356,7 @@
       .hover()
       .on('click touchstart', function () {
         self.VisToggle.prop('checked', true);
-        self.EditOn();
+        self.AfterLoad(function () { self.EditOn();});
         return false;
       });
   };
@@ -389,6 +394,7 @@
   // There are two modes for name editing.  This is the inner mode.
   // When the mouse if over the button, make the div content editable.
   AnnotationLayerGui.prototype.EditNameOn = function () {
+    console.log("EditNameOn");
     var self = this;
     this.Viewer.InteractionOff();
     // Get rid of the events blocking viewer interaction
@@ -397,11 +403,13 @@
     this.NameButton.focus();
     this.NameButton.attr('tabindex', '1');
     // Note: Too agressive,  find another way to turn it off.
-    this.NameButton.on('mouseleave', function () { self.EditNameOff(); });
+    // #saAnnotationPanel
+    this.LayerPanel.Div.on('mouseleave', function () { self.EditNameOff(); });
   };
 
   
   AnnotationLayerGui.prototype.EditNameOff = function () {
+    console.log("EditNameOff");
     var self = this;
     // Did the name change?
     var name = this.NameButton.text();

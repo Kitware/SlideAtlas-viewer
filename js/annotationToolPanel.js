@@ -406,7 +406,6 @@
     if (this.PencilOpenClosedState === CLOSED) {
       return;
     }
-    console.log('Set mode to closed');
     this.PencilOpenClosedState = CLOSED;
     this.PencilOpenClosedToggle
         .attr('src', SA.ImagePathUrl + 'select_lasso.png');
