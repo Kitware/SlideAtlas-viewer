@@ -35,7 +35,6 @@ var jsSrcFiles = [
   'js/gridWidget.js',
   'js/scaleWidget.js',
   'js/dialog.js',
-  'js/girderAnnotationEditor.js',
   'js/girderAnnotationIterator.js',
   'js/GirderStackWidget.js',
   'js/GirderRocWidget.js',
