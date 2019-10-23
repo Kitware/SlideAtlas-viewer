@@ -133,7 +133,7 @@
     }
     this.ZoomTarget = this.MainView.Camera.GetHeight();
     this.RollTarget = this.MainView.Camera.GetWorldRoll();
-
+    
     this.DoubleClickX = 0;
     this.DoubleClickY = 0;
 
@@ -2324,8 +2324,8 @@
       var cy = y - (this.MainView.Viewport[3] * 0.5);
       // GLOBAL views will go away when views handle this.
       this.MainView.Camera.HandleRoll(cx, cy,
-                                            this.MouseDeltaX,
-                                            this.MouseDeltaY);
+                                      this.MouseDeltaX,
+                                      this.MouseDeltaY);
       this.RollTarget = this.MainView.Camera.GetWorldRoll();
       this.UpdateCamera();
     } else if (this.InteractionState === INTERACTION_ZOOM) {
@@ -2484,22 +2484,36 @@
     var s = -Math.sin(roll);
     if (event.keyCode === 38) {
       // Up cursor key
-      dx = 0.0;
-      dy = -0.5 * cam.GetHeight();
-      rx = dx * c - dy * s;
-      ry = dx * s + dy * c;
-      this.TranslateTarget[0] = fp[0] + rx;
-      this.TranslateTarget[1] = fp[1] + ry;
+      if (event.ctrlKey) {
+        // Rotate to the next 90 degree lock.
+        var idx = (this.MainView.Camera.GetWorldRoll() / (Math.PI*0.5)) - 0.01;
+        idx = Math.floor(idx)
+        this.RollTarget = idx * Math.PI * 0.5;
+      } else {
+        dx = 0.0;
+        dy = -0.5 * cam.GetHeight();
+        rx = dx * c - dy * s;
+        ry = dx * s + dy * c;
+        this.TranslateTarget[0] = fp[0] + rx;
+        this.TranslateTarget[1] = fp[1] + ry;
+      }
       this.AnimateLast = new Date().getTime();
       this.AnimateDuration = 200.0;
       this.EventuallyRender(true);
       return false;
     } else if (event.keyCode === 40) {
       // Down cursor key
-      dx = 0.0;
-      dy = 0.5 * cam.GetHeight();
-      rx = dx * c - dy * s;
-      ry = dx * s + dy * c;
+      if (event.ctrlKey) {
+        // Rotate to the next 90 degree lock.
+        var idx = (this.MainView.Camera.GetWorldRoll() / (Math.PI*0.5)) + 0.01;
+        idx = Math.ceil(idx)
+        this.RollTarget = idx * Math.PI * 0.5;
+      } else {
+        dx = 0.0;
+        dy = 0.5 * cam.GetHeight();
+        rx = dx * c - dy * s;
+        ry = dx * s + dy * c;
+      }
       this.TranslateTarget[0] = fp[0] + rx;
       this.TranslateTarget[1] = fp[1] + ry;
       this.AnimateLast = new Date().getTime();
@@ -2508,24 +2522,36 @@
       return false;
     } else if (event.keyCode === 37) {
       // Left cursor key
-      dx = -0.5 * cam.GetWidth();
-      dy = 0.0;
-      rx = dx * c - dy * s;
-      ry = dx * s + dy * c;
-      this.TranslateTarget[0] = fp[0] + rx;
-      this.TranslateTarget[1] = fp[1] + ry;
+      if (event.ctrlKey) {
+        // Rotate by 90 degrees.
+        this.RollTarget = this.MainView.Camera.GetWorldRoll() -
+          Math.PI / 2.0;
+      } else {
+        dx = -0.5 * cam.GetWidth();
+        dy = 0.0;
+        rx = dx * c - dy * s;
+        ry = dx * s + dy * c;
+        this.TranslateTarget[0] = fp[0] + rx;
+        this.TranslateTarget[1] = fp[1] + ry;
+      }
       this.AnimateLast = new Date().getTime();
       this.AnimateDuration = 200.0;
       this.EventuallyRender(true);
       return false;
     } else if (event.keyCode === 39) {
       // Right cursor key
-      dx = 0.5 * cam.GetWidth();
-      dy = 0.0;
-      rx = dx * c - dy * s;
-      ry = dx * s + dy * c;
-      this.TranslateTarget[0] = fp[0] + rx;
-      this.TranslateTarget[1] = fp[1] + ry;
+      if (event.ctrlKey) {
+        // Rotate by 90 degrees.
+        this.RollTarget = this.MainView.Camera.GetWorldRoll() +
+          Math.PI / 2.0;
+      } else {
+        dx = 0.5 * cam.GetWidth();
+        dy = 0.0;
+        rx = dx * c - dy * s;
+        ry = dx * s + dy * c;
+        this.TranslateTarget[0] = fp[0] + rx;
+        this.TranslateTarget[1] = fp[1] + ry;
+      }
       this.AnimateLast = new Date().getTime();
       this.AnimateDuration = 200.0;
       this.EventuallyRender(true);

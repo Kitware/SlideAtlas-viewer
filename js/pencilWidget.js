@@ -115,6 +115,23 @@
       .val(this.LineWidth)
       .css({'display': 'table-cell'})
       .keypress(function (event) { return event.keyCode !== 13; });
+
+    // closed check
+    this.Dialog.ClosedDiv =
+            $('<div>')
+            .appendTo(this.Dialog.Body)
+            .css({'display': 'table-row'});
+    this.Dialog.ClosedLabel =
+            $('<div>')
+            .appendTo(this.Dialog.ClosedDiv)
+            .text('Closed:')
+            .css({'display': 'table-cell',
+              'text-align': 'left'});
+    this.Dialog.ClosedInput =
+            $('<input type="checkbox">')
+            .appendTo(this.Dialog.ClosedDiv)
+            .attr('checked', 'false')
+            .css({'display': 'table-cell'});    
   };
 
   // This callback gets called when ever the active state changes,
@@ -692,6 +709,7 @@
     }
     this.Dialog.ColorInput.val(this.Color);
     this.Dialog.LineWidthInput.val(this.LineWidth.toFixed(2));
+    this.Dialog.ClosedInput.prop('checked', this.Mode === CLOSED);
 
     this.Dialog.Show(true);
   };
@@ -699,6 +717,12 @@
   PencilWidget.prototype.DialogApplyCallback = function () {
     this.Color = this.Dialog.ColorInput.val();
     this.LineWidth = parseFloat(this.Dialog.LineWidthInput.val());
+    if (this.Dialog.ClosedInput.prop('checked')) {
+      this.SetModeToClosed();
+    } else {
+      this.SetModeToOpen();
+    }
+    
     this.Shapes.SetOutlineColor(this.Color);
     this.Shapes.SetLineWidth(parseFloat(this.Dialog.LineWidthInput.val()));
     this.Shapes.UpdateBuffers(this.Layer.AnnotationView);

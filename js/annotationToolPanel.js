@@ -510,7 +510,7 @@
       // TODO: REmove dialogs from widget and manage them here.
       // Widgets can share a dialog.
       layer.AddWidget(widget);
-      widget.SetCreationCamera(layer.GetCamera());
+      //widget.SetCreationCamera(layer.GetCamera());
       widget.SetStateToDialog();
     }
 
@@ -554,8 +554,7 @@
       // TODO: REmove dialogs from widget and manage them here.
       // Widgets can share a dialog.
       layer.AddWidget(widget);
-      widget.SetC
-      reationCamera(layer.GetCamera());
+      //widget.SetCreationCamera(layer.GetCamera());
     }
 
     // Activate the widget to start drawing.
@@ -591,7 +590,7 @@
       // TODO: REmove dialogs from widget and manage them here.
       // Widgets can share a dialog.
       layer.AddWidget(widget);
-      widget.SetCreationCamera(layer.GetCamera());
+      //widget.SetCreationCamera(layer.GetCamera());
     }
 
     // Activate the widget to start drawing.
@@ -627,7 +626,7 @@
       // TODO: REmove dialogs from widget and manage them here.
       // Widgets can share a dialog.
       layer.AddWidget(widget);
-      widget.SetCreationCamera(layer.GetCamera());
+      //widget.SetCreationCamera(layer.GetCamera());
     }
 
     // Activate the widget to start drawing.
@@ -664,7 +663,7 @@
       // TODO: REmove dialogs from widget and manage them here.
       // Widgets can share a dialog.
       layer.AddWidget(widget);
-      widget.SetCreationCamera(layer.GetCamera());
+      //widget.SetCreationCamera(layer.GetCamera());
     }
 
     // Activate the widget to start drawing.

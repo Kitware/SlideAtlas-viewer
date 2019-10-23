@@ -28,6 +28,10 @@ window.SAM = window.SAM || {};
     this.CreateBuffer();
     this.Mirror = false;
 
+    // When rotating, I want to stop at 0, 90, 180, and 270.
+    this.RollStopFlag = false;
+    this.RollStopCounter = 0.0;
+    
     // Placeholders
     this.ViewportWidth = 162;
     this.ViewportHeight = 100;
@@ -294,7 +298,61 @@ window.SAM = window.SAM || {};
     if (this.Mirror) {
       dRoll = -dRoll;
     }
+    this.IncrementRollWithStops(dRoll);
+  }
+
+
+  Camera.prototype.IncrementRollWithStops = function (dRoll) {
     // Keep roll in radians.
+    var newRoll = this.WorldRoll + dRoll;
+    // Logic for 90 degree stops
+    var rad90 = Math.PI * 0.5;
+    
+    // How long to stop in units radians.
+    var stopDuration = rad90 / 9; // 10 degrees
+    var quadrant = ((Math.floor(this.WorldRoll / rad90) % 4)+4)%4
+    var newQuadrant = ((Math.floor(newRoll / rad90) % 4)+4)%4
+    // Are we going to pass a stop?
+    if (!this.RollStopFlag && quadrant !== newQuadrant) {
+      // Yes, compute the stop angle.
+      var stopAngle = 0;
+      if (Math.abs(quadrant - newQuadrant) < 2) {
+        stopAngle = (((quadrant + newQuadrant) / 2.0) + 0.5) * rad90;
+      }
+      this.RollStopFlag = true;
+      // Rotate upto the stop (update dRoll) and let remaining cases execute..
+      dRoll -= (this.WorldRoll - stopAngle);
+      // Handle the 360->0 boundaries.
+      var rad360 = Math.PI * 2.0;
+      while (dRoll > Math.PI) {
+        dRoll -= rad360;
+      }
+      while (dRoll < -Math.PI) {
+        dRoll += rad360;
+      }
+      this.WorldRoll = stopAngle;
+      if (dRoll > 0) {
+        this.RollStopCounter = 0;
+      } else {
+        this.RollStopCounter = stopDuration;
+      }
+      dRoll = 0;
+    }
+    // If we are at a stop, advance the stop by dRoll.
+    if (this.RollStopFlag) {
+      this.RollStopCounter += dRoll;
+      console.log("roll stop counter: " + this.RollStopCounter);
+      dRoll = 0;
+      if (this.RollStopCounter < 0.0) {
+        this.RollStopFlag = false;
+        dRoll = this.RollStopCounter;
+      }
+      if (this.RollStopCounter > stopDuration) {
+        this.RollStopFlag = false;
+        dRoll = this.RollStopCounter - stopDuration;
+      }
+    }
+    // Handle normal rotation.
     this.WorldRoll += dRoll;
 
     this.ComputeMatrix();

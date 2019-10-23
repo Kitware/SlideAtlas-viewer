@@ -48,7 +48,7 @@
 
     // Circle is to show an active tip and base.
     this.CircleTip = new SAM.Circle();
-    this.CircleTip.SetFillColor();
+    this.CircleTip.SetFillColor([1,1,0]);
     this.CircleTip.SetOutlineColor([0.0, 0.0, 0.0]);
     this.CircleTip.Radius = 5;
     this.CircleTip.LineWidth = 1;
@@ -56,7 +56,7 @@
     // this.Circle.ZOffset = -0.05;
 
     this.CircleTail = new SAM.Circle();
-    this.CircleTail.SetFillColor();
+    this.CircleTail.SetFillColor([1,1,0]);
     this.CircleTail.SetOutlineColor([0.0, 0.0, 0.0]);
     this.CircleTail.Radius = 5;
     this.CircleTail.PositionCoordinateSystem = 1; // Shape.VIEWER;
@@ -357,23 +357,19 @@
       var dy = y - this.CircleTip.Origin[1];
       if (dx * dx + dy * dy < Math.pow(this.CircleTip.Radius, 2)) {
         this.CircleTip.Selected = true;
-        this.CircleTip.SetFillColor([1, 1, 0]);
         cursor = 'move';
         this.State = HOVER;
       } else {
         this.CircleTip.Selected = false;
-        this.CircleTip.SetFillColor();
       }
       dx = x - this.CircleTail.Origin[0];
       dy = y - this.CircleTail.Origin[1];
       if (dx * dx + dy * dy < Math.pow(this.CircleTail.Radius, 2)) {
         this.CircleTail.Selected = true;
-        this.CircleTail.SetFillColor([1, 1, 0]);
         cursor = 'move';
         this.State = HOVER;
       } else {
         this.CircleTail.Selected = false;
-        this.CircleTail.SetFillColor();
       }
       this.Layer.GetParent().css({'cursor': cursor});
       this.Layer.EventuallyDraw();
