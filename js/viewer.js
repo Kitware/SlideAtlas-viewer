@@ -730,18 +730,14 @@
     this.ShareTab.Panel
       .css({
         'box-sizing': 'border-box',
-        'left': '-300px',
-        'width': '380px',
+        'left': '-400px',
+        'width': '480px',
         'z-index': '500',
         // 'height': '45px',
         'padding': '0 2px'});
     var self = this;
-    // TODO: Separate the share update from EndInteraction.
-    this.ShareTab.Panel.on('show', function () {
-      self.TriggerEndInteraction();
-      self.ShareDisplay.focus();
-    });
-    this.ShareDisplay = $('<textarea>')
+    //this.ShareDisplay = $('<textarea>')
+    this.ShareDisplay = $('<div>')
       .appendTo(this.ShareTab.Panel)
       .addClass('sa-view-share-text')
       .html('')
@@ -753,6 +749,11 @@
         '-webkit-user-select': 'all',
         'user-select': 'all'});
 
+    // TODO: Separate the share update from EndInteraction.
+    this.ShareTab.Panel.on('show', function () {
+      self.TriggerEndInteraction();
+      self.ShareDisplay.focus();
+    });
     // Gymnastics to let the textarea get events.
     // Allow copy of text.
     this.ShareDisplay.on('mouseenter', function () {

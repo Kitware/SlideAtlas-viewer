@@ -241,6 +241,8 @@
         function () {
           self.LayerPanel.WithEditingLayerCall(
             function (layerGui) {
+              
+              self.Viewer.InteractionOn();
               (self[onCallbackName])(layerGui);
             });
         });

@@ -852,7 +852,7 @@
   // Called by the SelectedDeleteButton click event (or delete key).
   // Returns true if a widget was deleted.
   AnnotationLayerGui.prototype.DeleteSelected = function () {
-    if (!this.Layer.IsSelected()) {
+    if (this.Layer.IsEmpty()) {
       this.Delete();
       return;
     }

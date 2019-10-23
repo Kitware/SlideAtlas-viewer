@@ -104,8 +104,8 @@
       if (!this.Shapes[idx].IsEmpty()) {
         return false;
       }
-      return true;
     }
+    return true;
   };
 
   // Depreciates: TODO:  Remove this method.
