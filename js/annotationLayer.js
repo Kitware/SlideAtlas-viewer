@@ -1237,7 +1237,9 @@
       if (pick != widget.IsSelected()) {
         modified = true;
       }
-      widget.SetSelected(pick);
+      // widget "handleSelect should do this.
+      // pencil can have multiple shapes.  I do not wnat them all selected.
+      //widget.SetSelected(pick);
     }
 
     if (selectedWidgets.length > 0 && !this.Active) {

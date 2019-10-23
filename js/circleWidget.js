@@ -23,6 +23,8 @@
   var INSIDE = 2;
   var CENTER = 3;
 
+  var DEFAULT_LABEL;
+  
   function CircleWidget (layer) {
     this.Layer = layer;
 
@@ -110,6 +112,14 @@
     this.Cross.LineWidth = 1;
     this.Cross.PositionCoordinateSystem = 1;
 
+    if (DEFAULT_LABEL) {
+      var text = new SAM.Text()
+      text.BackgroundFlag = false;
+      text.String = DEFAULT_LABEL;
+      text.Position = this.Circle.Origin;
+      this.Circle.Children["label"] = text;
+    }
+    
     this.State = INACTIVE;
   }
 
@@ -459,6 +469,7 @@
     var label = this.Dialog.LabelInput.val();
     label = label.trim();
     if (label == "") {
+      DEFAULT_LABEL = undefined;
       delete this.Circle.Children.label;
     } else {
       if (!this.Circle.Children.label) {
@@ -467,6 +478,7 @@
         text.String = label;
         text.Position = this.Circle.Origin;
         this.Circle.Children["label"] = text;
+        DEFAULT_LABEL = label;
       }
       this.Circle.Children.label.String = label;
       modified = true;
@@ -794,7 +806,7 @@
     if (event.which === 0 &&
         (this.State === NEW_DRAG_RADIUS || this.State === DRAG_RADIUS ||
          this.State === DRAG || this.State === DRAG_KEYPOINT)) {
-      return this.HandleMouseUp(event);
+      return this.HandleMouseUp(layer);
     }
 
     if (event.which === 0 && this.State === ACTIVE) {
@@ -902,6 +914,8 @@
     }
 
     this.Circle.SetSelected(false);
+    // hack to fix bug where circle remained active when no longer selected.
+    this.SetActive(false);
     return false;
   };
 

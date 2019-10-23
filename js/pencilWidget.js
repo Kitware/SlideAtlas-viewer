@@ -481,6 +481,9 @@
       // I do not this this is used anymore.
       this.SelectionChanged();
       return selectedShape;
+    } else {
+      this.SetActive(false);
+      this.SelectionChanged();
     }
   };
 

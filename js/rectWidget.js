@@ -30,6 +30,8 @@
   var DEFAULT_WIDTH = -1;
   var DEFAULT_HEIGHT = -1;
 
+  var DEFAULT_LABEL;
+  
   function Rect () {
     SAM.Shape.call(this);
 
@@ -150,6 +152,14 @@
       }
     }
 
+    if (DEFAULT_LABEL) {
+      var text = new SAM.Text()
+      text.BackgroundFlag = false;
+      text.String = DEFAULT_LABEL;
+      text.Position = this.Circle.Origin;
+      this.Circle.Children["label"] = text;
+    }
+    
     // Note: If the user clicks before the mouse is in the
     // canvas, this will behave odd.
 
@@ -777,6 +787,7 @@
     var label = this.Dialog.LabelInput.val();
     label = label.trim();
     if (label == "") {
+      DEFAULT_LABEL = undefined;
       delete this.Shape.Children.label;
     } else {
       if (!this.Shape.Children.label) {
@@ -785,6 +796,7 @@
         text.String = label;
         text.Position = this.Shape.Origin;
         this.Shape.Children["label"] = text;
+        DEFAULT_LABEL = label;
       }
       this.Shape.Children.label.String = label;
       modified = true;

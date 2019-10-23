@@ -2390,9 +2390,9 @@
     // Initial delta cause another bug.
     // Lets restrict to one zoom step per event.
     if (tmp > 0) {
-      this.ZoomTarget *= 1.1;
+      this.ZoomTarget *= 1.05;
     } else if (tmp < 0) {
-      this.ZoomTarget /= 1.1;
+      this.ZoomTarget /= 1.05;
     }
 
     // Compute translate target to keep position in the same place.
