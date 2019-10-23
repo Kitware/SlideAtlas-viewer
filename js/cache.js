@@ -239,7 +239,7 @@
     this.Image = image;
 
     if (image.copyright === undefined) {
-      image.copyright = 'Copyright 2017. All Rights Reserved.';
+      image.copyright = 'Copyright 2019. All Rights Reserved.';
     }
 
     this.Levels = new Array(image.levels);
