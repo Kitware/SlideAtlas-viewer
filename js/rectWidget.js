@@ -302,6 +302,8 @@
     if (part !== undefined) {
       this.SetSelected(true);
       return true;
+    } else {
+      this.SetSelected(false);
     }
 
     return false;

@@ -1227,14 +1227,15 @@
 
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
-      var pick = false;
-      if (selectedWidgets.length == 0 || event.shiftKey == true) {
+      var selectedOld = widget.IsSelected();
+      // Skip calling select if widget is already selected and we allow multiple selections.
+      if ( ! (event.shiftKey && selectedOld)) {
         if (widget.HandleSelect && widget.HandleSelect(this)) {
-          pick = true;
           selectedWidgets.push(widget);
         }
       }
-      if (pick != widget.IsSelected()) {
+
+      if (selectedOld != widget.IsSelected()) {
         modified = true;
       }
       // widget "handleSelect should do this.
