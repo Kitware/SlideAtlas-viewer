@@ -55,6 +55,17 @@
           'padding-right': '4px'})
         .text(metadata.annotation.name);
 
+    nameButton.hover(
+      function () {
+        $(this).css({'background-color': this.ActiveColor,
+                     'cursor': 'text'});
+      },
+      function () {
+        $(this).css({'background-color': this.DefaultColor,
+                     'cursor': 'pointer'});
+      });
+
+
     // Check is for visibility
     var visToggle = $('<img>')
         .appendTo(div)
@@ -98,6 +109,7 @@
           'cursor': 'pointer',
           'position': 'relative',
           'color': 'red',
+          'opacity': '0.5',
           'margin': '1px',
           'background-color': '#DDD',
           'border': '1px solid #555'})
@@ -164,7 +176,7 @@
 
     // The user can only activate his own annotations
     if (metadata.creatorId === this.LayerPanel.UserData._id) {
-      this.SetNameButtonModeToOwner();
+      this.EditNameOff();
 
       deleteButton.mouseenter(function () { div.focus(); })
         .hover(
@@ -248,7 +260,11 @@
     this.GetToolPanel();
     
     // Make the name editable.
-    this.SetNameButtonModeToEdit();
+    this.NameButton
+      .on('click touchstart', function () {
+        self.AfterLoad(function () { self.EditNameOn();});
+        return false;
+      });
 
     this.EditToggle
       .attr('src', SA.ImagePathUrl + 'edit_down.png');
@@ -282,8 +298,9 @@
       this.Layer.EventuallyDraw();
     }
     // Disable editing of the name.
-    this.SetNameButtonModeToOwner();
-
+    this.EditNameOff();
+    this.NameButton.off('click touchstart');
+    
     // Save the annotation if anything changed.
     if (this.Modified) {
       this.RecordAndSave();
@@ -326,37 +343,7 @@
     };
   };
 
-    // There are two modes for name editing.  This is the outter mode.
-  // The button is waiting for the mouse to hover.
-  // The complexity is because ancenstor events interfere with contentEditing.
-  AnnotationLayerGui.prototype.SetNameButtonModeToEdit = function () {
-    var self = this;
-    this.NameButton
-      .off('click touchstart')
-      // .prop('title', 'edit name')
-      .attr('contentEditable', true)
-      .css({'cursor': 'text'})
-      // Needed to expose contenteditable which is blocked by ancestor event handlers.
-      .on('mouseenter', function () { self.EditNameOn(); });
-    this.EditNameOn();
-  };
 
-  AnnotationLayerGui.prototype.SetNameButtonModeToOwner = function () {
-    var self = this;
-    this.NameButton
-      .off('mouseenter')
-      // .prop('title', 'edit')
-      .attr('contentEditable', false)
-      .css({'cursor': 'pointer'})
-      .hover()
-      .on('click touchstart', function () {
-        self.VisToggle.prop('checked', true);
-        self.AfterLoad(function () { self.EditOn();});
-        return false;
-      });
-  };
-
-  
   AnnotationLayerGui.prototype.VisibilityOn = function () {
     if (this.Visible) {
       return;
@@ -390,34 +377,54 @@
   // When the mouse if over the button, make the div content editable.
   AnnotationLayerGui.prototype.EditNameOn = function () {
     var self = this;
-    this.Viewer.InteractionOff();
+    this.EditOn();
+    
     // Get rid of the events blocking viewer interaction
     // but also blocking content editable.
+    this.Viewer.InteractionOff();
     this.NameButton.off();
-    this.NameButton.focus();
     this.NameButton.attr('tabindex', '1');
-    // Note: Too agressive,  find another way to turn it off.
-    // #saAnnotationPanel
-    this.LayerPanel.Div.on('mouseleave', function () { self.EditNameOff(); });
+    // Sometimes the leave even does not fire, and the viewer appears non functional
+    this.LayerPanel.Div.on('mousedown.namebutton', function () { self.EditNameOff(); });
+    this.LayerPanel.Div.on('mouseleave.namebutton', function () { self.EditNameOff(); });
+    this.Viewer.GetDiv().on('mousedown.namebutton', function () { self.EditNameOff(); });
+
+    var self = this;
+    this.NameButton
+      .attr('contentEditable', true);
+    this.NameButton.focus();    
   };
 
-  
+
   AnnotationLayerGui.prototype.EditNameOff = function () {
+    console.log("edit name off")
+
     var self = this;
     // Did the name change?
     var name = this.NameButton.text();
     if (name !== this.Name) {
-      // Yes,  schedule teh change to be saved on teh server.
+      // Yes,  schedule the change to be saved on the server.
       this.Name = name;
       this.AnnotationModified();
     }
-    // TODO:  Just keep a Viewer ivar
+
     this.Viewer.InteractionOn();
+
+    this.LayerPanel.Div.off('mousedown.namebutton');
+    this.LayerPanel.Div.off('mouseleave.namebutton');
+    this.Viewer.GetDiv().off('mousedown.namebutton');
+
+    this.NameButton
+      .attr('contentEditable', false)
+      .css({'cursor': 'pointer'})
+      .on('click touchstart', function () {
+        self.AfterLoad(function () { self.EditNameOn();});
+        return false;
+      });
+
     // Turn viewer event blocking on again.
     this.NameButton.on('mousedown mousemove mouseup touchstart touchend',
                        function () { return false; });
-    // Turn editing back on if the mouse enters the button again.
-    this.NameButton.on('mouseenter', function () { self.EditNameOn(); });
 
     if (this.Name !== this.LayerPanel.GetDefaultLayerName()) {
       this.LayerPanel.InitializeDefaultToolPanel();

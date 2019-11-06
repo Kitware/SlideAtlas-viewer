@@ -213,8 +213,13 @@
   CircleWidget.prototype.GetActive = function () {
     return this.State !== INACTIVE;
   };
-
+  
   CircleWidget.prototype.SetActive = function (flag) {
+    if (flag === false && this.State === NEW_DRAG) {
+      // User is in the middle of dragging a circle)
+      this.Cancel();
+      return;
+    }
     if (flag && this.State === INACTIVE) {
       this.State = HOVER;
       // Probably not right, but the widget probably became active because it was selected,
@@ -645,6 +650,15 @@
     }
   };
 
+  CircleWidget.prototype.Cancel = function () {
+    if (this.State === NEW_DRAG) {  
+      // Circle has not been placed. Delete the circle.
+      this.Circle.Selected = true;
+      this.Layer.DeleteSelected();
+    }
+    this.SetActive(false);
+  };
+
   CircleWidget.prototype.HandleKeyDown = function (keyCode) {
     if (this.State === INACTIVE) {
       return true;
@@ -657,11 +671,7 @@
 
     // Escape key
     if (event.keyCode === 27) {
-      if (this.State === NEW_DRAG) {
-        // Circle has not been placed. Delete the circle.
-        this.Layer.DeleteSelected();
-      }
-      this.SetActive(false);
+      this.Cancel();
       return false;
     }
 

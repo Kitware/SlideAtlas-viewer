@@ -277,8 +277,8 @@
     this.HighlightRadioToolButton(pressedButton);
 
     // Turn off previous tool widgets. (deactivate)
-    if (this.LayerPanel.EditingLayer) {
-      var layer = this.LayerPanel.EditingLayer.Layer;
+    if (this.LayerPanel.EditingLayerGui) {
+      var layer = this.LayerPanel.EditingLayerGui.Layer;
       layer.InactivateAll();
     }
 

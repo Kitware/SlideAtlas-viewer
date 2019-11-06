@@ -357,6 +357,10 @@
       'lineWidth': this.Shape.LineWidth,
       'lineColor': SAM.ConvertColorToHex(this.Shape.OutlineColor)
     }
+    if (obj.center.length === 2) {
+      obj.center.push(0);
+    }
+    
     if (this.Shape.Children.label && this.Shape.Children.label.String) {
       obj.label = {'value': this.Shape.Children.label.String};
     }
