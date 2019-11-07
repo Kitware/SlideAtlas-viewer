@@ -260,6 +260,7 @@
     this.GetToolPanel();
     
     // Make the name editable.
+    var self = this;
     this.NameButton
       .on('click touchstart', function () {
         self.AfterLoad(function () { self.EditNameOn();});
@@ -378,6 +379,7 @@
   AnnotationLayerGui.prototype.EditNameOn = function () {
     var self = this;
     this.EditOn();
+
     
     // Get rid of the events blocking viewer interaction
     // but also blocking content editable.

@@ -651,7 +651,8 @@
   };
 
   CircleWidget.prototype.Cancel = function () {
-    if (this.State === NEW_DRAG) {  
+    if (this.State === NEW_DRAG) {
+      this.State = INACTIVE;
       // Circle has not been placed. Delete the circle.
       this.Circle.Selected = true;
       this.Layer.DeleteSelected();
