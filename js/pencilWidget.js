@@ -131,7 +131,7 @@
             $('<input type="checkbox">')
             .appendTo(this.Dialog.ClosedDiv)
             .attr('checked', 'false')
-            .css({'display': 'table-cell'});    
+            .css({'display': 'table-cell'});
   };
 
   // This callback gets called when ever the active state changes,
@@ -725,7 +725,7 @@
     } else {
       this.SetModeToOpen();
     }
-    
+
     this.Shapes.SetOutlineColor(this.Color);
     this.Shapes.SetLineWidth(parseFloat(this.Dialog.LineWidthInput.val()));
     this.Shapes.UpdateBuffers(this.Layer.AnnotationView);

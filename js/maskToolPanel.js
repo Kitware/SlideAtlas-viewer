@@ -1,7 +1,6 @@
 // Split off from annotationToolPanel.js
 // This is for mask tools: draw and erase.
 
-
 (function () {
   'use strict';
 
@@ -11,7 +10,7 @@
     this.LayerPanel = layerPanel;
     // Any new layers created have to know the viewer.
     this.Viewer = layerPanel.Viewer;
-    
+
     this.Parent = this.Viewer.GetDiv();
 
     // -----------------------------------------------------
@@ -49,7 +48,7 @@
   MaskToolPanel.prototype.SetLayerGui = function (layerGui) {
     this.LayerGui = layerGui;
   };
-  
+
   MaskToolPanel.prototype.Hide = function () {
     this.ToolPanel.hide();
   };
@@ -57,10 +56,8 @@
   MaskToolPanel.prototype.Show = function () {
     this.ToolPanel.show();
   };
-  
-  MaskToolPanel.prototype.InitializeTools = function () {
-    var self = this;
 
+  MaskToolPanel.prototype.InitializeTools = function () {
     // Radio buttons for tools. (One active at a time).
     this.CursorButton = this.AddToolRadioButton('cursor_arrow.png', 'CursorOn');
     this.PaintButton = this.AddToolRadioButton('paint64.png', 'PaintButtonOn');
@@ -150,9 +147,8 @@
   };
 
   MaskToolPanel.prototype.UpdateToolVisibility = function () {
-    console.log("UpdateToolVisibility not needed here.  Does it have to be called?");
+    console.log('UpdateToolVisibility not needed here.  Does it have to be called?');
   };
-
 
   MaskToolPanel.prototype.CursorOn = function () {
     if (this.LayerPanel.EditingLayer && this.LayerPanel.EditingLayer.Layer) {
@@ -165,7 +161,6 @@
     this.LayerGui.SelectedWidgets = [];
   };
 
-  
   MaskToolPanel.prototype.PaintButtonOn = function (annotObj) {
     // The layer has to be in editing mode.
     annotObj.EditOn();
@@ -200,7 +195,6 @@
     this.LayerGui.SelectedWidgets = [widget];
   };
 
-  
   MaskToolPanel.prototype.EraseButtonOn = function (annotObj) {
     // The layer has to be in editing mode.
     annotObj.EditOn();
@@ -235,7 +229,6 @@
     this.LayerGui.SelectedWidgets = [widget];
   };
 
-
   MaskToolPanel.prototype.SetTime = function (time) {
     for (var i = 0; i < this.AnnotationObjects.length; ++i) {
       var annotObj = this.AnnotationObjects[i];
@@ -246,6 +239,5 @@
     }
   };
 
-  
   SAM.MaskToolPanel = MaskToolPanel;
 })();

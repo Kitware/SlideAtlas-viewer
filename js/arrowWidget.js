@@ -48,7 +48,7 @@
 
     // Circle is to show an active tip and base.
     this.CircleTip = new SAM.Circle();
-    this.CircleTip.SetFillColor([1,1,0]);
+    this.CircleTip.SetFillColor([1, 1, 0]);
     this.CircleTip.SetOutlineColor([0.0, 0.0, 0.0]);
     this.CircleTip.Radius = 5;
     this.CircleTip.LineWidth = 1;
@@ -56,7 +56,7 @@
     // this.Circle.ZOffset = -0.05;
 
     this.CircleTail = new SAM.Circle();
-    this.CircleTail.SetFillColor([1,1,0]);
+    this.CircleTail.SetFillColor([1, 1, 0]);
     this.CircleTail.SetOutlineColor([0.0, 0.0, 0.0]);
     this.CircleTail.Radius = 5;
     this.CircleTail.PositionCoordinateSystem = 1; // Shape.VIEWER;

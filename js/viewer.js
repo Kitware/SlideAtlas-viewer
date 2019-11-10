@@ -133,7 +133,7 @@
     }
     this.ZoomTarget = this.MainView.Camera.GetHeight();
     this.RollTarget = this.MainView.Camera.GetWorldRoll();
-    
+
     this.DoubleClickX = 0;
     this.DoubleClickY = 0;
 
@@ -563,19 +563,14 @@
     // Find the center of the overview window.
     var cx = this.OverViewport[0] + (0.5 * this.OverViewport[2]);
     var cy = this.OverViewport[1] + (0.5 * this.OverViewport[3]);
-    // same as
-    //var w = this.OverView.Parent;
-    //var o = w.offset();
-    //var cx = o.left + (w.width() / 2);
-    //var cy = o.top + (w.height() / 2);
     var offset = this.MainView.Parent.offset();
     var x = e.pageX - offset.left - cx;
     var y = e.pageY - offset.top - cy;
 
     // Normalize
-    var m = Math.sqrt(x*x + y*y);
-    this.RotateIconX  = x/m;
-    this.RotateIconY  = y/m;
+    var m = Math.sqrt((x * x) + (y * y));
+    this.RotateIconX = x / m;
+    this.RotateIconY = y / m;
 
     // Move event is in the viewer or overview.
     // It has a sanity check of which button was pressed.
@@ -586,7 +581,7 @@
 
     return false;
   };
-  
+
   Viewer.prototype.RollMove = function (e) {
     if (!this.OverView) { return; }
     if (!this.RotateIconDrag) { return; }
@@ -607,10 +602,10 @@
     var y = e.pageY - offset.top - cy;
 
     // Normalize
-    var m = Math.sqrt(x*x + y*y);
-    x = x/m;
-    y = y/m;
-    
+    var m = Math.sqrt((x * x) + (y * y));
+    x = x / m;
+    y = y / m;
+
     // Cross product gives angle*m^2
     var dAngle = x * this.RotateIconY - y * this.RotateIconX;
 
@@ -736,7 +731,6 @@
         // 'height': '45px',
         'padding': '0 2px'});
     var self = this;
-    //this.ShareDisplay = $('<textarea>')
     this.ShareDisplay = $('<div>')
       .appendTo(this.ShareTab.Panel)
       .addClass('sa-view-share-text')
@@ -764,7 +758,7 @@
       self.InteractionOn();
       self.ShareDisplay.blur();
     });
-    
+
     // Put the zoom bottons in a tab.
     this.ZoomTab = new SA.Tab(this.GetDiv(),
                                SA.ImagePathUrl + 'mag.png',
@@ -2472,11 +2466,8 @@
       return false;
     }
 
-    var cam;
-    var dx;
-    var dy;
-    var rx;
-    var ry;
+    var cam, idx;
+    var dx, dy, rx, ry;
     cam = this.GetCamera();
     var roll = cam.GetWorldRoll();
     var fp = cam.GetWorldFocalPoint();
@@ -2486,8 +2477,8 @@
       // Up cursor key
       if (event.ctrlKey) {
         // Rotate to the next 90 degree lock.
-        var idx = (this.MainView.Camera.GetWorldRoll() / (Math.PI*0.5)) - 0.01;
-        idx = Math.floor(idx)
+        idx = (this.MainView.Camera.GetWorldRoll() / (Math.PI * 0.5)) - 0.01;
+        idx = Math.floor(idx);
         this.RollTarget = idx * Math.PI * 0.5;
       } else {
         dx = 0.0;
@@ -2505,8 +2496,8 @@
       // Down cursor key
       if (event.ctrlKey) {
         // Rotate to the next 90 degree lock.
-        var idx = (this.MainView.Camera.GetWorldRoll() / (Math.PI*0.5)) + 0.01;
-        idx = Math.ceil(idx)
+        idx = (this.MainView.Camera.GetWorldRoll() / (Math.PI * 0.5)) + 0.01;
+        idx = Math.ceil(idx);
         this.RollTarget = idx * Math.PI * 0.5;
       } else {
         dx = 0.0;
@@ -2825,7 +2816,7 @@
     return viewLayer;
   };
 
-  Viewer.prototype.TriggerEndInteraction= function () {
+  Viewer.prototype.TriggerEndInteraction = function () {
     this.UpdateZoomGui();
 
     // Save the state when the animation is finished.
@@ -2842,10 +2833,11 @@
     var top = Math.round(fp[1] - height / 2);
     var rot = Math.round(cam.GetWorldRotation());
 
+    // TODO: Fix this
     // Image._id is just a random id.
-    //var imageId = this.GetCache().Image._id;
-    // Hck to get th real id from a tile url.
-    var url = this.GetCache().TileSource.getTileUrl(0,0,0,0)
+    // var imageId = this.GetCache().Image._id;
+    // Hack to get th real id from a tile url.
+    var url = this.GetCache().TileSource.getTileUrl(0, 0, 0, 0);
     var imageId = url.split('/')[3];
 
     url = window.location.href;
@@ -2854,10 +2846,10 @@
     url = url + '/' + imageId + '?bounds=' + left + ',' + top +
       ',' + (left + width) + ',' + (top + height);
 
-    if (rot != 0) {
+    if (rot !== 0) {
       url += '&rotate=' + rot;
     }
-    
+
     this.ShareDisplay.text(url);
   };
 

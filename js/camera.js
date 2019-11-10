@@ -31,7 +31,7 @@ window.SAM = window.SAM || {};
     // When rotating, I want to stop at 0, 90, 180, and 270.
     this.RollStopFlag = false;
     this.RollStopCounter = 0.0;
-    
+
     // Placeholders
     this.ViewportWidth = 162;
     this.ViewportHeight = 100;
@@ -116,7 +116,7 @@ window.SAM = window.SAM || {};
 
   Camera.prototype.SetViewport = function (viewport) {
     if (10 * viewport[3] < viewport[2]) {
-      // alert("Unusual viewport " + viewport[3]);
+      // alert('Unusual viewport ' + viewport[3]);
       return;
     }
     this.ViewportWidth = viewport[2];
@@ -299,19 +299,18 @@ window.SAM = window.SAM || {};
       dRoll = -dRoll;
     }
     this.IncrementRollWithStops(dRoll);
-  }
-
+  };
 
   Camera.prototype.IncrementRollWithStops = function (dRoll) {
     // Keep roll in radians.
     var newRoll = this.WorldRoll + dRoll;
     // Logic for 90 degree stops
     var rad90 = Math.PI * 0.5;
-    
+
     // How long to stop in units radians.
     var stopDuration = rad90 / 9; // 10 degrees
-    var quadrant = ((Math.floor(this.WorldRoll / rad90) % 4)+4)%4
-    var newQuadrant = ((Math.floor(newRoll / rad90) % 4)+4)%4
+    var quadrant = ((Math.floor(this.WorldRoll / rad90) % 4) + 4) % 4;
+    var newQuadrant = ((Math.floor(newRoll / rad90) % 4) + 4) % 4;
     // Are we going to pass a stop?
     if (!this.RollStopFlag && quadrant !== newQuadrant) {
       // Yes, compute the stop angle.
@@ -341,7 +340,7 @@ window.SAM = window.SAM || {};
     // If we are at a stop, advance the stop by dRoll.
     if (this.RollStopFlag) {
       this.RollStopCounter += dRoll;
-      console.log("roll stop counter: " + this.RollStopCounter);
+      console.log('roll stop counter: ' + this.RollStopCounter);
       dRoll = 0;
       if (this.RollStopCounter < 0.0) {
         this.RollStopFlag = false;
@@ -603,10 +602,10 @@ window.SAM = window.SAM || {};
       var ctx = overview.Context2d;
       /*
         ctx.beginPath();
-        //ctx.strokeStyle="#E500E5";
+        //ctx.strokeStyle='#E500E5';
         ctx.rect(this.WorldFocalPoint[0]-(0.5*width),
                  this.WorldFocalPoint[1]-(0.5*height),width,height);
-        //ctx.fillStyle="#E500E5";
+        //ctx.fillStyle='#E500E5';
         //ctx.fillRect(this.WorldFocalPoint[0]-(0.5*width),
                        this.WorldFocalPoint[1]-(0.5*height),width,height);
         ctx.stroke();

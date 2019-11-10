@@ -7,27 +7,20 @@
 // Each layer is a group of vector annotations that can be turned on and off together.
 // Layers first started off as markup,  but I am extending this to include a raster mask layer.
 
-
 // Notes:
 // LayerGuis, are annotationLayerGui objects that manaage an annotation layer and GUI
-
 
 // TODO:
 // I want layerGui to own the tools, but the tools have to be available before the first layer is created.
 // Make a default layerGui that is not visible until it has its first annotation
 
-
 // TODO:
 // Click Select circle not working
 // Cannot navigate viewer with touch.
 
-
-
-
 (function () {
   'use strict';
 
-  
   function LayerPanel (viewer, itemId) {
     this.Viewer = viewer;
     this.Parent = viewer.GetDiv();
@@ -37,7 +30,7 @@
     this.EditingLayerGui = undefined;
 
     this.Viewer.ScaleOn();
-    
+
     // Because of loading on demand, the easiest way to restore
     // visibile annotations from local storage is to load a list
     // here.
@@ -70,7 +63,7 @@
                'name': "test.txt",
                'data': "Hello World"};
     girder.rest.restRequest({
-      path: 'item/' + obj.item_id + '/tiles',
+      url: 'item/' + obj.item_id + '/tiles',
       method: 'GET'
     }).done(function (data) {
       obj.sizeX = data.sizeX;
@@ -93,15 +86,14 @@
     this.Viewer.AddLayer(this);
   }
 
-
   LayerPanel.prototype.TestUploadFile = function (obj) {
     var self = this;
     girder.rest.restRequest({
-      path: 'item/' + obj.item_id + '/files',
+      url: 'item/' + obj.item_id + '/files',
       method: 'GET'
     }).done(function (data) {
       for (var idx = 0; idx < data.length; ++idx) {
-        if (data[idx].name == obj.name) {
+        if (data[idx].name === obj.name) {
           obj.file_id = data[idx]._id;
           break;
         }
@@ -110,15 +102,15 @@
     });
   };
 
-  
   LayerPanel.prototype.TestUploadFile2 = function (obj) {
     var self = this;
+    var params;
     if ('file_id' in obj) {
-      var params = {
-        'size': obj.data.length,
+      params = {
+        'size': obj.data.length
       };
       girder.rest.restRequest({
-        path: 'file/' + obj.file_id + '/contents',
+        url: 'file/' + obj.file_id + '/contents',
         params: params,
         method: 'PUT'
       }).done(function (data) {
@@ -126,16 +118,16 @@
         self.TestUploadFile3(obj);
       });
     } else {
-      var params = {
+      params = {
         'parentType': 'item',
         'parentId': obj.item_id,
-        'name': "test.txt",
+        'name': 'test.txt',
         'size': obj.data.length,
-        //'mimeType':"image/png"
-        'mimeType': "text/plain"
+        // 'mimeType':'image/png'
+        'mimeType': 'text/plain'
       };
       girder.rest.restRequest({
-        path: 'file',
+        url: 'file',
         params: params,
         method: 'POST'
       }).done(function (data) {
@@ -145,22 +137,20 @@
     }
   };
 
-
   LayerPanel.prototype.TestUploadFile3 = function (obj) {
     var params = {
       'offset': 0,
       'uploadId': obj.upload_id
     };
     girder.rest.restRequest({
-      path: 'file/chunk',
+      url: 'file/chunk',
       params: params,
       method: 'POST',
       data: obj.data
     }).done(function (data) {
-      console.log("upload sucessful " + data['_id'])
+      console.log('upload sucessful ' + data['_id']);
     });
   };
-
 
   // onresize callback.  Canvas width and height and the camera need
   // to be synchronized with the canvas div.
@@ -174,7 +164,6 @@
     }
   };
 
-
   LayerPanel.prototype.Draw = function () {
     for (var i = 0; i < this.LayerGuis.length; ++i) {
       var layerGui = this.LayerGuis[i];
@@ -185,7 +174,6 @@
     }
   };
 
-  
   LayerPanel.prototype.Reset = function () {
     for (var i = 0; i < this.LayerGuis.length; ++i) {
       var layerGui = this.LayerGuis[i];
@@ -195,14 +183,12 @@
       }
     }
   };
-  
 
   LayerPanel.prototype.InitializeNavigation = function (parent, itemId) {
     var nav = new SA.GirderNavigationWidget(parent, itemId);
     var self = this;
     nav.SetChangeItemCallback(function (itemId) { self.ChangeItem(itemId); });
   };
-
 
   // This call back pattern is all because we load on demand.
   // Gets the annotation being edited. If one is not editing, look for one
@@ -222,7 +208,6 @@
     });
   };
 
-  
   // ===============================================================================
   // TODO: The information has to find a different home.
   LayerPanel.prototype.InitializeHelp = function (parent) {
@@ -480,7 +465,6 @@
           });
   };
 
-  
   // ===============================================================================
   // Call back from navigation to update the annotation to match the viewer item.
   LayerPanel.prototype.ChangeItem = function (itemId) {
@@ -501,7 +485,7 @@
     this.LocalStorageVisibleAnnotationNames = savedNames;
     this.Initialize(this.Div, itemId);
     girder.rest.restRequest({
-      path: 'item/' + itemId + '/tiles',
+      url: 'item/' + itemId + '/tiles',
       method: 'GET'
     }).done(function (data) {
       self.LoadItemToViewer(itemId, data);
@@ -521,7 +505,7 @@
     }
     this.LayerGuis = [];
   };
-  
+
   LayerPanel.prototype.RestoreVisibilityFromLocalStorage = function () {
     this.LocalStorageVisibleAnnotationNames = [];
     var str = localStorage.getItem('SAAnnotationVisibility');
@@ -543,7 +527,6 @@
     localStorage.setItem('SAAnnotationVisibility', JSON.stringify(names));
     this.LocalStorageVisibleAnnotationNames = names;
   };
-
 
   LayerPanel.prototype.LoadItemToViewer = function (itemId, data) {
     // TODO: if a viewer already exists, do we render again?
@@ -574,7 +557,6 @@
     // Viewer.prototype.SetViewerRecord(viewerRecord, lockCamera);
   };
 
-
   LayerPanel.prototype.Initialize = function (parent, itemId) {
     // The multiple nested annotation button divs are to get the scrollbar
     // on the left, but keep the text left justified.
@@ -603,7 +585,7 @@
     // But first, get info about the user (to manage sharing).
     var self = this;
     girder.rest.restRequest({
-      path: 'user/me',
+      url: 'user/me',
       method: 'GET'
     }).done(function (data) {
       if (!data) {
@@ -616,8 +598,7 @@
       }
     });
   };
-  
-  
+
   // Get a list of annotations and make the buttons.
   // Do not get or load the annotation data yet.
   LayerPanel.prototype.RequestGirderImageItem = function (itemId) {
@@ -631,7 +612,7 @@
     var self = this;
     // This gives an array of {_id: '....',annotation:{name: '....'},itemId: '....'}
     girder.rest.restRequest({
-      path: 'annotation?itemId=' + itemId,
+      url: 'annotation?itemId=' + itemId,
       method: 'GET',
       data: JSON.stringify(data)
     }).done(function (data) {
@@ -645,14 +626,14 @@
       var layerGui = new SAM.AnnotationLayerGui(data[i], this);
       this.LayerGuis.push(layerGui);
     }
-    
+
     // If the user has write access, we need a default layerGui.
     // First we have to see if we have write access to the folder containing this item.
     // We get the folder from the item ........
     if (this.ItemId) {
       var self = this;
       girder.rest.restRequest({
-        path: 'item/' + this.ItemId,
+        url: 'item/' + this.ItemId,
         method: 'GET'
       }).done(function (data) {
         self.CheckItemDataAccessTools(data);
@@ -663,14 +644,14 @@
     // First we have to see if we have write access to the folder containing this item.
     var self = this;
     girder.rest.restRequest({
-      path: 'folder/' + data.folderId,
+      url: 'folder/' + data.folderId,
       method: 'GET'
     }).done(function (data) {
       self.CheckFolderDataAccessTools(data);
     });
   };
   LayerPanel.prototype.CheckFolderDataAccessTools = function (data) {
-    if (data._accessLevel == 0) {
+    if (data._accessLevel === 0) {
       // No access, skip creating the tools (which are confusing to have
       // if annoation cannot be saved.
       return;
@@ -684,31 +665,30 @@
   LayerPanel.prototype.InitializeDefaultToolPanel = function () {
     this.DefaultToolPanel = new SAM.AnnotationToolPanel(this);
     this.DefaultToolPanel.Show();
-  }
+  };
 
   LayerPanel.prototype.GetDefaultLayerName = function () {
     return this.UserData.login;
-  }
-  
+  };
+
   // Find or make a deafult GUI (user name).  Return it.
   LayerPanel.prototype.GetDefaultLayerGui = function () {
     var layerGui;
     var defaultLayerName = this.GetDefaultLayerName();
-    for (var idx = 0; idx < this.LayerGuis.length; ++ idx) {
-      var layerGui = this.LayerGuis[idx];
-      if (layerGui.Name == defaultLayerName) {
+    for (var idx = 0; idx < this.LayerGuis.length; ++idx) {
+      layerGui = this.LayerGuis[idx];
+      if (layerGui.Name === defaultLayerName) {
         return layerGui;
       }
     }
 
     // Setting the ToolPanel is deferred until it starts editing.
-    layerGui = new SAM.AnnotationLayerGui({'annotation':{'name': defaultLayerName}},
+    layerGui = new SAM.AnnotationLayerGui({'annotation': {'name': defaultLayerName}},
                                           this);
     this.LayerGuis.push(layerGui);
     return layerGui;
   };
-  
-  
+
   // ===========================================================================
   // Forward events to layers.
 
@@ -747,7 +727,6 @@
   // TODO: Try to put this into annotationLayerGui (if it makes sense).
   LayerPanel.prototype.HandleTouchStart = function (event) {
     if (this.CheckForIPadPencil(event)) {
-      var self = this;
       // User is drawing with a pencil.  Make sure a layer is editable.
       this.WithEditingLayerCall(
         function (layerGui) {
@@ -831,7 +810,7 @@
   };
 
   LayerPanel.prototype.HandleKeyDown = function (event) {
-    if ( ! this.EditingLayerGui) {
+    if (!this.EditingLayerGui) {
       return true;
     }
     var layer = this.EditingLayerGui.Layer;
@@ -867,12 +846,12 @@
       // See if a widget in the editing wants to handle the click.
       var layer = this.EditingLayerGui.Layer;
       if (layer && layer.HandleMouseClick) {
-        if ( ! layer.HandleMouseClick(event)) {
+        if (!layer.HandleMouseClick(event)) {
           // false means the event was consumed.
           return false;
         }
       }
-      
+
       // This selection path (for an editing layer) is to avoid an
       // undesireable behavior. Accidentally clicking an annotation in
       // a different layer Changed the new layer to take editing focus.
@@ -886,12 +865,12 @@
       // I do not think I want the layer to keep a pointer to the gui.
       this.EditingLayerGui.SetSelectedWidgets(selectedWidgets);
       // Returning false stops propagation of the event.
-      return selectedWidgets.length == 0;
+      return selectedWidgets.length === 0;
     }
 
     // This selection path is to turn editing on for a layer.
     // The layer is choosen by which widget is picked.
-    
+
     // TODO: Get rid of the multiple strokes in a single pencil widget.
     // It was a bad idea. It is 'hard' because lasso interaction editing of loops
     // depends on the two strokes to be in the same widget.  I do not want to
@@ -908,7 +887,7 @@
         continue;
       }
       if (layer.HandleSelect) {
-        var selectedWidgets = layer.HandleSelect(event);
+        selectedWidgets = layer.HandleSelect(event);
         if (selectedWidgets.length > 0) {
           this.SetEditingLayerGui(layerGui);
           this.EditingLayerGui.SetSelectedWidgets(selectedWidgets);
@@ -920,30 +899,27 @@
     return true;
   };
 
-  
   // The EditinlayerGui is always set. If non are checked by the user,
   // then use the default layer. The tools of the layer being edited are
   // displayed in this layer panel
   LayerPanel.prototype.SetEditingLayerGui = function (layerGui) {
-    if (this.EditingLayerGui == layerGui) {
+    if (this.EditingLayerGui === layerGui) {
       return;
     }
     this.DefaultToolPanel.Hide();
 
     // This check is only used on the first call after this object has been created.
     if (this.EditingLayerGui) {
-      this.EditingLayerGui.GetToolPanel().Hide()
+      this.EditingLayerGui.GetToolPanel().Hide();
       this.EditingLayerGui.EditOff();
     }
-    if (layerGui == undefined) {
+    if (layerGui === undefined) {
       this.DefaultToolPanel.Show();
     } else {
       layerGui.GetToolPanel().Show();
-    }    
+    }
     this.EditingLayerGui = layerGui;
   };
-  
-
 
   // This adds a pencil ivar (= true) for events generated by the iPad pencil.
   LayerPanel.prototype.CheckForIPadPencil = function (event, debug) {
@@ -972,6 +948,5 @@
     return false;
   };
 
-  
   SAM.LayerPanel = LayerPanel;
 })();

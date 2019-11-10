@@ -147,7 +147,7 @@
     this.ItemId = itemId;
     var self = this;
     girder.rest.restRequest({
-      path: 'item/' + itemId,
+      url: 'item/' + itemId,
       method: 'GET'
     }).done(function (data) {
       if (data && data.folderId) {
@@ -162,7 +162,7 @@
     // Load the folder so we can create a list to iterate over.
     var self = this;
     girder.rest.restRequest({
-      path: 'item?folderId=' + folderId + '&limit=5000&sort=lowerName&sortdir=1',
+      url: 'item?folderId=' + folderId + '&limit=5000&sort=lowerName&sortdir=1',
       method: 'GET'
     }).done(function (data) {
       self.LoadFolderItems(data);

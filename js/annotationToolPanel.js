@@ -32,7 +32,6 @@
 
 // 3: undo.
 
-
 // Notes:  It was tricky getting two modes of activating tools:  1 radio button, 2 click to select widget.
 // Here is what happens for the two paths:
 // Click Tool button
@@ -46,9 +45,7 @@
 //   2: Layer editon (good)
 //   3: Changes tool button GUI.
 
-
 // TODO: Clean up the access to "AnnotationLayerGui::SelectedWidgets"
-
 
 (function () {
   'use strict';
@@ -63,7 +60,7 @@
     this.LayerPanel = layerPanel;
     // Any new layers created have to know the viewer.
     this.Viewer = layerPanel.Viewer;
-    
+
     this.Parent = this.Viewer.GetDiv();
 
     // -----------------------------------------------------
@@ -104,8 +101,8 @@
   };
 
   AnnotationToolPanel.prototype.GetLayerGui = function () {
-    if (! this.LayerGui) {
-      this.LayerGui = this.LayerPanel.GetDefaultLayerGui()
+    if (!this.LayerGui) {
+      this.LayerGui = this.LayerPanel.GetDefaultLayerGui();
       // The layer panel aleady sets this,
       // but it cannot hurt to do this for saftey.
       // It is a hack.  No API.
@@ -113,7 +110,7 @@
     }
     return this.LayerGui;
   };
-  
+
   AnnotationToolPanel.prototype.Hide = function () {
     this.ToolPanel.hide();
   };
@@ -121,7 +118,7 @@
   AnnotationToolPanel.prototype.Show = function () {
     this.ToolPanel.show();
   };
-  
+
   AnnotationToolPanel.prototype.InitializeTools = function () {
     var self = this;
 
@@ -241,7 +238,6 @@
         function () {
           self.LayerPanel.WithEditingLayerCall(
             function (layerGui) {
-              
               self.Viewer.InteractionOn();
               (self[onCallbackName])(layerGui);
             });
@@ -427,10 +423,8 @@
     this.SaveDefaults();
   };
 
-
   // ============================================================================
   // new (used) stuff.
-
 
   AnnotationToolPanel.prototype.CursorOn = function () {
     if (this.LayerPanel.EditingLayer && this.LayerPanel.EditingLayer.Layer) {
@@ -475,7 +469,7 @@
     layer.RemoveWidget(selector);
     layer.EventuallyDraw();
 
-    var layerGui = this.GetLayerGui();
+    layerGui = this.GetLayerGui();
     if (selectedWidgets.length === 1) {
       layerGui.SetSelectedWidget(selectedWidgets[0]);
     } else {
@@ -510,7 +504,7 @@
       // TODO: REmove dialogs from widget and manage them here.
       // Widgets can share a dialog.
       layer.AddWidget(widget);
-      //widget.SetCreationCamera(layer.GetCamera());
+      // widget.SetCreationCamera(layer.GetCamera());
       widget.SetStateToDialog();
     }
 
@@ -554,7 +548,7 @@
       // TODO: REmove dialogs from widget and manage them here.
       // Widgets can share a dialog.
       layer.AddWidget(widget);
-      //widget.SetCreationCamera(layer.GetCamera());
+      // widget.SetCreationCamera(layer.GetCamera());
     }
 
     // Activate the widget to start drawing.
@@ -590,7 +584,7 @@
       // TODO: REmove dialogs from widget and manage them here.
       // Widgets can share a dialog.
       layer.AddWidget(widget);
-      //widget.SetCreationCamera(layer.GetCamera());
+      // widget.SetCreationCamera(layer.GetCamera());
     }
 
     // Activate the widget to start drawing.
@@ -626,7 +620,7 @@
       // TODO: REmove dialogs from widget and manage them here.
       // Widgets can share a dialog.
       layer.AddWidget(widget);
-      //widget.SetCreationCamera(layer.GetCamera());
+      // widget.SetCreationCamera(layer.GetCamera());
     }
 
     // Activate the widget to start drawing.
@@ -663,7 +657,7 @@
       // TODO: REmove dialogs from widget and manage them here.
       // Widgets can share a dialog.
       layer.AddWidget(widget);
-      //widget.SetCreationCamera(layer.GetCamera());
+      // widget.SetCreationCamera(layer.GetCamera());
     }
 
     // Activate the widget to start drawing.
@@ -688,7 +682,6 @@
     this.GetLayerGui().SelectedWidgets = [widget];
   };
 
-    
   AnnotationToolPanel.prototype.SetTime = function (time) {
     for (var i = 0; i < this.AnnotationObjects.length; ++i) {
       var layerGui = this.AnnotationObjects[i];
@@ -699,6 +692,5 @@
     }
   };
 
-  
   SAM.AnnotationToolPanel = AnnotationToolPanel;
 })();

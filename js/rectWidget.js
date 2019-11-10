@@ -31,7 +31,7 @@
   var DEFAULT_HEIGHT = -1;
 
   var DEFAULT_LABEL;
-  
+
   function Rect () {
     SAM.Shape.call(this);
 
@@ -51,14 +51,13 @@
     // Get rid of the buffers?
   };
 
-  //Rect.prototype.Draw = function(view) {
-  //  if (this.Image) {
-  //    view.Context2d.drawImage(this.Image, 0,0);      
-  //  }
-  //  SAM.Shape.prototype.Draw.call(this, view);
-  //}
+  // Rect.prototype.Draw = function(view) {
+  //   if (this.Image) {
+  //     view.Context2d.drawImage(this.Image, 0,0);
+  //   }
+  //   SAM.Shape.prototype.Draw.call(this, view);
+  // }
 
-  
   Rect.prototype.UpdateBuffers = function (view) {
     this.PointBuffer = [];
 
@@ -153,13 +152,13 @@
     }
 
     if (DEFAULT_LABEL) {
-      var text = new SAM.Text()
+      var text = new SAM.Text();
       text.BackgroundFlag = false;
       text.String = DEFAULT_LABEL;
       text.Position = this.Circle.Origin;
-      this.Circle.Children["label"] = text;
+      this.Circle.Children['label'] = text;
     }
-    
+
     // Note: If the user clicks before the mouse is in the
     // canvas, this will behave odd.
 
@@ -169,13 +168,13 @@
   }
 
   RectWidget.prototype.SetOrigin = function (x, y) {
-    this.Shape.Origin[0] =  x;
-    this.Shape.Origin[1] =  y;
+    this.Shape.Origin[0] = x;
+    this.Shape.Origin[1] = y;
     if (this.Shape.Children.Label) {
       this.Shape.Children.Label = this.Shape.Origin;
     }
   };
-  
+
   // Not used yet, but might be useful.
   RectWidget.prototype.SetCreationCamera = function (cam) {
     // Lets save the zoom level (sort of).
@@ -356,11 +355,11 @@
       // caller might handle this already.
       'lineWidth': this.Shape.LineWidth,
       'lineColor': SAM.ConvertColorToHex(this.Shape.OutlineColor)
-    }
+    };
     if (obj.center.length === 2) {
       obj.center.push(0);
     }
-    
+
     if (this.Shape.Children.label && this.Shape.Children.label.String) {
       obj.label = {'value': this.Shape.Children.label.String};
     }
@@ -404,45 +403,41 @@
       this.CreationCamera = obj.CreationCamera;
     }
 
-
-    if ("label" in obj) {
-      var str = obj["label"]["value"]
+    if ('label' in obj) {
+      var str = obj['label']['value'];
       // I universally inserted label "test" before the label was rendered.
-      if (str != "test") {
-        var text = new SAM.Text()
+      if (str !== 'test') {
+        var text = new SAM.Text();
         text.BackgroundFlag = false;
         text.String = str;
         text.Position = this.Shape.Origin;
-        this.Shape.Children["label"] = text;
+        this.Shape.Children['label'] = text;
       }
     }
-    
-    if ("user" in obj) {
+
+    if ('user' in obj) {
       var user = obj.user;
-      if ("imageUrl" in user) {
+      if ('imageUrl' in user) {
         this.Shape.UserImageUrl = user.imageUrl;
         this.Shape.Image = new Image();
         var self = this;
-		$(self.Shape.Image).one('load', function () {
-			var width = self.Shape.Image.width;
-			var height = self.Shape.Image.height;
-			var hiddenCanvas = $('<canvas width='+width+'  height='+height+'>') ;
-			
-			var ctx = hiddenCanvas[0].getContext("2d");
-			ctx.drawImage(self.Shape.Image, 0, 0);
-			ctx.beginPath();
-			ctx.lineWidth = "100";
-			ctx.strokeStyle = "blue";
-			ctx.arc(500, 500, 300, 0, 2 * Math.PI);
-			ctx.stroke();
-			ctx.clearRect(200, 200, 300, 300);
-			self.Shape.Image.src = hiddenCanvas[0].toDataURL();
-		});
-        
+        $(self.Shape.Image).one('load', function () {
+          var width = self.Shape.Image.width;
+          var height = self.Shape.Image.height;
+          var hiddenCanvas = $('<canvas width=' + width + '  height=' + height + '>');
+          var ctx = hiddenCanvas[0].getContext('2d');
+          ctx.drawImage(self.Shape.Image, 0, 0);
+          ctx.beginPath();
+          ctx.lineWidth = '100';
+          ctx.strokeStyle = 'blue';
+          ctx.arc(500, 500, 300, 0, 2 * Math.PI);
+          ctx.stroke();
+          ctx.clearRect(200, 200, 300, 300);
+          self.Shape.Image.src = hiddenCanvas[0].toDataURL();
+        });
 
         this.Shape.Image.src = user.imageUrl;
         // On loaded, render?
-        
       }
     }
   };
@@ -504,7 +499,7 @@
       return true;
     }
     var event = layer.Event;
-    
+
     // Dragging is complicated enough that we have to compute reactangle
     // from the mouse movement vector (and not contraints).
     var worldPt0 = this.LastMouseWorld;
@@ -662,8 +657,8 @@
         dx = (c * rdx) + (s * rdy);
         dy = (-s * rdx) + (c * rdy);
         // Center is moving half as fast as the mouse.
-        this.SetOrigin(this.Shape.Origin[0] + dx/2.0,
-                       this.Shape.Origin[1] + dy/2.0);
+        this.SetOrigin(this.Shape.Origin[0] + dx / 2.0,
+                       this.Shape.Origin[1] + dy / 2.0);
       }
     }
 
@@ -758,7 +753,7 @@
     this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Shape.OutlineColor));
     this.Dialog.LineWidthInput.val((this.Shape.LineWidth).toFixed(2));
 
-    var label = "";
+    var label = '';
     if (this.Shape.Children.label && this.Shape.Children.label.String) {
       label = this.Shape.Children['label'].String;
     }
@@ -792,22 +787,22 @@
 
     var label = this.Dialog.LabelInput.val();
     label = label.trim();
-    if (label == "") {
+    if (label === '') {
       DEFAULT_LABEL = undefined;
       delete this.Shape.Children.label;
     } else {
       if (!this.Shape.Children.label) {
-        var text = new SAM.Text()
+        var text = new SAM.Text();
         text.BackgroundFlag = false;
         text.String = label;
         text.Position = this.Shape.Origin;
-        this.Shape.Children["label"] = text;
+        this.Shape.Children['label'] = text;
         DEFAULT_LABEL = label;
       }
       this.Shape.Children.label.String = label;
       modified = true;
-    }    
-    
+    }
+
     if (modified) {
       // Save values in local storage as defaults for next time.
       localStorage.RectWidgetDefaults = JSON.stringify({

@@ -293,7 +293,7 @@
     }
     if (typeof (color) === 'string') {
       // No other formats for now.
-      console.error("Cannot decode color " + color)
+      console.error('Cannot decode color ' + color);
       var colorArray = new Array(3);
       colorArray.fill(0);
       return colorArray;
@@ -1229,18 +1229,18 @@
       var widget = this.WidgetList[i];
       var selectedOld = widget.IsSelected();
       // Skip calling select if widget is already selected and we allow multiple selections.
-      if ( ! (event.shiftKey && selectedOld)) {
+      if (!(event.shiftKey && selectedOld)) {
         if (widget.HandleSelect && widget.HandleSelect(this)) {
           selectedWidgets.push(widget);
         }
       }
 
-      if (selectedOld != widget.IsSelected()) {
+      if (selectedOld !== widget.IsSelected()) {
         modified = true;
       }
       // widget "handleSelect should do this.
       // pencil can have multiple shapes.  I do not wnat them all selected.
-      //widget.SetSelected(pick);
+      // widget.SetSelected(pick);
     }
 
     if (selectedWidgets.length > 0 && !this.Active) {
@@ -1248,7 +1248,7 @@
       // and change, the layer has to be active.
       this.SetActive(true);
     }
-    
+
     // This does not work when previously selected
     if (modified) {
       if (this.SelectionChangeCallback) {
@@ -1588,7 +1588,7 @@
 
     var annotationId = '572be29d3f24e53573aa8e91';
     girder.rest.restRequest({
-      path: 'annotation/' + annotationId,    // note that you don't need
+      url: 'annotation/' + annotationId,    // note that you don't need
       // api/v1
       method: 'GET',                          // data will be put in the
       // body of a POST

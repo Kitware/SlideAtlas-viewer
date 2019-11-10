@@ -32,7 +32,7 @@
 
     // Grouping shapes.
     // TODO: Change widgets to interactors (that can deal with multiple shapes).
-    this.Children = {}
+    this.Children = {};
   }
 
   Shape.prototype.GetLineWidth = function () {
@@ -58,7 +58,7 @@
   };
 
   Shape.prototype.DeleteSelected = function () {
-    for (name in this.Children) {
+    for (var name in this.Children) {
       if (this.Children[name].DeleteSelected()) {
         delete this.Children[name];
       }
@@ -278,18 +278,18 @@
       if (this.Image && this.Image.complete && this.Width && this.Height) {
         view.Context2d.save();
         // Scale the image to match the rectangle
-        var a = this.Width*scale / this.Image.width;
-        var d = this.Height*scale / this.Image.height;
+        var a = this.Width * scale / this.Image.width;
+        var d = this.Height * scale / this.Image.height;
         // move the origin to the corner of the image.
-        var e = -this.Width*scale / 2.0;
-        var f = -this.Height*scale / 2.0;
+        var e = -this.Width * scale / 2.0;
+        var f = -this.Height * scale / 2.0;
         // a c e
         // b d f
         view.Context2d.transform(a, 0, 0, d, e, f);
-        view.Context2d.drawImage(this.Image, 0,0);      
+        view.Context2d.drawImage(this.Image, 0, 0);
         view.Context2d.restore();
       }
-      
+
       // for debugging section alignment.
       var x0 = this.PointBuffer[0];
       var y0 = this.PointBuffer[1];
@@ -365,8 +365,8 @@
 
       view.Context2d.restore();
     }
-    for (name in this.Children) {
-      if (this.Children[name] &&  this.Children[name].Draw) {
+    for (var name in this.Children) {
+      if (this.Children[name] && this.Children[name].Draw) {
         this.Children[name].Draw(view);
       }
     }
