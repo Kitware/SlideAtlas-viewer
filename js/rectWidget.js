@@ -125,7 +125,7 @@
     this.Shape.LineWidth = 0;
     this.Shape.FixedSize = false;
 
-    // false is a handle for translation.
+    // This is a handle for translation.
     this.CenterCircle = new SAM.Circle();
     this.CenterCircle.SetFillColor([1, 1, 0]);
     this.CenterCircle.SetOutlineColor([0.0, 0.0, 0.0]);
@@ -133,7 +133,7 @@
     this.CenterCircle.LineWidth = 1;
     this.CenterCircle.PositionCoordinateSystem = 1;
 
-    this.Rotatable = false;
+    this.Rotatable = true;
 
     // Circle is a handle for rotation.
     this.RotateCircle = new SAM.Circle();
@@ -316,6 +316,9 @@
   };
 
   RectWidget.prototype.Draw = function () {
+    if (this.Visibility === false) {
+      return;
+    }
     var view = this.Layer.GetView();
     if (this.Layer.ZTime !== undefined && this.Shape.Origin.length > 2) {
       if (this.Layer.ZTime !== this.Shape.Origin[2]) {
@@ -442,7 +445,18 @@
     }
   };
 
+  RectWidget.prototype.SetVisibility = function (vis) {
+    this.Visibility = vis;
+    this.Layer.EventuallyDraw();
+  };
+
   RectWidget.prototype.HandleKeyDown = function (layer) {
+    if (layer.Event.keyCode === 86) {
+      this.Visibility = !this.Visibility;
+      layer.EventuallyDraw();
+      return true;
+    }
+
     if (!this.Visibility || this.State === INACTIVE) {
       return true;
     }

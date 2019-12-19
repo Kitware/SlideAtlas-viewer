@@ -823,7 +823,17 @@
     return this.Visibility;
   };
   AnnotationLayer.prototype.SetVisibility = function (vis) {
+    if (vis === this.Visibility) {
+      return;
+    }
     this.Visibility = vis;
+    // Since KeyDown (V) can change visibility, this resets it.
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var widget = this.WidgetList[i];
+      if (widget.SetVisibility) {
+        widget.SetVisibility(vis);
+      }
+    }
     this.EventuallyDraw();
   };
 

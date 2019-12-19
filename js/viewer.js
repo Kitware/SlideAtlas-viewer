@@ -72,15 +72,14 @@
     this.HistoryFlag = false;
     this.MinPixelSize = 0.25;
 
+    // Need this to avoid calling interaction on multiple times.
+    this.InteractionEnabled = false;
+
     // Interaction state:
     // What to do for mouse move or mouse up.
     this.InteractionState = INTERACTION_NONE;
     // External callbacks
     this.InteractionListeners = [];
-    // TODO: Get rid of this.  Remove bindings instead.
-    // This is a hack to turn off interaction.
-    // Sometime I need to clean up the events for viewers.
-    this.InteractionEnabled = true;
 
     this.AnimateLast = null;
     this.AnimateDuration = 0.0;
@@ -169,6 +168,11 @@
                   'width': '100px',
                   'z-index': '4'});
     }
+
+    // For accelerating mouse wheel zooming.  I should probably merg this with drag accerlation ...
+    this.WheelSensitivity = 0.0;     // (0.1) + Sensitivity: fraction zoom with no acceleration
+    this.WheelAcceleration = 0.025;   // Each wheel event increases sensitivty by this size.
+    this.WheelTimeConstant = 1000.0; // Time constant for sensitivty to decay back to default value.
   }
 
   Viewer.prototype.GetParentDiv = function () {
@@ -187,6 +191,12 @@
 
   // I need to turn the bindins on and off, to make children 'contentEditable'.
   Viewer.prototype.InteractionOn = function () {
+    // Keep from adding multiple bindings for events.
+    if (this.InteractionEnabled) {
+      return;
+    }
+    this.InteractionEnabled = true;
+
     var self = this;
     // var can = this.MainView.Parent;
     var can = this.Div;
@@ -306,6 +316,8 @@
 
   // I need to turn the bindins on and off, to make children 'contentEditable'.
   Viewer.prototype.InteractionOff = function () {
+    this.InteractionEnabled = false;
+
     // Options:
     // 1: Just use off to get rid of all bindings. This will remove outside bindings too.
     // 2: Remove them 1 by 1.
@@ -1499,13 +1511,17 @@
     this.EventuallyRender(true);
   };
 
+  // TODO: I think these are legacy and need to be removed.
   Viewer.prototype.SetInteractionEnabled = function (enabled) {
+    console.log('Get rid of this');
     this.InteractionEnabled = enabled;
   };
   Viewer.prototype.EnableInteraction = function () {
+    console.log('Get rid of this');
     this.InteractionEnabled = true;
   };
   Viewer.prototype.DisableInteraction = function () {
+    console.log('Get rid of this');
     this.InteractionEnabled = false;
   };
 
@@ -2358,6 +2374,21 @@
   Viewer.prototype.HandleMouseWheel = function (event) {
     if (!this.InteractionEnabled) { return true; }
 
+    // Decay computations.
+    this.MouseTime = (new Date()).getTime();
+    if (this.LastMouseTime) {
+      var dt = this.MouseTime - this.LastMouseTime;
+      this.WheelSensitivity *= Math.exp(-dt / this.WheelTimeConstant);
+      // console.log(dt);
+    }
+    this.LastMouseTime = this.MouseTime;
+    this.WheelSensitivity += this.WheelAcceleration;
+    if (this.WheelSensitivity > 0.2) {
+      this.WheelSensitivity = 0.2;
+    }
+
+    // console.log(this.WheelSensitivity);
+
     if (!event.offsetX) {
       // for firefox
       event.offsetX = event.layerX;
@@ -2384,9 +2415,9 @@
     // Initial delta cause another bug.
     // Lets restrict to one zoom step per event.
     if (tmp > 0) {
-      this.ZoomTarget *= 1.05;
+      this.ZoomTarget *= (1.0 + this.WheelSensitivity);
     } else if (tmp < 0) {
-      this.ZoomTarget /= 1.05;
+      this.ZoomTarget /= (1.0 + this.WheelSensitivity);
     }
 
     // Compute translate target to keep position in the same place.

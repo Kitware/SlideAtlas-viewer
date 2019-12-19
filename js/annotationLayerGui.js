@@ -107,7 +107,6 @@
           'cursor': 'pointer',
           'position': 'relative',
           'color': 'red',
-          'opacity': '0.5',
           'margin': '1px',
           'background-color': '#DDD',
           'border': '1px solid #555'})
@@ -175,15 +174,6 @@
     // The user can only activate his own annotations
     if (metadata.creatorId === this.LayerPanel.UserData._id) {
       this.EditNameOff();
-
-      deleteButton.mouseenter(function () { div.focus(); })
-        .hover(
-          function () {
-            $(this).css({'opacity': '1'});
-          },
-          function () {
-            $(this).css({'opacity': '0.5'});
-          });
       deleteButton.on(
         'click touchstart',
         function () {
@@ -387,7 +377,7 @@
   };
 
   AnnotationLayerGui.prototype.EditNameOff = function () {
-    console.log('edit name off');
+    // console.log('edit name off');
 
     var self = this;
     // Did the name change?
@@ -647,7 +637,7 @@
       self.SaveTimerId = undefined;
     }
 
-    console.log('Save annotation');
+    // console.log('Save annotation');
     if (!this.Data) {
       this.Data = {annotation: {elements: []}};
     }

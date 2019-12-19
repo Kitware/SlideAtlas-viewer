@@ -478,7 +478,7 @@
     // Probably a better solution than this is to have two set visibility methods.
     // Only the one used by the gui changes local storage values.
     // For now, save and restore the cached names.
-    var savedNames = this.LocalStorageVisibleAnnotationNames;
+    var savedNames = this.LocalStorageVisibleAnnotationNames.splice(0);
 
     // Now for the annotation stuff.
     this.DeleteAnnotationButtons();
@@ -515,12 +515,22 @@
   };
 
   LayerPanel.prototype.SaveVisibilityInLocalStorage = function () {
-    // Assemble a list of visible names.
-    var names = [];
+    // Start with the list in storage already.
+    var names = this.LocalStorageVisibleAnnotationNames;
+
+    // Only modify the names this view has.
+    // I had a problem where one section did not have an annotation name,
+    // So the annotation would turn off when I did not want it to.
     for (var idx = 0; idx < this.LayerGuis.length; ++idx) {
       var layerGui = this.LayerGuis[idx];
-      if (layerGui.Visible) {
+      var name = layerGui.Name;
+      var nameIdx = names.indexOf(name);
+      // Toggle
+      if (layerGui.Visible && nameIdx === -1) {
         names.push(layerGui.Name);
+      }
+      if (!layerGui.Visible && nameIdx !== -1) {
+        names.splice(nameIdx, 1);
       }
     }
 
@@ -683,8 +693,9 @@
     }
 
     // Setting the ToolPanel is deferred until it starts editing.
-    layerGui = new SAM.AnnotationLayerGui({'annotation': {'name': defaultLayerName}},
-                                          this);
+    layerGui = new SAM.AnnotationLayerGui(
+      {'annotation': {'name': defaultLayerName}, 'creatorId': this.UserData._id},
+      this);
     this.LayerGuis.push(layerGui);
     return layerGui;
   };

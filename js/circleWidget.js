@@ -56,6 +56,7 @@
       this.Tolerance = 15.0;
     }
 
+    this.Visibility = true;
     if (layer === null) {
       return;
     }
@@ -503,7 +504,7 @@
   };
 
   CircleWidget.prototype.Draw = function () {
-    if (this.State !== NEW_HIDDEN && this.Circle) {
+    if (this.Visibility && this.State !== NEW_HIDDEN && this.Circle) {
       var view = this.Layer.GetView();
       this.Circle.Draw(view);
       if (this.State === ACTIVE || this.State === HOVER) {
@@ -659,7 +660,18 @@
     this.SetActive(false);
   };
 
-  CircleWidget.prototype.HandleKeyDown = function (keyCode) {
+  CircleWidget.prototype.SetVisibility = function (vis) {
+    this.Visibility = vis;
+    this.Layer.EventuallyDraw();
+  };
+
+  CircleWidget.prototype.HandleKeyDown = function (layer) {
+    if (layer.Event.keyCode === 86) {
+      this.Visibility = !this.Visibility;
+      layer.EventuallyDraw();
+      return true;
+    }
+
     if (this.State === INACTIVE) {
       return true;
     }
