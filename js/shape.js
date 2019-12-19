@@ -17,7 +17,8 @@
     this.PositionCoordinateSystem = Shape.SLIDE;
     // This is the position of the shape origin in the containing
     // coordinate system. Probably better called position.
-    this.Origin = [10000, 10000]; // Anchor in world coordinates.
+    this.Origin = new Array(2);
+    this.Origin.fill(10000); // Anchor in world coordinates.
     // FixedSize => PointBuffer units in viewer pixels.
     // otherwise
     this.FixedSize = false;
@@ -26,8 +27,12 @@
     this.Visibility = true; // An easy way to turn off a shape (with removing it from the shapeList).
     this.Selected = false;
     this.SelectedColor = [1.0, 1.0, 0.0];
-        // Playing around with layering.  The anchor is being obscured by the text.
+    // Playing around with layering.  The anchor is being obscured by the text.
     this.ZOffset = 0.1;
+
+    // Grouping shapes.
+    // TODO: Change widgets to interactors (that can deal with multiple shapes).
+    this.Children = {};
   }
 
   Shape.prototype.GetLineWidth = function () {
@@ -53,10 +58,16 @@
   };
 
   Shape.prototype.DeleteSelected = function () {
+    for (var name in this.Children) {
+      if (this.Children[name].DeleteSelected()) {
+        delete this.Children[name];
+      }
+    }
     if (this.IsSelected()) {
       this.PointBuffer = undefined;
       return true;
     }
+    return false;
   };
 
   Shape.prototype.IsEmpty = function () {
@@ -75,6 +86,12 @@
   Shape.prototype.SetSelected = function (f) {
     if (f === this.Selected) { return false; }
     this.Selected = f;
+    // When a parent is selected, the children are highligted too.
+    for (var childKey in this.Children) {
+      var child = this.Children[childKey];
+      child.SetSelected(f);
+    }
+
     return true;
   };
 
@@ -178,7 +195,7 @@
           view.gl.uniform3f(program.colorUniform, this.FillColor[0],
                                  this.FillColor[1], this.FillColor[2]);
         }
-                // Cell Connectivity
+        // Cell Connectivity
         view.gl.bindBuffer(view.gl.ELEMENT_ARRAY_BUFFER, this.CellBuffer);
 
         view.gl.drawElements(view.gl.TRIANGLES, this.CellBuffer.numItems,
@@ -256,6 +273,23 @@
         view.Context2d.transform(this.Matrix[0], this.Matrix[1], this.Matrix[4], this.Matrix[5], x, y);
       }
 
+      // Right now this is specific to a rectangle.
+      // It is here because I need the transformation.  It could be generalized...
+      if (this.Image && this.Image.complete && this.Width && this.Height) {
+        view.Context2d.save();
+        // Scale the image to match the rectangle
+        var a = this.Width * scale / this.Image.width;
+        var d = this.Height * scale / this.Image.height;
+        // move the origin to the corner of the image.
+        var e = -this.Width * scale / 2.0;
+        var f = -this.Height * scale / 2.0;
+        // a c e
+        // b d f
+        view.Context2d.transform(a, 0, 0, d, e, f);
+        view.Context2d.drawImage(this.Image, 0, 0);
+        view.Context2d.restore();
+      }
+
       // for debugging section alignment.
       var x0 = this.PointBuffer[0];
       var y0 = this.PointBuffer[1];
@@ -331,6 +365,11 @@
 
       view.Context2d.restore();
     }
+    for (var name in this.Children) {
+      if (this.Children[name] && this.Children[name].Draw) {
+        this.Children[name].Draw(view);
+      }
+    }
   };
 
   // Invert the fill color.
@@ -340,6 +379,10 @@
         1.0 - this.FillColor[1],
         1.0 - this.FillColor[2]];
     }
+  };
+
+  Shape.prototype.SetOrigin = function (o) {
+    this.Origin = o.slice();
   };
 
   Shape.prototype.SetOutlineColor = function (c) {

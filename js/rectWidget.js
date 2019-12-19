@@ -2,7 +2,6 @@
 // renaming this as Rect, other possible name is OrientedRectangle
 
 (function () {
-  // Depends on the CIRCLE widget
   'use strict';
 
   // Bits for WhichDrag (not the best way to encode this state).
@@ -31,14 +30,18 @@
   var DEFAULT_WIDTH = -1;
   var DEFAULT_HEIGHT = -1;
 
+  var DEFAULT_LABEL;
+
   function Rect () {
     SAM.Shape.call(this);
 
     this.Width = 50;
     this.Height = 50;
     this.Orientation = 0; // Angle with respect to x axis ?
-    this.Origin = [10000, 10000, 0]; // Center in world coordinates.
-    this.OutlineColor = [0, 0, 0];
+    this.Origin = new Array(2); // Center in world coordinates.
+    this.Origin.fill(10000);
+    this.OutlineColor = new Array(3);
+    this.OutlineColor.fill(0);
     this.PointBuffer = [];
   }
 
@@ -47,6 +50,13 @@
   Rect.prototype.destructor = function () {
     // Get rid of the buffers?
   };
+
+  // Rect.prototype.Draw = function(view) {
+  //   if (this.Image) {
+  //     view.Context2d.drawImage(this.Image, 0,0);
+  //   }
+  //   SAM.Shape.prototype.Draw.call(this, view);
+  // }
 
   Rect.prototype.UpdateBuffers = function (view) {
     this.PointBuffer = [];
@@ -103,8 +113,8 @@
     this.Shape = new Rect();
     // TODO: Correct the mix or orientation and rotation.
     this.Shape.Orientation = cam.GetImageRotation();
-    this.Shape.Origin = [0, 0];
-    this.Shape.OutlineColor = [0.0, 0.0, 0.0];
+    this.Shape.Origin.fill(0);
+    this.Shape.SetOutlineColor([0.0, 0.0, 0.0]);
     if (DEFAULT_WIDTH > 0) {
       this.Shape.Height = DEFAULT_HEIGHT;
       this.Shape.Width = DEFAULT_WIDTH;
@@ -115,7 +125,7 @@
     this.Shape.LineWidth = 0;
     this.Shape.FixedSize = false;
 
-    // false is a handle for translation.
+    // This is a handle for translation.
     this.CenterCircle = new SAM.Circle();
     this.CenterCircle.SetFillColor([1, 1, 0]);
     this.CenterCircle.SetOutlineColor([0.0, 0.0, 0.0]);
@@ -123,7 +133,7 @@
     this.CenterCircle.LineWidth = 1;
     this.CenterCircle.PositionCoordinateSystem = 1;
 
-    this.Rotatable = false;
+    this.Rotatable = true;
 
     // Circle is a handle for rotation.
     this.RotateCircle = new SAM.Circle();
@@ -141,6 +151,14 @@
       }
     }
 
+    if (DEFAULT_LABEL) {
+      var text = new SAM.Text();
+      text.BackgroundFlag = false;
+      text.String = DEFAULT_LABEL;
+      text.Position = this.Circle.Origin;
+      this.Circle.Children['label'] = text;
+    }
+
     // Note: If the user clicks before the mouse is in the
     // canvas, this will behave odd.
 
@@ -148,6 +166,14 @@
     this.State = INACTIVE;
     this.WhichDrag = 0;      // Bits
   }
+
+  RectWidget.prototype.SetOrigin = function (x, y) {
+    this.Shape.Origin[0] = x;
+    this.Shape.Origin[1] = y;
+    if (this.Shape.Children.Label) {
+      this.Shape.Children.Label = this.Shape.Origin;
+    }
+  };
 
   // Not used yet, but might be useful.
   RectWidget.prototype.SetCreationCamera = function (cam) {
@@ -219,6 +245,11 @@
     if (flag && this.SelectedCallback) {
       (this.SelectedCallback)(this);
     }
+    if (!flag) {
+      // We can be selected without being active, but we cannot be
+      // active without being selected.
+      this.SetActive(false);
+    }
   };
 
   // Selects the widget if the shape is fuly contained in the selection rectangle.
@@ -252,7 +283,7 @@
   };
 
   // Returns true if the mouse is over the rectangle.
-  RectWidget.prototype.SingleSelect = function () {
+  RectWidget.prototype.HandleSelect = function () {
     if (this.State === DIALOG) {
       return;
     }
@@ -270,6 +301,8 @@
     if (part !== undefined) {
       this.SetSelected(true);
       return true;
+    } else {
+      this.SetSelected(false);
     }
 
     return false;
@@ -283,6 +316,9 @@
   };
 
   RectWidget.prototype.Draw = function () {
+    if (this.Visibility === false) {
+      return;
+    }
     var view = this.Layer.GetView();
     if (this.Layer.ZTime !== undefined && this.Shape.Origin.length > 2) {
       if (this.Layer.ZTime !== this.Shape.Origin[2]) {
@@ -306,55 +342,61 @@
     this.Load(data);
     // Place the widget over the mouse.
     // This would be better as an argument.
-    this.Shape.Origin = [mouseWorldPt[0], mouseWorldPt[1]];
+    this.SetOrigin(mouseWorldPt[0], mouseWorldPt[1]);
     layer.EventuallyDraw();
     this.Modified();
   };
 
   RectWidget.prototype.Serialize = function () {
     if (this.Shape === undefined) { return null; }
-    var obj = {};
-    obj.type = 'rect';
-    obj.user_note_flag = this.UserNoteFlag;
-    obj.origin = this.Shape.Origin;
-    obj.outlinecolor = this.Shape.OutlineColor;
-    obj.height = this.Shape.Height;
-    obj.width = this.Shape.Width;
-    obj.orientation = this.Shape.GetOrientation();
-    obj.linewidth = this.Shape.LineWidth;
-    obj.creation_camera = this.CreationCamera;
+    var obj = {
+      'type': 'rectangle',
+      'center': this.Shape.Origin,
+      'width': this.Shape.Width,
+      'height': this.Shape.Height,
+      'rotation': this.Shape.GetOrientation(),
+      // caller might handle this already.
+      'lineWidth': this.Shape.LineWidth,
+      'lineColor': SAM.ConvertColorToHex(this.Shape.OutlineColor)
+    };
+    if (obj.center.length === 2) {
+      obj.center.push(0);
+    }
+
+    if (this.Shape.Children.label && this.Shape.Children.label.String) {
+      obj.label = {'value': this.Shape.Children.label.String};
+    }
+    if ('UserImageUrl' in this.Shape) {
+      obj.user = {'imageUrl': this.Shape.UserImageUrl};
+    }
+
     return obj;
   };
 
   // Load a widget from a json object (origin MongoDB).
   RectWidget.prototype.Load = function (obj) {
     this.UserNoteFlag = obj.user_note_flag;
-    this.Shape.Origin[0] = parseFloat(obj.origin[0]);
-    this.Shape.Origin[1] = parseFloat(obj.origin[1]);
-    if (obj.origin.length > 2) {
-      this.Shape.Origin[2] = parseFloat(obj.origin[2]);
+    this.SetOrigin(parseFloat(obj.center[0]),
+                   parseFloat(obj.center[1]));
+    if (obj.center.length > 2) {
+      this.Shape.Origin[2] = parseFloat(obj.center[2]);
     }
 
-    if (obj.outlinecolor) {
-      this.Shape.OutlineColor[0] = parseFloat(obj.outlinecolor[0]);
-      this.Shape.OutlineColor[1] = parseFloat(obj.outlinecolor[1]);
-      this.Shape.OutlineColor[2] = parseFloat(obj.outlinecolor[2]);
+    if (obj.lineColor) {
+      this.Shape.OutlineColor = SAM.ConvertColor(obj.lineColor);
     }
     this.Shape.Width = parseFloat(obj.width);
     if (obj.confidence) {
       this.confidence = parseFloat(obj.confidence);
     }
-    if (obj.length) {
-      this.Shape.Height = parseFloat(obj.length);
-    }
     if (obj.height) {
       this.Shape.Height = parseFloat(obj.height);
     }
-    if (obj.orientation) {
-      this.Shape.Orientation = parseFloat(obj.orientation);
+    if (obj.rotation) {
+      this.Shape.Orientation = parseFloat(obj.rotation);
     }
-    if (obj.linewidth !== undefined) {
-      this.Shape.LineWidth = parseFloat(obj.linewidth);
+    if (obj.lineWidth !== undefined) {
+      this.Shape.LineWidth = parseFloat(obj.lineWidth);
     }
     this.Shape.FixedSize = false;
     this.Shape.UpdateBuffers(this.Layer.AnnotationView);
@@ -363,9 +405,58 @@
     if (obj.creation_camera !== undefined) {
       this.CreationCamera = obj.CreationCamera;
     }
+
+    if ('label' in obj) {
+      var str = obj['label']['value'];
+      // I universally inserted label "test" before the label was rendered.
+      if (str !== 'test') {
+        var text = new SAM.Text();
+        text.BackgroundFlag = false;
+        text.String = str;
+        text.Position = this.Shape.Origin;
+        this.Shape.Children['label'] = text;
+      }
+    }
+
+    if ('user' in obj) {
+      var user = obj.user;
+      if ('imageUrl' in user) {
+        this.Shape.UserImageUrl = user.imageUrl;
+        this.Shape.Image = new Image();
+        var self = this;
+        $(self.Shape.Image).one('load', function () {
+          var width = self.Shape.Image.width;
+          var height = self.Shape.Image.height;
+          var hiddenCanvas = $('<canvas width=' + width + '  height=' + height + '>');
+          var ctx = hiddenCanvas[0].getContext('2d');
+          ctx.drawImage(self.Shape.Image, 0, 0);
+          ctx.beginPath();
+          ctx.lineWidth = '100';
+          ctx.strokeStyle = 'blue';
+          ctx.arc(500, 500, 300, 0, 2 * Math.PI);
+          ctx.stroke();
+          ctx.clearRect(200, 200, 300, 300);
+          self.Shape.Image.src = hiddenCanvas[0].toDataURL();
+        });
+
+        this.Shape.Image.src = user.imageUrl;
+        // On loaded, render?
+      }
+    }
   };
 
-  RectWidget.prototype.HandleKeyDown = function () {
+  RectWidget.prototype.SetVisibility = function (vis) {
+    this.Visibility = vis;
+    this.Layer.EventuallyDraw();
+  };
+
+  RectWidget.prototype.HandleKeyDown = function (layer) {
+    if (layer.Event.keyCode === 86) {
+      this.Visibility = !this.Visibility;
+      layer.EventuallyDraw();
+      return true;
+    }
+
     if (!this.Visibility || this.State === INACTIVE) {
       return true;
     }
@@ -375,7 +466,7 @@
       return false;
     }
 
-    var event = this.Layer.Event;
+    var event = layer.Event;
     if (this.State === NEW) {
       // escape key (or space or enter) to turn off drawing
       if (event.keyCode === 27 || event.keyCode === 32 || event.keyCode === 13) {
@@ -400,7 +491,7 @@
     return true;
   };
 
-  RectWidget.prototype.HandleMouseDown = function (event) {
+  RectWidget.prototype.HandleMouseDown = function (layer) {
     if (!this.Visibility || this.State === INACTIVE) {
       return true;
     }
@@ -410,17 +501,18 @@
     if (this.State === HOVER) {
       // var part = this.PointOnWhichPart();
       this.State = DRAG;
-      this.LastMouse = this.Layer.GetMouseWorld();
+      this.LastMouse = layer.GetMouseWorld();
       // Which drag is already set by mouse move.
     }
 
     return false;
   };
 
-  RectWidget.prototype.HandleMouseMove = function () {
+  RectWidget.prototype.HandleMouseMove = function (layer) {
     if (this.State === INACTIVE) {
       return true;
     }
+    var event = layer.Event;
 
     // Dragging is complicated enough that we have to compute reactangle
     // from the mouse movement vector (and not contraints).
@@ -445,7 +537,7 @@
         // THis is ignored until the mouse is pressed.
         this.Visibility = true;
         // Center follows mouse.
-        this.Shape.Origin = worldPt1;
+        this.SetOrigin(worldPt1[0], worldPt1[1]);
         this.Layer.EventuallyDraw();
         return false;
       }
@@ -518,7 +610,7 @@
     if (this.State === NEW || this.State === DRAG) {
       if (this.WhichDrag & CENTER) {
         // Special case with no modifiers.  Just translate the whole rectangle.
-        this.Shape.Origin = worldPt1;
+        this.SetOrigin(worldPt1[0], worldPt1[1]);
         this.Layer.EventuallyDraw();
         this.Modified();
         return false;
@@ -579,8 +671,8 @@
         dx = (c * rdx) + (s * rdy);
         dy = (-s * rdx) + (c * rdy);
         // Center is moving half as fast as the mouse.
-        this.Shape.Origin[0] += dx / 2.0;
-        this.Shape.Origin[1] += dy / 2.0;
+        this.SetOrigin(this.Shape.Origin[0] + dx / 2.0,
+                       this.Shape.Origin[1] + dy / 2.0);
       }
     }
 
@@ -673,6 +765,13 @@
   // Fill the dialog values from the widget values.
   RectWidget.prototype.WidgetPropertiesToDialog = function () {
     this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Shape.OutlineColor));
+    this.Dialog.LineWidthInput.val((this.Shape.LineWidth).toFixed(2));
+
+    var label = '';
+    if (this.Shape.Children.label && this.Shape.Children.label.String) {
+      label = this.Shape.Children['label'].String;
+    }
+    this.Dialog.LabelInput.val(label);
 
     var area = this.Shape.Width * this.Shape.Height;
     var areaString = '';
@@ -699,6 +798,24 @@
     this.Shape.SetOutlineColor(hexcolor);
     this.Shape.LineWidth = parseFloat(this.Dialog.LineWidthInput.val());
     this.Shape.UpdateBuffers(this.Layer.AnnotationView);
+
+    var label = this.Dialog.LabelInput.val();
+    label = label.trim();
+    if (label === '') {
+      DEFAULT_LABEL = undefined;
+      delete this.Shape.Children.label;
+    } else {
+      if (!this.Shape.Children.label) {
+        var text = new SAM.Text();
+        text.BackgroundFlag = false;
+        text.String = label;
+        text.Position = this.Shape.Origin;
+        this.Shape.Children['label'] = text;
+        DEFAULT_LABEL = label;
+      }
+      this.Shape.Children.label.String = label;
+      modified = true;
+    }
 
     if (modified) {
       // Save values in local storage as defaults for next time.
@@ -813,6 +930,22 @@
             $('<input type="number">')
             .appendTo(this.Dialog.LineWidthDiv)
             .css({'display': 'table-cell'})
+            .keypress(function (event) { return event.keyCode !== 13; });
+
+    // Label
+    this.Dialog.LabelDiv =
+            $('<div>')
+            .appendTo(this.Dialog.Body)
+            .addClass('sa-view-annotation-modal-div');
+    this.Dialog.LabelLabel =
+            $('<div>')
+            .appendTo(this.Dialog.LabelDiv)
+            .text('Label:')
+            .addClass('sa-view-annotation-modal-input-label');
+    this.Dialog.LabelInput =
+            $('<input type="text">')
+            .appendTo(this.Dialog.LabelDiv)
+            .addClass('sa-view-annotation-modal-input')
             .keypress(function (event) { return event.keyCode !== 13; });
 
     // Area

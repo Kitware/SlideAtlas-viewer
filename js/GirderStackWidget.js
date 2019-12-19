@@ -155,7 +155,7 @@
     this.ErrorCount = 0;
     if (window.girder) {
       girder.rest.restRequest({
-        path: ('folder/' + folderId + '/details'),
+        url: ('folder/' + folderId + '/details'),
         method: 'GET',
         contentType: 'application/json'
       }).done(function (resp) {
@@ -187,7 +187,7 @@
 
     // Get the next bite.
     girder.rest.restRequest({
-      path: 'item?folderId=' + folderId + '&limit=' + limit +
+      url: 'item?folderId=' + folderId + '&limit=' + limit +
         '&offset=' + offset + '&sort=lowerName&sortdir=1',
       method: 'GET',
       contentType: 'application/json',
@@ -412,7 +412,7 @@
     // We need to request image data from the server to setup the cache.
     var self = this;
     girder.rest.restRequest({
-      path: 'item/' + stackSection.imageId + '/tiles',
+      url: 'item/' + stackSection.imageId + '/tiles',
       method: 'GET',
       contentType: 'application/json',
       error: function (error, status) {
@@ -472,7 +472,7 @@
     // TODO: REnder when load if section is current.
     if (this.AnnotationName) {
       girder.rest.restRequest({
-        path: 'annotation?itemId=' + stackSection.imageId + '&name=' + this.AnnotationName,
+        url: 'annotation?itemId=' + stackSection.imageId + '&name=' + this.AnnotationName,
         method: 'GET',
         contentType: 'application/json',
         error: function (error, status) {
@@ -482,7 +482,7 @@
         if (resp.length > 0) {
           var annotId = resp[0]['_id'];
           girder.rest.restRequest({
-            path: 'annotation/' + annotId,
+            url: 'annotation/' + annotId,
             method: 'GET',
             contentType: 'application/json',
             error: function (error, status) {
@@ -605,8 +605,8 @@
       }
       if (element.type === 'circle') {
         obj.type = element.type;
-        obj.outlinecolor = SAM.ConvertColor(element.lineColor);
-        obj.linewidth = element.lineWidth;
+        obj.lineColor = SAM.ConvertColor(element.lineColor);
+        obj.lineWidth = element.lineWidth;
         obj.origin = element.center;
         obj.radius = element.radius;
         annotLayer.LoadWidget(obj);
@@ -624,8 +624,8 @@
       }
       if (element.type === 'rectanglegrid') {
         obj.type = 'grid';
-        obj.outlinecolor = SAM.ConvertColor(element.lineColor);
-        obj.linewidth = element.lineWidth;
+        obj.lineColor = SAM.ConvertColor(element.lineColor);
+        obj.lineWidth = element.lineWidth;
         obj.origin = element.center;
         obj.bin_width = element.width / element.widthSubdivisions;
         obj.bin_height = element.height / element.heightSubdivisions;
@@ -658,8 +658,8 @@
           }
         } else {
           obj.type = 'rect';
-          obj.outlinecolor = SAM.ConvertColor(element.lineColor);
-          obj.linewidth = element.lineWidth;
+          obj.lineColor = SAM.ConvertColor(element.lineColor);
+          obj.lineWidth = element.lineWidth;
           obj.origin = element.center;
           obj.width = element.width;
           obj.length = element.height;
@@ -670,8 +670,8 @@
       if (element.type === 'polyline') {
         obj.type = element.type;
         obj.closedloop = element.closed;
-        obj.outlinecolor = SAM.ConvertColor(element.lineColor);
-        obj.linewidth = element.lineWidth;
+        obj.lineColor = SAM.ConvertColor(element.lineColor);
+        obj.lineWidth = element.lineWidth;
         obj.points = element.points;
         annotLayer.LoadWidget(obj);
       }

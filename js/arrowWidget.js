@@ -48,7 +48,7 @@
 
     // Circle is to show an active tip and base.
     this.CircleTip = new SAM.Circle();
-    this.CircleTip.SetFillColor();
+    this.CircleTip.SetFillColor([1, 1, 0]);
     this.CircleTip.SetOutlineColor([0.0, 0.0, 0.0]);
     this.CircleTip.Radius = 5;
     this.CircleTip.LineWidth = 1;
@@ -56,7 +56,7 @@
     // this.Circle.ZOffset = -0.05;
 
     this.CircleTail = new SAM.Circle();
-    this.CircleTail.SetFillColor();
+    this.CircleTail.SetFillColor([1, 1, 0]);
     this.CircleTail.SetOutlineColor([0.0, 0.0, 0.0]);
     this.CircleTail.Radius = 5;
     this.CircleTail.PositionCoordinateSystem = 1; // Shape.VIEWER;
@@ -161,8 +161,8 @@
     var obj = {};
     obj.type = 'arrow';
     obj.origin = this.Arrow.Origin;
-    obj.fillcolor = this.Arrow.FillColor;
-    obj.outlinecolor = this.Arrow.OutlineColor;
+    obj.fillColor = SAM.ConvertColorToHex(this.Arrow.FillColor);
+    obj.lineColor = SAM.ConvertColorToHex(this.Arrow.OutlineColor);
     obj.length = this.Arrow.Length;
     obj.width = this.Arrow.Width;
     obj.orientation = this.Arrow.Orientation;
@@ -177,7 +177,7 @@
     this.Arrow.Origin = [parseFloat(obj.origin[0]), parseFloat(obj.origin[1])];
     this.TipPosition = [parseFloat(obj.origin[0]), parseFloat(obj.origin[1])];
     this.Arrow.FillColor = [parseFloat(obj.fillcolor[0]), parseFloat(obj.fillcolor[1]), parseFloat(obj.fillcolor[2])];
-    this.Arrow.OutlineColor = [parseFloat(obj.outlinecolor[0]), parseFloat(obj.outlinecolor[1]), parseFloat(obj.outlinecolor[2])];
+    this.Arrow.OutlineColor = SAM.ConvertColor(obj.lineColor);
     this.Arrow.Length = parseFloat(obj.length);
     this.Arrow.Width = parseFloat(obj.width);
     this.Arrow.Orientation = parseFloat(obj.orientation);
@@ -231,7 +231,7 @@
   };
 
   // Returns true if the mouse is over the arrow.
-  ArrowWidget.prototype.SingleSelect = function () {
+  ArrowWidget.prototype.HandleSelect = function () {
     if (this.State === DIALOG) {
       return;
     }
@@ -357,23 +357,19 @@
       var dy = y - this.CircleTip.Origin[1];
       if (dx * dx + dy * dy < Math.pow(this.CircleTip.Radius, 2)) {
         this.CircleTip.Selected = true;
-        this.CircleTip.SetFillColor([1, 1, 0]);
         cursor = 'move';
         this.State = HOVER;
       } else {
         this.CircleTip.Selected = false;
-        this.CircleTip.SetFillColor();
       }
       dx = x - this.CircleTail.Origin[0];
       dy = y - this.CircleTail.Origin[1];
       if (dx * dx + dy * dy < Math.pow(this.CircleTail.Radius, 2)) {
         this.CircleTail.Selected = true;
-        this.CircleTail.SetFillColor([1, 1, 0]);
         cursor = 'move';
         this.State = HOVER;
       } else {
         this.CircleTail.Selected = false;
-        this.CircleTail.SetFillColor();
       }
       this.Layer.GetParent().css({'cursor': cursor});
       this.Layer.EventuallyDraw();

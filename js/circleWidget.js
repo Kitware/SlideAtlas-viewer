@@ -13,21 +13,30 @@
   var NEW_DRAG_RADIUS = 2;
   var DRAG = 3; // The whole circle is being dragged.
   var DRAG_RADIUS = 4;
-  var INACTIVE = 5; // Not responding to events at all
-  var ACTIVE = 6; // Receive events.  Looking for a hover.
-  var HOVER = 7; // Mouse is over the widget.
-  var DIALOG = 8; // Properties dialog is up
+  var DRAG_KEYPOINT = 5;
+  var INACTIVE = 6; // Not responding to events at all
+  var ACTIVE = 7; // Receive events.  Looking for a hover.
+  var HOVER = 8; // Mouse is over the widget.
+  var DIALOG = 9; // Properties dialog is up
 
   var CIRCUMFERENCE = 1;
   var INSIDE = 2;
   var CENTER = 3;
 
+  var DEFAULT_LABEL;
+
   function CircleWidget (layer) {
     this.Layer = layer;
+
+    // This is to save fields from loaded elements that we ignore.
+    // That way we include them when we serialize.
+    this.Element = {};
 
     // Get default properties.
     if (localStorage.CircleWidgetDefaults) {
       this.Defaults = JSON.parse(localStorage.CircleWidgetDefaults);
+    } else {
+      this.Defaults = {};
     }
 
     // This method gets called if anything is added, deleted or moved.
@@ -47,6 +56,7 @@
       this.Tolerance = 15.0;
     }
 
+    this.Visibility = true;
     if (layer === null) {
       return;
     }
@@ -59,15 +69,16 @@
     var cam = layer.GetCamera();
     var viewport = layer.GetViewport();
     this.Circle = new SAM.Circle();
-    this.Circle.Origin = [0, 0];
-    this.Circle.OutlineColor = [0.0, 0.0, 0.0];
+    this.Circle.Origin = new Array(2);
+    this.Circle.Origin.fill(0);
+    this.Circle.OutlineColor = new Array(3);
     this.Circle.SetOutlineColor('#00ff00');
     this.Circle.Radius = 50 * cam.Height / viewport[3];
     this.Circle.LineWidth = 5.0 * cam.Height / viewport[3];
 
     if (this.Defaults) {
       if (this.Defaults.Color) {
-        this.Circle.OutlineColor = this.Defaults.Color;
+        this.Circle.OutlineColor = SAM.ConvertColor(this.Defaults.Color);
       }
       if (this.Defaults.LineWidth !== undefined) {
         // Only use the default if it is reasonable.
@@ -95,25 +106,20 @@
     // canvas, this will behave odd.
 
     // Cross hairs is to show an active center.
-    // this.Cross = new SAM.CrossHairs();
-    // this.Cross.SetOutlineColor([1.0, 1.0, 0.0]);
-    // this.Cross.length = 10;
-    // this.Cross.LineWidth = 1;
-
-    this.Cross = new SAM.Circle();
-    this.Cross.Origin = [0, 0];
-    this.Cross.SetFillColor([1.0, 1.0, 0.0]);
-    this.Cross.SetOutlineColor([0.0, 0.0, 0.0]);
-    this.Cross.LineWidth = 1;
-    this.Cross.Radius = 10;
-    this.Cross.PositionCoordinateSystem = 1; // Shape.VIEWER;
-
     this.Cross = new SAM.Circle();
     this.Cross.SetFillColor([1, 1, 0]);
     this.Cross.SetOutlineColor([0.0, 0.0, 0.0]);
     this.Cross.Radius = 5;
     this.Cross.LineWidth = 1;
     this.Cross.PositionCoordinateSystem = 1;
+
+    if (DEFAULT_LABEL) {
+      var text = new SAM.Text();
+      text.BackgroundFlag = false;
+      text.String = DEFAULT_LABEL;
+      text.Position = this.Circle.Origin;
+      this.Circle.Children['label'] = text;
+    }
 
     this.State = INACTIVE;
   }
@@ -187,6 +193,7 @@
         selection.ViewerPointInSelection(p[0] + radius, p[1] - radius) &&
         selection.ViewerPointInSelection(p[0] + radius, p[1] + radius)) {
       this.Circle.SetSelected(true);
+
       return true;
     }
     this.Circle.SetSelected(false);
@@ -209,6 +216,11 @@
   };
 
   CircleWidget.prototype.SetActive = function (flag) {
+    if (flag === false && this.State === NEW_DRAG) {
+      // User is in the middle of dragging a circle)
+      this.Cancel();
+      return;
+    }
     if (flag && this.State === INACTIVE) {
       this.State = HOVER;
       // Probably not right, but the widget probably became active because it was selected,
@@ -249,8 +261,49 @@
     this.Dialog = new SAM.Dialog(this.Layer.GetParent().parent());
     this.Dialog.SetApplyCallback(function () { self.DialogApplyCallback(); });
     // Customize dialog for a circle.
-    this.Dialog.Title.text('Circle Propoerties');
-    this.Dialog.Body.css({'margin': '1em 2em'});
+    this.Dialog.Title.text('Circle Properties');
+    this.Dialog.Body.css({'margin': '1em 2em', 'height': '14em'});
+    // Radius
+    this.Dialog.RadiusDiv =
+            $('<div>')
+            .css({'height': '24px'})
+            .appendTo(this.Dialog.Body)
+            .addClass('sa-view-annotation-modal-div');
+    this.Dialog.RadiusLabel =
+            $('<div>')
+            .appendTo(this.Dialog.RadiusDiv)
+            .text('Radius:')
+            .addClass('sa-view-annotation-modal-input-label');
+    this.Dialog.RadiusInput =
+            $('<input type="number">')
+            .appendTo(this.Dialog.RadiusDiv)
+            .val(10)
+            .addClass('sa-view-annotation-modal-input');
+
+    // Center
+    this.Dialog.CenterDiv =
+            $('<div>')
+            .css({'height': '24px'})
+            .appendTo(this.Dialog.Body)
+            .addClass('sa-view-annotation-modal-div');
+    this.Dialog.CenterLabel =
+            $('<div>')
+            .appendTo(this.Dialog.CenterDiv)
+            .text('Center:')
+            .addClass('sa-view-annotation-modal-input-label');
+    this.Dialog.CenterXInput =
+            $('<input type="number">')
+            .appendTo(this.Dialog.CenterDiv)
+            .css({'width': '30%'})
+            .val(0)
+            .addClass('sa-view-annotation-modal-input');
+    this.Dialog.CenterYInput =
+            $('<input type="number">')
+            .appendTo(this.Dialog.CenterDiv)
+            .css({'width': '30%'})
+            .val(0)
+            .addClass('sa-view-annotation-modal-input');
+
     // Color
     this.Dialog.ColorDiv =
             $('<div>')
@@ -281,6 +334,22 @@
     this.Dialog.LineWidthInput =
             $('<input type="number">')
             .appendTo(this.Dialog.LineWidthDiv)
+            .addClass('sa-view-annotation-modal-input')
+            .keypress(function (event) { return event.keyCode !== 13; });
+
+    // Label
+    this.Dialog.LabelDiv =
+            $('<div>')
+            .appendTo(this.Dialog.Body)
+            .addClass('sa-view-annotation-modal-div');
+    this.Dialog.LabelLabel =
+            $('<div>')
+            .appendTo(this.Dialog.LabelDiv)
+            .text('Label:')
+            .addClass('sa-view-annotation-modal-input-label');
+    this.Dialog.LabelInput =
+            $('<input type="text">')
+            .appendTo(this.Dialog.LabelDiv)
             .addClass('sa-view-annotation-modal-input')
             .keypress(function (event) { return event.keyCode !== 13; });
 
@@ -332,13 +401,16 @@
 
   // Fill the dialog values from the widget values.
   CircleWidget.prototype.WidgetPropertiesToDialog = function () {
+    this.Dialog.RadiusInput.val(Math.round(this.Circle.Radius));
+    this.Dialog.CenterXInput.val(Math.round(this.Circle.Origin[0]));
+    this.Dialog.CenterYInput.val(Math.round(this.Circle.Origin[1]));
     this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Circle.OutlineColor));
     this.Dialog.LineWidthInput.val((this.Circle.LineWidth).toFixed(2));
-  };
-
-  // Copy the properties of the dialog into the widget
-  CircleWidget.prototype.DialogPropertiesToWidget = function () {
-    var modified = false;
+    var label = '';
+    if (this.Circle.Children.label && this.Circle.Children.label.String) {
+      label = this.Circle.Children['label'].String;
+    }
+    this.Dialog.LabelInput.val(label);
 
     var area = (2.0 * Math.PI * this.Circle.Radius * this.Circle.Radius) * 0.25 * 0.25;
     var areaString = '';
@@ -355,6 +427,34 @@
       }
     }
     this.Dialog.Area.text(areaString);
+  };
+
+  // I am having the two shapes share an origin/position point array.
+  // That way code that just modifies oring will automatically change label.
+  CircleWidget.prototype.SetOrigin = function (xy) {
+    this.Circle.Origin = xy;
+    if ('label' in this.Circle.Children) {
+      this.Circle.Children.label.Position = xy;
+    }
+  };
+
+  // Copy the properties of the dialog into the widget
+  CircleWidget.prototype.DialogPropertiesToWidget = function () {
+    var modified = false;
+
+    var radius = parseInt(this.Dialog.RadiusInput.val());
+    if (radius !== this.Circle.Radius) {
+      this.Circle.Radius = radius;
+      modified = true;
+    }
+
+    var cx = parseInt(this.Dialog.CenterXInput.val());
+    var cy = parseInt(this.Dialog.CenterYInput.val());
+    if (cx !== this.Circle.Origin[0] || cy !== this.Circle.Origin[1]) {
+      this.Circle.Origin[0] = cx;
+      this.Circle.Origin[1] = cy;
+      modified = true;
+    }
 
     // Get the color
     var hexcolor = SAM.ConvertColorToHex(this.Dialog.ColorInput.val());
@@ -367,6 +467,24 @@
     var lineWidth = parseFloat(this.Dialog.LineWidthInput.val());
     if (lineWidth !== this.Circle.LineWidth) {
       this.Circle.LineWidth = lineWidth;
+      modified = true;
+    }
+
+    var label = this.Dialog.LabelInput.val();
+    label = label.trim();
+    if (label === '') {
+      DEFAULT_LABEL = undefined;
+      delete this.Circle.Children.label;
+    } else {
+      if (!this.Circle.Children.label) {
+        var text = new SAM.Text();
+        text.BackgroundFlag = false;
+        text.String = label;
+        text.Position = this.Circle.Origin;
+        this.Circle.Children['label'] = text;
+        DEFAULT_LABEL = label;
+      }
+      this.Circle.Children.label.String = label;
       modified = true;
     }
 
@@ -386,7 +504,7 @@
   };
 
   CircleWidget.prototype.Draw = function () {
-    if (this.State !== NEW_HIDDEN && this.Circle) {
+    if (this.Visibility && this.State !== NEW_HIDDEN && this.Circle) {
       var view = this.Layer.GetView();
       this.Circle.Draw(view);
       if (this.State === ACTIVE || this.State === HOVER) {
@@ -403,53 +521,157 @@
     this.Load(data);
     // Place the widget over the mouse.
     // This would be better as an argument.
-    this.Circle.Origin = [mouseWorldPt[0], mouseWorldPt[1]];
+    this.SetOrigin([mouseWorldPt[0], mouseWorldPt[1]]);
     // TODO: Just have the caller draw.
     layer.EventuallyDraw();
   };
 
   CircleWidget.prototype.Serialize = function () {
     if (this.Circle === undefined) { return null; }
-    var obj = {};
-    obj.type = 'circle';
-    obj.origin = this.Circle.Origin;
-    obj.outlinecolor = this.Circle.OutlineColor;
-    obj.radius = this.Circle.Radius;
-    obj.linewidth = this.Circle.LineWidth;
-    obj.creation_camera = this.CreationCamera;
-    return obj;
+    var element = this.Element;
+    element.type = 'circle';
+    element.center = [this.Circle.Origin[0], this.Circle.Origin[1], 0];
+    element.lineColor = SAM.ConvertColorToHex(this.Circle.OutlineColor);
+    element.radius = this.Circle.Radius;
+    element.lineWidth = this.Circle.LineWidth;
+    // element.creation_camera = this.CreationCamera;
+
+    if (this.Circle.Children.label && this.Circle.Children.label.String) {
+      element.label = {'value': this.Circle.Children.label.String};
+    }
+    // Serialize the keypoints
+    var childKey, child;
+    for (childKey in this.Circle.Children) {
+      child = this.Circle.Children[childKey];
+      if (typeof (child) === 'object' && 'Radius' in child) {
+        if (!('user' in element)) {
+          element['user'] = {};
+        }
+        var user = element['user'];
+        if (!('keypoints' in user)) {
+          user['keypoints'] = [];
+        }
+        var keypoints = user['keypoints'];
+        // This is an inefficient schema.  I have to search an array.
+        // This will not add a new keypoint.
+        for (var i = 0; i < keypoints.length; ++i) {
+          var kp = keypoints[i];
+          if (kp.category === childKey) {
+            kp.xy = child.Origin;
+          }
+        }
+      }
+    }
+
+    return element;
   };
 
   // Load a widget from a json object (origin MongoDB).
   // Layer is needed to update the bufferes.
   // TODO: delayed upldating bufferes until the first draw
-  CircleWidget.prototype.Load = function (obj) {
-    this.Circle.Origin[0] = parseFloat(obj.origin[0]);
-    this.Circle.Origin[1] = parseFloat(obj.origin[1]);
-    if (obj['outlinecolor'] !== undefined) {
-      this.Circle.OutlineColor[0] = parseFloat(obj.outlinecolor[0]);
-      this.Circle.OutlineColor[1] = parseFloat(obj.outlinecolor[1]);
-      this.Circle.OutlineColor[2] = parseFloat(obj.outlinecolor[2]);
+  CircleWidget.prototype.Load = function (element) {
+    this.Element = element;
+    this.Circle.Origin[0] = Math.round(parseFloat(element.center[0]));
+    this.Circle.Origin[1] = Math.round(parseFloat(element.center[1]));
+    if (element['lineColor'] !== undefined) {
+      this.Circle.OutlineColor = SAM.ConvertColor(element.lineColor);
     } else {
       this.Circle.OutlineColor[0] = 0.0;
       this.Circle.OutlineColor[1] = 1.0;
       this.Circle.OutlineColor[2] = 1.0;
     }
-    this.Circle.Radius = parseFloat(obj.radius);
+    this.Circle.Radius = Math.round(parseFloat(element.radius));
     this.Circle.LineWidth = 0;
-    if (obj.lineWidth) {
-      this.Circle.LineWidth = parseFloat(obj.linewidth);
+    if (element.lineWidth) {
+      this.Circle.LineWidth = parseFloat(element.lineWidth);
     }
     this.Circle.FixedSize = false;
     this.Circle.UpdateBuffers(this.Layer.AnnotationView);
 
     // How zoomed in was the view when the annotation was created.
-    if (obj.creation_camera !== undefined) {
-      this.CreationCamera = obj.CreationCamera;
+    if (element.creation_camera !== undefined) {
+      this.CreationCamera = element.CreationCamera;
+    }
+
+    if ('label' in element) {
+      var str = element['label']['value'];
+      var text = new SAM.Text();
+      text.BackgroundFlag = false;
+      text.String = str;
+      text.Position = this.Circle.Origin;
+      this.Circle.Children['label'] = text;
+    }
+
+    var circle, kp, idx;
+    var keypoints;
+    if ('user' in element) {
+      var user = element['user'];
+      if ('keypoints' in user) {
+        keypoints = user['keypoints'];
+        for (idx = 0; idx < keypoints.length; ++idx) {
+          kp = keypoints[idx];
+          circle = new SAM.Circle();
+          if (kp['category'] === 'nose') {
+            circle.SetFillColor([0.0, 1.0, 0]);
+          } else if (kp['category'] === 'tail') {
+            circle.SetFillColor([1.0, 0.0, 0]);
+          } else if (kp['category'] === 'left_wingtip') {
+            circle.SetFillColor([1.0, 0.0, 1.0]);
+          } else if (kp['category'] === 'right_wingtip') {
+            circle.SetFillColor([0.0, 1.0, 1.0]);
+          } else {
+            circle.SetFillColor([0.8, 0.8, 1]);
+          }
+          circle.SetOutlineColor([0.0, 0.0, 0.0]);
+          circle.Radius = 2;
+          circle.LineWidth = 1;
+          circle.Origin = kp['xy'];
+          this.Circle.Children[kp['category']] = circle;
+        }
+      } else if ('network_keypoints' in user) {
+        keypoints = user['network_keypoints'];
+        for (idx = 0; idx < keypoints.length; ++idx) {
+          kp = keypoints[idx];
+          circle = new SAM.Circle();
+          if (kp['keypoint_category'] === 'nose') {
+            circle.SetFillColor([0.5, 1.0, 0.5]);
+          } else if (kp['keypoint_category'] === 'tail') {
+            circle.SetFillColor([1.0, 0.5, 0.5]);
+          } else {
+            circle.SetFillColor([0.8, 0.8, 1]);
+          }
+          circle.SetOutlineColor([0.0, 0.0, 0.0]);
+          circle.Radius = 2;
+          circle.LineWidth = 1;
+          circle.Origin = kp['xy'];
+          this.Circle.Children[kp['keypoint_category']] = circle;
+        }
+      }
     }
   };
 
-  CircleWidget.prototype.HandleKeyDown = function (keyCode) {
+  CircleWidget.prototype.Cancel = function () {
+    if (this.State === NEW_DRAG) {
+      this.State = INACTIVE;
+      // Circle has not been placed. Delete the circle.
+      this.Circle.Selected = true;
+      this.Layer.DeleteSelected();
+    }
+    this.SetActive(false);
+  };
+
+  CircleWidget.prototype.SetVisibility = function (vis) {
+    this.Visibility = vis;
+    this.Layer.EventuallyDraw();
+  };
+
+  CircleWidget.prototype.HandleKeyDown = function (layer) {
+    if (layer.Event.keyCode === 86) {
+      this.Visibility = !this.Visibility;
+      layer.EventuallyDraw();
+      return true;
+    }
+
     if (this.State === INACTIVE) {
       return true;
     }
@@ -461,11 +683,7 @@
 
     // Escape key
     if (event.keyCode === 27) {
-      if (this.State === NEW_DRAG) {
-        // Circle has not been placed. Delete the circle.
-        this.Layer.DeleteSelected();
-      }
-      this.SetActive(false);
+      this.Cancel();
       return false;
     }
 
@@ -502,7 +720,10 @@
     if (this.State === HOVER) {
       var circlePart = this.MouseOverWhichPart(layer.Event);
       // Determine behavior from active radius.
-      if (circlePart === CENTER) {
+      if (typeof (circlePart) === 'object') {
+        this.State = DRAG_KEYPOINT;
+        this.KeyPoint = circlePart;
+      } else if (circlePart === CENTER) {
         this.State = DRAG;
       } else if (circlePart === CIRCUMFERENCE) {
         this.OriginViewer =
@@ -526,10 +747,12 @@
       this.Layer.EventuallyDraw();
     }
 
-    if (this.State === DRAG || this.State === DRAG_RADIUS) {
+    if (this.State === DRAG || this.State === DRAG_RADIUS ||
+        this.State === DRAG_KEYPOINT) {
       this.State = HOVER;
       this.Modified();
       this.Layer.EventuallyDraw();
+      this.KeyPoint = undefined;
     }
 
     var event = layer.Event;
@@ -576,11 +799,22 @@
     if (this.State === ACTIVE || this.State === HOVER) {
       var circlePart = this.MouseOverWhichPart(layer.Event);
       if (this.Circle.FillColor !== undefined && circlePart === INSIDE) {
+        // Mouse if over a child keypoint.
+        this.State = HOVER;
+        this.Layer.GetParent().css({'cursor': 'move'});
+        return false;
+      }
+      if (this.Circle.FillColor !== undefined && circlePart === INSIDE) {
         this.State = HOVER;
         this.Layer.GetParent().css({'cursor': 'move'});
         return false;
       }
       if (circlePart === CIRCUMFERENCE || circlePart === CENTER) {
+        this.State = HOVER;
+        this.Layer.GetParent().css({'cursor': 'move'});
+        return false;
+      }
+      if (typeof (circlePart) === 'object' && 'Radius' in circlePart) {
         this.State = HOVER;
         this.Layer.GetParent().css({'cursor': 'move'});
         return false;
@@ -592,8 +826,9 @@
 
     // Hack to fix weird state where mouse up is not called.
     if (event.which === 0 &&
-        (this.State === NEW_DRAG_RADIUS || this.State === DRAG_RADIUS || this.State === DRAG)) {
-      return this.HandleMouseUp(event);
+        (this.State === NEW_DRAG_RADIUS || this.State === DRAG_RADIUS ||
+         this.State === DRAG || this.State === DRAG_KEYPOINT)) {
+      return this.HandleMouseUp(layer);
     }
 
     if (event.which === 0 && this.State === ACTIVE) {
@@ -607,7 +842,7 @@
     }
     if (this.State === NEW_DRAG || this.State === DRAG) {
       if (SA && SA.notesWidget) { SA.notesWidget.MarkAsModified(); } // hack
-      this.Circle.Origin = cam.ConvertPointViewerToWorld(x, y);
+      this.SetOrigin(cam.ConvertPointViewerToWorld(x, y));
       layer.EventuallyDraw();
     }
 
@@ -620,6 +855,12 @@
       this.Circle.Radius = Math.sqrt(dx * dx + dy * dy) * cam.Height / viewport[3];
       this.Circle.UpdateBuffers(layer.AnnotationView);
       if (SA && SA.notesWidget) { SA.notesWidget.MarkAsModified(); } // hack
+      layer.EventuallyDraw();
+    }
+
+    if (this.State === DRAG_KEYPOINT) {
+      if (SA && SA.notesWidget) { SA.notesWidget.MarkAsModified(); } // hack
+      this.KeyPoint.Origin = cam.ConvertPointViewerToWorld(x, y);
       layer.EventuallyDraw();
     }
 
@@ -673,7 +914,7 @@
   };
 
   // Returns the selected stroke or undefined.
-  CircleWidget.prototype.SingleSelect = function () {
+  CircleWidget.prototype.HandleSelect = function () {
     if (this.State === NEW_HIDDEN || this.State === NEW_DRAG || this.State === DIALOG) {
       return false;
     }
@@ -688,29 +929,59 @@
       this.Circle.SetSelected(true);
       return this;
     }
+    // Handle clicking on the keypoints.
+    if (typeof (circlePart) === 'object') {
+      this.Circle.SetSelected(true);
+      return this;
+    }
 
     this.Circle.SetSelected(false);
+    // hack to fix bug where circle remained active when no longer selected.
+    this.SetActive(false);
     return false;
   };
 
   // Returns true or false.  Point is in viewer coordinates.
   CircleWidget.prototype.MouseOverWhichPart = function (event) {
     var pt = [event.offsetX, event.offsetY];
-    var c = this.Circle.Origin;
-    var r = this.Circle.Radius;
+    var c, r, child, childKey, cam;
+    var d, dx, dy;
+
+    // Check the children (keypoints).
+    for (childKey in this.Circle.Children) {
+      child = this.Circle.Children[childKey];
+      if (typeof (child) === 'object' && 'Radius' in child) {
+        // Assume the child is a circle.
+        c = child.Origin;
+        r = child.Radius;
+        if (!this.FixedSize) {
+          cam = this.Layer.GetCamera();
+          c = cam.ConvertPointWorldToViewer(c[0], c[1]);
+          r = cam.ConvertScaleWorldToViewer(r);
+        }
+        dx = pt[0] - c[0];
+        dy = pt[1] - c[1];
+        d = Math.sqrt((dx * dx) + (dy * dy));
+        if (Math.abs(d) < r + this.Tolerance) {
+          return child;
+        }
+      }
+    }
+
+    c = this.Circle.Origin;
+    r = this.Circle.Radius;
     var lineWidth = this.Circle.LineWidth;
     // Do the comparison in view coordinates.
     if (!this.FixedSize) {
-      var cam = this.Layer.GetCamera();
+      cam = this.Layer.GetCamera();
       c = cam.ConvertPointWorldToViewer(c[0], c[1]);
       r = cam.ConvertScaleWorldToViewer(r);
       lineWidth = cam.ConvertScaleWorldToViewer(lineWidth);
     }
 
-    var dx = pt[0] - c[0];
-    var dy = pt[1] - c[1];
-
-    var d = Math.sqrt(dx * dx + dy * dy);
+    dx = pt[0] - c[0];
+    dy = pt[1] - c[1];
+    d = Math.sqrt(dx * dx + dy * dy);
 
     if (Math.abs(d - r) < this.Tolerance + lineWidth) {
       return CIRCUMFERENCE;

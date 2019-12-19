@@ -72,15 +72,14 @@
     this.HistoryFlag = false;
     this.MinPixelSize = 0.25;
 
+    // Need this to avoid calling interaction on multiple times.
+    this.InteractionEnabled = false;
+
     // Interaction state:
     // What to do for mouse move or mouse up.
     this.InteractionState = INTERACTION_NONE;
     // External callbacks
     this.InteractionListeners = [];
-    // TODO: Get rid of this.  Remove bindings instead.
-    // This is a hack to turn off interaction.
-    // Sometime I need to clean up the events for viewers.
-    this.InteractionEnabled = true;
 
     this.AnimateLast = null;
     this.AnimateDuration = 0.0;
@@ -169,6 +168,11 @@
                   'width': '100px',
                   'z-index': '4'});
     }
+
+    // For accelerating mouse wheel zooming.  I should probably merg this with drag accerlation ...
+    this.WheelSensitivity = 0.0;     // (0.1) + Sensitivity: fraction zoom with no acceleration
+    this.WheelAcceleration = 0.025;   // Each wheel event increases sensitivty by this size.
+    this.WheelTimeConstant = 1000.0; // Time constant for sensitivty to decay back to default value.
   }
 
   Viewer.prototype.GetParentDiv = function () {
@@ -187,6 +191,12 @@
 
   // I need to turn the bindins on and off, to make children 'contentEditable'.
   Viewer.prototype.InteractionOn = function () {
+    // Keep from adding multiple bindings for events.
+    if (this.InteractionEnabled) {
+      return;
+    }
+    this.InteractionEnabled = true;
+
     var self = this;
     // var can = this.MainView.Parent;
     var can = this.Div;
@@ -202,10 +212,15 @@
       function (event) {
         // So key events go the the right viewer.
         this.focus();
+        if (event.which === undefined) {
+          event.which = self.FirefoxWhich;
+        }
         // Firefox does not define offsetX ...?
         // SA.FirefoxWhich(event);
         // Firefox does not set which for mouse move events.
-        event.which = self.FirefoxWhich;
+        if (event.which === undefined) {
+          event.which = self.FirefoxWhich;
+        }
         return self.HandleMouseMove(event);
       });
     // We need to detect the mouse up even if it happens outside the canvas,
@@ -213,7 +228,6 @@
       'mouseup.viewer',
       function (event) {
         // SA.FirefoxWhich(event);
-        self.FirefoxOverviewWhich = 0;
         self.FirefoxWhich = 0;
         if (event.which === undefined) {
           event.which = 0;
@@ -237,6 +251,10 @@
     can.on(
       'touchmove.viewer',
       function (event) {
+        if (event.which === undefined) {
+          event.which = 0;
+        }
+        event.which = self.FirefoxWhich;
         return self.HandleTouchMove(event.originalEvent);
       });
     can.on(
@@ -265,14 +283,14 @@
         'mousedown.viewer',
         function (event) {
           SA.FirefoxWhich(event);
-          self.FirefoxOverviewWhich = event.which;
+          self.FirefoxWhich = event.which;
           return self.HandleOverViewMouseDown(event);
         });
 
       can.on(
         'mouseup.viewer',
         function (event) {
-          self.FirefoxOverviewWhich = 0;
+          self.FirefoxWhich = 0;
           self.FirefoxWhich = 0;
           if (event.which === undefined) {
             event.which = 0;
@@ -283,7 +301,9 @@
         'mousemove.viewer',
         function (event) {
           // SA.FirefoxWhich(event);
-          event.which = self.FirefoxOverviewWhich;
+          if (event.which === undefined) {
+            event.which = self.FirefoxWhich;
+          }
           return self.HandleOverViewMouseMove(event);
         });
       can.on(
@@ -296,6 +316,8 @@
 
   // I need to turn the bindins on and off, to make children 'contentEditable'.
   Viewer.prototype.InteractionOff = function () {
+    this.InteractionEnabled = false;
+
     // Options:
     // 1: Just use off to get rid of all bindings. This will remove outside bindings too.
     // 2: Remove them 1 by 1.
@@ -539,7 +561,7 @@
     this.RotateIcon.addClass('sa-active');
   };
   Viewer.prototype.RollLeave = function (e) {
-    if (!this.Rotatable) { return; }
+    if (this.RotateIconDrag) { return; }
     this.RotateIconHover = false;
     if (!this.RotateIconDrag) {
       this.RotateIcon.removeClass('sa-active');
@@ -548,24 +570,30 @@
   Viewer.prototype.RollDown = function (e) {
     if (!this.OverView) { return; }
     if (!this.Rotatable) { return; }
+    this.FirefoxWhich = e.which;
     this.RotateIconDrag = true;
     // Find the center of the overview window.
-    var w = this.OverView.Parent;
-    var o = w.offset();
-    var cx = o.left + (w.width() / 2);
-    var cy = o.top + (w.height() / 2);
-    this.RotateIconX = e.clientX - cx;
-    this.RotateIconY = e.clientY - cy;
+    var cx = this.OverViewport[0] + (0.5 * this.OverViewport[2]);
+    var cy = this.OverViewport[1] + (0.5 * this.OverViewport[3]);
+    var offset = this.MainView.Parent.offset();
+    var x = e.pageX - offset.left - cx;
+    var y = e.pageY - offset.top - cy;
+
+    // Normalize
+    var m = Math.sqrt((x * x) + (y * y));
+    this.RotateIconX = x / m;
+    this.RotateIconY = y / m;
 
     // Move event is in the viewer or overview.
     // It has a sanity check of which button was pressed.
     // It looks like the icon consumes the down event so
     // the viewer never has a chance to set this
     SA.FirefoxWhich(event);
-    this.FirefoxOverviewWhich = event.which;
+    this.FirefoxWhich = event.which;
 
     return false;
   };
+
   Viewer.prototype.RollMove = function (e) {
     if (!this.OverView) { return; }
     if (!this.RotateIconDrag) { return; }
@@ -575,18 +603,25 @@
       this.RotateIconDrag = false;
       return;
     }
+
     // Find the center of the overview window.
-    var origin = this.MainView.Parent.offset();
-    // center of rotation
-    var cx = this.OverViewport[0] + (this.OverViewport[2] / 2);
-    var cy = this.OverViewport[1] + (this.OverViewport[3] / 2);
+    // Relative to mainview?
+    var cx = this.OverViewport[0] + (0.5 * this.OverViewport[2]);
+    var cy = this.OverViewport[1] + (0.5 * this.OverViewport[3]);
 
-    var x = (e.clientX - origin.left) - cx;
-    var y = (e.clientY - origin.top) - cy;
-    var c = x * this.RotateIconY - y * this.RotateIconX;
-    var r = c / (x * x + y * y);
+    var offset = this.MainView.Parent.offset();
+    var x = e.pageX - offset.left - cx;
+    var y = e.pageY - offset.top - cy;
 
-    var roll = this.MainView.Camera.GetWorldRoll() - r;
+    // Normalize
+    var m = Math.sqrt((x * x) + (y * y));
+    x = x / m;
+    y = y / m;
+
+    // Cross product gives angle*m^2
+    var dAngle = x * this.RotateIconY - y * this.RotateIconX;
+
+    var roll = this.MainView.Camera.GetWorldRoll() - dAngle;
     this.MainView.Camera.SetWorldRoll(roll);
     this.UpdateCamera();
     this.EventuallyRender(true);
@@ -702,18 +737,13 @@
     this.ShareTab.Panel
       .css({
         'box-sizing': 'border-box',
-        'left': '-300px',
-        'width': '380px',
+        'left': '-400px',
+        'width': '480px',
         'z-index': '500',
         // 'height': '45px',
         'padding': '0 2px'});
     var self = this;
-    // TODO: Separate the share update from EndInteraction.
-    this.ShareTab.Panel.on('show', function () {
-      self.TriggerEndInteraction();
-      self.ShareDisplay.focus();
-    });
-    this.ShareDisplay = $('<textarea>')
+    this.ShareDisplay = $('<div>')
       .appendTo(this.ShareTab.Panel)
       .addClass('sa-view-share-text')
       .html('')
@@ -724,6 +754,22 @@
         'width': '100%',
         '-webkit-user-select': 'all',
         'user-select': 'all'});
+
+    // TODO: Separate the share update from EndInteraction.
+    this.ShareTab.Panel.on('show', function () {
+      self.TriggerEndInteraction();
+      self.ShareDisplay.focus();
+    });
+    // Gymnastics to let the textarea get events.
+    // Allow copy of text.
+    this.ShareDisplay.on('mouseenter', function () {
+      self.InteractionOff();
+      self.ShareDisplay.focus();
+    });
+    this.ShareDisplay.on('mouseleave', function () {
+      self.InteractionOn();
+      self.ShareDisplay.blur();
+    });
 
     // Put the zoom bottons in a tab.
     this.ZoomTab = new SA.Tab(this.GetDiv(),
@@ -1465,13 +1511,17 @@
     this.EventuallyRender(true);
   };
 
+  // TODO: I think these are legacy and need to be removed.
   Viewer.prototype.SetInteractionEnabled = function (enabled) {
+    console.log('Get rid of this');
     this.InteractionEnabled = enabled;
   };
   Viewer.prototype.EnableInteraction = function () {
+    console.log('Get rid of this');
     this.InteractionEnabled = true;
   };
   Viewer.prototype.DisableInteraction = function () {
+    console.log('Get rid of this');
     this.InteractionEnabled = false;
   };
 
@@ -2155,7 +2205,7 @@
     this.FirefoxWhich = 0;
     this.RecordMouseUp(event);
 
-    if (this.Rotatable && this.RotateIconDrag) {
+    if (this.RotateIconDrag) {
       this.RollUp(event);
       return false;
     }
@@ -2237,7 +2287,7 @@
 
     // I think we need to deal with the move here because the mouse can
     // exit the icon and the events are lost.
-    if (this.Rotatable && this.RotateIconDrag) {
+    if (event.which === 1 && this.Rotatable && this.RotateIconDrag) {
       this.RollMove(event);
       return false;
     }
@@ -2284,8 +2334,8 @@
       var cy = y - (this.MainView.Viewport[3] * 0.5);
       // GLOBAL views will go away when views handle this.
       this.MainView.Camera.HandleRoll(cx, cy,
-                                            this.MouseDeltaX,
-                                            this.MouseDeltaY);
+                                      this.MouseDeltaX,
+                                      this.MouseDeltaY);
       this.RollTarget = this.MainView.Camera.GetWorldRoll();
       this.UpdateCamera();
     } else if (this.InteractionState === INTERACTION_ZOOM) {
@@ -2324,6 +2374,21 @@
   Viewer.prototype.HandleMouseWheel = function (event) {
     if (!this.InteractionEnabled) { return true; }
 
+    // Decay computations.
+    this.MouseTime = (new Date()).getTime();
+    if (this.LastMouseTime) {
+      var dt = this.MouseTime - this.LastMouseTime;
+      this.WheelSensitivity *= Math.exp(-dt / this.WheelTimeConstant);
+      // console.log(dt);
+    }
+    this.LastMouseTime = this.MouseTime;
+    this.WheelSensitivity += this.WheelAcceleration;
+    if (this.WheelSensitivity > 0.2) {
+      this.WheelSensitivity = 0.2;
+    }
+
+    // console.log(this.WheelSensitivity);
+
     if (!event.offsetX) {
       // for firefox
       event.offsetX = event.layerX;
@@ -2350,9 +2415,9 @@
     // Initial delta cause another bug.
     // Lets restrict to one zoom step per event.
     if (tmp > 0) {
-      this.ZoomTarget *= 1.1;
+      this.ZoomTarget *= (1.0 + this.WheelSensitivity);
     } else if (tmp < 0) {
-      this.ZoomTarget /= 1.1;
+      this.ZoomTarget /= (1.0 + this.WheelSensitivity);
     }
 
     // Compute translate target to keep position in the same place.
@@ -2432,11 +2497,8 @@
       return false;
     }
 
-    var cam;
-    var dx;
-    var dy;
-    var rx;
-    var ry;
+    var cam, idx;
+    var dx, dy, rx, ry;
     cam = this.GetCamera();
     var roll = cam.GetWorldRoll();
     var fp = cam.GetWorldFocalPoint();
@@ -2444,22 +2506,36 @@
     var s = -Math.sin(roll);
     if (event.keyCode === 38) {
       // Up cursor key
-      dx = 0.0;
-      dy = -0.5 * cam.GetHeight();
-      rx = dx * c - dy * s;
-      ry = dx * s + dy * c;
-      this.TranslateTarget[0] = fp[0] + rx;
-      this.TranslateTarget[1] = fp[1] + ry;
+      if (event.ctrlKey) {
+        // Rotate to the next 90 degree lock.
+        idx = (this.MainView.Camera.GetWorldRoll() / (Math.PI * 0.5)) - 0.01;
+        idx = Math.floor(idx);
+        this.RollTarget = idx * Math.PI * 0.5;
+      } else {
+        dx = 0.0;
+        dy = -0.5 * cam.GetHeight();
+        rx = dx * c - dy * s;
+        ry = dx * s + dy * c;
+        this.TranslateTarget[0] = fp[0] + rx;
+        this.TranslateTarget[1] = fp[1] + ry;
+      }
       this.AnimateLast = new Date().getTime();
       this.AnimateDuration = 200.0;
       this.EventuallyRender(true);
       return false;
     } else if (event.keyCode === 40) {
       // Down cursor key
-      dx = 0.0;
-      dy = 0.5 * cam.GetHeight();
-      rx = dx * c - dy * s;
-      ry = dx * s + dy * c;
+      if (event.ctrlKey) {
+        // Rotate to the next 90 degree lock.
+        idx = (this.MainView.Camera.GetWorldRoll() / (Math.PI * 0.5)) + 0.01;
+        idx = Math.ceil(idx);
+        this.RollTarget = idx * Math.PI * 0.5;
+      } else {
+        dx = 0.0;
+        dy = 0.5 * cam.GetHeight();
+        rx = dx * c - dy * s;
+        ry = dx * s + dy * c;
+      }
       this.TranslateTarget[0] = fp[0] + rx;
       this.TranslateTarget[1] = fp[1] + ry;
       this.AnimateLast = new Date().getTime();
@@ -2468,24 +2544,36 @@
       return false;
     } else if (event.keyCode === 37) {
       // Left cursor key
-      dx = -0.5 * cam.GetWidth();
-      dy = 0.0;
-      rx = dx * c - dy * s;
-      ry = dx * s + dy * c;
-      this.TranslateTarget[0] = fp[0] + rx;
-      this.TranslateTarget[1] = fp[1] + ry;
+      if (event.ctrlKey) {
+        // Rotate by 90 degrees.
+        this.RollTarget = this.MainView.Camera.GetWorldRoll() -
+          Math.PI / 2.0;
+      } else {
+        dx = -0.5 * cam.GetWidth();
+        dy = 0.0;
+        rx = dx * c - dy * s;
+        ry = dx * s + dy * c;
+        this.TranslateTarget[0] = fp[0] + rx;
+        this.TranslateTarget[1] = fp[1] + ry;
+      }
       this.AnimateLast = new Date().getTime();
       this.AnimateDuration = 200.0;
       this.EventuallyRender(true);
       return false;
     } else if (event.keyCode === 39) {
       // Right cursor key
-      dx = 0.5 * cam.GetWidth();
-      dy = 0.0;
-      rx = dx * c - dy * s;
-      ry = dx * s + dy * c;
-      this.TranslateTarget[0] = fp[0] + rx;
-      this.TranslateTarget[1] = fp[1] + ry;
+      if (event.ctrlKey) {
+        // Rotate by 90 degrees.
+        this.RollTarget = this.MainView.Camera.GetWorldRoll() +
+          Math.PI / 2.0;
+      } else {
+        dx = 0.5 * cam.GetWidth();
+        dy = 0.0;
+        rx = dx * c - dy * s;
+        ry = dx * s + dy * c;
+        this.TranslateTarget[0] = fp[0] + rx;
+        this.TranslateTarget[1] = fp[1] + ry;
+      }
       this.AnimateLast = new Date().getTime();
       this.AnimateDuration = 200.0;
       this.EventuallyRender(true);
@@ -2677,50 +2765,13 @@
 
   Viewer.prototype.HandleOverViewMouseMove = function (event) {
     if (!this.InteractionEnabled) { return true; }
-    if (this.RotateIconDrag) {
+    if (event.which === 1 && this.RotateIconDrag) {
       this.RollMove(event);
       return false;
     }
 
     this.OverViewPlaceCamera(event);
 
-    /*
-    var w;
-    var p;
-    if (this.InteractionState === INTERACTION_OVERVIEW) {
-      // Do not start dragging until the mouse has moved some distance.
-      if (Math.abs(event.pageX - this.OverViewEventX) > 5 ||
-          Math.abs(event.pageY - this.OverViewEventY) > 5) {
-        // Start dragging the overview window.
-        this.InteractionState = INTERACTION_OVERVIEW_DRAG;
-        w = this.GetViewport()[2];
-        p = Math.max(w - event.pageX, event.pageY);
-        this.OverViewScaleLast = p;
-      }
-      return false;
-    }
-
-    // This consumes events even when I return true. Why?
-    if (this.InteractionState !== INTERACTION_OVERVIEW_DRAG) {
-      // Drag originated outside overview.
-      // Could be panning.
-      return true;
-    }
-
-    // Drag to change overview size
-    w = this.GetViewport()[2];
-    p = Math.max(w - event.pageX, event.pageY);
-    var d = p / this.OverViewScaleLast;
-    this.OverViewScale *= d * d;
-    this.OverViewScaleLast = p;
-    if (p < 60) {
-      this.RotateIcon.hide();
-    } else {
-      if (this.Rotatable) { this.RotateIcon.show(); }
-    }
-
-    this.UpdateSize();
-    */
     return false;
   };
 
@@ -2811,12 +2862,24 @@
     var height = Math.round(cam.GetHeight());
     var left = Math.round(fp[0] - width / 2);
     var top = Math.round(fp[1] - height / 2);
-    var imageId = this.GetCache().Image._id;
-    var url = window.location.href;
+    var rot = Math.round(cam.GetWorldRotation());
+
+    // TODO: Fix this
+    // Image._id is just a random id.
+    // var imageId = this.GetCache().Image._id;
+    // Hack to get th real id from a tile url.
+    var url = this.GetCache().TileSource.getTileUrl(0, 0, 0, 0);
+    var imageId = url.split('/')[3];
+
+    url = window.location.href;
     var end = url.indexOf('item/');
     url = url.substr(0, end + 4);
-    url = url + '#item/' + imageId + '?bounds=' + left + ',' + (left + width) +
-      ',' + top + ',' + (top + width);
+    url = url + '/' + imageId + '?bounds=' + left + ',' + top +
+      ',' + (left + width) + ',' + (top + height);
+
+    if (rot !== 0) {
+      url += '&rotate=' + rot;
+    }
 
     this.ShareDisplay.text(url);
   };

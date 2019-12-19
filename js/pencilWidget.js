@@ -115,6 +115,23 @@
       .val(this.LineWidth)
       .css({'display': 'table-cell'})
       .keypress(function (event) { return event.keyCode !== 13; });
+
+    // closed check
+    this.Dialog.ClosedDiv =
+            $('<div>')
+            .appendTo(this.Dialog.Body)
+            .css({'display': 'table-row'});
+    this.Dialog.ClosedLabel =
+            $('<div>')
+            .appendTo(this.Dialog.ClosedDiv)
+            .text('Closed:')
+            .css({'display': 'table-cell',
+              'text-align': 'left'});
+    this.Dialog.ClosedInput =
+            $('<input type="checkbox">')
+            .appendTo(this.Dialog.ClosedDiv)
+            .attr('checked', 'false')
+            .css({'display': 'table-cell'});
   };
 
   // This callback gets called when ever the active state changes,
@@ -278,8 +295,8 @@
       var points = shape.Points.slice(0);
       obj.shapes.push(points);
       obj.closedFlags.push(shape.Closed);
-      obj.outlinecolor = shape.OutlineColor;
-      obj.linewidth = shape.LineWidth;
+      obj.lineColor = SAM.ConvertColorToHex(shape.OutlineColor);
+      obj.lineWidth = shape.LineWidth;
     }
     obj.creation_camera = this.CreationCamera;
 
@@ -289,16 +306,15 @@
   // Load a widget from a json object (origin MongoDB).
   PencilWidget.prototype.Load = function (obj) {
     this.LineWidth = 0;
-    if (obj.linewidth !== undefined) {
-      this.LineWidth = parseFloat(obj.linewidth);
+    if (obj.lineWidth !== undefined) {
+      this.LineWidth = parseFloat(obj.lineWidth);
     }
 
-    // Shapes use [1,1,1] instead of hex color.
+    // Shapes use [1,1,1] instead of hex color. Really!!!
 
     var outlineColor = this.Color;
-    if (obj.outlinecolor) {
-      outlineColor = SAM.ConvertColorToHex(obj.outlinecolor);
-      this.Color = outlineColor;
+    if (obj.lineColor) {
+      this.Color = obj.lineColor;
     }
     for (var n = 0; n < obj.shapes.length; n++) {
       var points = obj.shapes[n];
@@ -413,7 +429,7 @@
   };
 
   // Returns the selected stroke or undefined.
-  PencilWidget.prototype.SingleSelect = function () {
+  PencilWidget.prototype.HandleSelect = function () {
     // Check to see if a stroke was clicked.
     var x = this.Layer.MouseX;
     var y = this.Layer.MouseY;
@@ -454,7 +470,7 @@
     var minWidth = 20.0 / this.Layer.GetPixelsPerUnit();
     if (width < minWidth) { width = minWidth; }
 
-    var selectedShape = this.Shapes.SingleSelect(pt, width);
+    var selectedShape = this.Shapes.HandleSelect(pt, width);
     if (selectedShape) {
       // Change the widget mode to match the selected stroke.
       if (selectedShape.Closed) {
@@ -465,6 +481,9 @@
       // I do not this this is used anymore.
       this.SelectionChanged();
       return selectedShape;
+    } else {
+      this.SetActive(false);
+      this.SelectionChanged();
     }
   };
 
@@ -693,6 +712,7 @@
     }
     this.Dialog.ColorInput.val(this.Color);
     this.Dialog.LineWidthInput.val(this.LineWidth.toFixed(2));
+    this.Dialog.ClosedInput.prop('checked', this.Mode === CLOSED);
 
     this.Dialog.Show(true);
   };
@@ -700,6 +720,12 @@
   PencilWidget.prototype.DialogApplyCallback = function () {
     this.Color = this.Dialog.ColorInput.val();
     this.LineWidth = parseFloat(this.Dialog.LineWidthInput.val());
+    if (this.Dialog.ClosedInput.prop('checked')) {
+      this.SetModeToClosed();
+    } else {
+      this.SetModeToOpen();
+    }
+
     this.Shapes.SetOutlineColor(this.Color);
     this.Shapes.SetLineWidth(parseFloat(this.Dialog.LineWidthInput.val()));
     this.Shapes.UpdateBuffers(this.Layer.AnnotationView);

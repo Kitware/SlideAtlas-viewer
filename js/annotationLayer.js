@@ -43,7 +43,7 @@
       case 'polyline':
         widget = new SAM.PolylineWidget(layer);
         break;
-      case 'rect':
+      case 'rectangle':
         widget = new SAM.RectWidget(layer);
         break;
       case 'rect_set':
@@ -291,8 +291,15 @@
       }
       return floatColor;
     }
-    // No other formats for now.
-    return color;
+    if (typeof (color) === 'string') {
+      // No other formats for now.
+      console.error('Cannot decode color ' + color);
+      var colorArray = new Array(3);
+      colorArray.fill(0);
+      return colorArray;
+    }
+    // Fall through arrays.
+    return color.slice();
   };
 
   // RGB [Float, Float, Float] to #RRGGBB string
@@ -816,7 +823,17 @@
     return this.Visibility;
   };
   AnnotationLayer.prototype.SetVisibility = function (vis) {
+    if (vis === this.Visibility) {
+      return;
+    }
     this.Visibility = vis;
+    // Since KeyDown (V) can change visibility, this resets it.
+    for (var i = 0; i < this.WidgetList.length; ++i) {
+      var widget = this.WidgetList[i];
+      if (widget.SetVisibility) {
+        widget.SetVisibility(vis);
+      }
+    }
     this.EventuallyDraw();
   };
 
@@ -1147,17 +1164,10 @@
   };
 
   AnnotationLayer.prototype.HandleTouchEnd = function (event) {
-    console.log('layer touch end');
     if (!this.GetVisibility()) {
       return true;
     }
     this.Event = event;
-
-    if (this.Pencil) {
-      console.log('pencil state = ' + this.Pencil.State);
-    } else {
-      console.log('no pencil');
-    }
 
     // It seems that end events do not have a force (to indicate iPad pencil).
     if (this.Pencil && this.Pencil.IsStateDrawingDown()) {
@@ -1165,7 +1175,6 @@
     }
 
     if (event.pencil) {
-      console.log('ipad pencil end');
       var pencil = this.GetIPadPencilWidget();
       pencil.HandleTouchEnd(this);
       pencil.SetActive(false);
@@ -1214,7 +1223,7 @@
 
   // Click will only select one widget.
   // returns the widget selected or undefined.
-  AnnotationLayer.prototype.SingleSelect = function (event, shift) {
+  AnnotationLayer.prototype.HandleSelect = function (event) {
     if (!this.GetVisibility()) {
       return;
     }
@@ -1222,44 +1231,42 @@
     this.SetMousePositionFromEvent(event);
 
     // Not the same as modified.
-    var changed = false;
+    var modified = false;
+    // This is to limit selection to a single widget, unless shift is held.
+    var selectedWidgets = [];
 
-    // Each widget can use the click to activate itself.
-    // No cometition yet.  Just try the widgets one at a time.
-    var found;
     for (var i = 0; i < this.WidgetList.length; ++i) {
       var widget = this.WidgetList[i];
-      if (found) {
-        // We already found one.  Unselect the rest.
-        if (!shift && widget.SetSelected && widget.SetSelected(false)) {
-          // Assume the selection changed.
-          changed = true;
-        }
-      } else if (widget.SingleSelect) {
-        if (widget.IsSelected()) {
-          changed = true;
-        }
-        found = widget.SingleSelect(this);
-        if (found) {
-          found = widget;
-          // Not perfect.  I think it will mark a change even if the
-          // mark was reselected.
-          changed = true;
+      var selectedOld = widget.IsSelected();
+      // Skip calling select if widget is already selected and we allow multiple selections.
+      if (!(event.shiftKey && selectedOld)) {
+        if (widget.HandleSelect && widget.HandleSelect(this)) {
+          selectedWidgets.push(widget);
         }
       }
+
+      if (selectedOld !== widget.IsSelected()) {
+        modified = true;
+      }
+      // widget "handleSelect should do this.
+      // pencil can have multiple shapes.  I do not wnat them all selected.
+      // widget.SetSelected(pick);
     }
-    if (found && !this.Active) {
-      // TODO: Select should not make active by default.
+
+    if (selectedWidgets.length > 0 && !this.Active) {
+      // Active means editing, since a selected widget will respond to events
+      // and change, the layer has to be active.
       this.SetActive(true);
     }
+
     // This does not work when previously selected
-    if (changed) {
+    if (modified) {
       if (this.SelectionChangeCallback) {
         (this.SelectionChangeCallback)(this);
       }
       this.EventuallyDraw();
     }
-    return found;
+    return selectedWidgets;
   };
 
   AnnotationLayer.prototype.HasSelections = function () {
@@ -1591,7 +1598,7 @@
 
     var annotationId = '572be29d3f24e53573aa8e91';
     girder.rest.restRequest({
-      path: 'annotation/' + annotationId,    // note that you don't need
+      url: 'annotation/' + annotationId,    // note that you don't need
       // api/v1
       method: 'GET',                          // data will be put in the
       // body of a POST

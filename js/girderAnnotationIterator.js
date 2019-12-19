@@ -128,7 +128,7 @@
     }
     var self = this;
     girder.rest.restRequest({
-      path: 'annotation?itemId=' + this.ItemId + '&name=' + classObj.label + '&limit=1',
+      url: 'annotation?itemId=' + this.ItemId + '&name=' + classObj.label + '&limit=1',
       method: 'GET'
     }).done(function (data) {
       if (data.length > 0) {
@@ -142,7 +142,7 @@
           'name': classObj.label};
         // Make a new annotation in the database.
         girder.rest.restRequest({
-          path: 'annotation?itemId=' + self.ItemId,
+          url: 'annotation?itemId=' + self.ItemId,
           method: 'POST',
           contentType: 'application/json',
           data: JSON.stringify(annot)
@@ -162,7 +162,7 @@
     }
     var self = this;
     girder.rest.restRequest({
-      path: 'annotation/' + classObj.annotation_id,
+      url: 'annotation/' + classObj.annotation_id,
       method: 'GET',
       contentType: 'application/json'
     }).done(function (data) {
@@ -315,7 +315,7 @@
   GirderAnnotationIterator.prototype.HandleMouseClick = function (event) {
     // We even give inactive layers a chance to claim the selection.
     // It is a way to find which group a mark belongs to.
-    var selectedWidget = this.ArrowLayer.SingleSelect(event, false);
+    var selectedWidget = this.ArrowLayer.HandleSelect(event);
     if (selectedWidget === this.SelectedWidget) {
       return;
     }
@@ -482,14 +482,14 @@
   GirderAnnotationIterator.prototype.LoadItemArrows = function (itemId, name, layer) {
     var self = this;
     girder.rest.restRequest({
-      path: 'annotation?itemId=' + itemId + '&name=' + name + '&limit=1',
+      url: 'annotation?itemId=' + itemId + '&name=' + name + '&limit=1',
       method: 'GET'
     }).done(function (data) {
       if (data.length > 0) {
         // The annotation exists.  Reuest it.
         self.ArrowAnnotationId = data[0]['_id'];
         girder.rest.restRequest({
-          path: 'annotation/' + self.ArrowAnnotationId,
+          url: 'annotation/' + self.ArrowAnnotationId,
           method: 'GET',
           contentType: 'application/json'
         }).done(function (data) {
@@ -503,7 +503,7 @@
         self.ArrowAnnotation = annot;
         // Make a new annotation in the database.
         girder.rest.restRequest({
-          path: 'annotation?itemId=' + itemId,
+          url: 'annotation?itemId=' + itemId,
           method: 'POST',
           contentType: 'application/json',
           data: JSON.stringify(annot)
@@ -841,7 +841,7 @@
     annotation.elements = this.ArrowLayerToGirderElements(this.ArrowLayer);
     SA.PushProgress();
     girder.rest.restRequest({
-      path: 'annotation/' + this.ArrowAnnotationId,
+      url: 'annotation/' + this.ArrowAnnotationId,
       method: 'PUT',
       data: JSON.stringify(annotation),
       contentType: 'application/json'
