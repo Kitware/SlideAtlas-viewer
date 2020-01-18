@@ -110,7 +110,8 @@
       // Clear the canvas to start drawing.
       // this.Context2d.fillStyle = '#ffffff';
       // this.Context2d.fillRect(0, 0, this.Viewport[2], this.Viewport[3]);
-      this.Context2d.resetTransform();
+      //this.Context2d.resetTransform();
+      this.Context2d.setTransform(1, 0, 0, 1, 0, 0);
       this.Context2d.clearRect(0, 0, this.Canvas[0].width, this.Canvas[0].height);
       return this.Section.Draw(this);
     }

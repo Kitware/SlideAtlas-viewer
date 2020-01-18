@@ -82,7 +82,7 @@
         'top': (5 * this.Margin) + 'px',
         // 'height': this.ToolDivHeight.toString() + 'px',
         'opacity': '0.6',
-        'z-index': '300'})
+        'z-index': '49'}) // 300
       .draggable()
       .hide();
 

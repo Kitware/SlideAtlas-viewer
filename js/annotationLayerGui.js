@@ -616,6 +616,9 @@
           obj.lineWidth = element.lineWidth;
           obj.shapes = [element.points];
           obj.closedFlags = [element.closed];
+          if ('user' in element) {
+            obj.user = element.user;
+          }
           this.Layer.LoadWidget(obj);
         }
       }

@@ -58,15 +58,17 @@
     // this.Overlay = overlay;
 
     var self = this;
-    // THese event bindings do not work.
+    // These event bindings do not work.
+    // Actually, they do work.  They are just not useful.
+    // you have to click on the slider and keep the mouse over it.
     this.SliderDiv = $('<div>')
       .appendTo(parent)
       .css({
-        // 'background-color': '#fff',
+        'background-color': '#aaa',
         // 'opacity': '0.2',
         'position': 'absolute',
         'left': '0px',
-        'bottom': '5px',
+        'bottom': '-20px',
         'width': '100%',
         'z-index': '1000'})
       .on('keyup', function (e) { self.HandleKeyUp(e); })
@@ -90,7 +92,7 @@
       .appendTo(this.SliderDiv)
       .css({
         'position': 'absolute',
-        'top': '-25px',
+        'top': '0px',
         'text-align': 'center',
         'color': '#ddf',
         'text-shadow': '2px 2px #000'})
@@ -229,6 +231,9 @@
           } else {
             // Just add a single section (the whole slide)
             stackSection = {imageId: resp[j]._id};
+            if (item.meta && item.meta.trans) {
+              stackSection.transform = item.meta.trans;
+            }
             self.Stack.push(stackSection);
           }
         }
@@ -238,9 +243,12 @@
     });
   };
 
+  // !!! Nothing calls this method. !!!!!
   // Load section meta-data from the stack item.
   // This is a second path that allows editing of the sequence.
   GirderStackWidget.prototype.LoadSections = function (sectionData) {
+    console.log("Method scheduled for removal was called.")
+
     var self = this;
     this.Stack = [];
 
@@ -530,7 +538,7 @@
     // First set the world to image transformation.
     saSection.SetTransform(stackSection.transform);
 
-    // Now set the slide atla section bounds. They are best kept in world
+    // Now set the slide atlas section bounds. They are best kept in world
     // coordinate system because they are used for interaction.
     // The stackSection bounds are in image coodindate system (for now).
     // TODO: fix this:  Since we only have translation, hack in the

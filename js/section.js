@@ -5,9 +5,12 @@
 
 // I have just started implementing an API for a section transformation.
 // Use the same API as the canvas transform,
-// TODO: Generatlize to mesh based transformation.
+// TODO: Generalize to mesh based transformation.
 //   A transformation for each cache.
 //   (but not stored in the cache.  Sections can share a cache.)
+// I like a level / hierachical transformation better.
+// Each level will have a grid of transformations
+// that appliy in different locations.
 
 (function () {
   'use strict';

@@ -156,7 +156,7 @@
       text.BackgroundFlag = false;
       text.String = DEFAULT_LABEL;
       text.Position = this.Circle.Origin;
-      this.Circle.Children['label'] = text;
+      this.Shape.AddChild('label', text);
     }
 
     // Note: If the user clicks before the mouse is in the
@@ -167,11 +167,11 @@
     this.WhichDrag = 0;      // Bits
   }
 
-  RectWidget.prototype.SetOrigin = function (x, y) {
-    this.Shape.Origin[0] = x;
-    this.Shape.Origin[1] = y;
-    if (this.Shape.Children.Label) {
-      this.Shape.Children.Label = this.Shape.Origin;
+  RectWidget.prototype.SetOrigin = function (xy) {
+    this.Shape.Origin = xy;
+    var text = this.Shape.GetChild('label');
+    if (text) {
+      text.Position = xy;
     }
   };
 
@@ -342,7 +342,7 @@
     this.Load(data);
     // Place the widget over the mouse.
     // This would be better as an argument.
-    this.SetOrigin(mouseWorldPt[0], mouseWorldPt[1]);
+    this.SetOrigin(mouseWorldPt);
     layer.EventuallyDraw();
     this.Modified();
   };
@@ -363,8 +363,9 @@
       obj.center.push(0);
     }
 
-    if (this.Shape.Children.label && this.Shape.Children.label.String) {
-      obj.label = {'value': this.Shape.Children.label.String};
+    text = this.Shape.GetChild('label');
+    if (text && text.String) {
+      obj.label = {'value': text.String};
     }
     if ('UserImageUrl' in this.Shape) {
       obj.user = {'imageUrl': this.Shape.UserImageUrl};
@@ -376,8 +377,7 @@
   // Load a widget from a json object (origin MongoDB).
   RectWidget.prototype.Load = function (obj) {
     this.UserNoteFlag = obj.user_note_flag;
-    this.SetOrigin(parseFloat(obj.center[0]),
-                   parseFloat(obj.center[1]));
+    this.SetOrigin(parseFloat(obj.center));
     if (obj.center.length > 2) {
       this.Shape.Origin[2] = parseFloat(obj.center[2]);
     }
@@ -414,7 +414,7 @@
         text.BackgroundFlag = false;
         text.String = str;
         text.Position = this.Shape.Origin;
-        this.Shape.Children['label'] = text;
+        this.Shape.AddChild('label', text);
       }
     }
 
@@ -537,7 +537,7 @@
         // THis is ignored until the mouse is pressed.
         this.Visibility = true;
         // Center follows mouse.
-        this.SetOrigin(worldPt1[0], worldPt1[1]);
+        this.SetOrigin(worldPt1);
         this.Layer.EventuallyDraw();
         return false;
       }
@@ -610,7 +610,7 @@
     if (this.State === NEW || this.State === DRAG) {
       if (this.WhichDrag & CENTER) {
         // Special case with no modifiers.  Just translate the whole rectangle.
-        this.SetOrigin(worldPt1[0], worldPt1[1]);
+        this.SetOrigin(worldPt1);
         this.Layer.EventuallyDraw();
         this.Modified();
         return false;
@@ -671,8 +671,8 @@
         dx = (c * rdx) + (s * rdy);
         dy = (-s * rdx) + (c * rdy);
         // Center is moving half as fast as the mouse.
-        this.SetOrigin(this.Shape.Origin[0] + dx / 2.0,
-                       this.Shape.Origin[1] + dy / 2.0);
+        this.SetOrigin([this.Shape.Origin[0] + dx / 2.0,
+                        this.Shape.Origin[1] + dy / 2.0]);
       }
     }
 
@@ -767,11 +767,12 @@
     this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Shape.OutlineColor));
     this.Dialog.LineWidthInput.val((this.Shape.LineWidth).toFixed(2));
 
-    var label = '';
-    if (this.Shape.Children.label && this.Shape.Children.label.String) {
-      label = this.Shape.Children['label'].String;
+    var text = this.Shape.GetChild('label');
+    if (text && text.String) {
+      this.Dialog.LabelInput.val(text.String);
+    } else {
+      this.Dialog.LabelInput.val("");
     }
-    this.Dialog.LabelInput.val(label);
 
     var area = this.Shape.Width * this.Shape.Height;
     var areaString = '';
@@ -803,17 +804,18 @@
     label = label.trim();
     if (label === '') {
       DEFAULT_LABEL = undefined;
-      delete this.Shape.Children.label;
+      this.Shape.RemoveChildrenWithName('label');
     } else {
-      if (!this.Shape.Children.label) {
-        var text = new SAM.Text();
+      var text = this.Shape.GetChild('label');
+      if (!text) {
+        text = new SAM.Text();
         text.BackgroundFlag = false;
         text.String = label;
         text.Position = this.Shape.Origin;
-        this.Shape.Children['label'] = text;
+        this.Shape.Children.AddChild('label', text);
         DEFAULT_LABEL = label;
       }
-      this.Shape.Children.label.String = label;
+      text.String = label;
       modified = true;
     }
 

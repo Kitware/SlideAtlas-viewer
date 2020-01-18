@@ -458,7 +458,7 @@
         'left': '35px',
         'top': '2px',
         'height': '24px',
-        'z-index': '300'})
+        'z-index': '49'}) // 300
       .on('click touchend',
           function (e) {
             helpDiv.show();

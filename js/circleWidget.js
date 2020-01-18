@@ -118,7 +118,7 @@
       text.BackgroundFlag = false;
       text.String = DEFAULT_LABEL;
       text.Position = this.Circle.Origin;
-      this.Circle.Children['label'] = text;
+      this.Circle.AddChild('label', text);
     }
 
     this.State = INACTIVE;
@@ -406,12 +406,10 @@
     this.Dialog.CenterYInput.val(Math.round(this.Circle.Origin[1]));
     this.Dialog.ColorInput.val(SAM.ConvertColorToHex(this.Circle.OutlineColor));
     this.Dialog.LineWidthInput.val((this.Circle.LineWidth).toFixed(2));
-    var label = '';
-    if (this.Circle.Children.label && this.Circle.Children.label.String) {
-      label = this.Circle.Children['label'].String;
+    var label = this.Circle.GetChild('label');
+    if (label) {
+      this.Dialog.LabelInput.val(label.String);
     }
-    this.Dialog.LabelInput.val(label);
-
     var area = (2.0 * Math.PI * this.Circle.Radius * this.Circle.Radius) * 0.25 * 0.25;
     var areaString = '';
     if (this.Circle.FixedSize) {
@@ -433,8 +431,9 @@
   // That way code that just modifies oring will automatically change label.
   CircleWidget.prototype.SetOrigin = function (xy) {
     this.Circle.Origin = xy;
-    if ('label' in this.Circle.Children) {
-      this.Circle.Children.label.Position = xy;
+    var label = this.Circle.GetLabel('label');
+    if (label) {
+      label.Position = xy;
     }
   };
 
@@ -474,17 +473,18 @@
     label = label.trim();
     if (label === '') {
       DEFAULT_LABEL = undefined;
-      delete this.Circle.Children.label;
+      this.Circle.RemoveChildrenWithName('label');
     } else {
-      if (!this.Circle.Children.label) {
-        var text = new SAM.Text();
+      var text = this.Circle.GetChild('label');
+      if (!text) {
+        text = new SAM.Text();
         text.BackgroundFlag = false;
         text.String = label;
         text.Position = this.Circle.Origin;
-        this.Circle.Children['label'] = text;
+        this.Circle.AddChild('label', text);
         DEFAULT_LABEL = label;
       }
-      this.Circle.Children.label.String = label;
+      text.String = label;
       modified = true;
     }
 
@@ -536,13 +536,14 @@
     element.lineWidth = this.Circle.LineWidth;
     // element.creation_camera = this.CreationCamera;
 
-    if (this.Circle.Children.label && this.Circle.Children.label.String) {
-      element.label = {'value': this.Circle.Children.label.String};
+    var text = this.Circle.GetChild('label');
+    if (text && text.String) {
+      element.label = {'value': text.String};
     }
     // Serialize the keypoints
     var childKey, child;
-    for (childKey in this.Circle.Children) {
-      child = this.Circle.Children[childKey];
+    for (var idx = 0; idx < this.Circle.Children.length; ++idx) {
+      child = this.Circle.Children[idx];
       if (typeof (child) === 'object' && 'Radius' in child) {
         if (!('user' in element)) {
           element['user'] = {};
@@ -599,7 +600,7 @@
       text.BackgroundFlag = false;
       text.String = str;
       text.Position = this.Circle.Origin;
-      this.Circle.Children['label'] = text;
+      this.Circle.AddChild('label', text);
     }
 
     var circle, kp, idx;
@@ -626,7 +627,7 @@
           circle.Radius = 2;
           circle.LineWidth = 1;
           circle.Origin = kp['xy'];
-          this.Circle.Children[kp['category']] = circle;
+          this.Circle.AddChild(kp['category'], circle);
         }
       } else if ('network_keypoints' in user) {
         keypoints = user['network_keypoints'];
@@ -644,7 +645,7 @@
           circle.Radius = 2;
           circle.LineWidth = 1;
           circle.Origin = kp['xy'];
-          this.Circle.Children[kp['keypoint_category']] = circle;
+          this.Circle.AddChild(kp['keypoint_category'], circle);
         }
       }
     }
@@ -948,8 +949,8 @@
     var d, dx, dy;
 
     // Check the children (keypoints).
-    for (childKey in this.Circle.Children) {
-      child = this.Circle.Children[childKey];
+    for (var idx = 0; idx < this.Circle.Children.length; ++idx) {
+      child = this.Circle.Children[idx];
       if (typeof (child) === 'object' && 'Radius' in child) {
         // Assume the child is a circle.
         c = child.Origin;

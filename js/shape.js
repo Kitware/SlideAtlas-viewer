@@ -32,9 +32,54 @@
 
     // Grouping shapes.
     // TODO: Change widgets to interactors (that can deal with multiple shapes).
-    this.Children = {};
+    this.Children = [];
   }
 
+  Shape.prototype.GetNumberOfChildren = function() {
+    return this.Children.length();
+  }
+
+  Shape.prototype.AddChild = function(name, child) {
+    child.Name = name;
+    this.Children.push(child);
+  };
+
+  Shape.prototype.RemoveChildrenWithName = function(name) {
+    this.Children = this.Children.filter(function(ele) {return ele.Name !== name;});
+  };
+
+  Shape.prototype.RemoveChild = function(child) {
+    if (child == undefined) {
+      return;
+    }
+    this.Children.remove(child);
+  };
+  
+  
+  Shape.prototype.GetChild = function(name) {
+    for (var idx = 0; idx < this.Children.length; ++idx) {
+      var child = this.Children[idx];
+      if ('name' in child && child.Name === name) {
+        return child;
+      }
+    }
+    return undefined;
+  };
+
+  Shape.prototype.GetChildren = function(name) {
+    if (name === undefined) {
+      return this.Children;
+    }
+    var children = []
+    for (var idx = 0; idx < this.Children.length; ++idx) {
+      var child = this.Children[idx];
+      if ('name' in child && child.Name === name) {
+        children.push(child);
+      }
+    }
+    return children;
+  };
+  
   Shape.prototype.GetLineWidth = function () {
     return this.LineWidth;
   };
@@ -58,11 +103,15 @@
   };
 
   Shape.prototype.DeleteSelected = function () {
-    for (var name in this.Children) {
-      if (this.Children[name].DeleteSelected()) {
-        delete this.Children[name];
+    var new_children = [];
+    var idx;
+    for (idx = 0; idx < this.Children.length; ++idx) {
+      var child = this.Children[idx];
+      if (!child.DeleteSelected()) {
+        new_children.push(child);
       }
     }
+    this.Children = new_children;
     if (this.IsSelected()) {
       this.PointBuffer = undefined;
       return true;
@@ -87,8 +136,9 @@
     if (f === this.Selected) { return false; }
     this.Selected = f;
     // When a parent is selected, the children are highligted too.
-    for (var childKey in this.Children) {
-      var child = this.Children[childKey];
+    var idx;
+    for (idx = 0; idx < this.Children.length; ++idx) {
+      var child = this.Children[idx];
       child.SetSelected(f);
     }
 
@@ -365,9 +415,11 @@
 
       view.Context2d.restore();
     }
-    for (var name in this.Children) {
-      if (this.Children[name] && this.Children[name].Draw) {
-        this.Children[name].Draw(view);
+    var idx;
+    for (idx = 0; idx < this.Children.length; ++idx) {
+      var child = this.Children[idx];
+      if (child && child.Draw) {
+        child.Draw(view);
       }
     }
   };

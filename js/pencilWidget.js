@@ -315,6 +315,7 @@
     var outlineColor = this.Color;
     if (obj.lineColor) {
       this.Color = obj.lineColor;
+      outlineColor = obj.lineColor;
     }
     for (var n = 0; n < obj.shapes.length; n++) {
       var points = obj.shapes[n];
@@ -349,6 +350,30 @@
     if (obj.view_height !== undefined) {
       this.CreationCamera = obj.creation_camera;
     }
+
+    var circle, kp, idx;
+    var keypoints;
+    if ('user' in obj) {
+      // I could add the keypoints to the shape group or one of the shapes.
+      // shape = this.Shapes.GetShape(0);
+      var user = obj['user'];
+      if ('keypoints' in user) {
+        keypoints = user['keypoints'];
+        for (idx = 0; idx < keypoints.length; ++idx) {
+          kp = keypoints[idx];
+          circle = new SAM.Circle();
+          circle.SetFillColor([0.8, 0.8, 1]);
+          circle.SetOutlineColor([0.0, 0.0, 0.0]);
+          circle.Radius = 2;
+          if ('radius' in kp) {
+            circle.Radius = kp.radius;
+          }
+          circle.LineWidth = 1;
+          circle.Origin = kp['xy'];
+          this.Shapes.AddShape(circle);
+        }
+      }
+    }    
   };
 
   // Returns true if something was deleted.

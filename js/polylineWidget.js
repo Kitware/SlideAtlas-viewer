@@ -268,7 +268,7 @@
     if (this.Text) {
       obj.text = this.Text.String;
     }
-
+    
     return obj;
   };
 
@@ -324,6 +324,29 @@
     if (obj.view_height !== undefined) {
       this.CreationCamera = obj.creation_camera;
     }
+
+    var circle, kp, idx;
+    var keypoints;
+    if ('user' in element) {
+      var user = element['user'];
+      if ('keypoints' in user) {
+        keypoints = user['keypoints'];
+        for (idx = 0; idx < keypoints.length; ++idx) {
+          kp = keypoints[idx];
+          circle = new SAM.Circle();
+          circle.SetFillColor([0.8, 0.8, 1]);
+          circle.SetOutlineColor([0.0, 0.0, 0.0]);
+          circle.Radius = 2;
+          circle.LineWidth = 1;
+          circle.Origin = kp['xy'];
+          if ('category' in kp) {
+            this.Circle.AddChild(kp['category'], circle);
+          } else {
+            this.Circle.AddChild('', circle);
+          }
+        }
+      }
+    }    
   };
 
   PolylineWidget.prototype.CityBlockDistance = function (p0, p1) {
