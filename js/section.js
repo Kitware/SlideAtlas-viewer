@@ -139,7 +139,6 @@
   Section.prototype.Draw = function (view) {
     var finishedRendering = true;
     view.Camera.SetWorldToImageTransform(this.Transform);
-    // var m = view.Camera.GetImageMatrix();
 
     if (view.gl) {
       // Draw tiles.

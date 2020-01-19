@@ -1176,6 +1176,11 @@
 
   // Same as set camera but use animation
   Viewer.prototype.AnimateCamera = function (center, rotation, height) {
+    if (this.MainView.Camera.WorldToImageInteraction) {
+      // No scale aligment now.  assume scale of all images is the same.
+      height = this.MainView.Camera.GetHeight();
+    }
+    
     this.ZoomTarget = height;
     // Compute traslate target to keep position in the same place.
     this.TranslateTarget[0] = center[0];
@@ -1210,6 +1215,11 @@
     // This is used to set the default camera so the complexities
     // of the target and overview are hidden.
   Viewer.prototype.SetCamera = function (center, rotation, height) {
+    if (this.MainView.Camera.WorldToImageInteraction) {
+      // No scale aligment now.  assume scale of all images is the same.
+      height = this.MainView.Camera.GetHeight();
+    }    
+
     this.MainView.Camera.SetHeight(height);
     this.MainView.Camera.SetWorldFocalPoint([center[0], center[1]]);
     this.MainView.Camera.SetWorldRoll(rotation * 3.14159265359 / 180.0);
@@ -1229,6 +1239,10 @@
 
   // I could merge zoom methods if position defaulted to focal point.
   Viewer.prototype.AnimateZoomTo = function (factor, position) {
+    if (this.MainView.Camera.WorldToImageInteraction) {
+      // No scale aligment now.  assume scale of all images is the same.
+      return;
+    }
     if (this.AnimateDuration > 0.0) {
       // Odd effect with multiple fast zoom clicks.  Center shifted.
       return;
@@ -1262,6 +1276,10 @@
   };
 
   Viewer.prototype.AnimateZoom = function (factor) {
+    if (this.MainView.Camera.WorldToImageInteraction) {
+      // No scale aligment now.  assume scale of all images is the same.
+      return;
+    }
     // I cannot get the canvas from processing this event too.
     // Issue with double click. Hack to stop double click from firing.
     this.MouseUpTime -= 1000.0;
@@ -2354,7 +2372,7 @@
       var speed = Math.sqrt(dx * dx + dy * dy) / this.MouseDeltaTime;
       speed = 1.0 + speed * 1000; // f(0) = 1 and increasing.
       // I am not sure I like the speed acceleration.
-            // Lets try a limit.
+      // Lets try a limit.
       if (speed > 3.0) { speed = 3.0; }
       dx = dx * speed;
       dy = dy * speed;
@@ -2374,6 +2392,11 @@
   Viewer.prototype.HandleMouseWheel = function (event) {
     if (!this.InteractionEnabled) { return true; }
 
+    if (this.MainView.Camera.WorldToImageInteraction) {
+      // No scale aligment now.  assume scale of all images is the same.
+      return;
+    }
+    
     // Decay computations.
     this.MouseTime = (new Date()).getTime();
     if (this.LastMouseTime) {

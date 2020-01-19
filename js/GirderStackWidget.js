@@ -135,7 +135,20 @@
       // page down, space or n
       this.Next();
       return false;
+    } else if (e.keyCode == 84) { // t
+      // Switch to interacting with world to image transform for adjusting alignment.
+      this.Display.GetCamera().AlignmentInteractionOn();
+      console.log("Align Interaction On");
+    } else if (e.keyCode == 86) { // v
+      // Switch to interacting with global view transform for naviation.
+      this.Display.GetCamera().AlignmentInteractionOff();
+      console.log("Align Interaction Off");
+    } else if (e.keyCode == 83) { // s
+      // Save allignment.
+      console.log("Save Alignment not implmented");      
     }
+
+    // v=86, t=84, s=83
     return true;
   };
 
