@@ -228,7 +228,7 @@
       this.Stroke.FixedSize = false;
       this.Stroke.LineWidth = 0;
 
-      var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
+      var pt = this.Layer.GetCamera().ConvertPointViewToWorld(x, y);
       this.Stroke.Points = [];
       this.Stroke.Points.push([pt[0], pt[1]]); // avoid same reference.
       return false;
@@ -294,7 +294,7 @@
 
     if (event.which === 1 && this.State === DRAWING) {
       var shape = this.Stroke;
-      var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
+      var pt = this.Layer.GetCamera().ConvertPointViewToWorld(x, y);
       shape.Points.push([pt[0], pt[1]]); // avoid same reference.
       shape.UpdateBuffers(this.Layer.AnnotationView);
       if (SA.notesWidget && !this.UserNoteFlag) { SA.notesWidget.MarkAsModified(); } // hack
@@ -328,7 +328,7 @@
     // This also shows the popup if it is not visible already.
   LassoWidget.prototype.PlacePopup = function () {
     var pt = this.Loop.FindPopupPoint(this.Layer.GetCamera());
-    pt = this.Layer.GetCamera().ConvertPointWorldToViewer(pt[0], pt[1]);
+    pt = this.Layer.GetCamera().ConvertPointWorldToView(pt[0], pt[1]);
 
     pt[0] += 20;
     pt[1] -= 10;
@@ -343,7 +343,7 @@
 
     var x = event.offsetX;
     var y = event.offsetY;
-    var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
+    var pt = this.Layer.GetCamera().ConvertPointViewToWorld(x, y);
 
     var width = this.Loop.GetLineWidth() / 2;
         // Tolerance: 5 screen pixels.

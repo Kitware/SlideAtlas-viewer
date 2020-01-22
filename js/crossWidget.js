@@ -50,7 +50,7 @@
     }
     if (this.State === CROSS_WIDGET_DRAG) {
       // We need the viewer position of the CROSS center to drag radius.
-      this.OriginViewer = this.Viewer.ConvertPointWorldToViewer(this.Shape.Origin[0], this.Shape.Origin[1]);
+      this.OriginViewer = this.Viewer.ConvertPointWorldToView(this.Shape.Origin[0], this.Shape.Origin[1]);
       this.State = CROSS_WIDGET_WAITING;
     }
     if (this.State === CROSS_WIDGET_ACTIVE) {
@@ -80,7 +80,7 @@
     }
 
     if (this.State === CROSS_WIDGET_DRAG) {
-      var tmp = this.Viewer.ConvertPointViewerToWorld(x, y);
+      var tmp = this.Viewer.ConvertPointViewToWorld(x, y);
       // Trying to preserve pointer so I do not need to update correlation points.
       this.Shape.Origin[0] = tmp[0];
       this.Shape.Origin[1] = tmp[1];

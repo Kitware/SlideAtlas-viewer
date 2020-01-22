@@ -276,7 +276,7 @@
       var x = event.offsetX;
       var y = event.offsetY;
       var cam = this.Layer.GetCamera();
-      this.LastMouseWorld = cam.ConvertPointViewerToWorld(x, y);
+      this.LastMouseWorld = cam.ConvertPointViewToWorld(x, y);
     }
     return false;
   };
@@ -378,7 +378,7 @@
     }
 
     var cam = this.Layer.GetCamera();
-    var mouseWorld = cam.ConvertPointViewerToWorld(x, y);
+    var mouseWorld = cam.ConvertPointViewToWorld(x, y);
     if (this.State === NEW) {
       // Just have the tip follow the mouse.
       this.Arrow.Origin = mouseWorld;
@@ -422,12 +422,12 @@
     var dx = this.Arrow.Length * Math.cos(tmp);
     var dy = this.Arrow.Length * Math.sin(tmp);
 
-    var vpt1 = cam.ConvertPointWorldToViewer(pt1[0], pt1[1]);
+    var vpt1 = cam.ConvertPointWorldToView(pt1[0], pt1[1]);
     if (this.Arrow.FixedSize) {
       var vpt2 = [vpt1[0] + dx, vpt1[1] + dy];
     } else {
       var pt2 = [pt1[0] + dx, pt1[1] + dy];
-      vpt2 = cam.ConvertPointWorldToViewer(pt2[0], pt2[1]);
+      vpt2 = cam.ConvertPointWorldToView(pt2[0], pt2[1]);
     }
 
     return [vpt1, vpt2];

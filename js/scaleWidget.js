@@ -183,7 +183,7 @@
         if (event.which !== 1) {
             return true;
         }
-        this.DragLast = this.Layer.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
+        this.DragLast = this.Layer.ConvertPointViewToWorld(event.offsetX, event.offsetY);
         */
     return false;
   };
@@ -202,7 +202,7 @@
         /*
         if (event.which === 1) {
             var world =
-                this.Layer.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
+                this.Layer.ConvertPointViewToWorld(event.offsetX, event.offsetY);
             var dx, dy;
             if (this.State === DRAG) {
                 dx = world[0] - this.DragLast[0];
@@ -310,9 +310,9 @@
 
   ScaleWidget.prototype.HandleTouchPan = function (event) {
         /*
-          w0 = this.Layer.ConvertPointViewerToWorld(EVENT_MANAGER.LastMouseX,
+          w0 = this.Layer.ConvertPointViewToWorld(EVENT_MANAGER.LastMouseX,
           EVENT_MANAGER.LastMouseY);
-          w1 = this.Layer.ConvertPointViewerToWorld(event.offsetX,event.offsetY);
+          w1 = this.Layer.ConvertPointViewToWorld(event.offsetX,event.offsetY);
 
           // This is the translation.
           var dx = w1[0] - w0[0];

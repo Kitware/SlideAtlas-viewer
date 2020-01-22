@@ -118,11 +118,11 @@
   Arrow.prototype.SetTailViewer = function (x, y, cam) {
     var dx, dy;
     if (this.FixedSize) {
-      var tipViewer = cam.ConvertPointWorldToViewer(this.Origin[0], this.Origin[1]);
+      var tipViewer = cam.ConvertPointWorldToView(this.Origin[0], this.Origin[1]);
       dx = x - tipViewer[0];
       dy = y - tipViewer[1];
     } else {
-      var tailWorld = cam.ConvertPointViewerToWorld(x, y);
+      var tailWorld = cam.ConvertPointViewToWorld(x, y);
       dx = tailWorld[0] - this.Origin[0];
       dy = tailWorld[1] - this.Origin[1];
     }
@@ -137,14 +137,14 @@
     var theta = -this.Orientation * Math.PI / 180.0;
     var x, y;
     if (this.FixedSize) {
-      var tipViewer = cam.ConvertPointWorldToViewer(this.Origin[0], this.Origin[1]);
+      var tipViewer = cam.ConvertPointWorldToView(this.Origin[0], this.Origin[1]);
       x = tipViewer[0] + this.Length * Math.cos(theta);
       y = tipViewer[1] + this.Length * Math.sin(theta);
       return [x, y];
     } else {
       x = this.Origin[0] + this.Length * Math.cos(theta);
       y = this.Origin[1] + this.Length * Math.sin(theta);
-      var tailViewer = cam.ConvertPointWorldToViewer(x, y);
+      var tailViewer = cam.ConvertPointWorldToView(x, y);
       return tailViewer;
     }
   };

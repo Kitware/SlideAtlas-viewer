@@ -154,7 +154,7 @@
     var direction1 = 1;
     if (this.ActiveSection) {
       var allBds = this.GetBounds();
-      var allCenter = this.Layer.GetCamera().ConvertPointWorldToViewer(
+      var allCenter = this.Layer.GetCamera().ConvertPointWorldToView(
                 (allBds[0] + allBds[1]) * 0.5, (allBds[0] + allBds[1]) * 0.5);
       var center = this.ActiveSection.GetViewCenter(this.Layer.AnnotationView);
       if (center[0] < allCenter[0]) {
@@ -275,10 +275,10 @@
     var pt3 = [bds[0], bds[3]];
 
     if (world) {
-      pt0 = view.Camera.ConvertPointWorldToViewer(pt0[0], pt0[1]);
-      pt1 = view.Camera.ConvertPointWorldToViewer(pt1[0], pt1[1]);
-      pt2 = view.Camera.ConvertPointWorldToViewer(pt2[0], pt2[1]);
-      pt3 = view.Camera.ConvertPointWorldToViewer(pt3[0], pt3[1]);
+      pt0 = view.Camera.ConvertPointWorldToView(pt0[0], pt0[1]);
+      pt1 = view.Camera.ConvertPointWorldToView(pt1[0], pt1[1]);
+      pt2 = view.Camera.ConvertPointWorldToView(pt2[0], pt2[1]);
+      pt3 = view.Camera.ConvertPointWorldToView(pt3[0], pt3[1]);
     }
     var ctx = view.Context2d;
     ctx.save();
@@ -412,15 +412,15 @@
     if (event.which === 1) {
             // Drag out a bounding box.
             // Keep the bounding box in slide coordinates for now.
-      var pt0 = this.Layer.GetCamera().ConvertPointViewerToWorld(this.StartX, this.StartY);
-      var pt1 = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
+      var pt0 = this.Layer.GetCamera().ConvertPointViewToWorld(this.StartX, this.StartY);
+      var pt1 = this.Layer.GetCamera().ConvertPointViewToWorld(x, y);
       this.DragBounds = [pt0[0], pt1[0], pt0[1], pt1[1]];
       this.Layer.EventuallyDraw();
       return false;
     }
 
     if (event.which === 0) {
-      var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
+      var pt = this.Layer.GetCamera().ConvertPointViewToWorld(x, y);
             // Find the smallest section with pt in the bbox.
       var bestSection = null;
       var bestArea = -1;

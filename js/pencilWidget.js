@@ -449,7 +449,7 @@
     shape.Closed = false;
     this.Shapes.AddShape(shape);
 
-    var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
+    var pt = this.Layer.GetCamera().ConvertPointViewToWorld(x, y);
     shape.Points.push([pt[0], pt[1], 0.0]); // avoid same reference.
   };
 
@@ -458,7 +458,7 @@
     // Check to see if a stroke was clicked.
     var x = this.Layer.MouseX;
     var y = this.Layer.MouseY;
-    var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
+    var pt = this.Layer.GetCamera().ConvertPointViewToWorld(x, y);
 
     // Hack in click to add a point to the line.
     if (SAM.ControlKey) {
@@ -526,7 +526,7 @@
 
     // Anticipate dragging (might instead be a click or double click)
     var cam = this.Layer.GetCamera();
-    this.LastMouse = cam.ConvertPointViewerToWorld(x, y);
+    this.LastMouse = cam.ConvertPointViewToWorld(x, y);
 
     // if (event.which === 3) {
     //  // Right mouse was pressed.
@@ -636,7 +636,7 @@
     if (this.State === DRAWING_DOWN) {
       var last = this.Shapes.GetNumberOfShapes() - 1;
       var shape = this.Shapes.GetShape(last);
-      var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
+      var pt = this.Layer.GetCamera().ConvertPointViewToWorld(x, y);
       shape.Points.push([pt[0], pt[1], 0.0]); // avoid same reference.
       shape.Modified();
       this.Layer.EventuallyDraw();

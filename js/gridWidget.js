@@ -417,7 +417,7 @@
       return true;
     }
     var cam = this.Layer.GetCamera();
-    this.DragLast = cam.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
+    this.DragLast = cam.ConvertPointViewToWorld(event.offsetX, event.offsetY);
     return false;
   };
 
@@ -436,7 +436,7 @@
     if (event.which === 1) {
       var cam = this.Layer.GetCamera();
       var world =
-                cam.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
+                cam.ConvertPointViewToWorld(event.offsetX, event.offsetY);
       var dx, dy;
       if (this.State === DRAG) {
         dx = world[0] - this.DragLast[0];
@@ -545,9 +545,9 @@
 
   GridWidget.prototype.HandleTouchPan = function (event) {
         /*
-          w0 = this.Viewer.ConvertPointViewerToWorld(EVENT_MANAGER.LastMouseX,
+          w0 = this.Viewer.ConvertPointViewToWorld(EVENT_MANAGER.LastMouseX,
           EVENT_MANAGER.LastMouseY);
-          w1 = this.Viewer.ConvertPointViewerToWorld(event.offsetX,event.offsetY);
+          w1 = this.Viewer.ConvertPointViewToWorld(event.offsetX,event.offsetY);
 
           // This is the translation.
           var dx = w1[0] - w0[0];
@@ -676,7 +676,7 @@
         // Compute corner has its angle backwards.  I do not see how this works.
     var pt = this.ComputeCorner(1, -1, 0, 0);
     var cam = this.Layer.GetCamera();
-    pt = cam.ConvertPointWorldToViewer(pt[0], pt[1]);
+    pt = cam.ConvertPointWorldToView(pt[0], pt[1]);
     this.Popup.Show(pt[0] + 10, pt[1] - 30);
   };
 

@@ -295,7 +295,7 @@
       return false;
     }
 
-    // var pt = this.Layer.GetCamera().ConvertPointViewerToWorld(x, y);
+    // var pt = this.Layer.GetCamera().ConvertPointViewToWorld(x, y);
 
     var part = this.PointOnWhichPart();
     if (part !== undefined) {
@@ -844,17 +844,17 @@
     x = c * rw + s * rh;
     y = -s * rw + c * rh;
     var pt0 = [origin[0] - x, origin[1] - y];
-    pt0 = cam.ConvertPointWorldToViewer(pt0[0], pt0[1]);
+    pt0 = cam.ConvertPointWorldToView(pt0[0], pt0[1]);
     var pt2 = [origin[0] + x, origin[1] + y];
-    pt2 = cam.ConvertPointWorldToViewer(pt2[0], pt2[1]);
+    pt2 = cam.ConvertPointWorldToView(pt2[0], pt2[1]);
 
     rw = -rw;
     x = c * rw + s * rh;
     y = -s * rw + c * rh;
     var pt1 = [origin[0] - x, origin[1] - y];
-    pt1 = cam.ConvertPointWorldToViewer(pt1[0], pt1[1]);
+    pt1 = cam.ConvertPointWorldToView(pt1[0], pt1[1]);
     var pt3 = [origin[0] + x, origin[1] + y];
-    pt3 = cam.ConvertPointWorldToViewer(pt3[0], pt3[1]);
+    pt3 = cam.ConvertPointWorldToView(pt3[0], pt3[1]);
 
     var pt4 = [
       (pt0[0] + pt2[0]) * 0.5,

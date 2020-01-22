@@ -117,9 +117,9 @@
     var x = this.Position[0];
     var y = this.Position[1];
     if (this.PositionCoordinateSystem !== SAM.Shape.VIEWER) {
-      var m = view.Camera.GetImageMatrix();
-      x = (this.Position[0] * m[0] + this.Position[1] * m[4] + m[12]) / m[15];
-      y = (this.Position[0] * m[1] + this.Position[1] * m[5] + m[13]) / m[15];
+      var i2v = view.Camera.GetImageToViewTransform();
+      x = (this.Position[0] * i2v[0] + this.Position[1] * i2v[2] + i2v[4]);
+      y = (this.Position[0] * i2v[1] + this.Position[1] * i2v[3] + i2v[5]);
       // convert view to pixels (view coordinate system).
       x = view.Viewport[2] * (0.5 * (1.0 + x));
       y = view.Viewport[3] * (0.5 * (1.0 - y));

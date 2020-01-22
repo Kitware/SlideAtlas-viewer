@@ -104,10 +104,10 @@
   CutoutWidget.prototype.DrawRectangle = function (ctx, bds, cam, color,
                                                     lineWidth, active) {
         // Convert the for corners to view.
-    var pt0 = cam.ConvertPointWorldToViewer(bds[0], bds[2]);
-    var pt1 = cam.ConvertPointWorldToViewer(bds[1], bds[2]);
-    var pt2 = cam.ConvertPointWorldToViewer(bds[1], bds[3]);
-    var pt3 = cam.ConvertPointWorldToViewer(bds[0], bds[3]);
+    var pt0 = cam.ConvertPointWorldToView(bds[0], bds[2]);
+    var pt1 = cam.ConvertPointWorldToView(bds[1], bds[2]);
+    var pt2 = cam.ConvertPointWorldToView(bds[1], bds[3]);
+    var pt3 = cam.ConvertPointWorldToView(bds[0], bds[3]);
 
     ctx.lineWidth = lineWidth;
 
@@ -138,7 +138,7 @@
 
   CutoutWidget.prototype.DrawCenter = function (ctx, pt, cam, color) {
         // Convert the for corners to view.
-    var pt0 = cam.ConvertPointWorldToViewer(pt[0], pt[1]);
+    var pt0 = cam.ConvertPointWorldToView(pt[0], pt[1]);
 
     ctx.strokeStyle = (this.Active & 16) ? '#FF0' : color;
     ctx.lineWidth = 1;
@@ -200,7 +200,7 @@
 
     if (this.Active) {
       var cam = this.Layer.GetCamera();
-      var pt = cam.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
+      var pt = cam.ConvertPointViewToWorld(event.offsetX, event.offsetY);
       if (this.Active & 1) {
         this.DragBounds[0] = pt[0];
       }

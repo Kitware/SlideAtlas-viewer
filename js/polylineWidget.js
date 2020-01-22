@@ -397,7 +397,7 @@
     if (this.State === ACTIVE) {
       var x = event.offsetX;
       var y = event.offsetY;
-      var pt = layer.GetCamera().ConvertPointViewerToWorld(x, y);
+      var pt = layer.GetCamera().ConvertPointViewToWorld(x, y);
       // Active => Double click starts drawing again.
       if (this.ActiveVertex !== -1) {
         this.Polyline.Points[this.ActiveVertex] = pt;
@@ -477,7 +477,7 @@
 
     var x = event.offsetX;
     var y = event.offsetY;
-    var pt = layer.GetCamera().ConvertPointViewerToWorld(x, y);
+    var pt = layer.GetCamera().ConvertPointViewToWorld(x, y);
 
     if (this.State === DRAWING) {
       // handle the case where we restarted drawing and clicked again
@@ -614,7 +614,7 @@
     var event = layer.Event;
     var x = event.offsetX;
     var y = event.offsetY;
-    var pt = layer.GetCamera().ConvertPointViewerToWorld(x, y);
+    var pt = layer.GetCamera().ConvertPointViewToWorld(x, y);
 
     if (this.State === DRAWING) {
       this.StartDrawing(pt);
@@ -664,7 +664,7 @@
     var event = layer.Event;
     var x = event.offsetX;
     var y = event.offsetY;
-    var pt = layer.GetCamera().ConvertPointViewerToWorld(x, y);
+    var pt = layer.GetCamera().ConvertPointViewToWorld(x, y);
     var dist;
 
     this.ActiveEdge = undefined;
@@ -927,7 +927,7 @@
     for (var y = bds[2]; y < bds[3]; y += skip) {
       for (var x = bds[0]; x < bds[1]; x += skip) {
         if (this.PointInside(x, y)) {
-          var ip = layer.GetCamera().ConvertPointWorldToViewer(x, y);
+          var ip = layer.GetCamera().ConvertPointWorldToView(x, y);
           ip[0] = Math.round(ip[0] - dim / 2);
           ip[1] = Math.round(ip[1] - dim / 2);
           var data = ctx.getImageData(ip[0], ip[1], dim, dim);

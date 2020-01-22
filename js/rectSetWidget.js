@@ -127,7 +127,7 @@
 
     // We only support image coordinate system for now.
     var cam = view.GetCamera();
-    var t = cam.GetImageToViewerTransform();
+    var t = cam.GetImageToViewTransform();
     view.Context2d.setTransform(t[0], t[1], t[2], t[3], t[4], t[5]);
 
     var pixelSize = cam.ConvertScaleViewerToImage(1);

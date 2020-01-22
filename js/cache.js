@@ -568,7 +568,7 @@
 
   Cache.prototype.RecursiveGetTile = function (level, x, y, z) {
     if (!this.Levels[level]) { return null; }
-    var dims = this.Lavels[level].GridDims;
+    var dims = this.Levels[level].GridDims;
     if (x < 0 || y < 0 || x >= dims[0] || y >= dims[1]) {
       return null;
     }

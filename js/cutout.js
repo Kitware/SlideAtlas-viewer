@@ -60,8 +60,6 @@
     newCam.SetWorldFocalPoint(focalPoint);
     newCam.SetWorldRoll(roll);
     newCam.SetHeight(height * scale);
-    // TODO:  Hide matrix computation.  Make it automatic.
-    newCam.ComputeMatrix();
 
     // Load only the tiles we need.
     var tiles = cache.ChooseTiles(newCam, 0, []);

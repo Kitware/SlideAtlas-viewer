@@ -14,7 +14,7 @@
   InteractorHandle.prototype = new SAM.Shape();
 
   InteractorHandle.prototype.Draw = function (view) {
-    var origin = view.GetCamera().ConvertPointWorldToViewer(this.Origin[0], this.Origin[1]);
+    var origin = view.GetCamera().ConvertPointWorldToView(this.Origin[0], this.Origin[1]);
     var ctx = view.Context2d;
     ctx.save();
     ctx.strokeStyle = SAM.ConvertColorToHex(this.OutlineColor);

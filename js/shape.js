@@ -197,9 +197,6 @@
         m = view.Camera.Matrix;
         x = (this.Origin[0] * m[0] + this.Origin[1] * m[4] + m[12]) / m[15];
         y = (this.Origin[0] * m[1] + this.Origin[1] * m[5] + m[13]) / m[15];
-        // convert view to pixels (view coordinate system).
-        x = view.Viewport[2] * (0.5 * (1.0 + x));
-        y = view.Viewport[3] * (0.5 * (1.0 - y));
       }
       // Translate to place the origin.
       this.Matrix[12] = x;
@@ -301,13 +298,10 @@
           scale = view.Viewport[3] / view.Camera.GetHeight();
         }
         // First transform the origin-world to view.
-        m = view.Camera.GetImageMatrix();
-        x = (this.Origin[0] * m[0] + this.Origin[1] * m[4] + m[12]) / m[15];
-        y = (this.Origin[0] * m[1] + this.Origin[1] * m[5] + m[13]) / m[15];
+        var i2v = view.Camera.GetImageToViewTransform()
+        x = (this.Origin[0] * i2v[0] + this.Origin[1] * i2v[2] + i2v[4]);
+        y = (this.Origin[0] * i2v[1] + this.Origin[1] * i2v[3] + i2v[5]);
 
-        // convert origin-view to pixels (view coordinate system).
-        x = view.Viewport[2] * (0.5 * (1.0 + x));
-        y = view.Viewport[3] * (0.5 * (1.0 - y));
         view.Context2d.transform(this.Matrix[0], this.Matrix[1], this.Matrix[4], this.Matrix[5], x, y);
       } else if (this.PositionCoordinateSystem === Shape.VIEWER) {
         theta = (this.Orientation * 3.1415926536 / 180.0);

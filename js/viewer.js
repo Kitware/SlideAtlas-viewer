@@ -89,7 +89,6 @@
     // webgl for main view.
     this.MainView.OutlineColor = [0, 0, 0];
     this.MainView.Camera.ZRange = [0, 1];
-    this.MainView.Camera.ComputeMatrix();
     // necesary to respond to keyevents.
     this.MainView.Parent.attr('tabindex', '1');
 
@@ -106,7 +105,6 @@
       this.OverView.Camera.ZRange = [-1, 0];
       this.OverView.Camera.SetWorldFocalPoint([13000.0, 11000.0]);
       this.OverView.Camera.SetHeight(22000.0);
-      this.OverView.Camera.ComputeMatrix();
 
       // One must be true for the icon to be active (opaque).
       this.RotateIconHover = false;
@@ -468,7 +466,6 @@
         this.GetCamera().Load(cameraRecord);
         if (this.OverView) {
           this.OverView.Camera.SetWorldRoll(cameraRecord.Roll);
-          this.OverView.Camera.ComputeMatrix();
         }
         this.UpdateZoomGui();
         this.UpdateCamera();
@@ -671,7 +668,8 @@
       var radius = Math.sqrt(h * h + w * w) / 2;
       // Construct the viewport.  Hack: got rid of viewport[0]
       // TODO: I really need to get rid of the viewport stuff
-      this.OverViewport = [width - radius - w / 2,
+      this.OverViewport = [
+        width - radius - w / 2,
         radius - h / 2,
         w, h];
       this.OverViewDiv.css({
@@ -881,9 +879,7 @@
     newCam.SetWorldRoll(cam.GetWorldRoll());
     newCam.Height = cam.GetHeight();
     newCam.Width = cam.GetWidth();
-    newCam.ViewportWidth = width;
-    newCam.ViewportHeight = height;
-    newCam.ComputeMatrix();
+    newCam.SetViewport([0,0,width,height]);
 
     // Load only the tiles we need.
     var tiles = cache.ChooseTiles(newCam, 0, []);
@@ -1005,7 +1001,6 @@
       this.OverView.Camera.SetWorldFocalPoint([
         0.5 * (bounds[0] + bounds[1]),
         0.5 * (bounds[2] + bounds[3])]);
-      this.OverView.Camera.ComputeMatrix();
     }
   };
 
@@ -1067,7 +1062,6 @@
           height = height2;
         }
         this.OverView.Camera.SetHeight(height);
-        this.OverView.Camera.ComputeMatrix();
       }
     }
     // Change the overview to fit the new image dimensions.
@@ -1104,7 +1098,6 @@
             height = height2;
           }
           this.OverView.Camera.SetHeight(height);
-          this.OverView.Camera.ComputeMatrix();
         }
       }
     }
@@ -1126,7 +1119,6 @@
     // Caller should be positioning the parent.
     // The whole 'viewport' concept needs to be eliminated.
     // this.MainView.SetViewport(viewport, this.Parent);
-    // this.MainView.Camera.ComputeMatrix();
 
     // I do not know the way the viewport is used to place
     // this overview.  It should be like other widgets
@@ -1205,10 +1197,8 @@
     if (this.OverView) {
       this.OverView.Parent.css({'transform': 'rotate(' + this.RollTarget + 'rad'});
       this.OverView.Camera.SetWorldRoll(0);
-      this.OverView.Camera.ComputeMatrix();
     }
 
-    this.MainView.Camera.ComputeMatrix();
     this.UpdateZoomGui();
   };
 
@@ -1467,7 +1457,6 @@
         roll = this.RollTarget;
         this.OverView.Parent.css({'transform': 'rotate(' + roll + 'rad'});
         this.OverView.Camera.SetWorldRoll(0);
-        this.OverView.Camera.ComputeMatrix();
       }
       this.TriggerEndInteraction();
     } else {
@@ -1492,16 +1481,11 @@
         roll = this.MainView.Camera.GetWorldRoll();
         this.OverView.Parent.css({'transform': 'rotate(' + roll + 'rad'});
         this.OverView.Camera.SetWorldRoll(0);
-        this.OverView.Camera.ComputeMatrix();
       }
       this.AnimateDuration -= (timeNow - this.AnimateLast);
       // We are not finished yet.
       // Schedule another render
       this.EventuallyRender(true);
-    }
-    this.MainView.Camera.ComputeMatrix();
-    if (this.OverView) {
-      this.OverView.Camera.ComputeMatrix();
     }
     this.AnimateLast = timeNow;
     // Synchronize cameras is necessary
@@ -1514,12 +1498,13 @@
     // Compute focal point from inverse overview camera.
     x = x / this.OverView.Viewport[2];
     y = y / this.OverView.Viewport[3];
-    var m = this.OverView.Camera.GetWorldMatrix();
-    x = (x * 2.0 - 1.0) * m[15];
-    y = (1.0 - y * 2.0) * m[15];
-    var det = m[0] * m[5] - m[1] * m[4];
-    var xNew = (x * m[5] - y * m[4] + m[4] * m[13] - m[5] * m[12]) / det;
-    var yNew = (y * m[0] - x * m[1] - m[0] * m[13] + m[1] * m[12]) / det;
+    var w2v = this.OverView.Camera.GetWorldToViewTranform();
+    x = (x * 2.0 - 1.0);
+    y = (1.0 - y * 2.0);
+    // TODO: Use the SAM.InvertTransform instead.
+    var det = w2v[0] * w2v[3] - w2v[1] * w2v[2];
+    var xNew = (x * w2v[3] - y * w2v[2] + w2v[2] * w2v[5] - w2v[3] * w2v[4]) / det;
+    var yNew = (y * w2v[0] - x * w2v[1] - w2v[0] * w2v[5] + w2v[1] * w2v[4]) / det;
 
     // Animate to get rid of jerky panning (overview to low resolution).
     this.TranslateTarget[0] = xNew;
@@ -1691,7 +1676,6 @@
       cam.SetWorldFocalPoint([(bds[0] + bds[1]) * 0.5, (bds[2] + bds[3]) * 0.5]);
       cam.SetWorldRoll(0.0);
       cam.SetHeight(bds[3] - bds[2]);
-      cam.ComputeMatrix();
       this.EventuallyRender();
       // Return value hides navigation widget
       return true;
@@ -1782,8 +1766,8 @@
 
     // Convert to world by inverting the camera matrix.
     // I could simplify and just process the vector.
-    var w0 = this.ConvertPointViewerToWorld(this.LastMouseX, this.LastMouseY);
-    var w1 = this.ConvertPointViewerToWorld(this.MouseX, this.MouseY);
+    var w0 = this.ConvertPointViewToWorld(this.LastMouseX, this.LastMouseY);
+    var w1 = this.ConvertPointViewToWorld(this.MouseX, this.MouseY);
 
     // This is the new focal point.
     var dx = w1[0] - w0[0];
@@ -1804,7 +1788,6 @@
 
     var cam = this.GetCamera();
     cam.Translate(-dx, -dy, 0);
-    cam.ComputeMatrix();
     this.EventuallyRender(true);
   };
 
@@ -1824,8 +1807,8 @@
       this.MomentumTimerId = 0;
     }
 
-    var w0 = this.ConvertPointViewerToWorld(this.LastMouseX, this.LastMouseY);
-    var w1 = this.ConvertPointViewerToWorld(this.MouseX, this.MouseY);
+    var w0 = this.ConvertPointViewToWorld(this.LastMouseX, this.LastMouseY);
+    var w1 = this.ConvertPointViewToWorld(this.MouseX, this.MouseY);
     var dt = event.Time - this.LastTime;
 
     // Compute rotation.
@@ -1869,11 +1852,9 @@
     this.MomentumScale = 0.0;
 
     cam.SetWorldRoll(cam.GetWorldRoll() - a);
-    cam.ComputeMatrix();
     if (this.OverView) {
       var cam2 = this.OverView.Camera;
       cam2.SetWorldRoll(cam.GetWorldRoll());
-      cam2.ComputeMatrix();
     }
     this.EventuallyRender(true);
   };
@@ -1894,8 +1875,8 @@
       this.MomentumTimerId = 0;
     }
 
-    var w0 = this.ConvertPointViewerToWorld(this.LastMouseX, this.LastMouseY);
-    var w1 = this.ConvertPointViewerToWorld(this.MouseX, this.MouseY);
+    var w0 = this.ConvertPointViewToWorld(this.LastMouseX, this.LastMouseY);
+    var w1 = this.ConvertPointViewToWorld(this.MouseX, this.MouseY);
     var dx = w1[0] - w0[0];
     var dy = w1[1] - w0[1];
     var dt = event.Time - this.LastTime;
@@ -1948,7 +1929,6 @@
     cam.SetWorldFocalPoint([x, y]);
     cam.SetHeight(cam.GetHeight() / scale);
     //  cam.Translate(-dx, -dy, 0);
-    cam.ComputeMatrix();
     this.EventuallyRender(true);
   };
 
@@ -2043,11 +2023,9 @@
     cam.Translate(-(this.MomentumX * integ), -(this.MomentumY * integ), 0);
     cam.SetHeight(cam.Height / ((this.MomentumScale * integ) + 1));
     cam.SetWorldRoll(cam.GetWorldRoll() - (this.MomentumRoll * integ));
-    cam.ComputeMatrix();
     if (this.OverView) {
       var cam2 = this.OverView.Camera;
       cam2.SetWorldRoll(cam.GetWorldRoll());
-      cam2.ComputeMatrix();
     }
     // I think the problem with the ipad is thie asynchronous render.
     // Maybe two renders occur at the same time.
@@ -2112,9 +2090,6 @@
       cam.SetHeight(heightMin);
       // this.ZoomTarget = heightMin;
       modified = true;
-    }
-    if (modified) {
-      cam.ComputeMatrix();
     }
   };
 
@@ -2192,7 +2167,7 @@
       }
     }
 
-    var mWorld = this.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
+    var mWorld = this.ConvertPointViewToWorld(event.offsetX, event.offsetY);
     if (event.which === 1) {
       this.AnimateZoomTo(0.5, mWorld);
     } else if (event.which === 3) {
@@ -2366,11 +2341,11 @@
       // Translate
       // Convert to view [-0.5,0.5] coordinate system.
       // Note: the origin gets subtracted out in delta above.
-      dx = -this.MouseDeltaX / this.MainView.Viewport[2];
-      dy = -this.MouseDeltaY / this.MainView.Viewport[2];
+      dx = -this.MouseDeltaX;
+      dy = -this.MouseDeltaY;
       // compute the speed of the movement.
       var speed = Math.sqrt(dx * dx + dy * dy) / this.MouseDeltaTime;
-      speed = 1.0 + speed * 1000; // f(0) = 1 and increasing.
+      speed = 1.0 + speed * 2; // f(0) = 1 and increasing.
       // I am not sure I like the speed acceleration.
       // Lets try a limit.
       if (speed > 3.0) { speed = 3.0; }
@@ -2444,7 +2419,7 @@
     }
 
     // Compute translate target to keep position in the same place.
-    var position = this.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
+    var position = this.ConvertPointViewToWorld(event.offsetX, event.offsetY);
     var factor = this.ZoomTarget / this.MainView.Camera.GetHeight();
     var fp = this.MainView.Camera.GetWorldFocalPoint();
     this.TranslateTarget[0] = position[0] -
@@ -2509,12 +2484,11 @@
     // Handle paste
     if (event.keyCode === 79) {
       // o to print out world mouse location for debugging.
-      // var wPt = this.ConvertPointViewerToWorld(this.LastMouseX, this.LastMouseY);
+      // var wPt = this.ConvertPointViewToWorld(this.LastMouseX, this.LastMouseY);
     }
 
     if (String.fromCharCode(event.keyCode) === 'R') {
       // this.MainView.Camera.Reset();
-      this.MainView.Camera.ComputeMatrix();
       this.ZoomTarget = this.MainView.Camera.GetHeight();
       this.EventuallyRender(true);
       return false;
@@ -2648,14 +2622,14 @@
   };
 
   // Covert a point from world coordiante system to viewer coordinate system (units pixels).
-  Viewer.prototype.ConvertPointWorldToViewer = function (x, y) {
+  Viewer.prototype.ConvertPointWorldToView = function (x, y) {
     var cam = this.MainView.Camera;
-    return cam.ConvertPointWorldToViewer(x, y);
+    return cam.ConvertPointWorldToView(x, y);
   };
 
-  Viewer.prototype.ConvertPointViewerToWorld = function (x, y) {
+  Viewer.prototype.ConvertPointViewToWorld = function (x, y) {
     var cam = this.MainView.Camera;
-    return cam.ConvertPointViewerToWorld(x, y);
+    return cam.ConvertPointViewToWorld(x, y);
   };
 
   // ==============================================================================

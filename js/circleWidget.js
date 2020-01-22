@@ -186,7 +186,7 @@
     }
     var radius = this.Circle.Radius;
     var cam = this.Layer.GetCamera();
-    var p = cam.ConvertPointWorldToViewer(this.Circle.Origin[0], this.Circle.Origin[1]);
+    var p = cam.ConvertPointWorldToView(this.Circle.Origin[0], this.Circle.Origin[1]);
 
     if (selection.ViewerPointInSelection(p[0] - radius, p[1] - radius) &&
         selection.ViewerPointInSelection(p[0] - radius, p[1] + radius) &&
@@ -510,7 +510,7 @@
       if (this.State === ACTIVE || this.State === HOVER) {
         var origin = this.Circle.Origin;
         var cam = this.Layer.GetCamera();
-        var pt = cam.ConvertPointWorldToViewer(origin[0], origin[1]);
+        var pt = cam.ConvertPointWorldToView(origin[0], origin[1]);
         this.Cross.Origin = [pt[0], pt[1]];
         this.Cross.Draw(view);
       }
@@ -714,8 +714,8 @@
     if (this.State === NEW_DRAG) {
       // We need the viewer position of the circle center to drag radius.
       this.OriginViewer =
-                cam.ConvertPointWorldToViewer(this.Circle.Origin[0],
-                                              this.Circle.Origin[1]);
+        cam.ConvertPointWorldToView(this.Circle.Origin[0],
+                                    this.Circle.Origin[1]);
       this.State = NEW_DRAG_RADIUS;
     }
     if (this.State === HOVER) {
@@ -728,8 +728,8 @@
         this.State = DRAG;
       } else if (circlePart === CIRCUMFERENCE) {
         this.OriginViewer =
-                    cam.ConvertPointWorldToViewer(this.Circle.Origin[0],
-                                                  this.Circle.Origin[1]);
+                    cam.ConvertPointWorldToView(this.Circle.Origin[0],
+                                                this.Circle.Origin[1]);
         this.State = DRAG_RADIUS;
       }
     }
@@ -843,7 +843,7 @@
     }
     if (this.State === NEW_DRAG || this.State === DRAG) {
       if (SA && SA.notesWidget) { SA.notesWidget.MarkAsModified(); } // hack
-      this.SetOrigin(cam.ConvertPointViewerToWorld(x, y));
+      this.SetOrigin(cam.ConvertPointViewToWorld(x, y));
       layer.EventuallyDraw();
     }
 
@@ -861,7 +861,7 @@
 
     if (this.State === DRAG_KEYPOINT) {
       if (SA && SA.notesWidget) { SA.notesWidget.MarkAsModified(); } // hack
-      this.KeyPoint.Origin = cam.ConvertPointViewerToWorld(x, y);
+      this.KeyPoint.Origin = cam.ConvertPointViewToWorld(x, y);
       layer.EventuallyDraw();
     }
 
@@ -879,9 +879,9 @@
     var event = layer.Event;
     var cam = layer.GetCamera();
     // TODO: Last mouse should net be in layer.
-    var w0 = cam.ConvertPointViewerToWorld(layer.LastMouseX,
+    var w0 = cam.ConvertPointViewToWorld(layer.LastMouseX,
                                            layer.LastMouseY);
-    var w1 = cam.ConvertPointViewerToWorld(event.offsetX, event.offsetY);
+    var w1 = cam.ConvertPointViewToWorld(event.offsetX, event.offsetY);
 
     // This is the translation.
     var dx = w1[0] - w0[0];
@@ -957,8 +957,8 @@
         r = child.Radius;
         if (!this.FixedSize) {
           cam = this.Layer.GetCamera();
-          c = cam.ConvertPointWorldToViewer(c[0], c[1]);
-          r = cam.ConvertScaleWorldToViewer(r);
+          c = cam.ConvertPointWorldToView(c[0], c[1]);
+          r = cam.ConvertScaleWorldToView(r);
         }
         dx = pt[0] - c[0];
         dy = pt[1] - c[1];
@@ -975,9 +975,9 @@
     // Do the comparison in view coordinates.
     if (!this.FixedSize) {
       cam = this.Layer.GetCamera();
-      c = cam.ConvertPointWorldToViewer(c[0], c[1]);
-      r = cam.ConvertScaleWorldToViewer(r);
-      lineWidth = cam.ConvertScaleWorldToViewer(lineWidth);
+      c = cam.ConvertPointWorldToView(c[0], c[1]);
+      r = cam.ConvertScaleWorldToView(r);
+      lineWidth = cam.ConvertScaleWorldToView(lineWidth);
     }
 
     dx = pt[0] - c[0];

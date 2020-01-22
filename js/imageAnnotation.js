@@ -29,26 +29,25 @@
 
     var context = view.Context2d;
     context.save();
-        // Identity (screen coordinates).
+    // Identity (screen coordinates).
     context.setTransform(1, 0, 0, 1, 0, 0);
-        // Change canvas coordinates to View (-1->1, -1->1).
+    // Change canvas coordinates from View (-1->1, -1->1) to viewer (screen pixels).
     context.transform(0.5 * view.Viewport[2], 0.0,
-                          0.0, -0.5 * view.Viewport[3],
-                          0.5 * view.Viewport[2],
-                          0.5 * view.Viewport[3]);
+                      0.0, -0.5 * view.Viewport[3],
+                      0.5 * view.Viewport[2],
+                      0.5 * view.Viewport[3]);
 
-        // Change canvas coordinates to slide (world). (camera: slide to view).
-    var m = view.Camera.GetWorldMatrix();
-    var h = 1.0 / m[15];
-    context.transform(m[0] * h, m[1] * h,
-                      m[4] * h, m[5] * h,
-                      m[12] * h, m[13] * h);
+    // Change canvas coordinates to slide (world). (camera: slide to view).
+    var w2v = view.Camera.GetWorldToViewTransform();
+    context.transform(w2v);
 
-        // Change canvas to image coordinate system.
+    // "transform" appears to work backward.
+    
+    // Change canvas to image coordinate system.
     var scale = this.Height / this.Image.height;
     context.transform(scale, 0,
-                          0, scale,
-                          this.Origin[0], this.Origin[1]);
+                      0, scale,
+                      this.Origin[0], this.Origin[1]);
 
     // context.drawImage(this.Image, 0, 0);
     context.fillRect(100, 100, 500, 300);

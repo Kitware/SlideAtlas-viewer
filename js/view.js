@@ -105,10 +105,10 @@
   // The default world pixel = 0.25e-6 meters
   View.prototype.GetPixelsPerUnit = function () {
     // Determine the scale difference between the two coordinate systems.
-    var m = this.Camera.GetWorldMatrix();
+    var w2v = this.Camera.GetWorldToViewTransform();
 
-    // Convert from world coordinate to view (-1->1);
-    return 0.5 * this.Viewport[2] / (m[3] + m[15]); // m[3] for x, m[7] for height
+    // Use x (width)
+    return 0.5 * this.Viewport[2] / w2v[0];
   };
 
   View.prototype.HasUnits = function () {

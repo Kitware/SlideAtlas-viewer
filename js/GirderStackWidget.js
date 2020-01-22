@@ -20,9 +20,9 @@
 // Loading is a bit confusing (due to load on demand requirements):
 // Initialize (block / serialized)
 // 1: LoadFolder (called externally): Just gets the number of items in the folder.
-// 2: LoadFolderImageIds (chunked recursively):
+// 2: LoadFolderItemIds (chunked recursively):
 //      Gets the itemIds and meta data.  Creates the instance stack array.
-//      Section objects have bounds an transform, imageId.
+//      Section objects have bounds an transform, itemId.
 //      calls LoadStackMetaData to asynchronously load other item info.
 // Initialize (non blocking/ asynchonous, throttled)
 // 1: LoadStackMetaData:
@@ -34,8 +34,17 @@
 //      Yes: GirderRequest->LoadItem
 // 3: LoadItem: .....
 
+
+
+// 3 problems:
+// - transform in stackSection does not change with camera.
+// - PUT is not saving trans in meta data.
+// - Center of rotation is wrong for aliment interaction.
+
+
+
 (function () {
-    // Depends on the CIRCLE widget
+  // Depends on the CIRCLE widget
   'use strict';
 
   function GirderStackWidget (parent, display, overlay, apiRoot) {
@@ -146,6 +155,7 @@
     } else if (e.keyCode == 83) { // s
       // Save allignment.
       console.log("Save Alignment not implmented");      
+      this.SaveAlignment();
     }
 
     // v=86, t=84, s=83
@@ -160,6 +170,25 @@
     this.SetSectionIndex(this.SectionIndex - 1);
   };
 
+  // Load all the images in a folder as a stack.
+  GirderStackWidget.prototype.SaveAlignment = function () {
+    for (var idx = 0; idx < this.Stack.length; ++idx) {
+      var stackSection = this.Stack[idx];
+      stackSection.transform = stackSection.SaSection.GetImageToWorldTransform();
+      girder.rest.restRequest({
+        url: 'item/' + stackSection.itemId + '/metadata',
+        method: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify({trans: stackSection.transform}),
+        error: function (error, status) {
+          console.log("Error saving aligment transform: " + error);
+        }
+      }).done(function (resp) {
+        console.log("Saved aligment transform");
+      });
+    }
+  };
+  
   // Load all the images in a folder as a stack.
   GirderStackWidget.prototype.LoadFolder = function (folderId) {
     var self = this;
@@ -177,7 +206,7 @@
         // Just serialize loading the item info
         var length = resp.nItems;
         var limit = 100;
-        self.LoadFolderImageIds(folderId, 0, limit, length);
+        self.LoadFolderItemIds(folderId, 0, limit, length);
       });
     }
   };
@@ -186,11 +215,11 @@
   // Load all the images in a folder as a stack.
   // All this does is get the ids of the images in the folder.
   // Image data is loaded on demand
-  GirderStackWidget.prototype.LoadFolderImageIds = function (folderId,
-                                                             offset, limit, length) {
+  GirderStackWidget.prototype.LoadFolderItemIds = function (folderId,
+                                                            offset, limit, length) {
     var self = this;
     if (offset >= length) {
-      // We have received all the ImageIds in the stack
+      // We have received all the ItemIds in the stack
       if (this.Stack.length > 0) {
         this.SetSectionIndex(0);
         // Get meta data for all images in the stack.
@@ -211,7 +240,7 @@
         if (self.ErrorCount < 100) {
           console.error(error.status + ' ' + error.statusText, error.responseText);
           // try again:
-          self.LoadFolderImageIds(folderId, offset, limit, length);
+          self.LoadFolderItemIds(folderId, offset, limit, length);
         } else {
           console.log('Too many errors loading folder');
         }
@@ -227,7 +256,7 @@
             var metaSections = item.meta.sections;
             for (var sIdx = 0; sIdx < metaSections.length; ++sIdx) {
               var metaSection = metaSections[sIdx];
-              stackSection = {imageId: item._id};
+              stackSection = {itemId: item._id};
               if (metaSection.trans) {
                 stackSection.transform = metaSection.trans;
               }
@@ -243,7 +272,7 @@
             }
           } else {
             // Just add a single section (the whole slide)
-            stackSection = {imageId: resp[j]._id};
+            stackSection = {itemId: resp[j]._id};
             if (item.meta && item.meta.trans) {
               stackSection.transform = item.meta.trans;
             }
@@ -252,7 +281,7 @@
         }
       }
       // Serialize the bites.
-      self.LoadFolderImageIds(folderId, offset + limit, limit, length);
+      self.LoadFolderItemIds(folderId, offset + limit, limit, length);
     });
   };
 
@@ -271,7 +300,7 @@
 
     for (var idx = 0; idx < sectionData.length; ++idx) {
       var metaSection = sectionData[idx];
-      var stackSection = {imageId: metaSection.itemId};
+      var stackSection = {itemId: metaSection.itemId};
       if (metaSection.trans) {
         stackSection.transform = metaSection.trans;
       }
@@ -320,7 +349,7 @@
       return;
     }
 
-    var cache = this.Caches[stackSection.imageId];
+    var cache = this.Caches[stackSection.itemId];
     if (cache === undefined || !cache.RootsLoaded) {
       // The load callback will render if the section is current.
       return;
@@ -351,7 +380,7 @@
       var idx = this.Stack.indexOf(stackSection);
       if (idx !== -1 && idx < this.Stack.length - 1) {
         var nextSection = this.Stack[idx + 1];
-        cache = this.Caches[nextSection.imageId];
+        cache = this.Caches[nextSection.itemId];
         if (cache === undefined || !cache.RootsLoaded) {
           return;
         }
@@ -420,7 +449,7 @@
   // This gets called to create the saSection.  It may need to make a cache
   // and get the image data from the server to do it.
   GirderStackWidget.prototype.CreateSaSection = function (stackSection, callback) {
-    var cache = this.Caches[stackSection.imageId];
+    var cache = this.Caches[stackSection.itemId];
     if (cache) {
       // we have the cache already
       this.CreateSaSectionFromCache(stackSection, cache);
@@ -433,7 +462,7 @@
     // We need to request image data from the server to setup the cache.
     var self = this;
     girder.rest.restRequest({
-      url: 'item/' + stackSection.imageId + '/tiles',
+      url: 'item/' + stackSection.itemId + '/tiles',
       method: 'GET',
       contentType: 'application/json',
       error: function (error, status) {
@@ -460,11 +489,11 @@
     }
     // Get / setup the cache.
     var cache = new SA.Cache();
-    this.Caches[stackSection.imageId] = cache;
+    this.Caches[stackSection.itemId] = cache;
     var tileSource = new GirderTileSource(w, h, resp.tileWidth, resp.tileHeight,
                                           0, resp.levels - 1,
                                           this.ApiRoot,
-                                          stackSection.imageId,
+                                          stackSection.itemId,
                                           [0, w - 1, 0, h - 1]);
     cache.SetTileSource(tileSource);
     // Setup the slideAtlas section
@@ -481,7 +510,7 @@
         // If the current section uses this cache. render it.
         if (self.SectionIndex !== -1) {
           var currentSection = self.Stack[self.SectionIndex];
-          if (stackSection.imageId === currentSection.imageId) {
+          if (stackSection.itemId === currentSection.itemId) {
             self.RenderSection(currentSection);
           }
         }
@@ -493,7 +522,7 @@
     // TODO: REnder when load if section is current.
     if (this.AnnotationName) {
       girder.rest.restRequest({
-        url: 'annotation?itemId=' + stackSection.imageId + '&name=' + this.AnnotationName,
+        url: 'annotation?itemId=' + stackSection.itemId + '&name=' + this.AnnotationName,
         method: 'GET',
         contentType: 'application/json',
         error: function (error, status) {
@@ -549,7 +578,7 @@
     var saSection = new SA.Section();
     saSection.AddCache(cache);
     // First set the world to image transformation.
-    saSection.SetTransform(stackSection.transform);
+    saSection.SetImageToWorldTransform(stackSection.transform);
 
     // Now set the slide atlas section bounds. They are best kept in world
     // coordinate system because they are used for interaction.
@@ -565,20 +594,20 @@
   var GirderTileSource = function (width, height,
                                    tileWidth, tileHeight,
                                    minLevel, maxLevel,
-                                   apiRoot, imageId,
+                                   apiRoot, itemId,
                                    bounds) {
     this.height = height;
     this.width = width;
     this.TileWidth = tileWidth;
     this.TileHeight = tileHeight;
     this.apiRoot = apiRoot;
-    this.imageId = imageId;
+    this.itemId = itemId;
     this.bounds = bounds;
     this.maxLevel = maxLevel;
   };
 
   GirderTileSource.prototype.getTileUrl = function (level, x, y, z) {
-    return this.apiRoot + '/item/' + this.imageId +
+    return this.apiRoot + '/item/' + this.itemId +
       '/tiles/zxy/' + level + '/' + x + '/' + y;
   };
 
@@ -615,7 +644,7 @@
         }
         // Ignore width for now because it is determined by the
         // viewport.
-        cam.ComputeMatrix();
+
         // How to handle forcing viewer to render?
         // I could have a callback.
         // I could also make a $('.sa-viewer').EventuallyRender();

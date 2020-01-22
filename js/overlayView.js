@@ -114,7 +114,6 @@
       {FocalPoint: [width / 2, height / 2],
         Roll: 0,
         Height: height});
-    this.View.Camera.ComputeMatrix();
     this.View.UpdateCanvasSize();
   };
 
@@ -151,7 +150,6 @@
           (fp[1] - imageObj.origin[1]) / imageObj.spacing[1]]);
         outCam.SetWidth(outCam.GetWidth() / imageObj.spacing[0]);
         outCam.SetHeight(outCam.GetHeight() / imageObj.spacing[0]);
-        outCam.ComputeMatrix();
         this.Camera.DeepCopy(outCam);
       }
     }

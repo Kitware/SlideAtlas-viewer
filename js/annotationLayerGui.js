@@ -529,7 +529,7 @@
           }
           // Ignore width for now because it is determined by the
           // viewport.
-          cam.ComputeMatrix();
+
           // How to handle forcing viewer to render?
           // I could have a callback.
           // I could also make a $('.sa-viewer').EventuallyRender();

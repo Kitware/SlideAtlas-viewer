@@ -290,7 +290,6 @@
     var cam = new SAM.Camera();
     cam.Load(this.Camera);
     cam.SetViewport(viewport);
-    cam.ComputeMatrix();
 
         // Load only the tiles we need.
     var tiles = cache.ChooseTiles(cam, 0, []);

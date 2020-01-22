@@ -180,7 +180,6 @@ window.SA = window.SA || {};
     this.Viewer.OverView.Camera.SetWorldFocalPoint([(bounds[0] + bounds[1]) / 2,
       (bounds[2] + bounds[3]) / 2]);
     this.Viewer.OverView.Camera.SetHeight(bounds[3] - bounds[2]);
-    this.Viewer.OverView.Camera.ComputeMatrix();
     this.Viewer.eventuallyRender();
 
     // Save automatically if user has permission.
@@ -218,7 +217,6 @@ window.SA = window.SA || {};
     viewer.OverView.Camera.SetWorldFocalPoint([(bounds[0] + bounds[1]) / 2,
       (bounds[2] + bounds[3]) / 2]);
     viewer.OverView.Camera.SetHeight(bounds[3] - bounds[2]);
-    viewer.OverView.Camera.ComputeMatrix();
     viewer.EventuallyRender();
 
     $.ajax({

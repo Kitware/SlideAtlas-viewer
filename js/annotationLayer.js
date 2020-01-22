@@ -1031,7 +1031,7 @@
   };
 
   AnnotationLayer.prototype.ComputeMouseWorld = function (event) {
-    this.MouseWorld = this.GetCamera().ConvertPointViewerToWorld(event.offsetX, event.offsetY);
+    this.MouseWorld = this.GetCamera().ConvertPointViewToWorld(event.offsetX, event.offsetY);
     // Put this extra ivar in the even object.
     event.worldX = this.MouseWorld[0];
     event.worldY = this.MouseWorld[1];
@@ -1821,7 +1821,6 @@
     // compute the height.
     camOut.SetHeight(camIn.GetHeight() * scale);
     camOut.SetWorldRoll(camIn.GetWorldRoll());
-    camOut.ComputeMatrix();
   };
 
   // 2->1
@@ -1839,7 +1838,6 @@
     // compute the height.
     camOut.SetHeight(camIn.GetHeight() * scale);
     camOut.SetWorldRoll(camIn.GetWorldRoll());
-    camOut.ComputeMatrix();
   };
 
   SAM.MatrixTransformation = MatrixTransformation;

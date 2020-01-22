@@ -154,13 +154,13 @@
 
     var ptWorld;
     if (event.which === 1) {
-      ptWorld = this.Viewer.ConvertPointViewerToWorld(x, y);
+      ptWorld = this.Viewer.ConvertPointViewToWorld(x, y);
       this.Cursor.attr('src', SAM.ImagePathUrl + 'brush1.jpg');
       this.Cursor.show();
       this.Segmentation.AddPositive(ptWorld);
     }
     if (event.which === 3) {
-      ptWorld = this.Viewer.ConvertPointViewerToWorld(x, y);
+      ptWorld = this.Viewer.ConvertPointViewToWorld(x, y);
       this.Cursor.attr('src', SAM.ImagePathUrl + 'eraser1.jpg');
       this.Cursor.show();
       this.Segmentation.AddNegative(ptWorld);
@@ -196,11 +196,11 @@
     if (this.Viewer.MouseDown === true && this.State === FILL_WIDGET_DRAWING) {
       var ptWorld;
       if (event.which === 1) {
-        ptWorld = this.Viewer.ConvertPointViewerToWorld(x, y);
+        ptWorld = this.Viewer.ConvertPointViewToWorld(x, y);
         this.Segmentation.AddPositive(ptWorld);
       }
       if (event.which === 3) {
-        ptWorld = this.Viewer.ConvertPointViewerToWorld(x, y);
+        ptWorld = this.Viewer.ConvertPointViewToWorld(x, y);
         this.Segmentation.AddNegative(ptWorld);
       }
     }
@@ -226,10 +226,10 @@
         */
   };
 
-    // This also shows the popup if it is not visible already.
+  // This also shows the popup if it is not visible already.
   FillWidget.prototype.PlacePopup = function () {
         /*
-          var pt = this.Viewer.ConvertPointWorldToViewer(this.ActiveCenter[0],
+          var pt = this.Viewer.ConvertPointWorldToView(this.ActiveCenter[0],
           this.ActiveCenter[1]);
           pt[0] += 40;
           pt[1] -= 40;
@@ -241,7 +241,7 @@
         /*
           if (this.State === FILL_WIDGET_DRAWING) { return; }
 
-          var pt = this.Viewer.ConvertPointWorldToViewer(this.ActiveCenter[0],
+          var pt = this.Viewer.ConvertPointWorldToView(this.ActiveCenter[0],
           this.ActiveCenter[1]);
 
           var dx = this.Viewer.MouseX - pt[0];
@@ -260,8 +260,8 @@
     return false;
   };
 
-    // Setting to active always puts state into "active".
-    // It can move to other states and stay active.
+  // Setting to active always puts state into "active".
+  // It can move to other states and stay active.
   FillWidget.prototype.SetActive = function (flag) {
     if (flag) {
       this.Viewer.ActivateWidget(this);

@@ -87,8 +87,8 @@
     // Returns the center of the bounds in view coordinates.
   StackSectionWidget.prototype.GetViewCenter = function (view) {
     var bds = this.GetBounds();
-    return view.Camera.ConvertPointWorldToViewer((bds[0] + bds[1]) * 0.5,
-                                                     (bds[2] + bds[3]) * 0.5);
+    return view.Camera.ConvertPointWorldToView((bds[0] + bds[1]) * 0.5,
+                                               (bds[2] + bds[3]) * 0.5);
   };
 
   // We need bounds in view coordinates for sorting.
@@ -103,7 +103,7 @@
       var shape = this.Shapes[i];
       for (var j = 0; j < shape.Points.length; ++j) {
         var pt = shape.Points[j];
-        pt = view.Camera.ConvertPointWorldToViewer(pt[0], pt[1]);
+        pt = view.Camera.ConvertPointWorldToView(pt[0], pt[1]);
         if (pt[0] < bds[0]) { bds[0] = pt[0]; }
         if (pt[0] > bds[1]) { bds[1] = pt[0]; }
         if (pt[1] < bds[2]) { bds[2] = pt[1]; }
@@ -117,10 +117,10 @@
     // Compute the upper right corner in view coordinates.
     // This is used by the SectionsWidget holds this section.
     var bds = this.GetBounds();
-    var p0 = view.Camera.ConvertPointWorldToViewer(bds[0], bds[2]);
-    var p1 = view.Camera.ConvertPointWorldToViewer(bds[0], bds[3]);
-    var p2 = view.Camera.ConvertPointWorldToViewer(bds[1], bds[3]);
-    var p3 = view.Camera.ConvertPointWorldToViewer(bds[1], bds[2]);
+    var p0 = view.Camera.ConvertPointWorldToView(bds[0], bds[2]);
+    var p1 = view.Camera.ConvertPointWorldToView(bds[0], bds[3]);
+    var p2 = view.Camera.ConvertPointWorldToView(bds[1], bds[3]);
+    var p3 = view.Camera.ConvertPointWorldToView(bds[1], bds[2]);
         // Pick the furthest upper right corner.
     this.ViewUpperRight = p0;
     var best = p0[0] - p0[1];

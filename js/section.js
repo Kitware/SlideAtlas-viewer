@@ -26,7 +26,7 @@
     this.Caches = [];
     // For debugging stitching.
     this.Markers = [];
-    this.Transform = [1, 0, 0, 1, 0, 0];
+    this.ImageToWorldTransform = [1, 0, 0, 1, 0, 0];
   }
 
   Section.prototype.GetNumberOfCaches = function () {
@@ -52,8 +52,11 @@
   // Set the tranform for cache 0.  Same api as html canvas transform.
   // This tranform is applied before the camera.  It converts world to image
   // coordinates.
-  Section.prototype.SetTransform = function (tran) {
-    this.Transform = tran.slice(0);
+  Section.prototype.SetImageToWorldTransform = function (tran) {
+    this.ImageToWorldTransform = tran.slice(0);
+  };
+  Section.prototype.GetImageToWorldTransform = function () {
+    return this.ImageToWorldTransform;
   };
 
   Section.prototype.AddCache = function (cache) {
@@ -138,7 +141,9 @@
   // False implies that the user shoudl render again.
   Section.prototype.Draw = function (view) {
     var finishedRendering = true;
-    view.Camera.SetWorldToImageTransform(this.Transform);
+    // Set a referece.  It is important that we share because the camera can
+    // modify the transformation when aligning section interactively.
+    view.Camera.SetImageToWorldTransform(this.ImageToWorldTransform);
 
     if (view.gl) {
       // Draw tiles.
@@ -149,7 +154,7 @@
       // program not defined ... gl.uniformMatrix4fv(program.pMatrixUniform, false, m);
     } else {
       // The camera maps the world coordinate system to (-1->1, -1->1).
-      var t = view.Camera.GetImageToViewerTransform();
+      var t = view.Camera.GetImageToViewTransform();
       view.Context2d.setTransform(t[0], t[1], t[2], t[3], t[4], t[5]);
     }
 

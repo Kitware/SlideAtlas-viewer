@@ -59,7 +59,7 @@
   TextWidget.prototype.ApplySelect = function (selection) {
     var bds = this.Text.PixelBounds;
     var cam = this.Layer.GetCamera();
-    var p = cam.ConvertPointWorldToViewer(this.Text.Position[0], this.Text.Position[1]);
+    var p = cam.ConvertPointWorldToView(this.Text.Position[0], this.Text.Position[1]);
 
     if (selection.ViewerPointInSelection(p[0] + bds[0], p[1] + bds[2]) &&
         selection.ViewerPointInSelection(p[0] + bds[0], p[1] + bds[3]) &&
@@ -459,7 +459,7 @@
     // convert the world arrow tip to screen.
     var cam = this.Layer.GetCamera();
     var textOriginScreenPixelPosition =
-            cam.ConvertPointWorldToViewer(this.Text.Position[0], this.Text.Position[1]);
+            cam.ConvertPointWorldToView(this.Text.Position[0], this.Text.Position[1]);
     // Offset to the text)
     x = (x - textOriginScreenPixelPosition[0]) + this.Text.Offset[0];
     y = (y - textOriginScreenPixelPosition[1]) + this.Text.Offset[1];
@@ -496,8 +496,8 @@
     if ((this.VisibilityMode === 0 && this.State === DRAG_TEXT) ||
         this.State === DRAG) {
       var cam = this.Layer.GetCamera();
-      var w0 = cam.ConvertPointViewerToWorld(this.LastMouse[0], this.LastMouse[1]);
-      var w1 = cam.ConvertPointViewerToWorld(x, y);
+      var w0 = cam.ConvertPointViewToWorld(this.LastMouse[0], this.LastMouse[1]);
+      var w1 = cam.ConvertPointViewToWorld(x, y);
       var wdx = w1[0] - w0[0];
       var wdy = w1[1] - w0[1];
       this.Text.Position[0] += wdx;

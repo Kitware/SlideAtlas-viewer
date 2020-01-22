@@ -36,9 +36,9 @@
   TileView.prototype.SetSection = function (section) {
     this.Section = section;
     if (section.Transform) {
-      this.GetCamera().SetWorldToImageTransform(section.Transform);
+      this.GetCamera().SetImageToWorldTransform(section.ImageToWorldTransform);
     } else {
-      this.GetCamera().SetWorldToImageTransform([1, 0, 0, 1, 0, 0]);
+      this.GetCamera().SetImageToWorldTransform([1, 0, 0, 1, 0, 0]);
     }
   };
 
