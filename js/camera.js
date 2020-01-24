@@ -301,7 +301,7 @@ window.SAM = window.SAM || {};
     }
 
     // Convert view vector to world vector.
-    vw = SAM.TransformVector(dx,dy);
+    var vw = SAM.TransformVector(v2w, dx,dy);
     this.Translate(vw[0], vw[1], 0.0);
   };
 
