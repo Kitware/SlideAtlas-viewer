@@ -15,6 +15,7 @@ window.SAM = window.SAM || {};
   function Camera () {
     // WorldToView:  Transforms "Volume" to view [-1->1]
     this.WorldToViewTransform = undefined;
+
     // WorldToImage:  WorldToImageTransform X ImageToViewTransofrm = WorldToViewTransform
     // Since we use ImageToView to render:
     //   ImageToView = WorldToImage^-1 X WorldToView
@@ -25,6 +26,7 @@ window.SAM = window.SAM || {};
     // Interaction changes world to image matrix.
     // For aligning sections
     this.AlignmentInteraction = false;
+    this.Stack = undefined;
     
     // Better managmenet of layers and sub layers.
     // Assign a range of the z buffer  for the view to use exclusively.
@@ -122,10 +124,12 @@ window.SAM = window.SAM || {};
   };  
   
   Camera.prototype.AlignmentInteractionOff = function() {
+    this.Stack = undefined;
     this.AlignmentInteraction = false;
   };
   
-  Camera.prototype.AlignmentInteractionOn = function() {
+  Camera.prototype.AlignmentInteractionOn = function(stack) {
+    this.Stack = stack;
     this.AlignmentInteraction = true;
   };
 
@@ -288,15 +292,16 @@ window.SAM = window.SAM || {};
     var w2v = this.GetWorldToViewTransform();
     var v2w = SAM.InvertTransform(w2v);
     if (this.AlignmentInteraction) {
-      var translate = [1,0,0,1,-dx,-dy];
-      var i2w = this.GetImageToWorldTransform();
-
-      var imageToWorld = SAM.ConcatTransforms([i2w, w2v, translate, v2w]);
-      // ImageToWorldTransform is shared with the section.
-      // Make sure this function operates in place on the ImageToWorldTransform.
-      // TODO: fix this  ================ This is broken ====================
-      SAM.CopyTransform(this.ImageToWorldTransform, imageToWorld);
-
+      var viewTranslate = [1,0,0,1,-dx,-dy];
+      var worldTranslate = SAM.ConcatTransforms([w2v, viewTranslate, v2w]);
+      // This is a hack. I want the edit the relative transform between two stack sections
+      // not the absolute trasform. Maybe the stack should manage the translate event
+      // before it gets to the camera.
+      if (this.Stack !== undefined) {
+        this.Stack.AlignWorldTransform(worldTranslate);
+      } else {
+        this.AlignWorldTransform(worldTranslate);
+      }
       return;
     }
 
@@ -305,6 +310,15 @@ window.SAM = window.SAM || {};
     this.Translate(vw[0], vw[1], 0.0);
   };
 
+  Camera.prototype.AlignWorldTransform = function (worldTransform) {
+    var i2w = this.GetImageToWorldTransform();
+    var imageToWorld = SAM.ConcatTransforms([i2w, worldTranslate]);
+    // ImageToWorldTransform is shared with the section.
+    // Make sure this function operates in place on the ImageToWorldTransform.
+    // TODO: fix this  ================ This is broken ====================
+    SAM.CopyTransform(this.ImageToWorldTransform, imageToWorld);
+  }
+  
   // x,y are in display coordiantes (origin at the center).
   // dx,dy are in the same coordinates system (scale).
   // Scale does not matter because we only care about rotation.
@@ -337,9 +351,13 @@ window.SAM = window.SAM || {};
       var s = Math.sin(dRoll);
       var dx = x - (s * y) - (c * x); 
       var dy = y - (c * y) + (s * x);
-      var rotate = [c, s, -s, c, -dx, -dy]
-      SAM.CopyTransform(this.ImageToWorldTransform,
-                        SAM.ConcatTransforms([this.ImageToWorldTransform, rotate]));
+      var worldRotate = [c, s, -s, c, -dx, -dy];
+      if (this.Stack === undefined) {
+        this.AlignWorldTransform(worldRotate);
+      } else {
+        this.Stack.AlignWorldTransform(worldRotate);
+      }
+      
       return;
     }
 

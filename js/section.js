@@ -53,7 +53,7 @@
   // This tranform is applied before the camera.  It converts world to image
   // coordinates.
   Section.prototype.SetImageToWorldTransform = function (tran) {
-    this.ImageToWorldTransform = tran.slice(0);
+    this.ImageToWorldTransform = tran;
   };
   Section.prototype.GetImageToWorldTransform = function () {
     return this.ImageToWorldTransform;

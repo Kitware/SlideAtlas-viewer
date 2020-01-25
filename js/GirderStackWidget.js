@@ -135,6 +135,18 @@
     this.SlideLabel.hide();
   };
 
+
+  GirderStackWidget.prototype.AlignWorldTransform = function(worldTransform) {
+    // This applys a transform to the current section and every section after that.
+    // I might want an option to apply to every section before the current too.
+    for (var idx = this.SectionIndex; idx < this.Stack.length; ++idx) {
+      var section = this.Stack[idx];
+      var imageToWorld = section.transform;
+      SAM.CopyTransform(imageToWorld, SAM.ConcatTransforms([imageToWorld, worldTransform]));
+    }
+  };
+
+  
   GirderStackWidget.prototype.HandleKeyUp = function (e) {
     if (e.keyCode === 33 || e.keyCode === 80) {
       // page up or p
@@ -146,7 +158,7 @@
       return false;
     } else if (e.keyCode == 84) { // t
       // Switch to interacting with world to image transform for adjusting alignment.
-      this.Display.GetCamera().AlignmentInteractionOn();
+      this.Display.GetCamera().AlignmentInteractionOn(this);
       console.log("Align Interaction On");
     } else if (e.keyCode == 86) { // v
       // Switch to interacting with global view transform for naviation.
