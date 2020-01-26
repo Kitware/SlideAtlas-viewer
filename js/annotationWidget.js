@@ -34,15 +34,15 @@
           'right': '110px'});
         // .prop('title', 'Annotation');
 
-    this.Tab.Panel.addClass('sa-view-annotation-panel');
+    this.Tab.Panel.addClass('sa-toggle-panel');
     this.VisibilityDiv = $('<div>')
         .appendTo(this.Tab.Panel)
-        .addClass('sa-view-annotation-vis')
+        .addClass('sa-toggle')
         // .prop('title', 'Visibility')
         .on('click touchstart', function () { self.ToggleVisibility(); });
     this.VisibilityImage = $('<img>')
         .appendTo(this.VisibilityDiv)
-        .addClass('sa-view-annotation-vis-img')
+        .addClass('sa-toggle-img')
         .addClass('sa-active')
         .attr('type', 'image')
         .attr('src', SA.ImagePathUrl + 'toggleswitch.jpg');

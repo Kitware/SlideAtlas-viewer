@@ -5,10 +5,13 @@
 // Restrict viewer to bounds of section.
 // Startup in the middle of the first bounds.
 
-// TODO: If we can, delay creating the saSection until the cache root is loaded.
 
-// TODO: Make sure that the annotation (stored in slide coordiantes) get
-// transformed to section coordinates before they are rendered.
+// TODO:
+// - Render the annotation associated with the image.
+//   TODO: Make sure that the annotation (stored in slide coordiantes) get
+//    transformed to section coordinates before they are rendered.
+
+// TODO: If we can, delay creating the saSection until the cache root is loaded.
 
 // NOTE: Three different sections.
 
@@ -40,7 +43,7 @@
 // - transform in stackSection does not change with camera.
 // - PUT is not saving trans in meta data.
 // - Center of rotation is wrong for aliment interaction.
-
+// - When mouse is on the lowest few rows, raise the slides into the viewer.
 
 
 (function () {
@@ -106,8 +109,68 @@
         'color': '#ddf',
         'text-shadow': '2px 2px #000'})
       .hide();
+
+    this.AlignFlag = false;
+    this.AlignTab = new SA.Tab(parent,
+                               SA.ImagePathUrl + 'align1.jpg',
+                               'alignTab');
+    this.AlignTab.Button
+      .hover(
+        function () {
+          self.AlignTab.Button.attr('src', SA.ImagePathUrl + 'align2.jpg');
+        },
+        function () {
+          self.AlignTab.Button.attr('src', SA.ImagePathUrl + 'align1.jpg');
+        })
+      .prop('title', 'align');
+    
+    this.AlignTab.Div
+        .css({'box-sizing': 'border-box',
+          'position': 'absolute',
+          'bottom': '0px',
+          'right': '86px', //85
+          'z-index': '48'});
+    this.AlignTab.Panel
+      .css({
+        'box-sizing': 'border-box',
+        'width': '80px',
+        'left': '-30px'});
+
+    //this.AlignTab.Panel
+    //  .css({
+    //    'box-sizing': 'border-box',
+    //    'left': '-50px',
+    //    'width': '160px',
+    //    'z-index': '500',
+    //    'height': '45px',
+    //    'padding': '0 2px'});
+    var self = this;
+    this.AlignDiv = $('<div>')
+        .appendTo(this.AlignTab.Panel)
+        .addClass('sa-toggle')
+        .on('click touchstart', function () { self.ToggleAlign(); });
+    this.ToggleImage = $('<img>')
+        .appendTo(this.AlignDiv)
+        .addClass('sa-toggle-img')
+        .addClass('sa-active')
+        .attr('type', 'image')
+        .attr('src', SA.ImagePathUrl + 'toggleswitch.jpg')
+        .css({'top': '-30px'});
   }
 
+  GirderStackWidget.prototype.ToggleAlign = function () {
+    if (this.AlignFlag) {
+      this.AlignFlag = false;
+      this.ToggleImage.css({'top': '-30px'});
+      this.Display.GetCamera().AlignmentInteractionOff();
+      this.SaveAlignment();
+    } else {
+      this.AlignFlag = true;
+      this.ToggleImage.css({'top': '1px'});
+      this.Display.GetCamera().AlignmentInteractionOn(this);
+    }
+  };
+  
   GirderStackWidget.prototype.SetAnnotationName = function (name) {
     this.AnnotationName = name;
   };
@@ -151,23 +214,25 @@
     if (e.keyCode === 33 || e.keyCode === 80) {
       // page up or p
       this.Previous();
+      this.SliderDiv.slider('value',this.SectionIndex);
       return false;
     } else if (e.keyCode === 34 || e.keyCode === 32 || e.keyCode === 78) {
       // page down, space or n
       this.Next();
+      this.SliderDiv.slider('value',this.SectionIndex);
       return false;
-    } else if (e.keyCode == 84) { // t
-      // Switch to interacting with world to image transform for adjusting alignment.
-      this.Display.GetCamera().AlignmentInteractionOn(this);
-      console.log("Align Interaction On");
-    } else if (e.keyCode == 86) { // v
-      // Switch to interacting with global view transform for naviation.
-      this.Display.GetCamera().AlignmentInteractionOff();
-      console.log("Align Interaction Off");
-    } else if (e.keyCode == 83) { // s
-      // Save allignment.
-      console.log("Save Alignment not implmented");      
-      this.SaveAlignment();
+    //} else if (e.keyCode == 84) { // t
+    //  // Switch to interacting with world to image transform for adjusting alignment.
+    //  this.Display.GetCamera().AlignmentInteractionOn(this);
+    //  console.log("Align Interaction On");
+    //} else if (e.keyCode == 86) { // v
+    //  // Switch to interacting with global view transform for naviation.
+    //  this.Display.GetCamera().AlignmentInteractionOff();
+    //  console.log("Align Interaction Off");
+    //} else if (e.keyCode == 83) { // s
+    //  // Save allignment.
+    //  console.log("Save Alignment not implmented");      
+    //  this.SaveAlignment();
     }
 
     // v=86, t=84, s=83

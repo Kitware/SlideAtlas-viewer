@@ -331,27 +331,27 @@
 *  turning OFF of annotations; rather than ON
 *
 */
-.sa-view-annotation-panel {
+.sa-toggle-panel {
     box-sizing: border-box;
     width: 144px;
     left: -68px;
 }
 
-.sa-view-annotation-vis {
+.sa-toggle {
     height: 28px;
     opacity: 0.9;
     overflow: hidden;
     position: relative;
 }
 
-.sa-view-annotation-vis-img {
+.sa-toggle-img {
     height: 56px;
     opacity: 0.6;
     position: relative;
     top: 1px;
 }
 
-.sa-view-annotation-vis-img.sa-inactive {
+.sa-toggle-img.sa-inactive {
     top: -30px;
 }
 .sa-view-annotation-button {
