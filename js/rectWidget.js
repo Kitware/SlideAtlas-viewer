@@ -363,7 +363,7 @@
       obj.center.push(0);
     }
 
-    text = this.Shape.GetChild('label');
+    var text = this.Shape.GetChild('label');
     if (text && text.String) {
       obj.label = {'value': text.String};
     }
